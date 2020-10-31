@@ -34,6 +34,12 @@ there is a great deal of preparation needed when considering architectural chang
 If you are looking for more information about technical terms in this README you'll 
 likely find it in the LumoSQL documentation.
 
+LumoSQL uses the [Fossil source code manager](https://fossil-scm.org/), with a 
+[mirror project on Github](https://github.com/LumoSQL). This is partly because Fossil
+has some advantages over Github which suit a project of this size, and partly because
+Fossil and SQLite are symbiotic projects and test cases for each other. Fossil can 
+mirror to and from Github, but Fossil is the tool of choice for LumoSQL.
+
 ## Quickstart
 
 * Ensure you have the build environment described below
@@ -44,11 +50,12 @@ go deeper.
 
 ## About LumoSQL
 
-LumoSQL was started in December 2019 by Dan Shearer, who did the original source
-tree archaeology, patching and test builds. Keith Maxwell joined for a time
-and contributed invaluable version management to the Makefile and the benchmarking tools.
-Claudio Calvelli has contributed perhaps the most notable feature, not-forking
-and abstraction work.
+LumoSQL was started in December 2019 by Dan Shearer, who did the original
+source tree archaeology, patching and test builds. Keith Maxwell joined for a
+time and contributed invaluable version management to the Makefile and the
+benchmarking tools.  Claudio Calvelli contributes in many areas including the
+[not-forking tool](https://lumosql.org/src/not-forking), which is central to
+the relationship between LumoSQL and SQLite and is now a separate project.
 
 Generally speaking, the goal of the LumoSQL Project is to create and maintain
 an enhanced version of SQLite in cooperation with the SQLite project. There are
