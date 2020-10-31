@@ -1,0 +1,164 @@
+#!/bin/sh -e
+
+# usage: run-lumo-tests [OPTIONS] BUILD_DIR
+
+# BUILD_DIR is the directory where the objects has been built, for example
+# as a result of running build-lumo-backend with the same BUILD_DIR
+
+# OPTIONS control what output to produce in addition to the summary on stdout:
+# -h file.html       produce HTML output
+# -d database:table  also store results in database using the system sqlite3
+#                    (not the one being tested!)
+# -t file.txt        also save summary to a text file
+
+# before using -d, create the database and table, for example with
+# sqlite3 /tmp/tests.sqlite
+# CREATE TABLE results (
+# when_ran int,
+# duration float,
+# test_number int,
+# test_name varchar(255),
+# backend_name varchar(32),
+# backend_version varchar(32),
+# sqlite3_version varchar(32));
+# --> then one can use -d /tmp/tests.sqlite:results
+
+HTML_OUTPUT=
+DATABASE=
+TABLE=
+TEXT_OUTPUT=
+while [ $# -gt 0 ]
+do
+    case "$1" in
+	-[hdt])
+	    if [ $# -lt 2 ]
+	    then
+		echo "Option $1 requires an argument" >&2
+		exit 1
+	    fi
+	    opt="${1:1:1}"
+	    shift
+	    arg="$1"
+	    shift
+	    ;;
+	-[hdt]*)
+	    opt="${1:1:1}"
+	    arg="${1:2}"
+	    shift
+	    ;;
+	-*)
+	    echo "Invalid option $1" >&2
+	    exit 1
+	    ;;
+	*)
+	    break
+	    ;;
+    esac
+    case "$opt" in
+	h) HTML_OUTPUT="$arg" ;;
+	d) DATABASE="${arg%:*}"; TABLE="${arg##*:}" ;;
+	t) TEXT_OUTPUT="$arg" ;;
+    esac
+done
+
+if [ $# -ne 1 ]
+then
+    echo "Usage: $(basename "$0") [OPTIONS] BUILD_DIR" >&2
+    echo "See comments at top of script for more information" >&2
+    exit 1
+fi
+
+BUILD_DIR="$1"
+
+# supposedly we start from the lumosql directory and we need to have
+# at least tool/speedtest.tcl in there...
+[ -e "tool/speedtest.tcl" -a -r "tool/speedtest.tcl" ] || \
+    { echo "Missing speedtest tool (tool/speedtest.tcl)" >&2; exit 1; }
+
+if [ -n "$HTML_OUTPUT" ]
+then
+    # make sure HTML_OUTPUT is an absolute path and stop if it exists
+    HTML_OUTPUT="`realpath "$HTML_OUTPUT"`"
+    [ -e "$HTML_OUTPUT" ] && { echo "$HTML_OUTPUT already exists" >&2; exit 1; }
+fi
+
+if [ -n "$TEXT_OUTPUT" ]
+then
+    # make sure TEXT_OUTPUT is an absolute path and stop if it exists
+    TEXT_OUTPUT="`realpath "$TEXT_OUTPUT"`"
+    [ -e "$TEXT_OUTPUT" ] && { echo "$TEXT_OUTPUT already exists" >&2; exit 1; }
+fi
+
+# check we have sqlite3 in BUILD_DIR
+[ -e "$BUILD_DIR/sqlite3/sqlite3" -a -x "$BUILD_DIR/sqlite3/sqlite3" ] || \
+    { echo "Missing sqlite3 in $BUILD_DIR" >&2; exit 1; }
+
+# make BUILD_DIR absolute too as we'll be using it to clean up later
+BUILD_DIR="`realpath -e "$BUILD_DIR"`"
+
+# remember where we started from and change to the build directory
+BASE_DIR="`pwd`"
+cd "$BUILD_DIR/sqlite3"
+
+LUMO_DIR=".lumosql-work"
+BACKEND_NAME="$(cat "$LUMO_DIR/backend_name")"
+BACKEND_VERSION="$(cat "$LUMO_DIR/backend_version")"
+SQLITE3_VERSION="$(cat "$LUMO_DIR/sqlite3_version")"
+
+# prepare the test directory - note that we make it possible to run concurrent
+# tests on the same build, up to a limit
+TEST_DIR=''
+mkdir -p .lumo.tests
+cd .lumo.tests
+for retry in a b c d e f g h i j k l m n o p q r s t u v w x y z
+do
+    mkdir "$retry" 2>/dev/null || continue
+    TEST_DIR="$retry"
+    break
+done
+[ ".$TEST_DIR" = "." ] && exit 1 # did not manage to create a directory
+cd "$TEST_DIR"
+
+# remember that from now on we are inside TEST_DIR, and when we exit we
+# get rid of the whole directory, so we use the absolute version of
+# BUILD_DIR to do that
+cleanup() {
+    rm -r "$BUILD_DIR/sqlite3/.lumo.tests/$TEST_DIR"
+}
+
+trap cleanup EXIT INT HUP
+
+# and run the test
+ln -sf ../../sqlite3 .
+
+if [ -n "$TEXT_OUTPUT" ]
+then
+    exec 3>"$TEXT_OUTPUT"
+fi
+
+# keep our stdout somewhere...
+exec 4>&1
+
+now=`date +%s`
+if [ -n "$HTML_OUTPUT" ]
+then
+    tclsh "$BASE_DIR/tool/speedtest.tcl" "$HTML_OUTPUT"
+else
+    tclsh "$BASE_DIR/tool/speedtest.tcl"
+fi \
+| \
+while read time number name
+do
+    [ -n "$TEXT_OUTPUT" ] && printf "%8.3f %3d %s\n" "$time" "$number" "$name" >&3
+    printf "%8.3f %3d %s\n" "$time" "$number" "$name" >&4
+    [ -n "$DATABASE" ] && \
+	printf "INSERT INTO %s VALUES (%d, %f, %d, '%s', '%s', '%s', '%s');\n" \
+	       "$TABLE" $now "$time" "$number" "$name" \
+	       "$BACKEND_NAME" "$BACKEND_VERSION" "$SQLITE3_VERSION"
+done \
+| \
+if [ -n "$DATABASE" ]
+then
+    sqlite3 "$DATABASE"
+fi
+

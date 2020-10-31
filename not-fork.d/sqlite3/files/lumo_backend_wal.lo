@@ -1,0 +1,4 @@
+#ifndef __LUMO_BACKEND_wal_lo
+#define __LUMO_BACKEND_wal_lo 1
+#include "wal.lo"
+#endif

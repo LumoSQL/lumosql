@@ -1,0 +1,18 @@
+# List of files a backend may replace with new ones; other files in this
+# directory are generated from this list (see Makefile)
+
+backup.c
+backup.h
+btmutex.c
+btree.c
+btreeInt.h
+pager.c
+pager.h     
+pcache.c
+pcache.h
+pcache1.c
+vacuum.c
+wal.c
+wal.h
+wal.lo
+

@@ -1,0 +1,26 @@
+# list of files which we update on install: see Makefile
+
+Makefile.in
+Makefile.msc
+Makefile.vxworks
+main.mk
+src/backup.c
+src/btmutex.c
+src/btree.c
+#src/btree.h
+src/notify.c
+src/pager.c
+#src/pager.h
+#src/pcache.c
+#src/pcache.h
+#src/pcache1.c
+#src/pragma.c
+src/sqliteInt.h
+#src/test2.c
+src/test3.c
+src/test_btree.c
+src/wal.c
+tool/mksqlite3c-noext.tcl
+tool/mksqlite3c.tcl
+tool/mksqlite3internalh.tcl
+

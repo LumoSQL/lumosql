@@ -1,0 +1,110 @@
+#!/bin/sh
+
+# usage: get-lumo-sources [OPTIONS] SOURCES_DIR CFG_VERSION SQLITE3_VERSION \
+#                                   [BACKEND_NAME BACKEND_VERSION]
+
+# SOURCES_DIR is the directory where the sources will be installed; this will
+# have (at least) two subdirectories, one containing the sqlite3 sources, and
+# one containing the sources for the selected backend; it will also produce
+# some extra files needed by the build process
+
+# CFG_VERSION is the version of the configuration to use, which can be a
+# version number for the "lumosql-build" not-fork configuration, or "test"
+# to use the bundled version
+
+# SQLITE3_VERSION is a SQLITE3 version string, like "3.7.17"
+
+# BACKEND_NAME is a string defined by the configuration; currently it can only
+# be "lmdb" but the configuration is free to define more
+
+# BACKEND_VERSION is the version of the backend to use, for LMDB it will be
+# something like "0.9.26"
+
+# if BACKEND_NAME and BACKEND_VERSION are omitted, use the unmodified sqlite3
+# sources
+
+# OPTIONS are currently one of:
+# --update       always check with upstream repositories for updates
+# --no-update    use cached versions of sources if available
+# the default if neither is given is to look for the value in the local not-fork
+# configuration
+# In general one can use "--no-update" when selecting a version already
+# available in the local cache, since there is no need to download later
+# versions in this case; this is why the first call to "not-fork" in this
+# script uses these options, but later calls specify "--no-update"
+
+update=''
+case "$1" in
+    -n|--no-u*) update='--no-update'; shift ;;
+    -u|--upd*) update='--update'; shift ;;
+esac
+
+if [ $# -ne 3 -a $# -ne 5 ]
+then
+    echo "Usage: $(basename "$0") [OPTIONS] SOURCES_DIR CFG_VERSION SQLITE3_VERSION [BACKEND_NAME BACKEND_VERSION]" >&2
+    echo "See comments at top of script for more information" >&2
+    exit 1
+fi
+
+SOURCES_DIR="$1"
+CFG_VERSION="$2"
+SQLITE3_VERSION="$3"
+BACKEND_NAME="$4"
+BACKEND_VERSION="$5"
+
+WORK_DIR="$SOURCES_DIR/.lumosql-work"
+mkdir -p "$WORK_DIR" || exit 1
+
+# check that the required configuration exists; if it's "test" there's nothing
+# to check, but for anything else we need to use "not-fork" to obtain some
+# configuration for "not-fork". We avoid an infinite recursion by always using
+# the "test" configuration for this.
+if [ ".$CFG_VERSION" = ".test" ]
+then
+    CFG_DIR=not-fork.d
+else
+    not-fork $update -i not-fork.d -o "$SOURCES_DIR" -v "$CFG_VERSION" lumosql-build || exit 1
+    CFG_DIR="$SOURCES_DIR/lumosql-build"
+fi
+
+# and make sure the configuration provides at least sqlite3 and the selected
+# backend, in the requested versions
+OK=true
+if [ -d "$CFG_DIR/sqlite3" ]
+then
+    not-fork $update -i "$CFG_DIR" -q -v "$SQLITE3_VERSION" sqlite3 > "$WORK_DIR/sqlite3_info" || OK=false
+else
+    echo "Invalid '$CFG_VERSION' configuration directory $CFG_DIR" >&2
+    OK=false
+fi
+if [ -n "$BACKEND_NAME" ]
+then
+    if [ -d "$CFG_DIR/$BACKEND_NAME" ]
+    then
+	not-fork $update -i "$CFG_DIR" -q -v "$BACKEND_VERSION" "$BACKEND_NAME" > "$WORK_DIR/backend_info" || OK=false
+    else
+	echo "Invalid backend '$BACKEND_NAME'" >&2
+	OK=false
+    fi
+else
+    > "$WORK_DIR/backend_info"
+fi
+$OK || exit 1
+
+# get sources
+not-fork --no-update -i "$CFG_DIR" -o "$SOURCES_DIR" -v "$SQLITE3_VERSION" sqlite3 || OK=false
+if [ -n "$BACKEND_NAME" ]
+then
+    not-fork --no-update -i "$CFG_DIR" -o "$SOURCES_DIR" -v "$BACKEND_VERSION" "$BACKEND_NAME" || OK=false
+fi
+$OK || exit 1
+
+# provide some information the build process may use
+echo "$SQLITE3_VERSION" > "$WORK_DIR/sqlite3_version"
+awk '/commit_id / { print $NF }' "$WORK_DIR/sqlite3_info" > "$WORK_DIR/sqlite3_commit_id"
+echo "$BACKEND_NAME" > "$WORK_DIR/backend_name"
+echo "$BACKEND_VERSION" > "$WORK_DIR/backend_version"
+awk '/commit_id / { print $NF }' "$WORK_DIR/backend_info" > "$WORK_DIR/backend_commit_id"
+
+exit 0
+

@@ -1,0 +1,81 @@
+#!/bin/sh -e
+
+# usage: build-lumo-backend BUILD_DIR SOURCES_DIR
+
+# BUILD_DIR is the directory where the objects will be built; it must not already
+# exist
+
+# SOURCES_DIR is the directory containing the sources; normally this will
+# be something produced by get-sources
+
+if [ $# -ne 2 ]
+then
+    echo "Usage: $(basename "$0") BUILD_DIR SOURCES_DIR" >&2
+    echo "See comments at top of script for more information" >&2
+    exit 1
+fi
+
+BUILD_DIR="$1"
+LUMO_SOURCES="$2"
+
+LUMO_DIR="$LUMO_SOURCES/.lumosql-work"
+LUMO_BACKEND_NAME="$(cat "$LUMO_DIR/backend_name")"
+LUMO_BACKEND_VERSION="$(cat "$LUMO_DIR/backend_version")"
+SQLITE3_VERSION="$(cat "$LUMO_DIR/sqlite3_version")"
+
+# make sure we have all the stuff we need
+OK=true
+if [ ! -d "$LUMO_SOURCES/sqlite3/.lumosql" ]
+then
+    echo "Missing sources for 'sqlite3'" >&2
+    OK=false
+fi
+if [ -n "$LUMO_BACKEND_NAME" ]
+then
+    if [ ! -d "$LUMO_SOURCES/$LUMO_BACKEND_NAME/.lumosql" ]
+    then
+	echo "Missing sources for '$LUMO_BACKEND_NAME'" >&2
+	OK=false
+    fi
+    title="sqlite $SQLITE3_VERSION with $LUMO_BACKEND_NAME $LUMO_BACKEND_VERSION"
+else
+    title="sqlite $SQLITE3_VERSION"
+fi
+$OK || exit 1
+
+# we need an absolute path for LUMO_SOURCES if we don't have one
+LUMO_SOURCES="`realpath -e "$LUMO_SOURCES"`"
+
+# set up build directory - this fails if it already exist
+mkdir "$BUILD_DIR" "$BUILD_DIR/sqlite3"
+[ -n "$LUMO_BACKEND_NAME" ] && mkdir "$BUILD_DIR/$LUMO_BACKEND_NAME"
+cd "$BUILD_DIR"
+cp -a "$LUMO_SOURCES/.lumosql-work" sqlite3/.lumosql-work
+ls "$LUMO_SOURCES/$LUMO_BACKEND_NAME" | egrep '^LICEN[CS]E|^COPYING' | while read name
+do
+    cp -a "$LUMO_SOURCES/$LUMO_BACKEND_NAME/$name" "sqlite3/$name" || true
+done
+
+LUMO_BUILD="`pwd`"
+if [ -n "$LUMO_BACKEND_NAME" ]
+then
+    # build the backend first...
+    export LUMO_SOURCES LUMO_BACKEND_NAME LUMO_BACKEND_VERSION
+    cd "$LUMO_BACKEND_NAME"
+    sh "$LUMO_SOURCES/$LUMO_BACKEND_NAME/.lumosql/lumo.build"
+    cd "$LUMO_BUILD"
+fi
+
+cd sqlite3
+
+# configure
+echo "Configuring $title"
+"$LUMO_SOURCES/sqlite3/configure"
+
+# build
+echo "Building $title"
+make LUMO_SOURCES="$LUMO_SOURCES" LUMO_BACKEND="$LUMO_BACKEND_NAME" LUMO_BUILD="$LUMO_BUILD"
+
+# all done
+./sqlite3 --version
+

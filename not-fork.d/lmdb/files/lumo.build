@@ -1,0 +1,14 @@
+# how to build this backend... this runs in a shell from a "build" directory
+# and is provided environment variables LUMO_SOURCES, LUMO_BACKEND_NAME
+# and LUMO_BACKEND_VERSION
+
+#echo "Configuring $LUMO_BACKEND_NAME $LUMO_BACKEND_VERSION"
+#"$LUMO_SOURCES/$LUMO_BACKEND_NAME"/libraries/liblmdb/configure || exit 1
+
+cp -a "$LUMO_SOURCES/$LUMO_BACKEND_NAME/libraries/liblmdb/"* . || exit 1
+
+echo "Building $LUMO_BACKEND_NAME $LUMO_BACKEND_VERSION"
+make || exit 1
+
+exit 0
+

@@ -1,0 +1,75 @@
+#!/bin/sh
+
+# generate not-fork configuration; see Makefile
+
+method="$1"
+backend="$2"
+sqlite3="$3"
+
+header=true
+case "$method" in
+    sed) ;;
+    replace) ;;
+    files) header=false ;;
+    *) echo "Invalid file type"; exit 1 ;;
+esac
+
+if $header
+then
+    echo '# Generated file: do not edit; instead edit "backend-files" and run "make"'
+    echo
+    echo "method = $method"
+    echo '--'
+fi
+
+while read -r name
+do
+    case "$name" in
+	'#'*) continue ;;
+	?*) ;;
+	*) continue ;;
+    esac
+    case "$method" in
+	sed)
+	    quote="`echo "$name" | sed -e 's/\([][()^${}.*+?\\]\)/\\\\\1/'g`"
+	    while read -r sf
+	    do
+		case "$sf" in
+		    '#'*) continue ;;
+		    ?*) ;;
+		    *) continue ;;
+		esac
+		echo "$sf : '\\b$quote\\b' = lumo_$name"
+	    done < "$sqlite3"
+	    ;;
+	replace)
+	    echo ".lumosql/backend/lumo_$name = files/lumo_backend_$name"
+	    echo "src/lumo_$name = files/lumo_$name"
+	    ;;
+	files)
+	    fname="`echo "$name" | tr -c 'a-z_A-Z\n' _`"
+	    if ! [ -f "files/lumo_backend_$name" ]
+	    then
+		fname="`echo "$name" | tr -c 'a-z_A-Z\n' _`"
+		echo "files/lumo_backend_$name"
+		(
+		    echo "#ifndef __LUMO_BACKEND_$fname"
+		    echo "#define __LUMO_BACKEND_$fname 1"
+		    echo '#include "'"$name"'"' 
+		    echo '#endif'
+		) > "files/lumo_backend_$name"
+	    fi
+	    if ! [ -f "files/lumo_$name" ]
+	    then
+		echo "files/lumo_$name"
+		(
+		    echo "#ifndef __LUMO__$fname"
+		    echo "#define __LUMO__$fname 1"
+		    echo '#include "backend/'"lumo_$name"'"' 
+		    echo '#endif'
+		) > "files/lumo_$name"
+	    fi
+	    ;;
+    esac
+done < "$backend"
+

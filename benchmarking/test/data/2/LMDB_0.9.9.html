@@ -1,0 +1,147 @@
+<h2>Test 1: 1000 INSERTs</h2>
+<blockquote>
+CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100));<br>
+INSERT INTO t1 VALUES(1,13153,'thirteen thousand one hundred fifty three');<br>
+INSERT INTO t1 VALUES(2,75560,'seventy five thousand five hundred sixty');<br>
+<i>... 995 lines omitted</i><br>
+INSERT INTO t1 VALUES(998,66289,'sixty six thousand two hundred eighty nine');<br>
+INSERT INTO t1 VALUES(999,24322,'twenty four thousand three hundred twenty two');<br>
+INSERT INTO t1 VALUES(1000,94142,'ninety four thousand one hundred forty two');<br>
+
+</blockquote><table border=0 cellpadding=0 cellspacing=0>
+<tr><td>3.7.17 c896ea8 LMDB_0.9.9  7449ca6</td><td align="right">&nbsp;&nbsp;&nbsp;4.758</td></tr>
+</table>
+<h2>Test 2: 25000 INSERTs in a transaction</h2>
+<blockquote>
+BEGIN;<br>
+CREATE TABLE t2(a INTEGER, b INTEGER, c VARCHAR(100));<br>
+INSERT INTO t2 VALUES(1,298361,'two hundred ninety eight thousand three hundred sixty one');<br>
+<i>... 24997 lines omitted</i><br>
+INSERT INTO t2 VALUES(24999,447847,'four hundred forty seven thousand eight hundred forty seven');<br>
+INSERT INTO t2 VALUES(25000,473330,'four hundred seventy three thousand three hundred thirty');<br>
+COMMIT;<br>
+
+</blockquote><table border=0 cellpadding=0 cellspacing=0>
+<tr><td>3.7.17 c896ea8 LMDB_0.9.9  7449ca6</td><td align="right">&nbsp;&nbsp;&nbsp;0.315</td></tr>
+</table>
+<h2>Test 3: 100 SELECTs without an index</h2>
+<blockquote>
+SELECT count(*), avg(b) FROM t2 WHERE b>=0 AND b<1000;<br>
+SELECT count(*), avg(b) FROM t2 WHERE b>=100 AND b<1100;<br>
+SELECT count(*), avg(b) FROM t2 WHERE b>=200 AND b<1200;<br>
+<i>... 94 lines omitted</i><br>
+SELECT count(*), avg(b) FROM t2 WHERE b>=9700 AND b<10700;<br>
+SELECT count(*), avg(b) FROM t2 WHERE b>=9800 AND b<10800;<br>
+SELECT count(*), avg(b) FROM t2 WHERE b>=9900 AND b<10900;<br>
+
+</blockquote><table border=0 cellpadding=0 cellspacing=0>
+<tr><td>3.7.17 c896ea8 LMDB_0.9.9  7449ca6</td><td align="right">&nbsp;&nbsp;&nbsp;0.586</td></tr>
+</table>
+<h2>Test 4: 100 SELECTs on a string comparison</h2>
+<blockquote>
+SELECT count(*), avg(b) FROM t2 WHERE c LIKE '%one%';<br>
+SELECT count(*), avg(b) FROM t2 WHERE c LIKE '%two%';<br>
+SELECT count(*), avg(b) FROM t2 WHERE c LIKE '%three%';<br>
+<i>... 94 lines omitted</i><br>
+SELECT count(*), avg(b) FROM t2 WHERE c LIKE '%ninety eight%';<br>
+SELECT count(*), avg(b) FROM t2 WHERE c LIKE '%ninety nine%';<br>
+SELECT count(*), avg(b) FROM t2 WHERE c LIKE '%one hundred%';<br>
+
+</blockquote><table border=0 cellpadding=0 cellspacing=0>
+<tr><td>3.7.17 c896ea8 LMDB_0.9.9  7449ca6</td><td align="right">&nbsp;&nbsp;&nbsp;1.817</td></tr>
+</table>
+<h2>Test 5: 5000 SELECTs</h2>
+<blockquote>
+SELECT count(*), avg(b) FROM t2 WHERE b>=0 AND b<100;<br>
+SELECT count(*), avg(b) FROM t2 WHERE b>=100 AND b<200;<br>
+SELECT count(*), avg(b) FROM t2 WHERE b>=200 AND b<300;<br>
+<i>... 4994 lines omitted</i><br>
+SELECT count(*), avg(b) FROM t2 WHERE b>=499700 AND b<499800;<br>
+SELECT count(*), avg(b) FROM t2 WHERE b>=499800 AND b<499900;<br>
+SELECT count(*), avg(b) FROM t2 WHERE b>=499900 AND b<500000;<br>
+
+</blockquote><table border=0 cellpadding=0 cellspacing=0>
+<tr><td>3.7.17 c896ea8 LMDB_0.9.9  7449ca6</td><td align="right">&nbsp;&nbsp;&nbsp;23.137</td></tr>
+</table>
+<h2>Test 6: 1000 UPDATEs without an index</h2>
+<blockquote>
+BEGIN;<br>
+UPDATE t1 SET b=b*2 WHERE a>=0 AND a<10;<br>
+UPDATE t1 SET b=b*2 WHERE a>=10 AND a<20;<br>
+<i>... 996 lines omitted</i><br>
+UPDATE t1 SET b=b*2 WHERE a>=9980 AND a<9990;<br>
+UPDATE t1 SET b=b*2 WHERE a>=9990 AND a<10000;<br>
+COMMIT;<br>
+
+</blockquote><table border=0 cellpadding=0 cellspacing=0>
+<tr><td>3.7.17 c896ea8 LMDB_0.9.9  7449ca6</td><td align="right">&nbsp;&nbsp;&nbsp;0.278</td></tr>
+</table>
+<h2>Test 7: 25000 UPDATEs with an index</h2>
+<blockquote>
+BEGIN;<br>
+UPDATE t2 SET b=271822 WHERE a=1;<br>
+UPDATE t2 SET b=28304 WHERE a=2;<br>
+<i>... 24996 lines omitted</i><br>
+UPDATE t2 SET b=442549 WHERE a=24999;<br>
+UPDATE t2 SET b=423958 WHERE a=25000;<br>
+COMMIT;<br>
+
+</blockquote><table border=0 cellpadding=0 cellspacing=0>
+<tr><td>3.7.17 c896ea8 LMDB_0.9.9  7449ca6</td><td align="right">&nbsp;&nbsp;&nbsp;106.099</td></tr>
+</table>
+<h2>Test 8: 25000 text UPDATEs with an index</h2>
+<blockquote>
+BEGIN;<br>
+UPDATE t2 SET c='four hundred sixty eight thousand twenty six' WHERE a=1;<br>
+UPDATE t2 SET c='one hundred twenty one thousand nine hundred twenty eight' WHERE a=2;<br>
+<i>... 24996 lines omitted</i><br>
+UPDATE t2 SET c='thirty five thousand sixty five' WHERE a=24999;<br>
+UPDATE t2 SET c='three hundred forty seven thousand three hundred ninety three' WHERE a=25000;<br>
+COMMIT;<br>
+
+</blockquote><table border=0 cellpadding=0 cellspacing=0>
+<tr><td>3.7.17 c896ea8 LMDB_0.9.9  7449ca6</td><td align="right">&nbsp;&nbsp;&nbsp;101.603</td></tr>
+</table>
+<h2>Test 9: INSERTs from a SELECT</h2>
+<blockquote>
+BEGIN;<br>INSERT INTO t1 SELECT * FROM t2;<br>INSERT INTO t2 SELECT * FROM t1;<br>COMMIT;
+</blockquote><table border=0 cellpadding=0 cellspacing=0>
+<tr><td>3.7.17 c896ea8 LMDB_0.9.9  7449ca6</td><td align="right">&nbsp;&nbsp;&nbsp;0.094</td></tr>
+</table>
+<h2>Test 10: DELETE without an index</h2>
+<blockquote>
+DELETE FROM t2 WHERE c LIKE '%fifty%';
+</blockquote><table border=0 cellpadding=0 cellspacing=0>
+<tr><td>3.7.17 c896ea8 LMDB_0.9.9  7449ca6</td><td align="right">&nbsp;&nbsp;&nbsp;0.097</td></tr>
+</table>
+<h2>Test 11: DELETE with an index</h2>
+<blockquote>
+DELETE FROM t2 WHERE a>10 AND a<20000;
+</blockquote><table border=0 cellpadding=0 cellspacing=0>
+<tr><td>3.7.17 c896ea8 LMDB_0.9.9  7449ca6</td><td align="right">&nbsp;&nbsp;&nbsp;0.127</td></tr>
+</table>
+<h2>Test 12: A big INSERT after a big DELETE</h2>
+<blockquote>
+INSERT INTO t2 SELECT * FROM t1;
+</blockquote><table border=0 cellpadding=0 cellspacing=0>
+<tr><td>3.7.17 c896ea8 LMDB_0.9.9  7449ca6</td><td align="right">&nbsp;&nbsp;&nbsp;0.128</td></tr>
+</table>
+<h2>Test 13: A big DELETE followed by many small INSERTs</h2>
+<blockquote>
+BEGIN;<br>
+DELETE FROM t1;<br>
+INSERT INTO t1 VALUES(1,29676,'twenty nine thousand six hundred seventy six');<br>
+<i>... 2997 lines omitted</i><br>
+INSERT INTO t1 VALUES(2999,37835,'thirty seven thousand eight hundred thirty five');<br>
+INSERT INTO t1 VALUES(3000,97817,'ninety seven thousand eight hundred seventeen');<br>
+COMMIT;<br>
+
+</blockquote><table border=0 cellpadding=0 cellspacing=0>
+<tr><td>3.7.17 c896ea8 LMDB_0.9.9  7449ca6</td><td align="right">&nbsp;&nbsp;&nbsp;0.073</td></tr>
+</table>
+<h2>Test 14: DROP TABLE</h2>
+<blockquote>
+DROP TABLE t1;<br>DROP TABLE t2;
+</blockquote><table border=0 cellpadding=0 cellspacing=0>
+<tr><td>3.7.17 c896ea8 LMDB_0.9.9  7449ca6</td><td align="right">&nbsp;&nbsp;&nbsp;0.051</td></tr>
+</table>
