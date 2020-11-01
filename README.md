@@ -19,7 +19,7 @@ new backends. New versions of SQLite do not typically require much manual
 merging in LumoSQL, if any. The LumoSQL and SQLite projects are cooperating, so any merge
 friction is expected to become less over time.
 
-The full documentation for LumoSQL is at [the LumoSQL docs project](https://lumosql.org/src/lumodoc).
+The full documentation for LumoSQL is at [the LumoSQL Documentation project](https://lumosql.org/src/lumodoc).
 
 SQLite is used by thousands of software projects, just three of them being 
 Google's Android, Mozilla's Firefox and Apple's iOS which between them have 
