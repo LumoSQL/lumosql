@@ -55,6 +55,21 @@ BACKEND_VERSION="$5"
 WORK_DIR="$SOURCES_DIR/.lumosql-work"
 mkdir -p "$WORK_DIR" || exit 1
 
+# check that not-fork is in path, and is at least version 0.1
+NOTFORK_REQUIRED=0.1
+if ! not-fork --check-version "$NOTFORK_REQUIRED" > "$WORK_DIR/nfv"
+then
+    if [ -s "$WORK_DIR/nfv" ]
+    then
+	echo "Installed version of not-fork (`cat "$WORK_DIR/nfv"`) is too old" >&2
+    else
+	echo 'Cannot find not-fork in $PATH' >&2
+    fi
+    echo "Please install not-fork version >= $NOTFORK_REQUIRED" >&2
+    echo "See https://lumosql.org/src/not-forking/" >&2
+    exit 1
+fi
+
 # check that the required configuration exists; if it's "test" there's nothing
 # to check, but for anything else we need to use "not-fork" to obtain some
 # configuration for "not-fork". We avoid an infinite recursion by always using

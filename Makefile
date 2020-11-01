@@ -10,7 +10,7 @@
 # 
 # /Makefile
 #
-VERSIONS ?= SQLite-3.7.17 SQLite-3.30.1 LMDB_0.9.9 LMDB_0.9.16
+VERSIONS ?= SQLite-3.7.17 SQLite-3.30.1 SQLite-3.33.0 LMDB_0.9.9 LMDB_0.9.16 LMDB_0.9.26
 
 all: $(addprefix bld-,$(VERSIONS))
 
