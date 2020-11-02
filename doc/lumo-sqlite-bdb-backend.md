@@ -103,6 +103,7 @@ cd db-18.1.32/build
 ```
 
 This will create:
+
 1. libdb_sqlXX.{so|la} - A C API library, that exactly mirrors the SQLite
    C API.
 2. dbsql - A command line SQL interpreter, that exactly matches
