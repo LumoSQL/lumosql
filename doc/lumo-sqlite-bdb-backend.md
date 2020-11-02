@@ -1,10 +1,10 @@
-<!-- Copyright 2020 The LumoSQL Authors, see LICENSES/CC-BY-SA-4.0 -->
+<!-- Copyright 2020 The LumoSQL Authors, see LICENSES/MIT -->
 
-<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-License-Identifier: MIT -->
 <!-- SPDX-FileCopyrightText: 2020 The LumoSQL Authors -->
 <!-- SPDX-ArtifactOfProjectName: LumoSQL -->
 <!-- SPDX-FileType: Documentation -->
-<!-- SPDX-FileComment: Original by Dan Shearer, 2020 -->
+<!-- SPDX-FileComment: Original by Dan Shearer, September 2020 -->
 
 Notes on the Port of SQLite to BDB 18.1.32
 ==========================================

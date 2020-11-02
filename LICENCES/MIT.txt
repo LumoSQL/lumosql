@@ -1,4 +1,4 @@
-Copyright 2019, The LumoSQL Authors
+Copyright 2019-2020, The LumoSQL Authors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

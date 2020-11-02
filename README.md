@@ -3,7 +3,7 @@
 <!-- SPDX-FileCopyrightText: 2020 The LumoSQL Authors -->
 <!-- SPDX-ArtifactOfProjectName: LumoSQL -->
 <!-- SPDX-FileType: Documentation -->
-<!-- SPDX-FileComment: Original by Dan Shearer, 2019 -->
+<!-- SPDX-FileComment: Original by Dan Shearer, December 2019 -->
 
 # LumoSQL
 
@@ -18,6 +18,8 @@ the storage layer in SQLite without forking SQLite, making it possible to add
 new backends. New versions of SQLite do not typically require much manual
 merging in LumoSQL, if any. The LumoSQL and SQLite projects are cooperating, so any merge
 friction is expected to become less over time.
+
+LumoSQL is distributed under [very liberal terms](LICENCES/README.md).
 
 The full documentation for LumoSQL is at [the LumoSQL Documentation project](https://lumosql.org/src/lumodoc).
 
