@@ -117,6 +117,10 @@ LumoSQL provides a Makefile and benchmarking subsystem which:
 
 ## Build environment
 
+The build system requires [the not-forking tool](https://lumosql.org/src/not-forking/);
+once that is installed, some other tools are needed, usually provided by installing
+development packages.
+
 On Ubuntu 18.0.4 LTS, Debian Stable (buster), and on any reasonably recent
 Debian or Ubuntu-derived distribution, you need only:
 
