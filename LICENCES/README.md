@@ -1,19 +1,23 @@
 # Licences
 
-This directory documents the licences applying to the LumoSQL project.
-
-All significant files in this project should in addition have a [Software Package Data Exchange](https://spdx.dev) machine-readable header. 
+This directory documents all the licences applying to all material in the LumoSQL project.
 
 # MIT Licence
 
-The [MIT License](https://en.wikipedia.org/wiki/MIT_License) applies to code in
-this project. The MIT licence is probably the most-widely used Open Source
+The [MIT License](https://en.wikipedia.org/wiki/MIT_License) applies to all code in
+this project. The MIT licence is the most-widely used Open Source
 licence, including by some of the world's largest companies. The MIT licence
-grants everyone the right to use the code for any purpose under copyright law.
+grants everyone the right to use the code for any purpose under copyright law. Every 
+file should have a [Software Package Data Exchange](https://spdx.dev) machine-readable header,
+but even if it doesn't, the MIT licence still applies.
 
 # Creative Commons Licencse
 
 The [Creative Commons Attribution-ShareAlike 4.0](https://creativecommons.org/licenses/by-sa/4.0/) 
-licence applies to documentation in this project and in the companion
-[LumoSQL documentation project](https://lumosql.org/lumodoc). Code and documentation are very 
-different, which is why specific licences have been developed for them. 
+licence applies, where indicated by a copyright claim at the top, to the relatively small amount of 
+documentation in the LumoSQL project which is not within source code files.
+The full LumoSQL documentation can be found elsewhere at the 
+[LumoSQL documentation project](https://lumosql.org/lumodoc). 
+
+
+
