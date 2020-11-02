@@ -2,8 +2,7 @@
 
 This directory documents the licences applying to the LumoSQL project.
 
-All files in this project should in addition have a [Software Package Data Exchange](https://spdx.dev)
-machine-readable header. 
+All significant files in this project should in addition have a [Software Package Data Exchange](https://spdx.dev) machine-readable header. 
 
 # MIT Licence
 
