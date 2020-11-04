@@ -6,6 +6,6 @@
 
 method = sed
 --
-mdb.c : \z = \n#include "mdb_lumo_extras.c"
-lmdb.h : \z = \n#include "mdb_lumo_extras.h"
+mdb.c : \z = \n#include "mdb_lumo_extras.c"\n
+lmdb.h : \z = \n#include "mdb_lumo_extras.h"\n
 

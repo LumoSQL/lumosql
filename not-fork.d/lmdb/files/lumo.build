@@ -5,7 +5,7 @@
 #echo "Configuring $LUMO_BACKEND_NAME $LUMO_BACKEND_VERSION"
 #"$LUMO_SOURCES/$LUMO_BACKEND_NAME"/libraries/liblmdb/configure || exit 1
 
-cp -a "$LUMO_SOURCES/$LUMO_BACKEND_NAME/libraries/liblmdb/"* . || exit 1
+cp -a "$LUMO_SOURCES/$LUMO_BACKEND_NAME/"* . || exit 1
 
 echo "Building $LUMO_BACKEND_NAME $LUMO_BACKEND_VERSION"
 make || exit 1

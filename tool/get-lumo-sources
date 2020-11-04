@@ -1,7 +1,13 @@
 #!/bin/sh
 
-# usage: get-lumo-sources [OPTIONS] SOURCES_DIR CFG_VERSION SQLITE3_VERSION \
-#                                   [BACKEND_NAME BACKEND_VERSION]
+# use not-forking to obtain sources for a LumoSQL target
+
+# Copyright 2020 The LumoSQL Authors under the terms contained in LICENSES/MIT
+#
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2020 The LumoSQL Authors
+
+# usage: get-lumo-sources [OPTIONS] SOURCES_DIR CFG_VERSION LUMO_TARGET
 
 # SOURCES_DIR is the directory where the sources will be installed; this will
 # have (at least) two subdirectories, one containing the sqlite3 sources, and
@@ -12,16 +18,10 @@
 # version number for the "lumosql-build" not-fork configuration, or "test"
 # to use the bundled version
 
-# SQLITE3_VERSION is a SQLITE3 version string, like "3.7.17"
-
-# BACKEND_NAME is a string defined by the configuration; currently it can only
-# be "lmdb" but the configuration is free to define more
-
-# BACKEND_VERSION is the version of the backend to use, for LMDB it will be
-# something like "0.9.26"
-
-# if BACKEND_NAME and BACKEND_VERSION are omitted, use the unmodified sqlite3
-# sources
+# LUMO_TARGET is either a version of sqlite3 to build ("unmodified sqlite3")
+# or a string of the form SQLITE_VERSION+BACKEND_NAME-BACKEND_VERSION,
+# for example: "3.33.0" or "3.7.17+lmdb-0.9.26"
+# see tool/parse-target.tcl for a more complete description
 
 # OPTIONS are currently one of:
 # --update       always check with upstream repositories for updates
@@ -39,29 +39,33 @@ case "$1" in
     -u|--upd*) update='--update'; shift ;;
 esac
 
-if [ $# -ne 3 -a $# -ne 5 ]
+if [ $# -ne 3 ]
 then
-    echo "Usage: $(basename "$0") [OPTIONS] SOURCES_DIR CFG_VERSION SQLITE3_VERSION [BACKEND_NAME BACKEND_VERSION]" >&2
+    echo "Usage: $(basename "$0") [OPTIONS] SOURCES_DIR CFG_VERSION LUMO_TARGET" >&2
     echo "See comments at top of script for more information" >&2
     exit 1
 fi
 
-SOURCES_DIR="$1"
+LUMO_SOURCES="$1"
 CFG_VERSION="$2"
-SQLITE3_VERSION="$3"
-BACKEND_NAME="$4"
-BACKEND_VERSION="$5"
+LUMO_TARGET="$3"
 
-WORK_DIR="$SOURCES_DIR/.lumosql-work"
-mkdir -p "$WORK_DIR" || exit 1
+LUMO_DIR="$LUMO_SOURCES/.lumosql-work"
+mkdir -p "$LUMO_DIR" || exit 1
 
-# check that not-fork is in path, and is at least version 0.1
-NOTFORK_REQUIRED=0.1
-if ! not-fork --check-version "$NOTFORK_REQUIRED" > "$WORK_DIR/nfv"
+tclsh tool/parse-target.tcl "$LUMO_TARGET" "$LUMO_DIR" || exit 1
+
+SQLITE3_VERSION="$(cat "$LUMO_DIR/sqlite3_version")"
+LUMO_BACKEND_NAME="$(cat "$LUMO_DIR/backend_name")"
+LUMO_BACKEND_VERSION="$(cat "$LUMO_DIR/backend_version")"
+
+# check that not-fork is in path, and is at least version 0.2
+NOTFORK_REQUIRED=0.2
+if ! not-fork --check-version "$NOTFORK_REQUIRED" > "$LUMO_DIR/nfv"
 then
-    if [ -s "$WORK_DIR/nfv" ]
+    if [ -s "$LUMO_DIR/nfv" ]
     then
-	echo "Installed version of not-fork (`cat "$WORK_DIR/nfv"`) is too old" >&2
+	echo "Installed version of not-fork (`cat "$LUMO_DIR/nfv"`) is too old" >&2
     else
 	echo 'Cannot find not-fork in $PATH' >&2
     fi
@@ -78,8 +82,8 @@ if [ ".$CFG_VERSION" = ".test" ]
 then
     CFG_DIR=not-fork.d
 else
-    not-fork $update -i not-fork.d -o "$SOURCES_DIR" -v "$CFG_VERSION" lumosql-build || exit 1
-    CFG_DIR="$SOURCES_DIR/lumosql-build"
+    not-fork $update -i not-fork.d -o "$LUMO_SOURCES" -v "$CFG_VERSION" lumosql-build || exit 1
+    CFG_DIR="$LUMO_SOURCES/lumosql-build"
 fi
 
 # and make sure the configuration provides at least sqlite3 and the selected
@@ -87,7 +91,7 @@ fi
 OK=true
 if [ -d "$CFG_DIR/sqlite3" ]
 then
-    not-fork $update -i "$CFG_DIR" -q -v "$SQLITE3_VERSION" sqlite3 > "$WORK_DIR/sqlite3_info" || OK=false
+    not-fork $update -i "$CFG_DIR" -q -v "$SQLITE3_VERSION" sqlite3 > "$LUMO_DIR/sqlite3_info" || OK=false
 else
     echo "Invalid '$CFG_VERSION' configuration directory $CFG_DIR" >&2
     OK=false
@@ -96,30 +100,27 @@ if [ -n "$BACKEND_NAME" ]
 then
     if [ -d "$CFG_DIR/$BACKEND_NAME" ]
     then
-	not-fork $update -i "$CFG_DIR" -q -v "$BACKEND_VERSION" "$BACKEND_NAME" > "$WORK_DIR/backend_info" || OK=false
+	not-fork $update -i "$CFG_DIR" -q -v "$BACKEND_VERSION" "$BACKEND_NAME" > "$LUMO_DIR/backend_info" || OK=false
     else
 	echo "Invalid backend '$BACKEND_NAME'" >&2
 	OK=false
     fi
 else
-    > "$WORK_DIR/backend_info"
+    > "$LUMO_DIR/backend_info"
 fi
 $OK || exit 1
 
 # get sources
-not-fork --no-update -i "$CFG_DIR" -o "$SOURCES_DIR" -v "$SQLITE3_VERSION" sqlite3 || OK=false
+not-fork --no-update -i "$CFG_DIR" -o "$LUMO_SOURCES" -v "$SQLITE3_VERSION" sqlite3 || OK=false
 if [ -n "$BACKEND_NAME" ]
 then
-    not-fork --no-update -i "$CFG_DIR" -o "$SOURCES_DIR" -v "$BACKEND_VERSION" "$BACKEND_NAME" || OK=false
+    not-fork --no-update -i "$CFG_DIR" -o "$LUMO_SOURCES" -v "$BACKEND_VERSION" "$BACKEND_NAME" || OK=false
 fi
 $OK || exit 1
 
 # provide some information the build process may use
-echo "$SQLITE3_VERSION" > "$WORK_DIR/sqlite3_version"
-awk '/commit_id / { print $NF }' "$WORK_DIR/sqlite3_info" > "$WORK_DIR/sqlite3_commit_id"
-echo "$BACKEND_NAME" > "$WORK_DIR/backend_name"
-echo "$BACKEND_VERSION" > "$WORK_DIR/backend_version"
-awk '/commit_id / { print $NF }' "$WORK_DIR/backend_info" > "$WORK_DIR/backend_commit_id"
+awk '/commit_id / { print $NF }' "$LUMO_DIR/sqlite3_info" > "$LUMO_DIR/sqlite3_commit_id"
+awk '/commit_id / { print $NF }' "$LUMO_DIR/backend_info" > "$LUMO_DIR/backend_commit_id"
 
 exit 0
 

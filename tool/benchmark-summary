@@ -1,0 +1,71 @@
+#!/bin/sh
+
+# shows summary of benchmarks - DRAFT tool
+
+# Copyright 2020 The LumoSQL Authors under the terms contained in LICENSES/MIT
+#
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2020 The LumoSQL Authors
+
+# /tool/benchmark-summary
+
+if [ $# -lt 2 -o $# -gt 4 ]
+then
+    echo "Usage: $0 PATH_TO_SQLITE3 DATABASE [RUN_ID [TEST_NUMBER]]" >&2
+    exit 1
+fi
+
+SQLITE3="$1"; shift
+DATABASE="$1"; shift
+
+if [ $# -eq 0 ]
+then
+    printf "%-64s %-20s %-20s %9s\n" RUN_ID TARGET DATE/TIME DURATION
+    "$SQLITE3" -separator ' ' "$DATABASE" \
+	"select run_id, value from run_data where key='when-run' order by value" | \
+    while read id ts
+    do
+	target="`"$SQLITE3" "$DATABASE" \
+		"select value from run_data where run_id='$id' and key='target'"`"
+	duration="`"$SQLITE3" "$DATABASE" \
+		 "select sum(value) from test_data where run_id='$id' and key='real-time'"`"
+	printf "%-64s %-20s %-20s %9.3f\n" \
+	       "$id" "$target" "`date -d@"$ts" +"%Y-%m-%d %H:%M:%S"`" "$duration"
+    done
+    exit 0
+fi
+
+RUN_ID="$1"; shift
+
+if [ $# -eq 0 ]
+then
+    ts="`"$SQLITE3" "$DATABASE" \
+       "select value from run_data where run_id='$RUN_ID' and key='when-run'"`"
+    if [ -z "$ts" ]
+    then
+	echo "Invalid test ID $RUN_ID" >&2
+	exit 1
+    fi
+    title="`"$SQLITE3" "$DATABASE" \
+	  "select value from run_data where run_id='$RUN_ID' and key='title'"`"
+    name="`"$SQLITE3" "$DATABASE" \
+	 "select value from run_data where run_id='$RUN_ID' and key='sqlite-name'"`"
+    echo "Benchmark: $title"
+    [ -n "$name" ] && echo "   ($name)"
+    echo "Ran at `date -d@"$ts" +"%Y-%m-%d %H:%M:%S"`"
+    echo
+    printf "%8s %3s %s\n" TIME NUM NAME
+    "$SQLITE3" -separator ' ' "$DATABASE" \
+	"select test_number, value from test_data where run_id='$RUN_ID' and key='real-time' order by test_number" | \
+    while read num duration
+    do
+	name="`"$SQLITE3" "$DATABASE" \
+	     "select value from test_data where run_id='$RUN_ID' and test_number=$num and key='test-name'"`"
+	printf "%8.3f %3d %s\n" "$duration" "$num" "$name"
+    done
+    exit 0
+fi
+
+TEST_NUMBER="$1"
+"$SQLITE3" -column "$DATABASE" "select key, value from test_data where run_id='$RUN_ID' and test_number=$TEST_NUMBER order by key"
+

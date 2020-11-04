@@ -154,8 +154,9 @@ numbers to suit. A list of tested version numbers is in the table
 [below](#which-lmdb-version).
 
 ```sh
-make bld-SQLite-3.7.17
-make bld-LMDB_0.9.9
+make TARGETS=3.7.17
+make TARGETS=3.7.17+lmdb-0.9.9
+make TARGETS="3.33.0 3.7.17 3.7.17+lmdb-0.9.9"
 ```
 
 # Speed tests / benchmarking
@@ -166,17 +167,42 @@ on hardware.
 The instructions in this section explain how to benchmark four different
 versions:
 
-| V.  | SQLite | LMDB   | Repository | Report filename    |
-| --- | ------ | ------ | ---------- | ------------------ |
-| A.  | 3.7.17 | -      | SQLite     | SQLite-3.7.17.html |
-| B.  | 3.30.1 | -      | SQLite     | SQLite-3.30.1.html |
-| C.  | 3.7.17 | 0.9.9  | LumoSQL    | LMDB_0.9.9.html    |
-| D.  | 3.7.17 | 0.9.16 | LumoSQL    | LMDB_0.9.16.html   |
+| V.  | SQLite | LMDB   | Repository |
+| --- | ------ | ------ | ---------- |
+| A.  | 3.7.17 | -      | SQLite     |
+| B.  | 3.30.1 | -      | SQLite     |
+| C.  | 3.33.0 | -      | SQLite     |
+| D.  | 3.7.17 | 0.9.9  | LumoSQL    |
+| E.  | 3.7.17 | 0.9.16 | LumoSQL    |
+| F.  | 3.7.17 | 0.9.26 | LumoSQL    |
 
-To benchmark the four versions above use:
+To benchmark the six versions above use:
 
 ```sh
 make benchmark
+```
+
+This will create a database `benchmarks.sqlite` (if it does not already exist) with
+two tables containing the results, `run_data` contains data relative to a whole
+set of runs (version numbers, time test started, etc) and `test_data` contains
+individual test results within a run; it will also produce a summary on standard
+output.
+
+To run the benchmark for just two targets, and repeat the run 5 times:
+```sh
+make benchmark TARGETS="3.7.17 3.7.17+lmdb-0.9.9" BENCHMARK_RUNS=2
+```
+
+A simple (draft) tool is provided to display test results from the database:
+
+```sh
+sh tool/benchmark-summary build/3.33.0/sqlite3/sqlite3 benchmarks.sqlite
+```
+
+or given a run ID (first column of the output):
+
+```sh
+sh tool/benchmark-summary build/3.33.0/sqlite3/sqlite3 benchmarks.sqlite RUN_ID
 ```
 
 The "Repository" column means:
@@ -191,7 +217,7 @@ The "Repository" column means:
 <dt>LumoSQL</dt>
 <dd>
 
-<https://github.com/LumoSQL/LumoSQL> (this repository)
+<https://lumosql.org/src/lumosql/> (this repository)
 
 </dd>
 </dl>

@@ -1,5 +1,12 @@
 #!/bin/sh -e
 
+# Build SQLite with an optional alternative backend
+
+# Copyright 2020 The LumoSQL Authors under the terms contained in LICENSES/MIT
+#
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2020 The LumoSQL Authors
+
 # usage: build-lumo-backend BUILD_DIR SOURCES_DIR
 
 # BUILD_DIR is the directory where the objects will be built; it must not already
