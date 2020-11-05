@@ -3,12 +3,15 @@
 # and LUMO_BACKEND_VERSION
 
 #echo "Configuring $LUMO_BACKEND_NAME $LUMO_BACKEND_VERSION"
-#"$LUMO_SOURCES/$LUMO_BACKEND_NAME"/libraries/liblmdb/configure || exit 1
+#"$LUMO_SOURCES/$LUMO_BACKEND_NAME"/configure || exit 1
 
 cp -a "$LUMO_SOURCES/$LUMO_BACKEND_NAME/"* . || exit 1
 
 echo "Building $LUMO_BACKEND_NAME $LUMO_BACKEND_VERSION"
 make || exit 1
+
+mkdir -p ../sqlite3/.libs || exit 1
+cp -a liblmdb.* ../sqlite3/.libs/ || exit 1
 
 exit 0
 
