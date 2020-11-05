@@ -24,9 +24,8 @@ version of third party storeage backends, and to run tests on the combined
 code. This requires small modifications to SQLite itself, and some new code
 to interface each backend.
 
-To do this, the project uses the "not-forking" mechanism described in
-[Not-Forking Upstream Source Code Tracker](./lumo-not-forking.md), together
-with appropriate configuration, to obtain the sources, and a set of shell
+To do this, the project uses the [Not-forking tool](https://lumosql.org/src/not-forking) 
+together with appropriate configuration, to obtain the sources, and a set of shell
 and Tcl scripts to build and run test programs.
 
 To ensure repeatability of tests, each test will include the following information:

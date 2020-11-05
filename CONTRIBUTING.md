@@ -8,7 +8,14 @@ and has its own contribution rules.
 We try to keep the barriers to contribution low, which is assisted by
 our decision to use [Fossil].
 
+If you are familiar with Fossil, you will be able to start using 
+the [LumoSQL Build, Test and Benchmarking][testbuild] system straight
+away. However the rest of this document has useful non-technical information
+about contributing too.
+
+
 [home]: https://lumosql.org/src/lumosql
+[testbuild]: https://lumosql.org/src/lumosql/doc/tip/doc/lumo-test-build.md
 
 
 ## <a id="ghm"></a> The GitHub Mirror Is One-way

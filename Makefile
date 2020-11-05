@@ -9,6 +9,8 @@
 # SPDX-FileComment: Original by Keith Maxwell, 2019 
 # 
 # /Makefile
+#
+# Documented at https://lumosql.org/src/lumosql/doc/tip/doc/lumo-test-build.md
 
 # version of sqlite3 to use for the benchmark database; by default this
 # version is also benchmarked but see next comment
