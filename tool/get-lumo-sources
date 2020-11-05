@@ -96,13 +96,13 @@ else
     echo "Invalid '$CFG_VERSION' configuration directory $CFG_DIR" >&2
     OK=false
 fi
-if [ -n "$BACKEND_NAME" ]
+if [ -n "$LUMO_BACKEND_NAME" ]
 then
-    if [ -d "$CFG_DIR/$BACKEND_NAME" ]
+    if [ -d "$CFG_DIR/$LUMO_BACKEND_NAME" ]
     then
-	not-fork $update -i "$CFG_DIR" -q -v "$BACKEND_VERSION" "$BACKEND_NAME" > "$LUMO_DIR/backend_info" || OK=false
+	not-fork $update -i "$CFG_DIR" -q -v "$LUMO_BACKEND_VERSION" "$LUMO_BACKEND_NAME" > "$LUMO_DIR/backend_info" || OK=false
     else
-	echo "Invalid backend '$BACKEND_NAME'" >&2
+	echo "Invalid backend '$LUMO_BACKEND_NAME'" >&2
 	OK=false
     fi
 else
@@ -112,9 +112,9 @@ $OK || exit 1
 
 # get sources
 not-fork --no-update -i "$CFG_DIR" -o "$LUMO_SOURCES" -v "$SQLITE3_VERSION" sqlite3 || OK=false
-if [ -n "$BACKEND_NAME" ]
+if [ -n "$LUMO_BACKEND_NAME" ]
 then
-    not-fork --no-update -i "$CFG_DIR" -o "$LUMO_SOURCES" -v "$BACKEND_VERSION" "$BACKEND_NAME" || OK=false
+    not-fork --no-update -i "$CFG_DIR" -o "$LUMO_SOURCES" -v "$LUMO_BACKEND_VERSION" "$LUMO_BACKEND_NAME" || OK=false
 fi
 $OK || exit 1
 
