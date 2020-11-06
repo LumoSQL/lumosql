@@ -1,13 +1,13 @@
 # LumoSQL Code of Conduct
 
-Version 1.2 – Updated 5th November, 2020
+Version 1.3 – Updated 6th November, 2020
 
 **This file exists because the LumoSQL Project needed it, less than one year
 after starting. We take it seriously. Now we have the 2020 pandemic and
 most of us are feeling a bit fragile... a bit of kindness helps too.**
 
 The LumoSQL Project welcomes contributions from everyone who shares
-[the LumoSQL Project Goals][https://lumosql.org/src/lumodoc/doc/trunk/doc/lumo-project-aims.md]
+[the LumoSQL Project Goals](https://lumosql.org/src/lumodoc/doc/trunk/doc/lumo-project-aims.md)
 This document outlines both expected and prohibited behavior.
 
 # Short Summary
@@ -23,21 +23,21 @@ achieve. If you only read this much, it's a good start.
 
 Everyone, regardless of diversity dimensions including:
 
-    Gender, identity or expression
-    Age
-    Socioeconomic status
-    Sex or sexual orientation
-    Family status
-    Race and/or caste and/or ethnicity
-    National origin
-    Religion
-    Native or other languages
+* Gender, identity or expression
+* Age
+* Socioeconomic status
+* Sex or sexual orientation
+* Family status
+* Race and/or caste and/or ethnicity
+* National origin
+* Religion
+* Native or other languages
 
 # When Should They Feel Safe?
 
-    * Working with other LumoSQL community participants virtually or co-located
-    * Representing LumoSQL at public events
-    * Representing LumoSQL in social media
+* Working with other LumoSQL community participants virtually or co-located
+* Representing LumoSQL at public events
+* Representing LumoSQL in social media
 
 # What is Expected?
 
