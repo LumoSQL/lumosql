@@ -23,14 +23,14 @@ LumoSQL is supported by the [NLNet Foundation](https://nlnet.nl).
 
 # Table of Contents
 
-    * [Participating, Not-Forking and Project Interactions](#participating-not-forking-and-project-interactions)
-    * [LumoSQL, and SQLite's Billions](#lumosql-and-sqlites-billions)
-    * [Quickstart](#quickstart)
-    * [A Brief History](#a-brief-history)
-    * [What's In This Version of LumoSQL](#whats-in-this-version-of-lumosql)
-    * [Build environment](#build-environment)
-    * [Using the Makefile tool](#using-the-makefile-tool)
-    * [Speed tests / benchmarking](#speed-tests--benchmarking)
+* [Participating, Not-Forking and Project Interactions](#participating-not-forking-and-project-interactions)
+* [LumoSQL, and SQLite's Billions](#lumosql-and-sqlites-billions)
+* [Quickstart](#quickstart)
+* [A Brief History](#a-brief-history)
+* [What's In This Version of LumoSQL](#whats-in-this-version-of-lumosql)
+* [Build environment](#build-environment)
+* [Using the Makefile tool](#using-the-makefile-tool)
+* [Speed tests / benchmarking](#speed-tests--benchmarking)
 
 ## Participating, Not-Forking and Project Interactions
 
