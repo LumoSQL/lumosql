@@ -39,16 +39,17 @@ of LumoSQL is [the Fossil repository](https://lumosql.org/src/lumosql), which
 is where you can participate in the project including via write access.
 Despite dealing with multiple upstreams, LumoSQL tries hard to avoid forking,
 which is why we developed the
-[Not-forking](https://lumusql.org/src/not-forking) tool. It is also one reason
+[Not-forking](https://lumosql.org/src/not-forking) tool. It is also one reason
 among several why we moved from git and Github to the Fossil SCM.
 
-LumoSQL abstracts out the storage layer in SQLite, making it possible to add
-new backends. New upstream versions of SQLite do not typically require much
+LumoSQL abstracts out the storage layer in SQLite, making it possible to
+[add new backends](doc/lumo-test-build.md#adding-new-backends). New upstream 
+versions of SQLite do not typically require much
 manual merging in LumoSQL, if any. The LumoSQL and SQLite projects are
 cooperating, so any merge friction is expected to become less over time, and 
 key to that is our approach of not forking.
 
-## LumoSQL, and SQLite's Billions
+## LumoSQL, and SQLite's Billions of Users
 
 SQLite is used by thousands of software projects, just three of them being
 Google's Android, Mozilla's Firefox and Apple's iOS which between them have
