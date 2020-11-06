@@ -8,30 +8,57 @@
 
 # LumoSQL
 
-## About LumoSQL
-
 [LumoSQL](lumosql.org) is a modification of the [SQLite](https://sqlite.org)
-embedded data storage C language library. It has multiple backend storage
-systems selectable by the user and otehr integrity and security features. 
-In this early release there are three backends, the default SQLite storage system,
-[LMDB](https://github.com/LMDB/lmdb) and [the Berkley Database][BDB]. 
-LumoSQL abstracts out the storage layer in SQLite without forking SQLite, 
-making it possible to add new backends. New upstream versions of SQLite do not typically 
-require much manual merging in LumoSQL, if any. The LumoSQL and SQLite projects 
-are cooperating, so any merge friction is expected to become less over time.
+embedded data storage C language library that is not a fork. LumoSQL has multiple backend storage
+systems selectable by the user and proposes other integrity and security features.
+In this early release there are three backends: the default SQLite storage system,
+[LMDB](https://github.com/LMDB/lmdb) and [the Berkley Database](https://en.wikipedia.org/wiki/Berkeley_DB).
 
-[BDB]:https://en.wikipedia.org/wiki/Berkeley_DB
+LumoSQL is distributed under [very liberal licence terms](LICENCES/README.md).
 
-LumoSQL is distributed under [very liberal terms](LICENCES/README.md).
+The full documentation for LumoSQL is at 
+[the LumoSQL Documentation project](https://lumosql.org/src/lumodoc).
 
-The full documentation for LumoSQL is at [the LumoSQL Documentation project](https://lumosql.org/src/lumodoc).
+LumoSQL is supported by the [NLNet Foundation](https://nlnet.nl).
 
-SQLite is used by thousands of software projects, just three of them being 
-Google's Android, Mozilla's Firefox and Apple's iOS which between them have 
+# Table of Contents
+
+    * [Participating, Not-Forking and Project Interactions](#participating-not-forking-and-project-interactions)
+    * [LumoSQL, and SQLite's Billions](#lumosql-and-sqlites-billions)
+    * [Quickstart](#quickstart)
+    * [A Brief History](#a-brief-history)
+    * [What's In This Version of LumoSQL](#whats-in-this-version-of-lumosql)
+    * [Build environment](#build-environment)
+    * [Using the Makefile tool](#using-the-makefile-tool)
+    * [Speed tests / benchmarking](#speed-tests--benchmarking)
+
+## Participating, Not-Forking and Project Interactions
+
+If you are reading this on Github, then you are looking at a mirror. The home
+of LumoSQL is [the Fossil repository](https://lumosql.org/src/lumosql), which
+is where you can participate in the project including via write access.
+Despite dealing with multiple upstreams, LumoSQL tries hard to avoid forking,
+which is why we developed the
+[Not-forking](https://lumusql.org/src/not-forking) tool. It is also one reason
+among several why we moved from git and Github to the Fossil SCM.
+
+LumoSQL abstracts out the storage layer in SQLite, making it possible to add
+new backends. New upstream versions of SQLite do not typically require much
+manual merging in LumoSQL, if any. The LumoSQL and SQLite projects are
+cooperating, so any merge friction is expected to become less over time, and 
+key to that is our approach of not forking.
+
+## LumoSQL, and SQLite's Billions
+
+SQLite is used by thousands of software projects, just three of them being
+Google's Android, Mozilla's Firefox and Apple's iOS which between them have
 billions of users. SQLite is careful and conservative with changes that might
-have unpredictable effects on software stacks likely used by a majority of 
+have unpredictable effects on software stacks likely used by a majority of
 earth's population. On the other hand, there are changes to SQLite which are
-needed by many users, and LumoSQL is a demonstration of some of these improvements.
+needed by many of these same users, and LumoSQL is a demonstration of some of
+these improvements. Another side-effect (we hope) of the not-forking approach is
+that it will lower the barriers to finding a way for LumoSQL improvements to
+get into use among some of those billions of users.
 
 The LumoSQL documentation project covers the strategy, plans and research into
 dozens of relevant codebases. SQLite has become ubiquitous over two decades, which means 
@@ -39,18 +66,11 @@ there is a great deal of preparation needed when considering architectural chang
 If you are looking for more information about technical terms in this README you'll 
 likely find it in the LumoSQL documentation.
 
-If you are reading this on Github, then you are looking at a mirror. The official 
-home of LumoSQL is [the Fossil repository][lumo].
-
-[lumo:]https://lumosql.org/src/lumosql
-[Fossil:]https://fossil-scm.org/
-
-LumoSQL uses the [Fossil source code manager][Fossil] partly because Fossil
-has advantages over Github which suit a project of this size, and partly because
-Fossil and SQLite are symbiotic projects and test cases for each other. Fossil can 
-mirror to and from Github, but Fossil is the tool of choice for LumoSQL. If you 
-choose to send a PR on Github you will be heard, but your work will end up being
-pushed through the Fossil system anyway.
+LumoSQL uses the [Fossil source code manager](https://fossil-scm.org) partly because Fossil
+has advantages over Github which suit a project of this size, partly because Fossil 
+encourages inclusivity rather than forking as described above, and partly because
+Fossil and SQLite are symbiotic projects and test cases for each other. LumoSQL is
+mirrored to and can be imported from Github, but Fossil is the tool of choice for LumoSQL.
 
 ## Quickstart
 
@@ -60,62 +80,37 @@ pushed through the Fossil system anyway.
 The [LumoSQL Build System](doc/lumo-test-build.md) is well documented when you need to 
 go deeper.
 
-## About LumoSQL
-
-LumoSQL was started in December 2019 by Dan Shearer, who did the original
-source tree archaeology, patching and test builds and continues to lead the project.
-Keith Maxwell joined for a time and contributed invaluable version management to 
-the Makefile and the benchmarking tools.  Claudio Calvelli contributes in many areas including the
-[not-forking tool](https://lumosql.org/src/not-forking), which is central to
-the relationship between LumoSQL and SQLite and is now a separate project.
-
-Generally speaking, the goal of the LumoSQL Project is to create and maintain
-an enhanced version of SQLite in cooperation with the SQLite project. There are
-some very specific goals and committments covered in the LumoSQL documentation.
-
-LumoSQL is also supported by the [NLNet Foundation](https://nlnet.nl).
-
-## LumoSQL Started from an LMDB Port
+## A Brief History
 
 There have been several implementations of new storage backends to SQLite, all of them hard forks
-and most (but notably not all) of them dead forks. A backend needs certain characteristics if 
-it is to fit without totally rewriting SQLite:
+and nearly all dead forks. A backend needs certain characteristics:
 
 * btree-based key-value store
 * transactions, or fully ACID
 * full concurrency support, or fully MVCC
 
-There are not many candidate key-value stores. One of the most widely-used
-key/value stores is Howard Chu's LMDB. That is why there was a lot of attention
-when in 2013 Howard released his [proof of concept SQLite
-port](https://github.com/LMDB/sqlightning). LMDB operates on a very different
-and more modern principle to all other widely-used key/value stores, potentially bringing
-benefits to some users of SQLite. In 2013, the ported SQLite seemed to give 
-significant performance benefits, which is not surprising since LMDB's focus 
-is on performance and small size.
+There are not many candidate key-value stores. One of the most widely-used is
+Howard Chu's LMDB. There was a lot of attention in 2013 when Howard released
+his [proof of concept SQLite port](https://github.com/LMDB/sqlightning). LMDB
+operates on a very different and more modern principle to all other widely-used
+key/value stores, potentially bringing benefits to some users of SQLite. In
+2013, the ported SQLite gave significant performance benefits.
 
-The original 2013 code modified the SQLite `btree.c` from version SQLite version 
-3.7.17 to use LMDB 0.9.9 . It took considerable work to excavate the code and 
-reproduce the results from years ago. 
+The original 2013 code modified the SQLite `btree.c` from version SQLite
+version 3.7.17 to use LMDB 0.9.9 . It took considerable work for LumoSQL to
+excavate the ancient code and reproduce the results.
 
-By January 2020 the LumoSQL project had established that it was feasible to
-create something much more than an updated version of the LMDB port. We
-concluded:
+By January 2020 the LumoSQL project concluded:
 
 - Howard's 2013 performance work is reproducible
 - SQLite's key-value store improved in performance since 2013, getting close to
   parity with LMDB by some measures
 - SQLite can be readily modified to have multiple storage backends and still
-  pass all of its own tests
+  pass 'make test'
 - SQLite doesn't expect there to be multiple backends, and this has many effects
   including for example in error handling. An abstraction layer was needed.
 
-In addition there are several disclaimers made by the SQLite project including
-not being intended for high concurrency. Since high concurrency is a design
-feature of LMDB and a common use case for SQLite, we wanted to investigate
-whether an LMDB-backed LumoSQL might be better for highly concurrent applications.
-
-Since then, many new possibilities have emerged for LumoSQL.
+Since then, many new possibilities have emerged for LumoSQL, and new collaborations.
 
 ## What's In This Version of LumoSQL
 
@@ -126,6 +121,11 @@ LumoSQL provides a Makefile and benchmarking subsystem which:
 - Creates a testing matrix of versions and results. These can be limited by the
   user because a full suite takes hours to run.
 - Is suitable for extending to multiple other backends
+
+All benchmarking is written to an SQLite database. This separates out the tasks
+of collecting results and storing them safely from presenting and interpeting
+the results beyond the most basic. Presentation of statistical data is its own
+skill and a mini-project in its own right.
 
 ## Build environment
 
