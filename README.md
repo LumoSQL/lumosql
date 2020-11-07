@@ -272,13 +272,13 @@ The "Repository" column means:
 <dt>SQLite</dt>
 <dd>
 
-[https://github.com/sqlite/sqlite](https://github.com/sqlite/sqlite)
+https://github.com/sqlite/sqlite
 
 </dd>
 <dt>LumoSQL</dt>
 <dd>
 
-[https://lumosql.org/src/lumosql/](https://lumosql.org/src/lumosql/)
+https://lumosql.org/src/lumosql/
 (this repository)
 
 </dd>
