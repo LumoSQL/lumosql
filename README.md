@@ -198,15 +198,13 @@ two tables containing the results, `run_data` contains data relative to a whole
 set of runs (version numbers, time test started, etc) and `test_data` contains
 individual test results within a run; it will also produce a summary on standard
 output:
-
 ```
-RUN_ID                                                           TARGET               DATE/TIME             DURATION
-0905DCF04077ADF9FB96FB382B023123CEDE86FA510FB66F2F7E095743CB82E1 3.7.17               2020-11-05 20:10:23    148.431
-DDEC21FF7EF9186E4B636A948F387A7BA62BF0E7B503BD59BC0B1869340CCA9E 3.30.1               2020-11-05 20:13:06     89.370
-5A02EAC0981E8C0502FD3AA137E292BC8912AFD0C27C043A9BC944CC53FB1739 3.33.0               2020-11-05 20:14:50     78.099
-1FDEED012CAC8CC78CB76A658195A8D5C5B6FC4C1504B11064871C28BFB3F368 3.7.17+lmdb-0.9.9    2020-11-05 20:16:23    169.795
-92CD0F823663E082BC91E75DBE8462D99874B87208F0D9FCE5CE145275D56B5E 3.7.17+lmdb-0.9.16   2020-11-05 20:19:28    156.159
-D404F589B8FF22E5571E41323497BC0EF11E138A7CA1526FE114F9A869B5CCB9 3.7.17+lmdb-0.9.26   2020-11-05 20:22:19    177.874
+Creating database benchmarks.sqlite
+Target: 3.7.17
+ 21.772    1 1000 INSERTs
+  0.257    2 25000 INSERTs in a transaction
+...
+
 ```
 
 If you want to store benchmarking in a different database file, use BENCHMARK_DB:
@@ -226,7 +224,24 @@ A simple (draft) tool is provided to display test results from the database:
 sh tool/benchmark-summary build/3.33.0/sqlite3/sqlite3 benchmarks.sqlite
 ```
 
-This gives:
+This gives a 1-line summary of each run in the database, for example:
+```
+RUN_ID                                                           TARGET               DATE/TIME             DURATION
+0905DCF04077ADF9FB96FB382B023123CEDE86FA510FB66F2F7E095743CB82E1 3.7.17               2020-11-05 20:10:23    148.431
+DDEC21FF7EF9186E4B636A948F387A7BA62BF0E7B503BD59BC0B1869340CCA9E 3.30.1               2020-11-05 20:13:06     89.370
+5A02EAC0981E8C0502FD3AA137E292BC8912AFD0C27C043A9BC944CC53FB1739 3.33.0               2020-11-05 20:14:50     78.099
+1FDEED012CAC8CC78CB76A658195A8D5C5B6FC4C1504B11064871C28BFB3F368 3.7.17+lmdb-0.9.9    2020-11-05 20:16:23    169.795
+92CD0F823663E082BC91E75DBE8462D99874B87208F0D9FCE5CE145275D56B5E 3.7.17+lmdb-0.9.16   2020-11-05 20:19:28    156.159
+D404F589B8FF22E5571E41323497BC0EF11E138A7CA1526FE114F9A869B5CCB9 3.7.17+lmdb-0.9.26   2020-11-05 20:22:19    177.874
+```
+
+or given a run ID (first column of the output):
+
+```sh
+sh tool/benchmark-summary build/3.33.0/sqlite3/sqlite3 benchmarks.sqlite RUN_ID
+```
+
+For example:
 
 ```
 $ sh tool/benchmark-summary ./build/3.33.0/sqlite3/sqlite3 benchmarks.sqlite D404F589B8FF22E5571E41323497BC0EF11E138A7CA1526FE114F9A869B5CCB9
@@ -249,12 +264,6 @@ Ran at 2020-11-05 20:22:19
    0.139  13 A big DELETE followed by many small INSERTs
    0.030  14 DROP TABLE
 
-```
-
-or given a run ID (first column of the output):
-
-```sh
-sh tool/benchmark-summary build/3.33.0/sqlite3/sqlite3 benchmarks.sqlite RUN_ID
 ```
 
 The "Repository" column means:
