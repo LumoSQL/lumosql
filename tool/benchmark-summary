@@ -18,9 +18,21 @@ fi
 SQLITE3="$1"; shift
 DATABASE="$1"; shift
 
+# avoid creating databases if they don't exist...
+if ! [ -s "$DATABASE" ]
+then
+    echo "Invalid database $DATABASE" >&2
+    exit 1
+fi
+
+# if we don't do this, it will say "number not valid" in some locales
+LC_NUMERIC=C
+export LC_NUMERIC
+
 if [ $# -eq 0 ]
 then
-    printf "%-64s %-20s %-20s %9s\n" RUN_ID TARGET DATE/TIME DURATION
+    width="`"$SQLITE3" "$DATABASE" "select max(length(value)) from run_data where key='target';"`"
+    printf "%-64s %-${width}s %-20s %10s\n" RUN_ID TARGET DATE/TIME DURATION
     "$SQLITE3" -separator ' ' "$DATABASE" \
 	"select run_id, value from run_data where key='when-run' order by value" | \
     while read id ts
@@ -29,7 +41,7 @@ then
 		"select value from run_data where run_id='$id' and key='target'"`"
 	duration="`"$SQLITE3" "$DATABASE" \
 		 "select sum(value) from test_data where run_id='$id' and key='real-time'"`"
-	printf "%-64s %-20s %-20s %9.3f\n" \
+	printf "%-64s %-${width}s %-20s %10.3f\n" \
 	       "$id" "$target" "`date -d@"$ts" +"%Y-%m-%d %H:%M:%S"`" "$duration"
     done
     exit 0
@@ -54,14 +66,14 @@ then
     [ -n "$name" ] && echo "   ($name)"
     echo "Ran at `date -d@"$ts" +"%Y-%m-%d %H:%M:%S"`"
     echo
-    printf "%8s %3s %s\n" TIME NUM NAME
+    printf "%9s %3s %s\n" TIME NUM NAME
     "$SQLITE3" -separator ' ' "$DATABASE" \
 	"select test_number, value from test_data where run_id='$RUN_ID' and key='real-time' order by test_number" | \
     while read num duration
     do
 	name="`"$SQLITE3" "$DATABASE" \
 	     "select value from test_data where run_id='$RUN_ID' and test_number=$num and key='test-name'"`"
-	printf "%8.3f %3d %s\n" "$duration" "$num" "$name"
+	printf "%9.3f %3d %s\n" "$duration" "$num" "$name"
     done
     exit 0
 fi

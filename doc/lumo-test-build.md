@@ -35,7 +35,8 @@ To ensure repeatability of tests, each test will include the following informati
 unchanged version of sqlite3 with its own backend
 * the version of the storage backend used, also omitted for tests using
 an unchanged version of sqlite3
-* any other options (currently unimplemented)
+* any other options (currently only `datasize-N` to multiply the data size used
+in some benchmarks by `N`)
 
 Three scripts, which can be found in the `tools` subdirectory, handle
 the three steps of running a test:

@@ -56,11 +56,14 @@ set ones {zero one two three four five six seven eight nine
           eighteen nineteen}
 set tens {{} ten twenty thirty forty fifty sixty seventy eighty ninety}
 proc number_name {n} {
+  set txt {}
+  if {$n >= 1000000} {
+    append txt " [number_name [expr {$n/1000000}]] million"
+    set n [expr {$n%1000000}]
+  }
   if {$n>=1000} {
-    set txt "[number_name [expr {$n/1000}]] thousand"
+    append txt " [number_name [expr {$n/1000}]] thousand"
     set n [expr {$n%1000}]
-  } else {
-    set txt {}
   }
   if {$n>=100} {
     append txt " [lindex $::ones [expr {$n/100}]] hundred"
@@ -115,44 +118,52 @@ proc run_test {title} {
 proc run_tests {} {
     global sql_file
     global cnt
+    global datasize
 
     set cnt 0
 
+    #set d100 [expr {$datasize * 100}]
+    set d100 100
+    set d1000 [expr {$datasize * 1000}]
+    #set d5000 [expr {$datasize * 5000}]
+    set d5000 5000
+    set d25000 [expr {$datasize * 25000}]
+
     set fd [open $sql_file w]
     puts $fd "CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100));"
-    for {set i 1} {$i<=1000} {incr i} {
+    for {set i 1} {$i<=$d1000} {incr i} {
       set r [expr {int(rand()*100000)}]
       puts $fd "INSERT INTO t1 VALUES($i,$r,'[number_name $r]');"
     }
     close $fd
-    run_test {1000 INSERTs}
+    run_test "$d1000 INSERTs"
 
     set fd [open $sql_file w]
     puts $fd "BEGIN;"
     puts $fd "CREATE TABLE t2(a INTEGER, b INTEGER, c VARCHAR(100));"
-    for {set i 1} {$i<=25000} {incr i} {
+    for {set i 1} {$i<=$d25000} {incr i} {
       set r [expr {int(rand()*500000)}]
       puts $fd "INSERT INTO t2 VALUES($i,$r,'[number_name $r]');"
     }
     puts $fd "COMMIT;"
     close $fd
-    run_test {25000 INSERTs in a transaction}
+    run_test "$d25000 INSERTs in a transaction"
 
     set fd [open $sql_file w]
-    for {set i 0} {$i<100} {incr i} {
+    for {set i 0} {$i<$d100} {incr i} {
       set lwr [expr {$i*100}]
       set upr [expr {($i+10)*100}]
       puts $fd "SELECT count(*), avg(b) FROM t2 WHERE b>=$lwr AND b<$upr;"
     }
     close $fd
-    run_test {100 SELECTs without an index}
+    run_test "$d100 SELECTs without an index"
 
     set fd [open $sql_file w]
-    for {set i 1} {$i<=100} {incr i} {
+    for {set i 1} {$i<=$d100} {incr i} {
       puts $fd "SELECT count(*), avg(b) FROM t2 WHERE c LIKE '%[number_name $i]%';"
     }
     close $fd
-    run_test {100 SELECTs on a string comparison}
+    run_test "$d100 SELECTs on a string comparison"
 
     # Duplicate values and an index cause an error
     # Error: database disk image is malformed
@@ -163,44 +174,44 @@ proc run_tests {} {
     # run_test {Creating an index}
 
     set fd [open $sql_file w]
-    for {set i 0} {$i<5000} {incr i} {
+    for {set i 0} {$i<$d5000} {incr i} {
       set lwr [expr {$i*100}]
       set upr [expr {($i+1)*100}]
       puts $fd "SELECT count(*), avg(b) FROM t2 WHERE b>=$lwr AND b<$upr;"
     }
     close $fd
-    run_test {5000 SELECTs}
+    run_test "$d5000 SELECTs"
 
     set fd [open $sql_file w]
     puts $fd "BEGIN;"
-    for {set i 0} {$i<1000} {incr i} {
+    for {set i 0} {$i<$d1000} {incr i} {
       set lwr [expr {$i*10}]
       set upr [expr {($i+1)*10}]
       puts $fd "UPDATE t1 SET b=b*2 WHERE a>=$lwr AND a<$upr;"
     }
     puts $fd "COMMIT;"
     close $fd
-    run_test {1000 UPDATEs without an index}
+    run_test "$d1000 UPDATEs without an index"
 
     set fd [open $sql_file w]
     puts $fd "BEGIN;"
-    for {set i 1} {$i<=25000} {incr i} {
+    for {set i 1} {$i<=$d25000} {incr i} {
       set r [expr {int(rand()*500000)}]
       puts $fd "UPDATE t2 SET b=$r WHERE a=$i;"
     }
     puts $fd "COMMIT;"
     close $fd
-    run_test {25000 UPDATEs with an index}
+    run_test "$d25000 UPDATEs with an index"
 
     set fd [open $sql_file w]
     puts $fd "BEGIN;"
-    for {set i 1} {$i<=25000} {incr i} {
+    for {set i 1} {$i<=$d25000} {incr i} {
       set r [expr {int(rand()*500000)}]
       puts $fd "UPDATE t2 SET c='[number_name $r]' WHERE a=$i;"
     }
     puts $fd "COMMIT;"
     close $fd
-    run_test {25000 text UPDATEs with an index}
+    run_test "$d25000 text UPDATEs with an index"
 
     set fd [open $sql_file w]
     puts $fd "BEGIN;"
@@ -326,11 +337,12 @@ for {set n_target 4} {$n_target < [llength $argv]} {incr n_target} {
 		values ('$run_id', 'backend-id', '$backend_id');
 	    "
 	}
+	set datasize 1
 	for {set opt 1} \
 	    {[file exists "$target_dir/sqlite3/.lumosql-work/option$opt"]} \
 	    {incr opt} \
 	{
-	    set $o [split [read_file "option$opt"] "\n"]
+	    set o [split [read_file "option$opt"] "\n"]
 	    if {[llength $o] > 1} {
 		set oname [lindex $o 0]
 		set ovalue [lindex $o 1]
@@ -338,6 +350,9 @@ for {set n_target 4} {$n_target < [llength $argv]} {incr n_target} {
 		    insert into run_data (run_id, key, value)
 		    values ('$run_id', 'option-$oname', '$ovalue');
 		"
+		if {$oname == "datasize"} {
+		    set datasize $ovalue
+		}
 	    }
 	}
 
