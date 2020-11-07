@@ -23,6 +23,8 @@ if {[llength $tlist] < 1} {
     exit 1
 }
 
+# parse the first two components which are always sqlite version and
+# (optional) backend name and version
 set sqlite_version [lindex $tlist 0]
 set backend_name ""
 set backend_version ""
@@ -54,14 +56,21 @@ set fd [open "$dir/title" w]
 puts $fd $title
 close $fd
 
-set o 0
+# and now parse remaining options
+set o 1
 for {set i 2} {$i < [llength $tlist]} {incr i} {
-    incr o
     set olist [regexp -inline {^([^-]+)-(.*)$} [lindex $tlist $i]]
     set fd [open "$dir/option$o" w]
     for {set n 1} {$n < [llength $olist]} {incr n} {
 	puts $fd [lindex $olist $n]
     }
     close $fd
+    incr o
+}
+
+# make sure to clean up any leftover options from previous builds
+while {[file exists "$dir/option$o"]} {
+    file delete "$dir/option$o"
+    incr o
 }
 
