@@ -16,11 +16,42 @@
 # version is also benchmarked but see next comment
 SQLITE_VERSION ?= 3.33.0
 
+# version of sqlite3 to use with the LMDB backend and LMDB versions to use by default
+USE_LMDB ?= yes
+SQLITE_FOR_LMDB ?= 3.8.3.1
+LMDB_VERSIONS ?= 0.9.9 0.9.16 0.9.27
+LMDB_TARGETS ?= $(addprefix $(SQLITE_FOR_LMDB)+lmdb-,$(LMDB_VERSIONS))
+
+# version of sqlite3 to use with the BDB backend and BDB versions to use by default
+USE_BDB ?= no
+SQLITE_FOR_BDB ?= 3.18.2
+BDB_VERSIONS ?= 18.1.32
+#BDB_VERSIONS ?= 18.1.32 18.1.40
+BDB_TARGETS ?= $(addprefix $(SQLITE_FOR_BDB)+bdb-,$(BDB_VERSIONS))
+
+# make a list of modified and unmodified sqlite3 targets
+SQLITE_TARGETS = $(SQLITE_VERSION)
+BACKEND_TARGETS =
+
+ifeq ($(USE_LMDB),yes)
+ifeq ($(findstring $(SQLITE_FOR_LMDB),$(SQLITE_TARGETS)),)
+SQLITE_TARGETS += $(SQLITE_FOR_LMDB)
+BACKEND_TARGETS += $(LMDB_TARGETS)
+endif
+endif
+
+ifeq ($(USE_BDB),yes)
+ifeq ($(findstring $(SQLITE_FOR_BDB),$(SQLITE_TARGETS)),)
+SQLITE_TARGETS += $(SQLITE_FOR_BDB)
+BACKEND_TARGETS += $(BDB_TARGETS)
+endif
+endif
+
 # targets to build/benchmark by default; format is sqlite_version[+backend_name-version]
 # the target naming scheme will be extended in future to add more dimensions,
 # for example sqlite_version+[backend_name-version][+option-value]...
 # to repeat a test target TT one could just run "make benchmark TARGETS=TT"
-TARGETS ?= 3.7.17 3.30.1 3.33.0 3.7.17+lmdb-0.9.9 3.7.17+lmdb-0.9.16 3.7.17+lmdb-0.9.26
+TARGETS ?= $(SQLITE_TARGETS) $(BACKEND_TARGETS)
 
 # build directory
 BUILD_DIR ?= build
@@ -36,6 +67,19 @@ NOTFORK_DIR ?= $(shell pwd)/sources
 
 # default target will build SQLITE_VERSION and all the other TARGETS
 all: $(BUILD_DIR) $(addprefix $(BUILD_DIR)/,$(SQLITE_VERSION) $(TARGETS))
+
+# show what targets would be built, useful to test combinations of command-line
+# options
+what:
+	@echo SQLITE_VERSION=$(SQLITE_VERSION)
+	@echo USE_LMDB=$(USE_LMDB)
+	@echo SQLITE_FOR_LMDB=$(SQLITE_FOR_LMDB)
+	@echo LMDB_VERSIONS=$(LMDB_VERSIONS)
+	@echo USE_BDB=$(USE_BDB)
+	@echo SQLITE_FOR_BDB=$(SQLITE_FOR_BDB)
+	@echo BDB_VERSIONS=$(BDB_VERSIONS)
+	@echo TARGETS=
+	@for n in $(TARGETS); do echo "    $$n"; done
 
 $(BUILD_DIR) :
 	mkdir -p $(BUILD_DIR)

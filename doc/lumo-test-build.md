@@ -13,7 +13,8 @@ Table of Contents
    * [LumoSQL Build System](#lumosql-build-system)
    * [Obtaining the sources <a name="user-content-obtaining-sources"></a>](#obtaining-the-sources-)
    * [Building the program <a name="user-content-building-program"></a>](#building-the-program-)
-   * [Running tests <a name="user-content-running-tests"></a>](#running-tests-)
+   * [Running tests/benchmarks <a name="user-content-running-testsbenchmarks"></a>](#running-testsbenchmarks-)
+   * ["make" targets <a name="user-content-make-targets"></a>](#make-targets-)
    * [Adding new backends <a name="user-content-adding-backends"></a>](#adding-new-backends-)
 
 LumoSQL Build System
@@ -125,7 +126,7 @@ After a successful run, there will be a subdirectory `sqlite3` inside the
 destination directory, and that will contain a working sqlite3 with the
 backend specified by `TARGET`.
 
-# Running tests/benchmarks <a name="running-tests"></a>
+# Running tests/benchmarks <a name="running-testsbenchmarks"></a>
 
 The `benchmark.tcl` script takes a number of command-line arguments to run
 a series of tests/benchmarks:
@@ -171,6 +172,105 @@ database; `PATH_TO_DATABASE` points to the same `DATABASE` as was provided
 to `benchmark.tcl`; if no `RUN_ID` is provided the program prints one line
 per run, with the run ID in the first column followed by some other information;
 to see the results for a particular run, add the corresponding ID to the command.
+
+# "make" targets <a name="make-targets"></A>
+
+The top-level `Makefile` contains targets to build the required versions of
+SQLite and backends, and to run a number of benchmarks.  By default the
+`Makefile` sets the (LumoSQL) targets as follows:
+
+* 3.33.0 (latest version of sqlite3 at the time of writing)
+* 3.8.3.1 (sqlite3 version used with the LMDB backend)
+* 3.18.2 (sqlite3 version used with the BDB backend)
+* 3.8.3.1+lmdb-0.9.9 (earliest LMDB version tested)
+* 3.8.3.1+lmdb-0.9.16
+* 3.8.3.1+lmdb-0.9.27 (latest version of LMDB at the time of writing)
+<!-- * 3.18.2+bdb-18.1.32 -->
+
+to build all of the above targets, just type:
+```
+make
+```
+
+and to run the corresponding benchmarks, type:
+```
+make benchmark
+```
+
+A number of options can be added to the above `make` commands to change the
+default behaviour.
+
+The whole list of (LumoSQL) targets can be replaced with a different one by
+adding `TARGETS=...`, for example to benchmark just one version of LMDB and
+the corresponding unmodified sqlite3:
+```
+make benchmark TARGETS='3.8.3.1+lmdb-0.9.27 3.8.3.1'
+```
+or to just build these targets without running benchmarks:
+```
+make TARGETS='3.8.3.1+lmdb-0.9.27 3.8.3.1'
+```
+
+Leaving `TARGETS` at its default value, it is possible to control how the
+Makefile constructs the default value by specifying one or more of the
+following options (the value indicated is the current default):
+
+* `SQLITE_VERSION=3.33.0` - the version of sqlite3 to use to update the
+benchmarks database; this will also be built and benchmarked by default
+* `USE_LMDB=yes` - whether to build/benchmark the LMDB targets
+* `SQLITE_FOR_LMDB=3.8.3.1` - the version of sqlite3 to use with the
+LMDB backend; this will also be built and benchmarked using the default
+(`btree.c`) backend for comparison
+* `LMDB_VERSIONS='0.9.9 0.9.16 0.9.27'` - the versions of LMDB to use
+* `USE_BDB=no` - whether to build/benchmark the BDB targets
+* `SQLITE_FOR_BDB=3.18.2` - the version of sqlite3 to use with the
+BDB backend; this will also be built and benchmarked using the default
+(`btree.c`) backend for comparison
+* `BDB_VERSIONS='18.1.32'` - the versions of BDB to use
+
+A special Makefile target `what` lists the value of these variables and the
+resulting TARGETS, for example:
+
+```
+make what USE_BDB=no LMDB_VERSIONS='0.9.26 0.9.27'
+SQLITE_VERSION=3.33.0
+USE_LMDB=yes
+SQLITE_FOR_LMDB=3.8.3.1
+LMDB_VERSIONS=0.9.26 0.9.27
+USE_BDB=no
+SQLITE_FOR_BDB=3.18.2
+BDB_VERSIONS=18.1.32
+TARGETS=
+    3.33.0
+    3.8.3.1
+    3.8.3.1+lmdb-0.9.26
+    3.8.3.1+lmdb-0.9.27
+```
+
+or to check the defaults:
+```
+make what
+SQLITE_VERSION=3.33.0
+USE_LMDB=yes
+SQLITE_FOR_LMDB=3.8.3.1
+LMDB_VERSIONS=0.9.9 0.9.16 0.9.27
+USE_BDB=no
+SQLITE_FOR_BDB=3.18.2
+BDB_VERSIONS=18.1.32
+TARGETS=
+    3.33.0
+    3.8.3.1
+    3.18.2
+    3.8.3.1+lmdb-0.9.9
+    3.8.3.1+lmdb-0.9.16
+    3.8.3.1+lmdb-0.9.27
+```
+
+More `make` options to control other aspects of the benchmarking than the list
+of targets:
+
+* `BENCHMARK_DB=benchmarks.sqlite` - SQLite database which will contain the results
+* `BENCHMARK_RUNS=1` - number of times to repeat each benchmark run
 
 # Adding new backends <a name="adding-backends"></a>
 

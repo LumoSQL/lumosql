@@ -24,7 +24,7 @@ LumoSQL is supported by the [NLNet Foundation](https://nlnet.nl).
 # Table of Contents
 
 * [Participating, Not-Forking and Project Interactions](#participating-not-forking-and-project-interactions)
-* [LumoSQL, and SQLite's Billions](#lumosql-and-sqlites-billions)
+* [LumoSQL, and SQLite's Billions](#lumosql-and-sqlites-billions-of-users)
 * [Quickstart](#quickstart)
 * [A Brief History](#a-brief-history)
 * [What's In This Version of LumoSQL](#whats-in-this-version-of-lumosql)
@@ -168,6 +168,8 @@ make TARGETS=3.7.17
 make TARGETS=3.7.17+lmdb-0.9.9
 make TARGETS="3.33.0 3.7.17 3.7.17+lmdb-0.9.9"
 ```
+See the [lumo-test-build](./doc/lumo-test-build.md) document for a large
+number of options controlling the process.
 
 # Speed tests / benchmarking
 
@@ -178,14 +180,14 @@ top-level directory by default.
 The instructions in this section explain how to benchmark six different
 versions:
 
-| V.  | SQLite | LMDB   | Repository |
-| --- | ------ | ------ | ---------- |
-| A.  | 3.7.17 | -      | SQLite     |
-| B.  | 3.30.1 | -      | SQLite     |
-| C.  | 3.33.0 | -      | SQLite     |
-| D.  | 3.7.17 | 0.9.9  | LumoSQL    |
-| E.  | 3.7.17 | 0.9.16 | LumoSQL    |
-| F.  | 3.7.17 | 0.9.26 | LumoSQL    |
+| V. | SQLite  | Backend     | Repository |
+| -- | ------- | ----------- | ---------- |
+| A. | 3.8.3.1 | -           | SQLite     |
+| B. | 3.18.2  | -           | SQLite     |
+| C. | 3.33.0  | -           | SQLite     |
+| D. | 3.8.3.1 | LMDB 0.9.9  | LumoSQL    |
+| E. | 3.8.3.1 | LMDB 0.9.16 | LumoSQL    |
+| F. | 3.8.3.1 | LMDB 0.9.27 | LumoSQL    |
 
 To benchmark the six versions above use:
 
@@ -207,7 +209,7 @@ Target: 3.7.17
 
 ```
 
-If you want to store benchmarking in a different database file, use BENCHMARK_DB:
+If you want to store benchmarking in a different database file, use `BENCHMARK_DB`:
 
 ```
 make benchmark BENCHMARK_DB=~/my-lumosql-results.sqlite

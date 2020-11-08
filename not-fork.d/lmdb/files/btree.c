@@ -734,7 +734,7 @@ int sqlite3BtreeCursor(
 ** This routine returns an error code if something goes wrong.  The
 ** integer *pHasMoved is set to one if the cursor has moved and 0 if not.
 */
-#if SQLITE_VERSION_NUMBER < 3016000
+#if SQLITE_VERSION_NUMBER < 3009000
 int sqlite3BtreeCursorHasMoved(BtCursor *pCur, int *pHasMoved){
   MDB_cursor *mc = pCur->mc;
   if (! cursor_initialised(pCur)) {
@@ -818,7 +818,11 @@ static int joinIndexKey(MDB_val *key, MDB_val *data, BtCursor *pCur, u_int32_t a
 ** These routines are used to get quick access to key and data
 ** in the common case where no overflow pages are used.
 */
+#if SQLITE_VERSION_NUMBER < 3008002
 const void *sqlite3BtreeKeyFetch(BtCursor *pCur, int *pAmt){
+#else
+const void *sqlite3BtreeKeyFetch(BtCursor *pCur, u32 *pAmt){
+#endif
   MDB_cursor *mc = pCur->mc;
   MDB_val key, data;
   int rc = mdb_cursor_get(mc, &key, &data, MDB_GET_CURRENT);
@@ -835,7 +839,11 @@ const void *sqlite3BtreeKeyFetch(BtCursor *pCur, int *pAmt){
 	}
   }
 }
+#if SQLITE_VERSION_NUMBER < 3008002
 const void *sqlite3BtreeDataFetch(BtCursor *pCur, int *pAmt){
+#else
+const void *sqlite3BtreeDataFetch(BtCursor *pCur, u32 *pAmt){
+#endif
   MDB_cursor *mc = pCur->mc;
   MDB_val key, data;
   int rc = mdb_cursor_get(mc, &key, &data, MDB_GET_CURRENT);
@@ -875,7 +883,14 @@ int sqlite3BtreeDataSize(BtCursor *pCur, u32 *pSize){
 ** Delete the entry that the cursor is pointing to.  The cursor
 ** is left pointing at a arbitrary location.
 */
+#if SQLITE_VERSION_NUMBER < 3009000
 int sqlite3BtreeDelete(BtCursor *pCur){
+#else
+/** mdb_cursor_del always act as if bPreserve is true, so we
+ * ignore this argument
+ */
+int sqlite3BtreeDelete(BtCursor *pCur, int bPreserve){
+#endif
   int rc;
   MDB_cursor *mc = pCur->mc;
   rc = mdb_cursor_del(mc, 0);
@@ -1225,7 +1240,7 @@ static void squashIndexKey(UnpackedRecord *pun, int file_format, MDB_val *key)
 	/* Look for any large strings or blobs */
 	pMem = pun->aMem;
 	for (i=0; i<pun->nField; i++) {
-#if SQLITE_VERSION_NUMBER < 3009000
+#if SQLITE_VERSION_NUMBER < 3010000
 		serial_type = sqlite3VdbeSerialType(pMem, file_format);
 #else
 		u32 len;
@@ -1254,7 +1269,7 @@ static void squashIndexKey(UnpackedRecord *pun, int file_format, MDB_val *key)
 		/* Loop thru and find out how much space is needed */
 		pMem = pun->aMem;
 		for (i=0; i<pun->nField; i++) {
-#if SQLITE_VERSION_NUMBER < 3009000
+#if SQLITE_VERSION_NUMBER < 3010000
 			serial_type = sqlite3VdbeSerialType(pMem, file_format);
 #else
 			u32 pLen;
@@ -1273,7 +1288,7 @@ static void squashIndexKey(UnpackedRecord *pun, int file_format, MDB_val *key)
 		len = putVarint32(zNewRecord, nHdr);
 		pMem = pun->aMem;
 		for (i=0; i<pun->nField; i++) {
-#if SQLITE_VERSION_NUMBER < 3009000
+#if SQLITE_VERSION_NUMBER < 3010000
 			serial_type = sqlite3VdbeSerialType(pMem, file_format);
 #else
 			u32 pLen;
@@ -1284,11 +1299,15 @@ static void squashIndexKey(UnpackedRecord *pun, int file_format, MDB_val *key)
 		}
 		pMem = pun->aMem;
 		for (i=0; i<pun->nField; i++) {
-#if SQLITE_VERSION_NUMBER < 3009000
+#if SQLITE_VERSION_NUMBER < 3008003
 			len += sqlite3VdbeSerialPut(&zNewRecord[len], (int)(nByte-len), pMem, file_format);
+#else
+#if SQLITE_VERSION_NUMBER < 3010000
+			serial_type = sqlite3VdbeSerialType(pMem, file_format);
 #else
 			u32 pLen;
 			serial_type = sqlite3VdbeSerialType(pMem, file_format, &pLen);
+#endif
 			len += sqlite3VdbeSerialPut(&zNewRecord[len], pMem, serial_type);
 #endif
 			pMem++;
@@ -1592,7 +1611,7 @@ int sqlite3BtreeMovetoUnpacked(
 	if (pUnKey->nField > pCur->pKeyInfo->nField) {
 	  u8 serial_type;
 	  Mem *rowid = &pUnKey->aMem[pUnKey->nField - 1];
-#if SQLITE_VERSION_NUMBER < 3009000
+#if SQLITE_VERSION_NUMBER < 3010000
 	  serial_type = sqlite3VdbeSerialType(rowid, file_format);
 #else
 	  u32 pLen;
@@ -1603,8 +1622,12 @@ int sqlite3BtreeMovetoUnpacked(
 	  assert(data.mv_size < ROWIDMAXSIZE);
 	  data.mv_data = &buf;
 	  putVarint32(buf, serial_type);
+#if SQLITE_VERSION_NUMBER < 3008003
 	  sqlite3VdbeSerialPut(&buf[1], ROWIDMAXSIZE - 1,
 			rowid, file_format);
+#else
+	  sqlite3VdbeSerialPut(&buf[1], rowid, serial_type);
+#endif
 	  ret = mdb_cursor_get(mc, key, &data, MDB_GET_BOTH_RANGE);
 	}
 	if (ret == MDB_NOTFOUND) {
@@ -1858,7 +1881,12 @@ int sqlite3BtreePrevious(BtCursor *pCur, int *pRes){
 ** that was open at the beginning of this operation will result
 ** in an error.
 */
+#if SQLITE_VERSION_NUMBER < 3009000
 int sqlite3BtreeRollback(Btree *p, int tripCode){
+#else
+int sqlite3BtreeRollback(Btree *p, int tripCode, int writeOnly){
+/* TODO - if writeOnly is true, we do not invalidate read-only cursors */
+#endif
   LOG("done",0);
   return sqlite3BtreeSavepoint(p, SAVEPOINT_ROLLBACK, -1);
 }
@@ -2118,10 +2146,17 @@ int sqlite3BtreeSyncDisabled(Btree *p){
 ** This is a no-op here since cursors in other transactions
 ** are fully isolated from the write transaction.
 */
+#if SQLITE_VERSION_NUMBER < 3009000
 void sqlite3BtreeTripAllCursors(Btree *pBtree, int errCode){
   LOG("done",0);
   /* no-op */
 }
+#else
+int sqlite3BtreeTripAllCursors(Btree *pBtree, int errCode, int writeOnly){
+    /* TODO - if writeOnly is true, we do not invalidate read-only cursors */
+    return SQLITE_OK;
+}
+#endif
 
 /*
 ** Write meta-information back into the database.  Meta[0] is
@@ -2163,3 +2198,37 @@ int sqlite3_enable_shared_cache(int enable){
 }
 #endif
 #endif
+
+/* new functions added in SQLite 3.8.5 */
+#if SQLITE_VERSION_NUMBER >= 3008005
+/*
+** Return the number of bytes of space at the end of every page that
+** are intentually left unused.  This is the "reserved" space that is
+** sometimes used by extensions.
+**
+** If SQLITE_HAS_MUTEX is defined then the number returned is the
+** greater of the current reserved space and the maximum requested
+** reserve space.
+*/
+int sqlite3BtreeGetOptimalReserve(Btree *p){
+  int n=0;
+#ifdef SQLITE_HAS_CODEC
+  if( n<p->pBt->optimalReserve ) n = p->pBt->optimalReserve;
+#endif
+  return n;
+}
+
+/*
+** Return true if the given Btree is read-only.
+*/
+int sqlite3BtreeIsReadonly(Btree *p){
+  return (p->eFlags & MDB_RDONLY)!=0;
+}
+
+// TODO sqlite3BtreeClearTableOfCursor
+// TODO sqlite3BtreeCursorRestore
+// TODO sqlite3BtreeIncrblobCursor
+// TODO sqlite3HeaderSizeBtree
+
+#endif
+
