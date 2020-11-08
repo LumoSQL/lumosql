@@ -62,10 +62,13 @@ do
     fi
     title="`"$SQLITE3" "$DATABASE" \
 	  "select value from run_data where run_id='$RUN_ID' and key='title'"`"
+    target="`"$SQLITE3" "$DATABASE" \
+	    "select value from run_data where run_id='$RUN_ID' and key='target'"`"
     name="`"$SQLITE3" "$DATABASE" \
 	 "select value from run_data where run_id='$RUN_ID' and key='sqlite-name'"`"
     [ $# -gt 1 ] && echo "Column $num:"
     echo "Benchmark: $title"
+    echo "   target: $target"
     [ -n "$name" ] && echo "   ($name)"
     echo "Ran at `date -d@"$ts" +"%Y-%m-%d %H:%M:%S"`"
     echo
@@ -76,7 +79,7 @@ do
 	dash='------'
 	num=`expr $num + 1`
     else
-	hdr='     TIME'
+	hdr='       TIME '
     fi
 done
 

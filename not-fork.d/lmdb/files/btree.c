@@ -734,6 +734,7 @@ int sqlite3BtreeCursor(
 ** This routine returns an error code if something goes wrong.  The
 ** integer *pHasMoved is set to one if the cursor has moved and 0 if not.
 */
+#if SQLITE_VERSION_NUMBER < 3016000
 int sqlite3BtreeCursorHasMoved(BtCursor *pCur, int *pHasMoved){
   MDB_cursor *mc = pCur->mc;
   if (! cursor_initialised(pCur)) {
@@ -744,6 +745,11 @@ int sqlite3BtreeCursorHasMoved(BtCursor *pCur, int *pHasMoved){
   LOG("rc=0, *pHasMoved=%d",*pHasMoved);
   return SQLITE_OK;
 }
+#else
+int sqlite3BtreeCursorHasMoved(BtCursor *pCur){
+  return ! cursor_initialised(pCur);
+}
+#endif
 
 /*
 ** Return the size of a BtCursor object in bytes.
@@ -1219,7 +1225,12 @@ static void squashIndexKey(UnpackedRecord *pun, int file_format, MDB_val *key)
 	/* Look for any large strings or blobs */
 	pMem = pun->aMem;
 	for (i=0; i<pun->nField; i++) {
+#if SQLITE_VERSION_NUMBER < 3009000
 		serial_type = sqlite3VdbeSerialType(pMem, file_format);
+#else
+		u32 len;
+		serial_type = sqlite3VdbeSerialType(pMem, file_format, &len);
+#endif
 		if (serial_type >= 12 && pMem->n >72) {
 			v.mv_data = (char *)pMem->z + 64;
 			v.mv_size = pMem->n - 64;
@@ -1243,7 +1254,12 @@ static void squashIndexKey(UnpackedRecord *pun, int file_format, MDB_val *key)
 		/* Loop thru and find out how much space is needed */
 		pMem = pun->aMem;
 		for (i=0; i<pun->nField; i++) {
+#if SQLITE_VERSION_NUMBER < 3009000
 			serial_type = sqlite3VdbeSerialType(pMem, file_format);
+#else
+			u32 pLen;
+			serial_type = sqlite3VdbeSerialType(pMem, file_format, &pLen);
+#endif
 			len = sqlite3VdbeSerialTypeLen(serial_type);
 			nData += len;
 			nHdr += sqlite3VarintLen(serial_type);
@@ -1257,13 +1273,24 @@ static void squashIndexKey(UnpackedRecord *pun, int file_format, MDB_val *key)
 		len = putVarint32(zNewRecord, nHdr);
 		pMem = pun->aMem;
 		for (i=0; i<pun->nField; i++) {
+#if SQLITE_VERSION_NUMBER < 3009000
 			serial_type = sqlite3VdbeSerialType(pMem, file_format);
+#else
+			u32 pLen;
+			serial_type = sqlite3VdbeSerialType(pMem, file_format, &pLen);
+#endif
 			len += putVarint32(&zNewRecord[len], serial_type);
 			pMem++;
 		}
 		pMem = pun->aMem;
 		for (i=0; i<pun->nField; i++) {
+#if SQLITE_VERSION_NUMBER < 3009000
 			len += sqlite3VdbeSerialPut(&zNewRecord[len], (int)(nByte-len), pMem, file_format);
+#else
+			u32 pLen;
+			serial_type = sqlite3VdbeSerialType(pMem, file_format, &pLen);
+			len += sqlite3VdbeSerialPut(&zNewRecord[len], pMem, serial_type);
+#endif
 			pMem++;
 		}
 		key->mv_size = len;
@@ -1303,7 +1330,10 @@ int sqlite3BtreeInsert(
   MDB_cursor *mc = pCur->mc;
   UnpackedRecord *p;
   MDB_val key[2], data;
-  char aSpace[150], *pFree = 0;
+#if SQLITE_VERSION_NUMBER < 3018000
+  char aSpace[150];
+#endif
+  char *pFree = 0;
   int rc, res, flag = 0;
 
   if ((cursor_flags(mc) & MDB_INTEGERKEY) || !pKey) {
@@ -1315,8 +1345,13 @@ int sqlite3BtreeInsert(
     else
       data.mv_data = (void *)pData;
   } else {
+#if SQLITE_VERSION_NUMBER < 3018000
     p = sqlite3VdbeAllocUnpackedRecord(
       pCur->pKeyInfo, aSpace, sizeof(aSpace), &pFree);
+#else
+    p = sqlite3VdbeAllocUnpackedRecord(pCur);
+    pFree = p;
+#endif
     if (!p)
       return SQLITE_NOMEM;
     key[0].mv_size = nKey;
@@ -1557,7 +1592,12 @@ int sqlite3BtreeMovetoUnpacked(
 	if (pUnKey->nField > pCur->pKeyInfo->nField) {
 	  u8 serial_type;
 	  Mem *rowid = &pUnKey->aMem[pUnKey->nField - 1];
+#if SQLITE_VERSION_NUMBER < 3009000
 	  serial_type = sqlite3VdbeSerialType(rowid, file_format);
+#else
+	  u32 pLen;
+	  serial_type = sqlite3VdbeSerialType(rowid, file_format, &pLen);
+#endif
 	  data.mv_size =
 			sqlite3VdbeSerialTypeLen(serial_type) + 1;
 	  assert(data.mv_size < ROWIDMAXSIZE);
@@ -1937,6 +1977,27 @@ int sqlite3BtreeSetCacheSize(Btree *p, int mxPage){
 int sqlite3BtreeSetMmapLimit(Btree *p, sqlite3_int64 szMmap){
   return SQLITE_OK;
 }
+
+#if SQLITE_VERSION_NUMBER >= 3008000
+/*
+** Change the way data is synced to disk in order to increase or decrease
+** how well the database resists damage due to OS crashes and power
+** failures.  Level 1 is the same as asynchronous (no syncs() occur and
+** there is a high probability of damage)  Level 2 is the default.  There
+** is a very low but non-zero probability of damage.  Level 3 reduces the
+** probability of damage to near zero but with a write performance reduction.
+*/
+#ifndef SQLITE_OMIT_PAGER_PRAGMAS
+int sqlite3BtreeSetPagerFlags(
+  Btree *p,              /* The btree to set the safety level on */
+  unsigned pgFlags       /* Various PAGER_* flags */
+){
+  /* this is not relevant to LMDB */
+  return SQLITE_OK;
+}
+#endif
+
+#endif
 
 /*
 ** Set the cached rowid value of every cursor in the same database file
