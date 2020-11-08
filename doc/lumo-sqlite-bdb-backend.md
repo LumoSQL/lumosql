@@ -61,7 +61,7 @@ BDB 18.1.32 contains scripts that patch SQLite 3.18.2 to have BDB support. The s
 intended to assist with forward-porting to later versions of SQLite.
 
 A convenient place to get the source for BDB 18.1.32 is
-[Bintray](https://bintray.com/version/files/homebrew/mirror/berkeley-db/18.1.32)
+[the LumoSQL mirror](https://lumosql.org/dist)
 .  It is also available at an Oracle site that requires a login. 
 
 This document will refer to the port as BDB-SQLite, because SQLite was modified
@@ -76,16 +76,16 @@ an embedded library without all code linked to it also becoming subject to the
 AGPL. That is the viral nature of a 
 [Copyleft License](https://en.wikipedia.org/wiki/Viral_license). The 
 [GNU Lesser GPL](https://en.wikipedia.org/wiki/GNU_Lesser_General_Public_License) would have 
-avoided this, or indeed the original BDB license. 
+avoided this, or indeed the original BDB license. Nevertheless, BDB is truly open source under GNU licensing without any tricks; it is just unhelpful for a library to be licensed as if it were an application.
 
 This definitely means:
 
 * All code linked to SQLite with a BDB backend is subject to the AGPL
-* Source code present in the same tree as the BDB backend is *not* subject to the AGPL
+* Source code present in the same tree as the BDB backend is *not* subject to the AGPL, so there is nothing to worry about distributing BDB source code
+* LumoSQL contributions to BDB code are covered by the AGPL, as well as the LumoSQL license.
 
 Without offering legal advice in any way, this probably means:
 
-* LumoSQL contributions to BDB code are covered by the AGPL, as well as the LumoSQL license
 * Users who have paid Oracle for a commercial licence to BDB code are probably exempt from the AGPL requirement, but do check with your open source lawyer
 
 
