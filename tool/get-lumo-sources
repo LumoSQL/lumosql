@@ -89,12 +89,17 @@ fi
 # and make sure the configuration provides at least sqlite3 and the selected
 # backend, in the requested versions
 OK=true
-if [ -d "$CFG_DIR/sqlite3" ]
+if [ -n "$SQLITE3_VERSION" ]
 then
-    not-fork $update -i "$CFG_DIR" -q -v "$SQLITE3_VERSION" sqlite3 > "$LUMO_DIR/sqlite3_info" || OK=false
+    if [ -d "$CFG_DIR/sqlite3" ]
+    then
+	not-fork $update -i "$CFG_DIR" -q -v "$SQLITE3_VERSION" sqlite3 > "$LUMO_DIR/sqlite3_info" || OK=false
+    else
+	echo "Invalid '$CFG_VERSION' configuration directory $CFG_DIR" >&2
+	OK=false
+    fi
 else
-    echo "Invalid '$CFG_VERSION' configuration directory $CFG_DIR" >&2
-    OK=false
+    > "$LUMO_DIR/sqlite3_info"
 fi
 if [ -n "$LUMO_BACKEND_NAME" ]
 then
@@ -111,7 +116,10 @@ fi
 $OK || exit 1
 
 # get sources
-not-fork --no-update -i "$CFG_DIR" -o "$LUMO_SOURCES" -v "$SQLITE3_VERSION" sqlite3 || OK=false
+if [ -n "$SQLITE3_VERSION" ]
+then
+    not-fork --no-update -i "$CFG_DIR" -o "$LUMO_SOURCES" -v "$SQLITE3_VERSION" sqlite3 || OK=false
+fi
 if [ -n "$LUMO_BACKEND_NAME" ]
 then
     not-fork --no-update -i "$CFG_DIR" -o "$LUMO_SOURCES" -v "$LUMO_BACKEND_VERSION" "$LUMO_BACKEND_NAME" || OK=false

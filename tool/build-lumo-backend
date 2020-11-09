@@ -29,13 +29,21 @@ LUMO_DIR="$LUMO_SOURCES/.lumosql-work"
 LUMO_BACKEND_NAME="$(cat "$LUMO_DIR/backend_name")"
 LUMO_BACKEND_VERSION="$(cat "$LUMO_DIR/backend_version")"
 SQLITE3_VERSION="$(cat "$LUMO_DIR/sqlite3_version")"
+TITLE="$(cat "$LUMO_DIR/title")"
 
 # make sure we have all the stuff we need
 OK=true
-if [ ! -d "$LUMO_SOURCES/sqlite3/.lumosql" ]
+if [ -n "$SQLITE3_VERSION" ]
+    then
+    if [ ! -d "$LUMO_SOURCES/sqlite3/.lumosql" ]
+    then
+	echo "Missing sources for 'sqlite3'" >&2
+	OK=false
+    fi
+elif [ -z "$LUMO_BACKEND_NAME" ]
 then
-    echo "Missing sources for 'sqlite3'" >&2
-    OK=false
+    echo "Cannot build without either sqlite3 or a backend!" >&2
+    exit 1
 fi
 if [ -n "$LUMO_BACKEND_NAME" ]
 then
@@ -44,9 +52,6 @@ then
 	echo "Missing sources for '$LUMO_BACKEND_NAME'" >&2
 	OK=false
     fi
-    title="sqlite $SQLITE3_VERSION with $LUMO_BACKEND_NAME $LUMO_BACKEND_VERSION"
-else
-    title="sqlite $SQLITE3_VERSION"
 fi
 $OK || exit 1
 
@@ -67,7 +72,7 @@ LUMO_BUILD="`pwd`"
 if [ -n "$LUMO_BACKEND_NAME" ]
 then
     # build the backend first...
-    export LUMO_SOURCES LUMO_BACKEND_NAME LUMO_BACKEND_VERSION
+    export LUMO_SOURCES LUMO_BACKEND_NAME LUMO_BACKEND_VERSION SQLITE3_VERSION
     cd "$LUMO_BACKEND_NAME"
     sh "$LUMO_SOURCES/$LUMO_BACKEND_NAME/.lumosql/lumo.build"
     cd "$LUMO_BUILD"
@@ -75,13 +80,19 @@ fi
 
 cd sqlite3
 
-# configure
-echo "Configuring $title"
-"$LUMO_SOURCES/sqlite3/configure"
+if [ -n "$SQLITE3_VERSION" ]
+then
+    # configure
+    echo "Configuring $TITLE"
+    "$LUMO_SOURCES/sqlite3/configure"
 
-# build
-echo "Building $title"
-make LUMO_SOURCES="$LUMO_SOURCES" LUMO_BACKEND="$LUMO_BACKEND_NAME" LUMO_BUILD="$LUMO_BUILD"
+    # build
+    echo "Building $TITLE"
+    make LUMO_SOURCES="$LUMO_SOURCES" LUMO_BACKEND="$LUMO_BACKEND_NAME" LUMO_BUILD="$LUMO_BUILD"
+else
+    # we assume that the backend has built its own version of sqlite
+    ln -s "../$LUMO_BACKEND_NAME/sqlite3" .
+fi
 
 # all done
 ./sqlite3 --version

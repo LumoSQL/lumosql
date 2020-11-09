@@ -31,7 +31,9 @@ and Tcl scripts to build and run test programs.
 
 To ensure repeatability of tests, each test will include the following information:
 * the version of the "not-forking" configuration used
-* the version of sqlite3 used
+* the version of sqlite3 used (in one special case building third-party backend code
+which provides its own patched version of sqlite3, this will be empty and the
+backend name and version will contain information about the third-party code)
 * the name of the storage backend used: this is omitted if the test used an
 unchanged version of sqlite3 with its own backend
 * the version of the storage backend used, also omitted for tests using
@@ -88,6 +90,10 @@ make sure the option is not interpreted as a backend name).
 At present the only backend provided is the `lmdb` backend derived from the
 sqlightning sources but modified to work with more versions of lmdb and sqlite3;
 however to add new backends see [Adding new backends](#adding-backends) below.
+
+A third backend, based on Oracle's Berkeley DB is in progress; a special target
+of `+bdb-VERSION` (without a sqlite3 version) indicates to build the code provided
+directy by Oracle, without using the LumoSQL build mechanism.
 
 The backend sources will be in subdirectory `BACKEND_NAME` or the `SRC_DIR`
 directory, for example if `SRC_DIR` is `lumo-sources` and the backend is lmdb,
@@ -185,7 +191,7 @@ SQLite and backends, and to run a number of benchmarks.  By default the
 * 3.8.3.1+lmdb-0.9.9 (earliest LMDB version tested)
 * 3.8.3.1+lmdb-0.9.16
 * 3.8.3.1+lmdb-0.9.27 (latest version of LMDB at the time of writing)
-<!-- * 3.18.2+bdb-18.1.32 -->
+* +bdb-18.1.32 (third-party Berkeley DB code, providing its own sqlite3)
 
 to build all of the above targets, just type:
 ```
@@ -222,11 +228,13 @@ benchmarks database; this will also be built and benchmarked by default
 LMDB backend; this will also be built and benchmarked using the default
 (`btree.c`) backend for comparison
 * `LMDB_VERSIONS='0.9.9 0.9.16 0.9.27'` - the versions of LMDB to use
-* `USE_BDB=no` - whether to build/benchmark the BDB targets
+* `USE_BDB=yes` - whether to build/benchmark the BDB targets
 * `SQLITE_FOR_BDB=3.18.2` - the version of sqlite3 to use with the
 BDB backend; this will also be built and benchmarked using the default
 (`btree.c`) backend for comparison
-* `BDB_VERSIONS='18.1.32'` - the versions of BDB to use
+* `BDB_VERSIONS=''` - the versions of BDB to use as LumoSQL backends
+* `BDB_STANDALONE=18.1.32` - the versions of BDB to use with their own
+included sqlite3
 
 A special Makefile target `what` lists the value of these variables and the
 resulting TARGETS, for example:
@@ -239,7 +247,8 @@ SQLITE_FOR_LMDB=3.8.3.1
 LMDB_VERSIONS=0.9.26 0.9.27
 USE_BDB=no
 SQLITE_FOR_BDB=3.18.2
-BDB_VERSIONS=18.1.32
+BDB_VERSIONS=
+BDB_STANDALONE=18.1.32
 TARGETS=
     3.33.0
     3.8.3.1
@@ -249,14 +258,14 @@ TARGETS=
 
 or to check the defaults:
 ```
-make what
 SQLITE_VERSION=3.33.0
 USE_LMDB=yes
 SQLITE_FOR_LMDB=3.8.3.1
 LMDB_VERSIONS=0.9.9 0.9.16 0.9.27
-USE_BDB=no
+USE_BDB=yes
 SQLITE_FOR_BDB=3.18.2
-BDB_VERSIONS=18.1.32
+BDB_VERSIONS=
+BDB_STANDALONE=18.1.32
 TARGETS=
     3.33.0
     3.8.3.1
@@ -264,6 +273,7 @@ TARGETS=
     3.8.3.1+lmdb-0.9.9
     3.8.3.1+lmdb-0.9.16
     3.8.3.1+lmdb-0.9.27
+    +bdb-18.1.32
 ```
 
 More `make` options to control other aspects of the benchmarking than the list

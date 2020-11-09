@@ -37,7 +37,16 @@ if {[llength $tlist] > 1 && [lindex $tlist 1] != ""} {
     }
     set backend_name [lindex $blist 1]
     set backend_version [lindex $blist 2]
-    append title " with $backend_name $backend_version"
+    if {[string equal $sqlite_version ""]} {
+	set title "$backend_name $backend_version"
+    } else {
+	append title " with $backend_name $backend_version"
+    }
+} else {
+    if {[string equal $sqlite_version ""]} {
+	puts stderr "Invalid TARGET: sqlite3 and backend both missing"
+	exit 1
+    }
 }
 
 set fd [open "$dir/sqlite3_version" w]

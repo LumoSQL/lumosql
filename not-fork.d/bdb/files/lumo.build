@@ -1,0 +1,75 @@
+# how to build this backend... this runs in a shell from a "build" directory
+# and is provided environment variables LUMO_SOURCES, LUMO_BACKEND_NAME
+# and LUMO_BACKEND_VERSION
+
+echo "Configuring $LUMO_BACKEND_NAME $LUMO_BACKEND_VERSION"
+ls "$LUMO_SOURCES/$LUMO_BACKEND_NAME" | while read name
+do
+    ln -s "$LUMO_SOURCES/$LUMO_BACKEND_NAME/$name" .
+done
+rm build_unix
+mkdir -p build_unix
+cd build_unix
+
+if [ -n "$SQLITE3_VERSION" ]
+then
+    ../dist/configure || exit 1
+else
+    ../dist/configure --enable-sql_compat || exit 1
+fi
+
+echo "Building $LUMO_BACKEND_NAME $LUMO_BACKEND_VERSION"
+make || exit 1
+
+if [ -z "$SQLITE3_VERSION" ]
+then
+    HERE="`pwd`/.libs"
+    cat > ../sqlite3 <<EOF || exit 1
+#!/bin/sh
+if [ -n "\$LD_LIBRAY_PATH" ]
+then
+    LD_LIBRARY_PATH="$HERE:\$LD_LIBRAY_PATH"
+else
+    LD_LIBRARY_PATH="$HERE"
+fi
+export LD_LIBRARY_PATH
+"$HERE/sqlite3" "\$@"
+EOF
+    chmod a+rx ../sqlite3
+    exit 0
+fi
+
+mkdir -p ../../sqlite3/.libs || exit 1
+cd .libs || exit 1
+cp -a libdb* ../../../sqlite3/.libs/ || exit 1
+ln -s libdb-*.so libdb.so
+ln -s libdb-*.a libdb.a
+cd ../../../sqlite3/.libs || exit 1
+ln -s libdb-*.so libdb.so
+ln -s libdb-*.a libdb.a
+
+# XXX this bit needs to be removed and we need to add these files to not-fork.d
+cd "$LUMO_SOURCES/$LUMO_BACKEND_NAME" || exit 1
+mkdir -p .lumosql/backend || exit 1
+cd lang/sql/adapter || exit 1
+sed=
+for name in *.h
+do
+    sed="$sed -e 's/#include \"$name\"/#include \"lumo_$name\"/'"
+done
+
+for name in *.[ch]
+do
+    [ "$name" = btree.c ] && continue
+    [ "$name" = db_pragma.c ] && continue
+    (
+	sym="`echo "$name" | tr -dc 'a-zA-Z0-9' | tr 'a-z' 'A-Z'`"
+	echo "#ifndef _LUMO_BDB_$sym"
+	echo "#define _LUMO_BDB_$sym 1"
+	eval "sed $sed $name" 
+	echo "#endif"
+    ) > "../../../.lumosql/backend/lumo_$name" || exit 1
+done
+
+exit 0
+

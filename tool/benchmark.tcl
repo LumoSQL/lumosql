@@ -45,11 +45,6 @@ if {! [file exists $result_db]} {
     close $sqlfd
 }
 
-# make sure we do have a run directory
-if {! [file exists $run_dir]} {
-    file mkdir $run_dir
-}
-
 # generate strings from numbers, used by some of the tests
 set ones {zero one two three four five six seven eight nine
           ten eleven twelve thirteen fourteen fifteen sixteen seventeen
@@ -284,13 +279,11 @@ for {set n_target 4} {$n_target < [llength $argv]} {incr n_target} {
 	    puts "RUN: $n_run"
 	}
 
-	# clean up any old result_db left around
-	if {[file exists $run_dir/bench.db]} {
-	    file delete $run_dir/bench.db
+	# make sure we do have a run directory and it's empty
+	if {[file exists $run_dir]} {
+	    file delete -force -- $run_dir
 	}
-	if {[file exists $run_dir/bench.db-lock]} {
-	    file delete $run_dir/bench.db-lock
-	}
+	file mkdir $run_dir
 
 	# create benchmark result_db
 	set sqlfd [open "| $target_db $run_dir/bench.db" w]
@@ -366,7 +359,7 @@ for {set n_target 4} {$n_target < [llength $argv]} {incr n_target} {
 	puts ""
 
 	# it's nice to be clean
-	file delete $run_dir/bench.db $run_dir/bench.db-lock $sql_file
+	file delete -force $run_dir
     }
 }
 

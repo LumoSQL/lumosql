@@ -12,6 +12,9 @@
 #
 # Documented at https://lumosql.org/src/lumosql/doc/tip/doc/lumo-test-build.md
 
+# if there is a Makefile.local we use it to get defaults
+-include Makefile.local
+
 # version of sqlite3 to use for the benchmark database; by default this
 # version is also benchmarked but see next comment
 SQLITE_VERSION ?= 3.33.0
@@ -23,11 +26,12 @@ LMDB_VERSIONS ?= 0.9.9 0.9.16 0.9.27
 LMDB_TARGETS ?= $(addprefix $(SQLITE_FOR_LMDB)+lmdb-,$(LMDB_VERSIONS))
 
 # version of sqlite3 to use with the BDB backend and BDB versions to use by default
-USE_BDB ?= no
+USE_BDB ?= yes
 SQLITE_FOR_BDB ?= 3.18.2
-BDB_VERSIONS ?= 18.1.32
+#BDB_VERSIONS ?= 18.1.32
 #BDB_VERSIONS ?= 18.1.32 18.1.40
 BDB_TARGETS ?= $(addprefix $(SQLITE_FOR_BDB)+bdb-,$(BDB_VERSIONS))
+BDB_STANDALONE ?= 18.1.32
 
 # make a list of modified and unmodified sqlite3 targets
 SQLITE_TARGETS = $(SQLITE_VERSION)
@@ -43,7 +47,7 @@ endif
 ifeq ($(USE_BDB),yes)
 ifeq ($(findstring $(SQLITE_FOR_BDB),$(SQLITE_TARGETS)),)
 SQLITE_TARGETS += $(SQLITE_FOR_BDB)
-BACKEND_TARGETS += $(BDB_TARGETS)
+BACKEND_TARGETS += $(BDB_TARGETS) $(addprefix +bdb-,$(BDB_STANDALONE))
 endif
 endif
 
@@ -78,6 +82,7 @@ what:
 	@echo USE_BDB=$(USE_BDB)
 	@echo SQLITE_FOR_BDB=$(SQLITE_FOR_BDB)
 	@echo BDB_VERSIONS=$(BDB_VERSIONS)
+	@echo BDB_STANDALONE=$(BDB_STANDALONE)
 	@echo TARGETS=
 	@for n in $(TARGETS); do echo "    $$n"; done
 
