@@ -235,12 +235,16 @@ BDB backend; this will also be built and benchmarked using the default
 * `BDB_VERSIONS=''` - the versions of BDB to use as LumoSQL backends
 * `BDB_STANDALONE=18.1.32` - the versions of BDB to use with their own
 included sqlite3
+* `DATASIZE=1` - multiply the data size by this number for some of the tests
+(this creates new targets which include the `datasize` option, even though
+it's only used when benchmarking)
 
 A special Makefile target `what` lists the value of these variables and the
 resulting TARGETS, for example:
 
 ```
-make what USE_BDB=no LMDB_VERSIONS='0.9.26 0.9.27'
+make what USE_BDB=no LMDB_VERSIONS='0.9.26 0.9.27' DATASIZE=2
+DATASIZE=2
 SQLITE_VERSION=3.33.0
 USE_LMDB=yes
 SQLITE_FOR_LMDB=3.8.3.1
@@ -250,14 +254,16 @@ SQLITE_FOR_BDB=3.18.2
 BDB_VERSIONS=
 BDB_STANDALONE=18.1.32
 TARGETS=
-    3.33.0
-    3.8.3.1
-    3.8.3.1+lmdb-0.9.26
-    3.8.3.1+lmdb-0.9.27
+    3.33.0++datasize-2
+    3.8.3.1++datasize-2
+    3.8.3.1+lmdb-0.9.26+datasize-2
+    3.8.3.1+lmdb-0.9.27+datasize-2
 ```
 
 or to check the defaults:
 ```
+make what
+DATASIZE=1
 SQLITE_VERSION=3.33.0
 USE_LMDB=yes
 SQLITE_FOR_LMDB=3.8.3.1

@@ -169,7 +169,8 @@ make TARGETS=3.7.17+lmdb-0.9.9
 make TARGETS="3.33.0 3.7.17 3.7.17+lmdb-0.9.9"
 ```
 See the [lumo-test-build](./doc/lumo-test-build.md) document for a large
-number of options controlling the process.
+number of options controlling the process, without having to figure out
+the exact syntax for the `TARGETS` option.
 
 # Speed tests / benchmarking
 

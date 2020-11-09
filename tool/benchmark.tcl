@@ -251,7 +251,7 @@ proc run_tests {} {
 
 proc read_file {name} {
     global target_dir
-    set fd [open "$target_dir/sqlite3/.lumosql-work/$name" r]
+    set fd [open "$target_dir/.lumosql-work/$name" r]
     set data [read $fd]
     close $fd
     return [string trim $data]
@@ -261,7 +261,6 @@ proc read_file {name} {
 for {set n_target 4} {$n_target < [llength $argv]} {incr n_target} {
     set target [lindex $argv $n_target]
     set target_dir "$build_dir/$target"
-    set target_db "$target_dir/sqlite3/sqlite3"
 
     # get information produced by the build process
     set title [read_file "title"]
@@ -270,6 +269,9 @@ for {set n_target 4} {$n_target < [llength $argv]} {incr n_target} {
     set backend_name [read_file "backend_name"]
     set backend_version [read_file "backend_version"]
     set backend_id [read_file "backend_commit_id"]
+    set build_target [read_file "build_target"]
+
+    set target_db "$build_dir/$build_target/sqlite3/sqlite3"
     set sqlite_name [exec $target_db --version]
 
     puts "Target: $target ($title)"
@@ -332,7 +334,7 @@ for {set n_target 4} {$n_target < [llength $argv]} {incr n_target} {
 	}
 	set datasize 1
 	for {set opt 1} \
-	    {[file exists "$target_dir/sqlite3/.lumosql-work/option$opt"]} \
+	    {[file exists "$target_dir/.lumosql-work/option$opt"]} \
 	    {incr opt} \
 	{
 	    set o [split [read_file "option$opt"] "\n"]

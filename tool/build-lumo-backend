@@ -7,25 +7,45 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2020 The LumoSQL Authors
 
-# usage: build-lumo-backend BUILD_DIR SOURCES_DIR
+# usage: build-lumo-backend BUILD_DIR TARGET SOURCES_DIR
 
-# BUILD_DIR is the directory where the objects will be built; it must not already
-# exist
+# BUILD_DIR is the top-level build directory
+
+# TARGET is the LumoSQL target to build
 
 # SOURCES_DIR is the directory containing the sources; normally this will
 # be something produced by get-sources
 
-if [ $# -ne 2 ]
+if [ $# -ne 3 ]
 then
-    echo "Usage: $(basename "$0") BUILD_DIR SOURCES_DIR" >&2
+    echo "Usage: $(basename "$0") BUILD_DIR TARGET SOURCES_DIR" >&2
     echo "See comments at top of script for more information" >&2
     exit 1
 fi
 
-BUILD_DIR="$1"
-LUMO_SOURCES="$2"
+BUILD_TOP="$1"
+TARGET="$2"
+LUMO_SOURCES="$3"
 
 LUMO_DIR="$LUMO_SOURCES/.lumosql-work"
+
+# create build directory - this must not already exist
+mkdir "$BUILD_TOP/$TARGET"
+
+# copy info to it
+mkdir "$BUILD_TOP/$TARGET/.lumosql-work"
+cp -a "$LUMO_DIR/"* "$BUILD_TOP/$TARGET/.lumosql-work/"
+
+# if we have already built the build_target, there's nothing more to do
+BUILD_TARGET="$(cat "$LUMO_DIR/build_target")"
+BUILD_DIR="$BUILD_TOP/$BUILD_TARGET"
+if [ -d "$BUILD_DIR" -a "$BUILD_TARGET" != "$TARGET" ]
+then
+    echo "Target $TARGET has same build as $BUILD_TARGET, not rebuilding"
+    exit 0
+fi
+
+# we need to build it
 LUMO_BACKEND_NAME="$(cat "$LUMO_DIR/backend_name")"
 LUMO_BACKEND_VERSION="$(cat "$LUMO_DIR/backend_version")"
 SQLITE3_VERSION="$(cat "$LUMO_DIR/sqlite3_version")"
@@ -59,10 +79,9 @@ $OK || exit 1
 LUMO_SOURCES="`realpath -e "$LUMO_SOURCES"`"
 
 # set up build directory - this fails if it already exist
-mkdir "$BUILD_DIR" "$BUILD_DIR/sqlite3"
+mkdir "$BUILD_DIR/sqlite3"
 [ -n "$LUMO_BACKEND_NAME" ] && mkdir "$BUILD_DIR/$LUMO_BACKEND_NAME"
 cd "$BUILD_DIR"
-cp -a "$LUMO_SOURCES/.lumosql-work" sqlite3/.lumosql-work
 ls "$LUMO_SOURCES/$LUMO_BACKEND_NAME" | egrep '^LICEN[CS]E|^COPYING' | while read name
 do
     cp -a "$LUMO_SOURCES/$LUMO_BACKEND_NAME/$name" "sqlite3/$name" || true

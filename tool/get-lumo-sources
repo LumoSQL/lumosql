@@ -53,7 +53,7 @@ LUMO_TARGET="$3"
 LUMO_DIR="$LUMO_SOURCES/.lumosql-work"
 mkdir -p "$LUMO_DIR" || exit 1
 
-tclsh tool/parse-target.tcl "$LUMO_TARGET" "$LUMO_DIR" || exit 1
+tclsh tool/parse-target.tcl "$LUMO_TARGET" "$LUMO_SOURCES" "$LUMO_DIR" || exit 1
 
 SQLITE3_VERSION="$(cat "$LUMO_DIR/sqlite3_version")"
 LUMO_BACKEND_NAME="$(cat "$LUMO_DIR/backend_name")"
