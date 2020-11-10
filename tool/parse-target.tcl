@@ -39,10 +39,10 @@ if {[llength $tlist] > 1 && [lindex $tlist 1] != ""} {
     }
     set backend_name [lindex $blist 1]
     set backend_version [lindex $blist 2]
-    if {! [file isdirectory "$sources_dir/$backend_name"]} {
-	puts stderr "Invalid backend name $backend_name"
-	exit 1
-    }
+#    if {! [file isdirectory "$sources_dir/$backend_name"]} {
+#	puts stderr "Invalid backend name $backend_name"
+#	exit 1
+#    }
     if {[string equal $sqlite_version ""]} {
 	set title "$backend_name $backend_version"
     } else {
