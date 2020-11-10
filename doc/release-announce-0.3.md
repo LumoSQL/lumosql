@@ -1,3 +1,7 @@
+# LumoSQL Database v0.3 Released
+
+10th November 2020
+
 The [LumoSQL](https://lumosql.org/src/lumosql) project provides answers to questions not many people 
 are asking about SQLite. SQLite is easily both the most-used database *and* most-used K-V store
 in the world, and so these questions are relevant:
