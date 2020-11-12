@@ -155,3 +155,7 @@ container:
 
 .PRECIOUS: bld-LMDB_% bld-SQLite-% src-lmdb
 .PHONY: clean bin container
+
+# Lumo build system currently does not support parallel build at this level
+.NOTPARALLEL:
+

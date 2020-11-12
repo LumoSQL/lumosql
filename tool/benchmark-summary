@@ -95,7 +95,14 @@ do
     do
 	duration="`"$SQLITE3" "$DATABASE" \
 	     "select value from test_data where run_id='$RUN_ID' and test_number=$num and key='real-time'"`"
-	printf "%11.3f " "$duration"
+	status="`"$SQLITE3" "$DATABASE" \
+	     "select value from test_data where run_id='$RUN_ID' and test_number=$num and key='status'"`"
+	if [ "$status" = OK ]
+	then
+	    printf "%11.3f " "$duration"
+	else
+	    printf "%11.11s " "$status"
+	fi
     done
     printf "%4d %s\n" "$num" "$name"
 done

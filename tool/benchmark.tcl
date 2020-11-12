@@ -11,6 +11,8 @@
 #
 # /tool/benchmark.tcl
 
+package require Tclx 8.0
+
 if {[llength $argv] < 5} {
   puts stderr "Usage: benchmark.tcl BUILD_DIR DATABASE TARGET_FOR_DB N_RUNS TARGETS...";
   exit 1
@@ -24,24 +26,35 @@ set run_dir "$build_dir/.lumo.tests"
 
 expr srand(1)
 
-# create the results database if it does not exist
-if {! [file exists $result_db]} {
+# if the database exists, check it has the correct tables;
+# if it does not exist, create it
+set run_schema {
+    CREATE TABLE run_data (
+	run_id VARCHAR(128),
+	key VARCHAR(256),
+	value TEXT
+    );
+    CREATE INDEX run_data_index ON run_data (run_id, key);
+}
+set test_schema {
+    CREATE TABLE test_data (
+	run_id VARCHAR(128),
+	test_number INTEGER,
+	key VARCHAR(256),
+	value TEXT
+    );
+    CREATE INDEX test_data_index_1 ON test_data (run_id, test_number, key);
+    CREATE INDEX test_data_index_2 ON test_data (run_id, key, test_number);
+}
+
+if {[file exists $result_db]} {
+    # TODO get table schemas and check them
+} else {
     puts "Creating database $result_db"
     flush stdout
     set sqlfd [open "| $sqlite3_result $result_db" w]
-    puts $sqlfd {
-	CREATE TABLE run_data (
-	    run_id VARCHAR(128),
-	    key VARCHAR(256),
-	    value TEXT
-	);
-	CREATE TABLE test_data (
-	    run_id VARCHAR(128),
-	    test_number INTEGER,
-	    key VARCHAR(256),
-	    value TEXT
-	);
-    }
+    puts $sqlfd $run_schema
+    puts $sqlfd $test_schema
     close $sqlfd
 }
 
@@ -78,36 +91,67 @@ proc number_name {n} {
 
 set cnt 0
 set target_db ""
-set sql_fd 0
 set run_id ""
 set sql_file "$run_dir/test.sql"
+set tests_ok 0
+set tests_intr 0
+set tests_fail 0
 
 # run a single test
 proc run_test {title} {
     global cnt
     global target_db
     global run_dir
-    global sql_fd
     global run_id
     global sql_file
-    global sql_fd
+    global tests_ok
+    global tests_intr
+    global tests_fail
+    global sqlite3_result
+    global result_db
+
     incr cnt
     set delay 1000
     exec sync; after $delay;
-    set ot [clock microseconds]
-    exec $target_db "$run_dir/bench.db" < $sql_file
-    set nt [clock microseconds]
-    set t [expr {($nt - $ot) / 1000000.0}]
-# TODO also collect CPU time used and any other information to add to test_data
+    set status "?"
+    set oct [times]
+    set owt [clock microseconds]
+    if {[catch {
+	exec $target_db "$run_dir/bench.db" < $sql_file
+    } res opt]} {
+	set S [dict get $opt -errorcode]
+	set E [lindex $S 0]
+	if {$E eq "CHILDKILLED"} {
+	    set status [lindex $S 2]
+	    incr tests_intr
+	} elseif {$E eq "CHILDSTATUS"} {
+	    set status "ERR[lindex $S 2]"
+	    incr tests_fail
+	}
+    } else {
+	set status "OK"
+	incr tests_ok
+    }
+    set nwt [clock microseconds]
+    set nct [times]
+    set wt [expr {($nwt - $owt) / 1000000.0}]
+    set ut [expr {([lindex $nct 2] - [lindex $oct 2]) / 1000.0}]
+    set st [expr {([lindex $nct 3] - [lindex $oct 3]) / 1000.0}]
+    set sql_fd [open "| $sqlite3_result $result_db" w];
     puts $sql_fd "insert into test_data (run_id, test_number, key, value)
 		  values ('$run_id', $cnt, 'test-name', '$title');"
     puts $sql_fd "insert into test_data (run_id, test_number, key, value)
-		  values ('$run_id', $cnt, 'real-time', $t);"
-    flush $sql_fd
-    puts [format "%8.3f %3d %s" $t $cnt $title]
+		  values ('$run_id', $cnt, 'real-time', $wt);"
+    puts $sql_fd "insert into test_data (run_id, test_number, key, value)
+		  values ('$run_id', $cnt, 'user-cpu-time', $ut);"
+    puts $sql_fd "insert into test_data (run_id, test_number, key, value)
+		  values ('$run_id', $cnt, 'system-cpu-time', $st);"
+    puts $sql_fd "insert into test_data (run_id, test_number, key, value)
+		  values ('$run_id', $cnt, 'status', '$status');"
+    close $sql_fd
+    puts [format "%8s %8.3f %3d %s" $status $wt $cnt $title]
     flush stdout
 }
-
 
 # run a set of tests
 proc run_tests {} {
@@ -116,6 +160,9 @@ proc run_tests {} {
     global datasize
 
     set cnt 0
+    set tests_ok 0
+    set tests_intr 0
+    set tests_fail 0
 
     #set d100 [expr {$datasize * 100}]
     set d100 100
@@ -258,6 +305,8 @@ proc read_file {name} {
 }
 
 # now run tests for each target
+
+# signal -restart ignore SIGINT
 for {set n_target 4} {$n_target < [llength $argv]} {incr n_target} {
     set target [lindex $argv $n_target]
     set target_dir "$build_dir/$target"
@@ -300,6 +349,8 @@ for {set n_target 4} {$n_target < [llength $argv]} {incr n_target} {
 	set run_id [exec $sqlite3_result $result_db {
 	    select hex(sha3('$target' || randomblob(16) || '$when_run'));
 	}]
+
+	# log run data
 	set sql_fd [open "| $sqlite3_result $result_db" w];
 	puts $sql_fd "
 	    insert into run_data (run_id, key, value)
@@ -329,10 +380,15 @@ for {set n_target 4} {$n_target < [llength $argv]} {incr n_target} {
 		values ('$run_id', 'backend-version', '$backend_version');
 
 		insert into run_data (run_id, key, value)
+		values ('$run_id', 'backend', '$backend_name-$backend_version');
+
+		insert into run_data (run_id, key, value)
 		values ('$run_id', 'backend-id', '$backend_id');
 	    "
 	}
-	set datasize 1
+
+	# parse and log options
+	set datasize ""
 	for {set opt 1} \
 	    {[file exists "$target_dir/.lumosql-work/option$opt"]} \
 	    {incr opt} \
@@ -350,13 +406,36 @@ for {set n_target 4} {$n_target < [llength $argv]} {incr n_target} {
 		}
 	    }
 	}
-
-# TODO later we will also insert into run_data any other data we collect
-	flush $sql_fd
+	if {$datasize eq ""} {
+	    set datasize 1
+	    puts $sql_fd "
+		insert into run_data (run_id, key, value)
+		values ('$run_id', 'option-datasize', 1);
+	    "
+	}
+	# if we leave $sql_fd open and the test is interrupted with a keyboard
+	# interrupt, it seems to kill this sqlite3 too...
+	close $sql_fd
 
 	# and now go and run a set of tests
 	run_tests
 
+	# log run results
+	set end_run [clock seconds]
+	set sql_fd [open "| $sqlite3_result $result_db" w];
+	puts $sql_fd "
+	    insert into run_data (run_id, key, value)
+	    values ('$run_id', 'tests-ok', '$tests_ok');
+
+	    insert into run_data (run_id, key, value)
+	    values ('$run_id', 'tests-intr', '$tests_intr');
+
+	    insert into run_data (run_id, key, value)
+	    values ('$run_id', 'tests-fail', '$tests_fail');
+
+	    insert into run_data (run_id, key, value)
+	    values ('$run_id', 'end-run', '$end_run');
+	"
 	close $sql_fd
 	puts ""
 
