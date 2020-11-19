@@ -123,15 +123,15 @@ LumoSQL provides a Makefile and benchmarking subsystem which:
   user because a full suite takes hours to run.
 - Is suitable for extending to multiple other backends
 
-All benchmarking is written to an SQLite database. This separates out the tasks
+All benchmarking results are written to an SQLite database. This separates out the tasks
 of collecting results and storing them safely from presenting and interpeting
 the results beyond the most basic. Presentation of statistical data is its own
 skill and a mini-project in its own right.
 
 ## Build environment
 
-The build system requires [the not-forking tool](https://lumosql.org/src/not-forking/);
-once that is installed, some other tools are needed, usually provided by installing
+The build system requires [the not-forking tool](https://lumosql.org/src/not-forking/).
+Once that is installed, some other tools are needed, usually provided by installing
 development packages.
 
 On Ubuntu 18.0.4 LTS, Debian Stable (buster), and on any reasonably recent
@@ -153,6 +153,24 @@ sudo dnf install --assumeyes \
 
 The following steps have been tested on Fedora 30 and Ubuntu 18.04 LTS (via the
 `container` target in the [Makefile](/Makefile)).
+
+## Install Dependencies
+
+* to build and benchmark just SQLite, you need to have [Fossil](https://fossil-scm.org/)
+* to build and benchmark any of the LMDB targets, you need to have git
+* to build and benchmark any of the Oracle Berkeley DB targets, you need either curl or wget, and GNU tar
+
+Each of these has minimum versions, especially bearing in mind the large and
+varied number of operating systems LumoSQL can compile on.
+
+Select the version(s) you want from this list:
+
+* git version 2.22 or later
+* any fossil version [listed on the download page](https://fossil-scm.org/home/uv/download.html), currently 2.13 or 2.12.1 . Better still, [build trunk yourself](https://fossil-scm.org/home/doc/trunk/www/build.wiki), it is easy and you have the latest features
+* curl, wget and GNU tar mostly just have to exist. Even on Windows almost any version will be sufficient.
+
+The not-forking will also advise you with an error message if you ask for sources that
+require a tool that is not installed on your operating system.
 
 ## Using the Makefile tool
 
