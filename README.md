@@ -138,7 +138,7 @@ On Ubuntu 18.0.4 LTS, Debian Stable (buster), and on any reasonably recent
 Debian or Ubuntu-derived distribution, you need only:
 
 ```sh
-sudo apt install git build-essential tcl
+sudo apt install git build-essential tclx
 sudo apt build-dep sqlite3
 ```
 
@@ -148,7 +148,7 @@ On Fedora 30, and on any reasonably recent Fedora-derived distribution:
 
 ```sh
 sudo dnf install --assumeyes \
-  git make gcc ncurses-devel readline-devel glibc-devel autoconf tcl-devel
+  git make gcc ncurses-devel readline-devel glibc-devel autoconf tcl-devel tclx-devel
 ```
 
 The following steps have been tested on Fedora 30 and Ubuntu 18.04 LTS (via the
