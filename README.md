@@ -166,7 +166,7 @@ varied number of operating systems LumoSQL can compile on.
 Select the version(s) you want from this list:
 
 * git version 2.22 or later
-* any fossil version [listed on the download page](https://fossil-scm.org/home/uv/download.html), currently 2.13 or 2.12.1 . Better still, [build trunk yourself](https://fossil-scm.org/home/doc/trunk/www/build.wiki), it is easy and you have the latest features
+* fossil version 2.13 or later from your distrbution, or [2.13 or 2.12.1 from the Fossil download page](https://fossil-scm.org/home/uv/download.html). You may want to [build trunk yourself](https://fossil-scm.org/home/doc/trunk/www/build.wiki), since it is very quick and easy even compared to LumoSQL.
 * curl, wget and GNU tar mostly just have to exist. Even on Windows almost any version will be sufficient.
 
 The not-forking will also advise you with an error message if you ask for sources that
