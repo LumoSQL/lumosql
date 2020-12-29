@@ -325,7 +325,7 @@ if {$prn} {
     puts $outf "endif"
     puts $outf ""
     close $outf
-    file rename "$outname.tmp" $outname
+    file rename -force "$outname.tmp" $outname
     exit 0
 }
 
