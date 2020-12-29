@@ -149,13 +149,15 @@ backend if the backend version does not specify one
 * `backend_VERSIONS=list` - replace the default list of versions to build; these
 can be a single version, the backend version, or two versions separated by a "+",
 the sqlite3 version and the backend version, respectively; the unmodified
-sqlite3 will also be added to the benchmark, for comparison
+sqlite3 will also be added to the benchmark, for comparison; if `list` is just
+the word `all`, then all known versions are benchmarked
 * `backend_STANDALONE=list` - if a backend includes its own version of sqlite3,
 then build that instead of linking against an official one; the version can be
 a single version, or two versions separated by `=`, which will be the backend
 version and the version of sqlite3 it will build, respectively; the sqlite3
 version is not used by the build process as it expects the backend to do what is
-necessary, however if known it will be added to the benchmarks for comparison
+necessary, however if known it will be added to the benchmarks for comparison;
+if `list` is just the word `all`, then all known versions are benchmarked
 * `BENCHMARK_DB=filename` - where to store benchmark results, default is
 `benchmarks.sqlite`
 * `BENCHMARK_RUNS=number` - how many times to repeat each benchmark, default 1.
