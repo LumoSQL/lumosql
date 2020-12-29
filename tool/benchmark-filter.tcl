@@ -539,6 +539,15 @@ if {$out_default} {
     }
 }
 
+proc if_key {d key op defval} {
+    if {[dict exists $d $key]} {
+	set v [dict get $d $key]
+	return [eval $op]
+    } else {
+	return $defval
+    }
+}
+
 if {$out_list} {
     set fmt [list]
     set title ""
@@ -571,6 +580,21 @@ if {$out_list} {
 	    set width -8
 	    lappend fmt "%-8s"
 	    lappend op {[clock format $w -format "%H:%M:%S"]}
+	} elseif {$field eq "END_DATE"} {
+	    set width 10
+	    lappend fmt "%10s"
+	    add_run_key "end-run"
+	    lappend op {[if_key $d "end-run" {clock format $v -format "%Y-%m-%d"} "-"]}
+	} elseif {$field eq "END_TIME"} {
+	    set width 8
+	    lappend fmt "%8s"
+	    add_run_key "end-run"
+	    lappend op {[if_key $d "end-run" {clock format $v -format "%H:%M:%S"} "-"]}
+	} elseif {$field eq "DONE"} {
+	    set width -4
+	    lappend fmt "%-4s"
+	    add_run_key "end-run"
+	    lappend op {[if_key $d "end-run" {expr "YES"} "NO"]}
 	} elseif {$field eq "DURATION"} {
 	    add_test_op "duration" "real-time" "sum(value)"
 	    set width 11
@@ -583,8 +607,7 @@ if {$out_list} {
 	append title [format "  %${width}s" $field]
     }
     puts [string range $title 2 end]
-    for {set i 0} {$i < [llength $runlist]} {incr i} {
-	set run_id [lindex $runlist $i]
+    foreach run_id $runlist {
 	set d [dict get $rundict $run_id]
 	set w [dict get $d "when-run"]
 	set line ""
