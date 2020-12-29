@@ -3,6 +3,6 @@
 method = replace
 --
 .lumosql/lumo.mk             =  files/lumo.mk
+.lumosql/lumo.build          =  files/lumo.build
 .lumosql/lumo-backend-defs.h =  files/lumo-backend-defs.h
-.lumosql/backend-id          =  files/backend-id
 

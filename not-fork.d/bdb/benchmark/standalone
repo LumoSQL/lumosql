@@ -1,0 +1,7 @@
+# "standalone" versions of BDB we use by default - these are expected
+# to contain their own version of sqlite3; each line contains two
+# version numbers separated by spaces: the version of the backend
+# and the included sqlite3 version
+
+18.1.32 3.18.2
+

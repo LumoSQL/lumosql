@@ -231,6 +231,10 @@ unless specified otherwise
 
 * `-average`  - instead of displaying run details, calculates an average of runs with the same properties and displays that instead (currently unimplemented)
 * `-list`  - list the selected runs, one per line, with no information about the single tests
+* `-fields` `FIELD[,FIELD]...` - change the fields printed by `-list`, default is
+`RUN_ID,TARGET,DATE,TIME,DURATION`; at present, these are the only fields defined,
+so one can only reorder them or select a subset of fields; later versions will have
+more possibilities
 * `-summary`  - display a summary of each test in each selected run; this only works if the selected runs have the same tests; cannot be combined with `-details`
 * `-details`  - display full details for each test in each selected run including all the information in the database; cannot be combined with `-summary`
 * `-export` `FILE`  - write the selected runs to `FILE` in a text format, useful for example to send the run information by email

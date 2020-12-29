@@ -17,6 +17,7 @@ set import [list]
 set sqlite3 ""
 
 set out_list 0
+set list_fields [list RUN_ID TARGET DATE TIME DURATION]
 set out_summary 0
 set out_add [list]
 set out_export [list]
@@ -78,6 +79,9 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
     } elseif {$o eq "-list"} {
 	set out_list 1
 	set out_default 0
+    } elseif {$o eq "-fields"} {
+	optarg {^}
+	set list_fields [split $o ,]
     } elseif {$o eq "-summary"} {
 	set out_summary 1
 	set out_default 0
@@ -155,8 +159,11 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
 
 if {$sqlite3 eq ""} {
     # find a sqlite3
-    if {[file executable "build/3.33.0/sqlite3/sqlite3"]} {
-	set sqlite3 "./build/3.33.0/sqlite3/sqlite3"
+    # TODO - we need to get this info in the same way as build.tcl does
+    if {[file executable "build/3.34.0/sqlite3"]} {
+	set sqlite3 "./build/3.34.0/sqlite3"
+    } elseif {[file executable "build/3.33.0/sqlite3"]} {
+	set sqlite3 "./build/3.33.0/sqlite3"
     } else {
 	set has_version ""
 	catch {
@@ -172,9 +179,9 @@ if {$sqlite3 eq ""} {
     }
 }
 
-# XXX if imports were specified, create a temporary database with the
-# XXX imported runs, and replace $database to point at it, and also
-# XXX remember to delete the temporary database at the end
+# TODO if imports were specified, create a temporary database with the
+# TODO imported runs, and replace $database to point at it, and also
+# TODO remember to delete the temporary database at the end
 
 if {! [file isfile $database]} {
     puts stderr "Database not found: $database"
@@ -204,8 +211,8 @@ if ($only_invalid) {
     puts $sql "key = 'backend' or key like 'backend-%'"
     puts $sql "group by run_id)"
     puts $sql "where A != 0 and A != 4"
-    # XXX we could also count the tests and see that they match tests-ok, fail, intr
-    # XXX any other thing we consider invalid?
+    # TODO we could also count the tests and see that they match tests-ok, fail, intr
+    # TODO any other thing we consider invalid?
 } else {
     puts $sql "select run_id, value from run_data where key='when-run'"
 
@@ -216,7 +223,7 @@ if ($only_invalid) {
 	    puts $sql ", '[lindex $only_ids $i]'"
 	}
 	puts $sql ")"
-	# XXX run the sql so far and check that all the IDs are valid
+	# TODO run the sql so far and check that all the IDs are valid
     }
 
     if {[llength $only_option] > 0} {
@@ -376,9 +383,9 @@ set runlist [lreverse $runlist]
 # if required, change tests to get averages
 
 if {$average} {
-    # XXX calculate averages in memory; we'll need to make up new run IDs
-    # which could be "average-N" or something and we'll need to remember
-    # the original run IDs if we need to look anything else up later
+    # TODO calculate averages in memory; we'll need to make up new run IDs
+    # TODO  which could be "average-N" or something and we'll need to remember
+    # TODO  the original run IDs if we need to look anything else up later
 }
 
 ###############################################################################
@@ -533,28 +540,59 @@ if {$out_default} {
 }
 
 if {$out_list} {
-    add_run_key "target"
-    add_test_op "duration" "real-time" "sum(value)"
-    set width 0
-    for {set i 0} {$i < [llength $runlist]} {incr i} {
-	set run_id [lindex $runlist $i]
-	set d [dict get $rundict $run_id]
-	if {$width < [string length [dict get $d "target"]]} {
-	    set width [string length [dict get $d "target"]]
+    set fmt [list]
+    set title ""
+    set op [list]
+    set flist [list TARGET TITLE SQLITE_NAME]
+    foreach field $list_fields {
+	if {$field eq "RUN_ID"} {
+	    set width -64
+	    lappend fmt "%-64s"
+	    lappend op {$run_id}
+	} elseif {[lsearch -exact $flist $field] >= 0} {
+	    set lf [string map {_ -} [string tolower $field]]
+	    add_run_key $lf
+	    set width [string length $field]
+	    for {set i 0} {$i < [llength $runlist]} {incr i} {
+		set run_id [lindex $runlist $i]
+		set d [dict get $rundict $run_id]
+		if {$width < [string length [dict get $d $lf]]} {
+		    set width [string length [dict get $d $lf]]
+		}
+	    }
+	    set width -$width
+	    lappend fmt "%${width}s"
+	    lappend op "\[dict get \$d $lf\]"
+	} elseif {$field eq "DATE"} {
+	    set width -10
+	    lappend fmt "%-10s"
+	    lappend op {[clock format $w -format "%Y-%m-%d"]}
+	} elseif {$field eq "TIME"} {
+	    set width -8
+	    lappend fmt "%-8s"
+	    lappend op {[clock format $w -format "%H:%M:%S"]}
+	} elseif {$field eq "DURATION"} {
+	    add_test_op "duration" "real-time" "sum(value)"
+	    set width 11
+	    lappend fmt "%11.3f"
+	    lappend op {[dict get $d "duration"]}
+	} else {
+	    puts stderr "Invalid field: $field"
+	    exit 1
 	}
+	append title [format "  %${width}s" $field]
     }
-    puts [format "%-64s %-${width}s %-10s %-8s %11s" "RUN_ID" "TARGET" "DATE" "TIME" "DURATION"]
+    puts [string range $title 2 end]
     for {set i 0} {$i < [llength $runlist]} {incr i} {
 	set run_id [lindex $runlist $i]
 	set d [dict get $rundict $run_id]
 	set w [dict get $d "when-run"]
-	puts [format "%-64s %-${width}s %-10s %-8s %11.3f" \
-	    $run_id \
-	    [dict get $d "target"] \
-	    [clock format $w -format "%Y-%m-%d"] \
-	    [clock format $w -format "%H:%M:%S"] \
-	    [dict get $d "duration"] \
-	]
+	set line ""
+	for {set f 0} {$f < [llength $fmt]} {incr f} {
+	    eval "set elem [lindex $op $f]"
+	    append line [format "  [lindex $fmt $f]" $elem]
+	}
+	puts [string range $line 2 end]
     }
 }
 
@@ -763,10 +801,12 @@ for {set a 0} {$a < [llength $out_export]} {incr a} {
 
 for {set a 0} {$a < [llength $out_copy]} {incr a} {
     set dn [lindex $out_copy $a]
-    # XXX copy to $dn
+    # TODO copy to $dn
 }
 
 if {[llength $out_add] > 0} {
+    # TODO we should check that the selected runs don't have any of these
+    # TODO options already (and/or add a flag to overwrite them)
     set sql [file tempfile sql_file]
     for {set i 0} {$i < [llength $runlist]} {incr i} {
 	set run_id [lindex $runlist $i]
@@ -783,10 +823,10 @@ if {[llength $out_add] > 0} {
 }
 
 if {$out_delete} {
-    # XXX delete these runs from both tables
+    # TODO delete these runs from both tables
 }
 
-# XXX -stats                    summary statistics on all tests
+# TODO -stats                    summary statistics on all tests
 
 if {$excess} {
     puts "FIlter returned more than $limit runs, list has been truncated"

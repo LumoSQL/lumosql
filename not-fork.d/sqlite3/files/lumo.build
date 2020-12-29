@@ -1,0 +1,36 @@
+# Build SQLite with an optional alternative backend
+
+# Copyright 2020 The LumoSQL Authors under the terms contained in LICENSES/MIT
+#
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2020 The LumoSQL Authors
+
+# this program is meant to be called by the sqlite3 build process
+# which sets up the correct environment etc
+
+global build_options
+
+if {$build_options(DEBUG) eq "on"} {
+    system ./configure --enable-debug
+} else {
+    system ./configure
+}
+
+system make
+
+# now move files of interest to lumo/build
+global lumo_dir
+set dest [file join $lumo_dir build]
+if {! [file isdirectory $dest]} { file mkdir $dest }
+foreach fn [glob -directory .libs *] {
+    file rename $fn $dest
+}
+
+# some versions of sqlite3 generate a binary in .libs and a script to call it
+# other versions have the binary in the top level; we keep the binary and we'll
+# have our own script to point at libraries (because we may have moved them)
+set binary [file join $dest sqlite3]
+if {! [file exists $binary]} {
+    file rename sqlite3 $binary
+}
+

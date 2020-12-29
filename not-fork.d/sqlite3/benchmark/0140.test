@@ -1,0 +1,5 @@
+set name {DROP TABLE}
+
+set sql "DROP TABLE t1;\n"
+append sql "DROP TABLE t2;\n"
+

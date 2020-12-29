@@ -1,17 +1,26 @@
-# how to build this backend... this runs in a shell from a "build" directory
-# and is provided environment variables LUMO_SOURCES, LUMO_BACKEND_NAME
-# and LUMO_BACKEND_VERSION
+#!/usr/bin/tcl
 
-#echo "Configuring $LUMO_BACKEND_NAME $LUMO_BACKEND_VERSION"
-#"$LUMO_SOURCES/$LUMO_BACKEND_NAME"/configure || exit 1
+# how to build this backend... this runs in TCL and has access to various
+# global variables - see documentation; it runs with current directory set
+# to the top of the backend sources
 
-cp -a "$LUMO_SOURCES/$LUMO_BACKEND_NAME/"* . || exit 1
+global build_options
 
-echo "Building $LUMO_BACKEND_NAME $LUMO_BACKEND_VERSION"
-make || exit 1
+if {$build_options(DEBUG) eq "on"} {
+    system make CPPFLAGS=-DMDB_DEBUG
+} else {
+    system make
+}
 
-mkdir -p ../sqlite3/.libs || exit 1
-cp -a liblmdb.* ../sqlite3/.libs/ || exit 1
-
-exit 0
+# now move files of interest to lumo/build
+global lumo_dir
+set dest [file join $lumo_dir build]
+if {! [file isdirectory $dest]} { file mkdir $dest }
+file rename .lumosql $dest
+foreach fn [glob *.h] {
+    file rename $fn $dest
+}
+foreach fn [glob liblmdb.*] {
+    file rename $fn $dest
+}
 

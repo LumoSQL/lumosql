@@ -242,7 +242,7 @@ make benchmark TARGETS="3.7.17 3.7.17+lmdb-0.9.9" BENCHMARK_RUNS=2
 A simple (draft) tool is provided to display test results from the database:
 
 ```sh
-sh tool/benchmark-summary build/3.33.0/sqlite3/sqlite3 benchmarks.sqlite
+tclsh tool/benchmark-filter.tcl
 ```
 
 This gives a 1-line summary of each run in the database, for example:
@@ -256,34 +256,37 @@ DDEC21FF7EF9186E4B636A948F387A7BA62BF0E7B503BD59BC0B1869340CCA9E 3.30.1         
 D404F589B8FF22E5571E41323497BC0EF11E138A7CA1526FE114F9A869B5CCB9 3.7.17+lmdb-0.9.26   2020-11-05 20:22:19    177.874
 ```
 
-or given a run ID (first column of the output):
+or given one or more run IDs (first column of the output):
 
 ```sh
-sh tool/benchmark-summary build/3.33.0/sqlite3/sqlite3 benchmarks.sqlite RUN_ID
+tclsh tool/benchmark-filter.tcl RUN_ID [RUN_ID]...
 ```
 
 For example:
 
 ```
-$ sh tool/benchmark-summary ./build/3.33.0/sqlite3/sqlite3 benchmarks.sqlite D404F589B8FF22E5571E41323497BC0EF11E138A7CA1526FE114F9A869B5CCB9
+$ tclsh tool/benchmark-filter.tcl D404F589B8FF22E5571E41323497BC0EF11E138A7CA1526FE114F9A869B5CCB9
 Benchmark: sqlite 3.7.17 with lmdb 0.9.26
-    (3.7.17 2013-05-20 00:56:22 118a3b35693b134d56ebd780123b7fd6f1497668 lmdb 0.9.26 20403b7b3818fdddb11288245061b31a36066472)
-Ran at 2020-11-05 20:22:19
-    TIME NUM NAME
-   7.424   1 1000 INSERTs
-   7.369   2 25000 INSERTs in a transaction
-   0.372   3 100 SELECTs without an index
-   1.102   4 100 SELECTs on a string comparison
-  16.435   5 5000 SELECTs
-   0.156   6 1000 UPDATEs without an index
-  87.422   7 25000 UPDATEs with an index
-  57.220   8 25000 text UPDATEs with an index
-   0.057   9 INSERTs from a SELECT
-   0.037  10 DELETE without an index
-   0.040  11 DELETE with an index
-   0.069  12 A big INSERT after a big DELETE
-   0.139  13 A big DELETE followed by many small INSERTs
-   0.030  14 DROP TABLE
+   Target: 3.7.17+lmdb-0.9.26
+          (3.7.17 2013-05-20 00:56:22 118a3b35693b134d56ebd780123b7fd6f1497668 lmdb 0.9.26 20403b7b3818fdddb11288245061b31a36066472)
+   Ran at: 2020-11-05 20:22:19
+ Duration: 177.874
+
+       TIME NUM NAME
+      7.424   1 1000 INSERTs
+      7.369   2 25000 INSERTs in a transaction
+      0.372   3 100 SELECTs without an index
+      1.102   4 100 SELECTs on a string comparison
+     16.435   5 5000 SELECTs
+      0.156   6 1000 UPDATEs without an index
+     87.422   7 25000 UPDATEs with an index
+     57.220   8 25000 text UPDATEs with an index
+      0.057   9 INSERTs from a SELECT
+      0.037  10 DELETE without an index
+      0.040  11 DELETE with an index
+      0.069  12 A big INSERT after a big DELETE
+      0.139  13 A big DELETE followed by many small INSERTs
+      0.030  14 DROP TABLE
 
 ```
 

@@ -1,0 +1,4 @@
+set name {DELETE without an index}
+
+set sql "DELETE FROM t2 WHERE c LIKE '%fifty%';\n"
+

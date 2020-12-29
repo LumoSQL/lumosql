@@ -6,6 +6,9 @@
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Claudio Calvelli, October 2020 -->
 
+Note: this file contains documentation for an older version of the LumoSQL
+build system; it has been partially updated, but please refer to
+`lumo-build-benchmark.md` for the up-to-date information.
 
 Table of Contents
 =================
@@ -166,18 +169,22 @@ such as the target itself, the time the run started, etc; table `test_data`
 will contain more detailed information about each test in each run; the
 column `run_id` in the two tables connects the information.
 
-A simple (draft) tool to list the runs and provide details of a single run is:
+A simple (draft) tool to list the runs and provide details of runs is:
 
 ```
-tool/benchmark-summary PATH_TO_SQLITE PATH_TO_DATABASE [RUN_ID]
+tclsh tool/benchmark-filter.tcl [-sqlite PATH_TO_SQLITE] [-database PATH_TO_DATABASE] [RUN_ID]
 ```
 
 where `PATH_TO_SQLITE` can point to either a system-installed sqlite3 or
 to the same one inside the build directory which was used to create the
-database; `PATH_TO_DATABASE` points to the same `DATABASE` as was provided
-to `benchmark.tcl`; if no `RUN_ID` is provided the program prints one line
+database; the default is to look for it in the build directory and in
+the normal PATH; `PATH_TO_DATABASE` points to the same `DATABASE` as was provided
+to `build.tcl` and defaults to `benchmarks.sqlite`; if no `RUN_ID` is provided
+the program prints one line
 per run, with the run ID in the first column followed by some other information;
-to see the results for a particular run, add the corresponding ID to the command.
+to see the results for particular runs, add the corresponding IDs to the command.
+The tool has many more options to select runs and control the output format;
+refer to its separate documentation.
 
 # "make" targets <a name="make-targets"></A>
 
@@ -185,7 +192,7 @@ The top-level `Makefile` contains targets to build the required versions of
 SQLite and backends, and to run a number of benchmarks.  By default the
 `Makefile` sets the (LumoSQL) targets as follows:
 
-* 3.33.0 (latest version of sqlite3 at the time of writing)
+* 3.34.0 (latest version of sqlite3 at the time of writing)
 * 3.8.3.1 (sqlite3 version used with the LMDB backend)
 * 3.18.2 (sqlite3 version used with the BDB backend)
 * 3.8.3.1+lmdb-0.9.9 (earliest LMDB version tested)
@@ -221,7 +228,7 @@ Leaving `TARGETS` at its default value, it is possible to control how the
 Makefile constructs the default value by specifying one or more of the
 following options (the value indicated is the current default):
 
-* `SQLITE_VERSION=3.33.0` - the version of sqlite3 to use to update the
+* `SQLITE_VERSION=3.34.0` - the version of sqlite3 to use to update the
 benchmarks database; this will also be built and benchmarked by default
 * `USE_LMDB=yes` - whether to build/benchmark the LMDB targets
 * `SQLITE_FOR_LMDB=3.8.3.1` - the version of sqlite3 to use with the
@@ -238,48 +245,79 @@ included sqlite3
 * `DATASIZE=1` - multiply the data size by this number for some of the tests
 (this creates new targets which include the `datasize` option, even though
 it's only used when benchmarking)
+* Plus many more options, see the separate documentation for the Makefile
+and the `buiild.tcl` tool.
 
 A special Makefile target `what` lists the value of these variables and the
 resulting TARGETS, for example:
 
 ```
 make what USE_BDB=no LMDB_VERSIONS='0.9.26 0.9.27' DATASIZE=2
-DATASIZE=2
-SQLITE_VERSION=3.33.0
+BENCHMARK_DB=benchmarks.sqlite
+BENCHMARK_RUNS=1
+SQLITE_VERSION=3.34.0
+SQLITE_EXTRA=
+USE_SQLITE=yes
+USE_BDB=no
+SQLITE_FOR_BDB=
+BDB_VERSIONS=
+BDB_STANDALONE=18.1.32=3.18.2
 USE_LMDB=yes
 SQLITE_FOR_LMDB=3.8.3.1
 LMDB_VERSIONS=0.9.26 0.9.27
-USE_BDB=no
-SQLITE_FOR_BDB=3.18.2
-BDB_VERSIONS=
-BDB_STANDALONE=18.1.32
+LMDB_STANDALONE=
+OPTION_DATASIZE=2
+OPTION_DEBUG=off
+BUILDS=
+    3.34.0
+    3.8.3.1
+    3.8.3.1+lmdb-0.9.26
+    3.8.3.1+lmdb-0.9.27
 TARGETS=
-    3.33.0++datasize-2
+    3.34.0++datasize-2
     3.8.3.1++datasize-2
     3.8.3.1+lmdb-0.9.26+datasize-2
     3.8.3.1+lmdb-0.9.27+datasize-2
 ```
 
+Here `BUILD` shows what would be built and `TARGETS` show the actual benchmark
+targets, which could be provided with the `TARGETS=` option; note how the
+`datasize` option is not present in the build targets as it's a runtime option.
+
 or to check the defaults:
 ```
 make what
-DATASIZE=1
-SQLITE_VERSION=3.33.0
+BENCHMARK_DB=benchmarks.sqlite
+BENCHMARK_RUNS=1
+SQLITE_VERSION=3.34.0
+SQLITE_EXTRA=
+USE_SQLITE=yes
+USE_BDB=yes
+SQLITE_FOR_BDB=
+BDB_VERSIONS=
+BDB_STANDALONE=18.1.32=3.18.2
 USE_LMDB=yes
 SQLITE_FOR_LMDB=3.8.3.1
 LMDB_VERSIONS=0.9.9 0.9.16 0.9.27
-USE_BDB=yes
-SQLITE_FOR_BDB=3.18.2
-BDB_VERSIONS=
-BDB_STANDALONE=18.1.32
-TARGETS=
-    3.33.0
-    3.8.3.1
+LMDB_STANDALONE=
+OPTION_DATASIZE=1
+OPTION_DEBUG=off
+BUILDS=
+    3.34.0
     3.18.2
+    +bdb-18.1.32
+    3.8.3.1
     3.8.3.1+lmdb-0.9.9
     3.8.3.1+lmdb-0.9.16
     3.8.3.1+lmdb-0.9.27
+TARGETS=
+    3.34.0
+    3.18.2
     +bdb-18.1.32
+    3.8.3.1
+    3.8.3.1+lmdb-0.9.9
+    3.8.3.1+lmdb-0.9.16
+    3.8.3.1+lmdb-0.9.27
 ```
 
 More `make` options to control other aspects of the benchmarking than the list
@@ -301,6 +339,12 @@ backend with sqlite3: see an existing backend for a quick example, or
 read the more comprehensive documentation below
 * `files/FILENAME`: every file mentioned in `lumo-new-files.mod` needs
 to be provided in the `files/` directory
+* at least one of `benchmark/versions` and `benchmark/standalone`; the
+former includes versions of the backend to build and link against a
+"standard" sqlite, as well as specifying which versions of sqlite are
+compatible with that; the latter specifies versions to build using an
+included sqlite3; see the existing `versions` for LMDB and `standalone`
+for BDB as examples
 
 The build process requires the backend to provide the following two files
 (in directory `.lumosql`), which means that `lumo-new-files.mod` or some
@@ -308,7 +352,9 @@ other file in the not-forking configuration must install them:
 
 * `lumo.mk` is a Makefile fragment which will be inserted into the sqlite3
 build process, for example to link against the backend
-* `lumo.build` is a shell script to build the backend
+* `lumo.build` is a TCL script to build the backend; it has access to
+various variables set by the build process; it needs to copy or move the
+build result to `$lumo_dir/build`
 
 The LumoSQL build system modifies sqlite3 to replace some of its own files
 with a stub, which used the C preprocessor's `#include` directive to read
@@ -354,15 +400,30 @@ backend's sources as library search path; finally it asks to link `libmy_backend
 or `libmy_backend.a` into the sqlite3 executable, probably finding it in
 the build directory just added to the library search path.
 
-Finally, `files/lumo.build` could be something like:
+`files/lumo.build` could be something like:
 
 ```
-echo "Configuring $LUMO_BACKEND_NAME $LUMO_BACKEND_VERSION"
-"$LUMO_SOURCES/$LUMO_BACKEND_NAME"/libraries/liblmdb/configure || exit 1
+global backend_name
+global backend_version
+global build_options
 
-echo "Building $LUMO_BACKEND_NAME $LUMO_BACKEND_VERSION"
-make || exit 1
+puts "Configuring $backend_name $backend_version"
+if {$build_options(DEBUG) eq "on"} {
+    system ./configure --enable-debug
+} else {
+    system ./configure --disable-debug
+}
 
-exit 0
+puts "Building $backend_name $backend_version"
+system make
+
+# now move files of interest to lumo/build
+global lumo_dir
+set dest [file join $lumo_dir build]
+if {! [file isdirectory $dest]} { file mkdir $dest }
+file rename mybackend.h $dest
+foreach fn [glob liblmybackend.*] {
+    file rename $fn $dest
+}
 ```
 

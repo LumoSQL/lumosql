@@ -1,0 +1,4 @@
+set name {A big INSERT after a big DELETE}
+
+set sql "INSERT INTO t2 SELECT * FROM t1;\n"
+

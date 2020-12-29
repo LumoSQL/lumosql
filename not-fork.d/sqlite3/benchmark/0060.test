@@ -1,0 +1,12 @@
+set d1000 [expr $options(DATASIZE) * 1000]
+
+set name "$d1000 UPDATEs without an index"
+
+set sql "BEGIN;\n"
+for {set i 0} {$i<$d1000} {incr i} {
+    set lwr [expr {$i*10}]
+    set upr [expr {($i+1)*10}]
+    append sql "UPDATE t1 SET b=b*2 WHERE a>=$lwr AND a<$upr;\n"
+}
+append sql "COMMIT;\n"
+

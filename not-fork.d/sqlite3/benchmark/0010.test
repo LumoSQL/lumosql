@@ -1,0 +1,9 @@
+set d1000 [expr $options(DATASIZE) * 1000]
+set name "$d1000 INSERTs"
+
+set sql "CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100));\n"
+for {set i 1} {$i<=$d1000} {incr i} {
+  set r [expr {int(rand()*100000)}]
+  append sql "INSERT INTO t1 VALUES($i,$r,'[number_name $r]');\n"
+}
+

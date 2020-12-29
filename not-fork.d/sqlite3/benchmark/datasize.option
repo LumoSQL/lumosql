@@ -1,0 +1,16 @@
+# "datasize" benchmark option
+
+# when running tests, some of the data is specified as a base number
+# multiplied by the value of this options (default 1)
+
+# see tool/build.tcl for how this information is used
+
+# this option does not affect the build process - runtime only
+build = no
+
+# takes positive numeric values
+positive
+
+# default value if not specified
+default = 1
+

@@ -1,0 +1,19 @@
+# "debug" build option
+
+# this option controls whether the build process includes debugging code
+# (in future it may also control which debugging code)
+
+# for sqlite3 build, this results in adding -DSQLITE_DEBUG during build
+# as controlled by variable OPTION_DEBUG passed to lumo.mk and lumo.build
+
+# backends may specify their own debugging methods controlled by this option
+
+# this option affects the build process
+build = yes
+
+# currently a Boolean (although in future this can change)
+boolean
+
+# default value if not specified
+default = off
+

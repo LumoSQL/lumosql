@@ -1,0 +1,7 @@
+set name {INSERTs from a SELECT}
+
+set sql "BEGIN;\n"
+append sql "INSERT INTO t1 SELECT * FROM t2;\n"
+append sql "INSERT INTO t2 SELECT * FROM t1;\n"
+append sql "COMMIT;\n"
+
