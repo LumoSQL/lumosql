@@ -64,7 +64,7 @@ entire files, and more.
 
 ```
 $ make what
-SQLITE_VERSION=3.33.0            # whatever the latest version is
+SQLITE_VERSIONS=3.34.0           # whatever the latest version is
 USE_LMDB=yes
 SQLITE_FOR_LMDB=3.8.3.1
 LMDB_VERSIONS=0.9.9 0.9.16 0.9.27
@@ -73,7 +73,7 @@ SQLITE_FOR_BDB=3.18.2
 BDB_VERSIONS=
 BDB_STANDALONE=18.1.32
 TARGETS=
-    3.33.0
+    3.34.0
     3.8.3.1
     3.18.2
     3.8.3.1+lmdb-0.9.9

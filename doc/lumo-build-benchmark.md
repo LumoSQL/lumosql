@@ -133,10 +133,11 @@ These options are in addition to the existing Makefile mechanism to generate
 a list of targets, using the (previously documented) variables `USE_backend`,
 `backend_VERSIONS`, etc:
 
-* `SQLITE_VERSION=list` - build and benchmark the specified versions instead
-of the default
-* `SQLITE_EXTRA=list` - same as `SQLITE_VERSION` but this list will be added
-to the default rather than replacing it
+* `SQLITE_VERSIONS=list` - build and benchmark the specified versions instead
+of the default; the first version in the list will also be used to update
+the benchmark result database (if a backend is built, the corresponding
+unmodified version of sqlite is also added to this list, so the benchmark
+can compare them)
 * `USE_SQLITE=yes` - build and benchmark an unmodified sqlite3: this is the
 default
 * `USE_SQLITE=no` - do not build/benchmark an unmodified sqlite3; however the

@@ -228,8 +228,10 @@ Leaving `TARGETS` at its default value, it is possible to control how the
 Makefile constructs the default value by specifying one or more of the
 following options (the value indicated is the current default):
 
-* `SQLITE_VERSION=3.34.0` - the version of sqlite3 to use to update the
-benchmarks database; this will also be built and benchmarked by default
+* `SQLITE_VERSIONS=3.34.0` - the version of sqlite3 to use to update the
+benchmarks database; this will also be built and benchmarked by default;
+if a space-separated list is specified, the first one will be used for
+the benchmarks database but all they will be built and benchmarked
 * `USE_LMDB=yes` - whether to build/benchmark the LMDB targets
 * `SQLITE_FOR_LMDB=3.8.3.1` - the version of sqlite3 to use with the
 LMDB backend; this will also be built and benchmarked using the default
@@ -255,8 +257,7 @@ resulting TARGETS, for example:
 make what USE_BDB=no LMDB_VERSIONS='0.9.26 0.9.27' DATASIZE=2
 BENCHMARK_DB=benchmarks.sqlite
 BENCHMARK_RUNS=1
-SQLITE_VERSION=3.34.0
-SQLITE_EXTRA=
+SQLITE_VERSIONS=3.34.0
 USE_SQLITE=yes
 USE_BDB=no
 SQLITE_FOR_BDB=
@@ -289,8 +290,7 @@ or to check the defaults:
 make what
 BENCHMARK_DB=benchmarks.sqlite
 BENCHMARK_RUNS=1
-SQLITE_VERSION=3.34.0
-SQLITE_EXTRA=
+SQLITE_VERSIONS=3.34.0
 USE_SQLITE=yes
 USE_BDB=yes
 SQLITE_FOR_BDB=

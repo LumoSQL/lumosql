@@ -27,7 +27,7 @@ BUILD_DIR ?= build
 # database name
 DATABASE_NAME ?= benchmarks.sqlite
 
-# default target will build SQLITE_VERSION and all the other TARGETS
+# default target will build SQLITE_VERSIONS and all the other TARGETS
 all: build
 
 build: Makefile.options

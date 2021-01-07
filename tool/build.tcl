@@ -244,12 +244,11 @@ read_options [file join $notfork sqlite3 benchmark]
 array set other_values [list \
 	BENCHMARK_DB     benchmarks.sqlite \
 	BENCHMARK_RUNS   1 \
-	SQLITE_VERSION   $sqlite3_for_db \
-	SQLITE_EXTRA     "" \
+	SQLITE_VERSIONS  $sqlite3_for_db \
 	TARGETS          "" \
 	USE_SQLITE       "yes" \
 ]
-set options_list [list BENCHMARK_DB BENCHMARK_RUNS SQLITE_VERSION SQLITE_EXTRA USE_SQLITE]
+set options_list [list BENCHMARK_DB BENCHMARK_RUNS SQLITE_VERSIONS USE_SQLITE]
 
 foreach backend_dir [glob -nocomplain -directory $notfork *] {
     if [file isdirectory [file join $backend_dir benchmark]] {
@@ -447,23 +446,18 @@ if {$target_string eq ""} {
 	}
     }
     if {$other_values(USE_SQLITE) eq "yes"} {
-	foreach sv [split $other_values(SQLITE_VERSION)] {
+	foreach sv [split $other_values(SQLITE_VERSIONS)] {
 	    if {$sv ne ""} {
 		add_target_no $sv 1
 		if {$operation eq "database"} { break }
 	    }
 	}
-    } elseif {$other_values(USE_SQLITE) eq "yes"} {
+    } else {
 	# build the first version listed, to update the database,
 	# but do not run the corresponding benchmark
-	add_target_no [lindex [split $other_values(SQLITE_VERSION)] 0] 0
+	add_target_no [lindex [split $other_values(SQLITE_VERSIONS)] 0] 0
     }
     if {$operation ne "database"} {
-	if {$other_values(USE_SQLITE) eq "yes"} {
-	    foreach sv [split $other_values(SQLITE_EXTRA)] {
-		if {$sv ne ""} { add_target_no $sv 1 }
-	    }
-	}
 	foreach {backend spec} $backends {
 	    set BACKEND [lindex $spec 0]
 	    if {$other_values(USE_$BACKEND) eq "yes"} {
@@ -504,7 +498,7 @@ if {$target_string eq ""} {
     }
     set target_list [split $target_string]
     # make sure we also have an unmodified sqlite3 for the benchmark database
-    lappend target_list [lindex [split $other_values(SQLITE_VERSION)] 0]
+    lappend target_list [lindex [split $other_values(SQLITE_VERSIONS)] 0]
     for {set tptr 0} {$tptr < [llength $target_list]} {incr tptr} {
 	set benchmark [lindex $target_list $tptr]
 	if {$benchmark eq ""} { continue }
