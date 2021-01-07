@@ -1,5 +1,6 @@
-Build and benchmark problem statement
-=====================================
+# LumoSQL Build and Benchmark System
+
+## Build and benchmark problem statement
 
 Motivation: LumoSQL has established that there is currently no way of comparing
 like-for-like SQLite-related databases. 
@@ -25,7 +26,7 @@ Example instances of these dimensions are:
 * ... and then we move on to the different versions of pure SQLite, and SQLite
   combined with Berkeley DB, etc.
 
-### Problem statement
+## Problem statement
 
 The LumoSQL Build and Benchmark system solves the problem of defining the
 dimensions of the test matrix in a formal machine-friendly manner, and 
@@ -35,10 +36,9 @@ The user can then select some or all of these dimensions by human-readable
 name, and then cause them to be actioned. Every selected by the user will have
 multiple dependency actions.
 
-Build and benchmark options
-===========================
+# Build and benchmark options
 
-# Build and Benchmark configuration
+## Build and Benchmark configuration
 
 A special subdirectory `benchmark` in `not-fork.d/NAME` contain files to
 control the build and benchmark process for backend `NAME` (`NAME` can be
@@ -112,7 +112,7 @@ in any directory; currently there is no mechanism to address the case of the
 same option is present in multiple directories, and it is undefined which
 one will take precedence.
 
-# Specifying build/benchmark options to "make"
+## Specifying build/benchmark options to "make"
 
 The Makefile has a mechanism to recognise build/benchmark options as command-line
 option with the form `OPTION=value` where `OPTION` is the name of an option
@@ -166,7 +166,7 @@ Alternatively, `TARGETS` can be specified to override all the makefile mechanism
 and build/benchmark a specific combination of options only, as explained in
 the next section.
 
-# Encoding options in the target name
+## Encoding options in the target name
 
 The target name is used internally by the benchmark system to determine if two
 benchmarks are for similar things and can be compared; in general, two benchmarks
@@ -179,7 +179,7 @@ internal representation, however it appears in the "target" field of the benchma
 database, and can be specified directly to make to repeat just a particular
 benchmark without specifying all the options separately.
 
-# Specifying build options to the build and benchmark tools
+## Specifying build options to the build and benchmark tools
 
 The various tools provided by previous versions of LumoSQL have been merged
 into a single tool, `tool/build.tcl`, which guarantees identical parsing of
