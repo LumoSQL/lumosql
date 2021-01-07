@@ -548,6 +548,18 @@ proc if_key {d key op defval} {
     }
 }
 
+proc show_done {d} {
+    if {[dict exists $d "end-run"]} {
+	if {[dict get $d "tests-intr"] || [dict get $d "tests-fail"]} {
+	    return "INTR"
+	} else {
+	    return "YES"
+	}
+    } else {
+	return "NO"
+    }
+}
+
 if {$out_list} {
     set fmt [list]
     set title ""
@@ -594,7 +606,9 @@ if {$out_list} {
 	    set width -4
 	    lappend fmt "%-4s"
 	    add_run_key "end-run"
-	    lappend op {[if_key $d "end-run" {expr "YES"} "NO"]}
+	    add_run_key "tests-intr"
+	    add_run_key "tests-fail"
+	    lappend op {[show_done $d]}
 	} elseif {$field eq "DURATION"} {
 	    add_test_op "duration" "real-time" "sum(value)"
 	    set width 11

@@ -453,7 +453,9 @@ if {$target_string eq ""} {
 		if {$operation eq "database"} { break }
 	    }
 	}
-    } else {
+    } elseif {$other_values(USE_SQLITE) eq "yes"} {
+	# build the first version listed, to update the database,
+	# but do not run the corresponding benchmark
 	add_target_no [lindex [split $other_values(SQLITE_VERSION)] 0] 0
     }
     if {$operation ne "database"} {
@@ -678,20 +680,24 @@ for {set i 0} {$i < [llength $build_list]} {incr i} {
     set sqlite3_commit_id ""
     if {$sqlite3_version ne ""} {
 	puts "    *** Getting sources: sqlite3 $sqlite3_version"
+	set pid [exec -ignorestderr not-fork -i $notfork --no-update -o $sources -v $sqlite3_version sqlite3 &]
+	set ws [wait $pid]
+	if {[lindex $ws 1] ne "EXIT"} { return -code error }
 	set sqlite3_info [exec not-fork -i $notfork -q -v $sqlite3_version sqlite3]
 	regexp {***:(?n)^commit_id\s*=\s*(\S.*)$} $sqlite3_info skip sqlite3_commit_id
-	exec not-fork -i $notfork --no-update -o $sources -v $sqlite3_version sqlite3
     } else {
 	set sqlite3_info [list]
     }
     set backend_commit_id ""
     if {$backend_version ne ""} {
 	puts "    *** Getting sources: $backend_name $backend_version"
-	set backend_info [exec not-fork -i $notfork -q -v $backend_version $backend_name]
-	regexp {***:(?n)^commit_id\s*=\s*(\S.*)$} $backend_info skip backend_commit_id
 	set backend_id " $backend_name $backend_version"
 	if {$backend_commit_id ne ""} { append backend_id " $backend_commit_id" }
-	exec not-fork -i $notfork --no-update -o $sources -v $backend_version $backend_name
+	set pid [exec -ignorestderr not-fork -i $notfork --no-update -o $sources -v $backend_version $backend_name &]
+	set ws [wait $pid]
+	if {[lindex $ws 1] ne "EXIT"} { return -code error }
+	set backend_info [exec not-fork -i $notfork -q -v $backend_version $backend_name]
+	regexp {***:(?n)^commit_id\s*=\s*(\S.*)$} $backend_info skip backend_commit_id
     } else {
 	set backend_info [list]
 	set backend_id ""
