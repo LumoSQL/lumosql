@@ -215,12 +215,12 @@ also be done automatically if required before running benchmarks;
 * `benchmark` - runs all benchmarks taking into account applicable options;
 `ARGUMENTS`  is the same as for `build`.
 
-* `what` - outputs a ddescription of what it would be built and benchmarked
+* `what` - outputs a description of what it would be built and benchmarked
 as well as the values of any options; `ARGUMENTS` is the same as for `build`
 and `benchmark` and if present will modify the output as appropriate.
 
 Note that apart from the slightly different syntax, build/benchmark options
-are specified in the same way as Makefile arguments.
+are specified in the same way as standard `Makefile` arguments.
 
 For example, to build two versions of plain sqlite3, two versions of sqlite3+LMDB
 and one version of BDB with its own sqlite3:
