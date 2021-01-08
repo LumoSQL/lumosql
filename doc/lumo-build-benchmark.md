@@ -1,16 +1,16 @@
 # LumoSQL Build and Benchmark System
 
-From one point of view, [LumoSQL](https://lumosql.org) mostly consists of a meta-build
-system for SQLite. An early problem we have spent many months on is this: how can we know 
-if our changes to SQLite make a difference, and if so, what kind of difference?
+[LumoSQL](https://lumosql.org) implements a meta-build system for SQLite. An
+early problem we have spent many months on is this: how can we know if our
+changes to SQLite builds make a difference, and if so, what kind of difference?
 
-That is why the LumoSQL Build and Benchmark System is relevant to all SQLite
+The LumoSQL Build and Benchmark System is relevant to all SQLite
 users, not just SQLite users who are wondering about using different storage
 backends for SQLite.
 
-# Questions The Build System Answers
+# Questions The Build and Benchmark System Answers
 
-LumoSQL created a tool for giving universal, repeatable, definitive answers to the
+A single command now gives Universal, repeatable, definitive answers to the
 following seemingly-simple questions:
 
 * How can benchmarking runs be shared in a consistent manner between all users? 
@@ -28,7 +28,7 @@ following seemingly-simple questions:
 
 The above questions are not really simple at all, but they have now been addressed.
 
-Having solved these questions, the following seemingly more-difficult questions
+Having addressed these questions, the following seemingly more-difficult questions
 become much the same as the previous ones: 
 
 * What happens to performance when LMDB is swapped in as a storage backend for SQLite?
