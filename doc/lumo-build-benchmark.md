@@ -1,3 +1,11 @@
+<!-- Copyright 2020 The LumoSQL Authors, see LICENSES/MIT -->
+
+<!-- SPDX-License-Identifier: MIT -->
+<!-- SPDX-FileCopyrightText: 2020 The LumoSQL Authors -->
+<!-- SPDX-ArtifactOfProjectName: LumoSQL -->
+<!-- SPDX-FileType: Documentation -->
+<!-- SPDX-FileComment: Original by Claudio Calvelli, December 2020 -->
+
 # LumoSQL Build and Benchmark System
 
 [LumoSQL](https://lumosql.org) implements a meta-build system for SQLite. But
