@@ -1,5 +1,48 @@
 # LumoSQL Build and Benchmark System
 
+From one point of view, [LumoSQL](https://lumosql.org) mostly consists of a meta-build
+system for SQLite. An early problem we have spent many months on is this: how can we know 
+if our changes to SQLite make a difference, and if so, what kind of difference?
+
+That is why the LumoSQL Build and Benchmark System is relevant to all SQLite
+users, not just SQLite users who are wondering about using different storage
+backends for SQLite.
+
+# Questions The Build System Answers
+
+LumoSQL created a tool for giving universal, repeatable, definitive answers to the
+following seemingly-simple questions:
+
+* How can benchmarking runs be shared in a consistent manner between all users? 
+  **(hint: use a standardised SQLite database)**
+* Does SQLite usually get faster with each version? **(hint: definitely not)**
+* Which compile options make a given version of SQLite faster?
+* How do different versions and compile options combine to change performance as 
+  data size gets larger?
+* Does SQLITE_DEBUG really make 
+[SQLite run approximately three times slower?](https://sqlite.org/compile.html) 
+* What happens when a given set of compile options, versions and data size are
+  tested on faster and slower disks?
+* Do I need to run hundreds of combinations to make decisions about SQLite versions/options/hardware?
+  **(hint: no, because you now can have comparable benchmarking results from other people)**
+
+The above questions are not really simple at all, but they have now been addressed.
+
+Having solved these questions, the following seemingly more-difficult questions
+become much the same as the previous ones: 
+
+* What happens to performance when LMDB is swapped in as a storage backend for SQLite?
+  **(hint: there is a strange performance curve with increasing LMDB versions)**
+* How does the Oracle-funded BDB backend compare with other backends, including the 
+  SQLite Btree?
+* How do all of the above compare with each other with different build options, 
+  versions and datasizes? **(hint: just as well we can now share benchmarking 
+  results, because otherwise the entire world would be taken over by computers
+  running SQLite-related benchmarking)**
+
+The rest of this document introduces and defines the benchmarking tool that 
+makes answering these questions possible. 
+
 ## Build and benchmark problem statement
 
 Motivation: LumoSQL has established that there is currently no way of comparing
