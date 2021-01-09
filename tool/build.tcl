@@ -852,6 +852,14 @@ proc number_name {n} {
   return $txt
 }
 
+set notforking_id ""
+pushd $notfork
+catch {
+    set notforking_tmp [exec fossil info]
+    regexp {***:(?n)^checkout\s*:\s*(\S+)} $notforking_tmp skip notforking_id
+}
+popd
+
 array set benchmark_options { }
 for {set i 0} {$i < [llength $benchmark_list]} {incr i} {
     set benchmark [lindex $benchmark_list $i]
@@ -931,6 +939,7 @@ for {set i 0} {$i < [llength $benchmark_list]} {incr i} {
 	    "target"          $benchmark \
 	    "title"           $title \
 	    "sqlite-name"     $sqlite3_name \
+	    "notforking-id"   $notforking_id \
 	]
 	foreach {option value} $benchmark_optlist {
 	    update_run $run_id [list "option-[string tolower $option]" $value]
