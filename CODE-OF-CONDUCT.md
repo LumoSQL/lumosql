@@ -1,10 +1,18 @@
+<!-- Copyright 2020 The LumoSQL Authors, see LICENSES/MIT -->
+
+<!-- SPDX-License-Identifier: MIT -->
+<!-- SPDX-FileCopyrightText: 2020 The LumoSQL Authors -->
+<!-- SPDX-ArtifactOfProjectName: LumoSQL -->
+<!-- SPDX-FileType: Documentation -->
+<!-- SPDX-FileComment: Original by Dan Shearer, December 2019 -->
+
 # LumoSQL Code of Conduct
 
-Version 1.3 – Updated 6th November, 2020
+Version 1.4 – Updated 9th Jan, 2021
 
 **This file exists because the LumoSQL Project needed it, less than one year
-after starting. We take it seriously. Now we have the 2020 pandemic and
-most of us are feeling a bit fragile... a bit of kindness helps too.**
+after starting in 2019. We take it seriously. Now we have the 2020/2021 pandemic and
+this file can be viewed as mandating kindness... most people are feeling a bit fragile.**
 
 The LumoSQL Project welcomes contributions from everyone who shares
 [the LumoSQL Project Goals](https://lumosql.org/src/lumodoc/doc/trunk/doc/lumo-project-aims.md)
@@ -15,7 +23,8 @@ This document outlines both expected and prohibited behavior.
 LumoSQL participants are required to be respectful and direct with each other.
 We will not tolerate bullying, racism, sexism or constant domineering
 behaviour.  No personal attacks, stay focussed on what we are trying to
-achieve. If you only read this much, it's a good start. 
+achieve. The foregoing three sentences sum up everything we really want to
+say, all the rest of this document is supporting detail.
 
 [lumoaims]:https://lumosql.org/src/lumodoc/doc/trunk/doc/lumo-project-aims.md
 
@@ -55,99 +64,93 @@ actions, listen carefully, apologize sincerely, and correct the behaviour.
 We must be able to speak directly when we disagree and when we think we need to
 improve. We cannot withhold hard truths.  Doing so respectfully is hard, doing
 so when others don’t seem to be listening is harder, and hearing such comments
-when one is the recipient can be even harder still. We need to be honest and
-direct.
+when can be harder still.
 
 ## Be Inclusive
 
 Seek diverse perspectives. Diversity of views and of people gives better
 results.  Encourage all voices. Help new perspectives be heard and listen
-actively. If you find yourself dominating a discussion, it is especially
-important to step back and encourage other voices to join in. Observe how
-much time is taken up by dominant members of the group.
+actively. If you find yourself dominating a discussion, step back and give
+other people a chance.  Observe how much time is taken up by dominant members
+of the group.
 
 ## Appreciate and Accommodate Our Similarities and Differences
 
 Be respectful of people with different cultural practices, attitudes and
 beliefs. Work to eliminate your own biases, prejudices and discriminatory
 practices. Think of others’ needs from their point of view. Use preferred
-titles (including pronouns) and the appropriate tone of voice. Respect people’s
-right to privacy and confidentiality. Be open to learning from and educating
-others as well as educating yourself.
+titles (including pronouns). Respect people’s right to privacy and
+confidentiality. Be open to learning from and educating others as well as
+educating yourself.
 
 # Behavior That Will Not Be Tolerated
 
-The following behaviors are considered to be unacceptable under these guidelines.
+The following behaviours are unacceptable, as should have been totally obvious
+already:
 
-## Violence and Threats of Violence
+## Violence and Threats of Violence Are Not Acceptable
 
-Violence and threats of violence are not acceptable - online or offline. This
-includes incitement of violence, including encouraging a person to commit
-self-harm. This also includes posting or threatening to post other people’s
-personally identifying information (“doxxing”) online.
+Offline or online, including incitement of violence or encouraging a person to
+commit self-harm. This also includes posting or threatening to post other
+people’s personal data (“doxxing”) online.
 
-## Derogatory Language
+## Derogatory Language Is Not Acceptable
 
 Hurtful or harmful language related to any dimension of diversity is not
 acceptable.
 
 This includes deliberately referring to someone by a gender that they do not
-identify with, and/or questioning the legitimacy of an individual’s gender
-identity. If you’re unsure if a word is derogatory, don’t use it. This also
-includes repeated subtle and/or indirect discrimination; when asked to stop,
-stop the behaviour in question.
+identify with, or questioning an individual’s gender identity. If you’re unsure
+if a word is derogatory, don’t use it.  When asked to stop, stop the behaviour
+in question.
 
-## Unwelcome Sexual Attention or Physical Contact
+## Unwelcome Sexual Attention or Physical Contact Is Not Acceptable
 
 This section is here because it has been proven to be needed. It is not some formality.
+If you doubt this is needed, you have lead a very sheltered and/or privileged life.
 
 Unwelcome sexual attention online or offline, or unwelcome physical contact is
-not acceptable. This includes sexualized comments, jokes or imagery in
-interactions, communications or presentation materials, as well as
-inappropriate touching, groping, or sexual advances. This includes touching a
-person without permission, including sensitive areas such as their hair,
-pregnant stomach, mobility device (wheelchair, scooter, etc) or tattoos. This
-also includes physically blocking or intimidating another person. Physical
-contact or simulated physical contact (such as emojis like “kiss”) without
-affirmative consent is not acceptable. This includes sharing or distribution of
-sexualized images or text.
+not acceptable. This includes sexualized comments, jokes or imagery as well as
+inappropriate touching, groping, or sexual advances.  This also includes
+physically blocking or intimidating another person. Physical contact or
+simulated physical contact (potentially including emojis) without affirmative
+consent is not acceptable. 
 
 # Consequences of Unacceptable Behaviour
 
-Bad behavior from any LumoSQL community participant can't be tolerated.
+Bad behaviour from any LumoSQL community participant can't be tolerated.
 Intentional efforts to exclude people (except as part of a consequence of these
 guidelines) from LumoSQL activities are not acceptable.
 
 Reports of harassment/discrimination will be promptly and thoroughly
 investigated by the people responsible for the safety of the space, event or
-activity. Appropriate measures will be taken to address the situation.
+activity, with a view to taking action.
 
 Anyone asked to stop unacceptable behaviour is expected to stop immediately.
 Violation of these guidelines can result in you being ask to leave an event or
 online space, either temporarily or for the duration of the event, or being
 banned from participation in spaces, or future events and activities.
 
-Any participants who abuse the reporting process will be considered to be in
-violation of these guidelines and subject to the same consequences. False
-reporting, especially to retaliate or exclude, will not be accepted or tolerated.
+Participants who abuse the reporting process will be considered to be in
+violation. False reporting, especially to retaliate or exclude, will not be
+accepted or tolerated.
 
 # Reporting
 
-If you believe you’re experiencing unacceptable behavior that will not be
-tolerated as outlined above please contact one of the [current authors](https://lumosql.org/src/lumosql/file?name=AUTHORS).
+If you believe you’re experiencing unacceptable behaviour 
+as outlined above please contact one of the 
+[current authors](https://lumosql.org/src/lumosql/file?name=AUTHORS).
 
 After receiving a concise description of your situation, they will review and
-determine next steps. In addition to conducting any investigation, they can
-provide a range of resources, from a private consultation to other community
-resources. 
+determine next steps. 
 
-Please also report to us if you observe someone in distress or violations of
-these guidelines, even if the situation is not happening to you.
+Please also report to us if you observe someone else in distress or violations of
+these guidelines.
 
 If you feel you have been unfairly accused of violating these guidelines,
 please follow the same reporting process.
 
-*Heavily Adapted and Compressed from the surprisingly large version 3.1 of the 
+*Heavily Adapted and Compressed from the surprisingly large and seemingly repetitive version 3.1 of the 
 [Mozilla Participation Guidelines](https://www.mozilla.org/en-US/about/governance/policies/participation/)
 and released under the 
 [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/) license.*
