@@ -24,32 +24,32 @@ to interface each backend.
 
 # Questions The Build and Benchmark System Answers
 
-A single command now gives Universal, repeatable, definitive answers to the
+A single command can now give universal, repeatable, definitive answers to the
 following seemingly-simple questions:
 
-* How can benchmarking runs be shared in a consistent manner between all users? 
+* How can benchmarking runs be shared in a consistent manner between all users?
   ***(hint: use a standardised SQLite database)***
-* Does SQLite get faster with each version? ***(hint: definitely not always)***
+* Does SQLite get faster with each version? ***(hint: not always)***
 * Which compile options make a given version of SQLite faster?
-* How do different versions and compile options combine to change performance as 
+* How do different versions and compile options combine to change performance as
   data size gets larger?
-* Does SQLITE_DEBUG really make 
-[SQLite run approximately three times slower?](https://sqlite.org/compile.html) 
+* Does SQLITE_DEBUG really make
+[SQLite run approximately three times slower?](https://sqlite.org/compile.html)
 * What happens when a given set of compile options, versions and data size are
   tested on faster and slower disks?
 * Do I need to run hundreds of combinations to make decisions about SQLite versions/options/hardware?
-  ***(hint: no, because you now can have comparable benchmarking results from other people)***
+  ***(hint: no, because you now can compare benchmarking results databases)***
 
 Having addressed the above questions, the following seemingly more-difficult questions
 now become very similar to the previous ones:
 
 * What happens to performance when LMDB is swapped in as a storage backend for SQLite?
   ***(hint: there is a strange performance curve with increasing LMDB versions)***
-* How does the Oracle-funded BDB backend compare with other backends, including the 
-  SQLite Btree? ***(hint: are bigger numbers better?)***
-* How do all of the above compare with each other with different build options, 
-  versions and datasizes? ***(hint: we can share benchmarking results, saving 
-  thousands of CPU-hours building and running benchmarks)***
+* How does the Oracle-funded BDB backend compare with other backends, including the
+  SQLite Btree? ***(hint: Oracle seems to have thought longer runtimes are better :-)***
+* How do all of the above compare with each other with different build options,
+  versions and datasizes? ***(hint: now can share benchmarking results, we can take
+  advantage of thousands of CPU-hours from other people)***
 
 The rest of this document introduces and defines the benchmarking tool that 
 makes answering these questions possible. 
