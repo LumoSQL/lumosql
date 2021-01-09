@@ -72,10 +72,14 @@ forking.
 <a name="lumosql-and-sqlites-billions-of-users"></a>
 ## LumoSQL, and SQLite's Billions of Users
 
+LumoSQL exists to demonstrate changes to SQLite that might be useful, but which
+SQLite probably cannot consider for many years because of SQLite's unique
+position of being used by a majority of the world's population. 
+
 SQLite is used by thousands of software projects, just three being
 Google's Android, Mozilla's Firefox and Apple's iOS which between them have
-billions of users. SQLite is careful and conservative, since changes are likely 
-to be noticed by a majority of earth's population. 
+billions of users. That is a main reason why SQLite is so careful and conservative
+with all changes.
 
 On the other hand, many of these same users need SQLite to have new features
 which do not fit with the SQLite project's cautious approach, and LumoSQL is a

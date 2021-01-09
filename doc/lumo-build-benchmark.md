@@ -17,6 +17,11 @@ The LumoSQL Build and Benchmark System is relevant to all SQLite
 users, not just SQLite users wondering about using different storage
 backends for SQLite.
 
+The LumoSQL project includes code to combine any version of SQLite with any
+version of third party storeage backends, and to run tests on the combined
+code. This requires small modifications to SQLite itself, and some new code
+to interface each backend.
+
 # Questions The Build and Benchmark System Answers
 
 A single command now gives Universal, repeatable, definitive answers to the
@@ -75,15 +80,28 @@ Example instances of these dimensions are:
 * ... and then we move on to the different versions of pure SQLite, and SQLite
   combined with Berkeley DB, etc.
 
-## Problem statement
+***Problem statement:***
 
-The LumoSQL Build and Benchmark system solves the problem of defining the
+> The LumoSQL Build and Benchmark system solves the problem of defining the
 dimensions of the test matrix in a formal machine-friendly manner, and 
 presenting them to the user in a human-friendly manner.
-
-The user can then select some or all of these dimensions by human-readable
-name, and then cause them to be actioned. Every selected by the user will have
+> The user can then select some or all of these dimensions by human-readable
+name, and then cause them to be actioned. Every selection by the user will have
 multiple dependency actions.
+
+To ensure repeatability of tests, each test will include the following information:
+* the version of the "not-forking" configuration used
+* the version of sqlite3 used (in one special case building third-party backend code
+which provides its own patched version of sqlite3, this will be empty and the
+backend name and version will contain information about the third-party code)
+* the name of the storage backend used: this is omitted if the test used an
+unchanged version of sqlite3 with its own backend
+* the version of the storage backend used, also omitted for tests using
+an unchanged version of sqlite3
+* any other options (currently only `datasize-N` to multiply the data size used
+in some benchmarks by `N`)
+
+Where the user has requested average results, the tests may be run several times.
 
 # Build and benchmark options
 
@@ -160,6 +178,16 @@ no matter which backend they use. Options which affect the build could be
 in any directory; currently there is no mechanism to address the case of the
 same option is present in multiple directories, and it is undefined which
 one will take precedence.
+
+## Backends as of LumoSQL 0.4
+
+At present the only backend provided is the `lmdb` backend derived from the
+sqlightning sources but modified to work with more versions of lmdb and sqlite3;
+however to add new backends see [Adding new backends](#adding-backends) below.
+
+A third backend, based on Oracle's Berkeley DB is in progress; a special target
+of `+bdb-VERSION` (without a sqlite3 version) indicates to build the code provided
+directy by Oracle, without using the LumoSQL build mechanism.
 
 ## Specifying build/benchmark options to "make"
 
@@ -357,4 +385,105 @@ test.
 At present, tests must be specified in the `sqlite3` directory and not a backend
 one: this is so that we run the same tests for unmodified sqlite3 as we do for
 the one modified by a backend, to guarantee a meaningful comparison.
+
+# Adding new backends <a name="adding-backends"></a>
+
+To add new backends, create a new directory inside `not-fork.d` (or inside the
+appropriate not-forking configuration repository) with the same name as the
+backend, and add information about how to obtain the sources etc. At a minimum
+the directory will contain the following files:
+
+* `upstream.conf`: information about where to find the sources
+* `lumo-new-files.mod`: a list of new files to be installed to link the
+backend with sqlite3: see an existing backend for a quick example, or
+read the more comprehensive documentation below
+* `files/FILENAME`: every file mentioned in `lumo-new-files.mod` needs
+to be provided in the `files/` directory
+* at least one of `benchmark/versions` and `benchmark/standalone`; the
+former includes versions of the backend to build and link against a
+"standard" sqlite, as well as specifying which versions of sqlite are
+compatible with that; the latter specifies versions to build using an
+included sqlite3; see the existing `versions` for LMDB and `standalone`
+for BDB as examples
+
+The build process requires the backend to provide the following two files
+(in directory `.lumosql`), which means that `lumo-new-files.mod` or some
+other file in the not-forking configuration must install them:
+
+* `lumo.mk` is a Makefile fragment which will be inserted into the sqlite3
+build process, for example to link against the backend
+* `lumo.build` is a TCL script to build the backend; it has access to
+various variables set by the build process; it needs to copy or move the
+build result to `$lumo_dir/build`
+
+The LumoSQL build system modifies sqlite3 to replace some of its own files
+with a stub, which used the C preprocessor's `#include` directive to read
+the original file. It also sets the include search path so that it looks
+first in a subdirectory `.lumosql/backend` of the backend's sources, and
+if not found there in the original sqlite3 sources. To avoid file name
+collision, all such files will be prefixed with `lumo_`
+
+Therefore, to replace one of these sqlite3 files with a new one the backend
+will need to have a line in `lumo-new-files.mod` to specify a new file with
+the appropriate name in `.lumosql/backend`, and also add this file in the
+`files` directory.
+
+For example, to replace `btree.c` with a new one (probably something to call
+the new backend using its own API rather than the original `btree.c` from
+sqlite3), one would have the following:
+
+File `lumo-new-files.mod`:
+```
+method = replace
+--
+# files required by the LumoSQL build system
+.lumosql/lumo.mk                 =  files/lumo.mk
+.lumosql/lumo.build              =  files/lumo.build
+
+# files we replace
+.lumosql/backend/lumo_btree.c    =  files/btree.c
+```
+
+Then file `files/btree.c` would contain the new version, and file `files/lumo.mk`
+would provide information on how to link the backend with sqlite3, for example:
+
+```
+TCC += -I$(LUMO_SOURCES)/$(LUMO_BACKEND)/include
+TLIBS += -L$(LUMO_BUILD)/$(LUMO_BACKEND)
+TLIBS += -lmy_backend
+```
+
+would add the `include` subdirectory in the backend's sources to the search
+path when building sqlite3 (probably because the replaced `btree.c` needs
+to include something from there), and also add the `build` directory in the
+backend's sources as library search path; finally it asks to link `libmy_backend.so`
+or `libmy_backend.a` into the sqlite3 executable, probably finding it in
+the build directory just added to the library search path.
+
+`files/lumo.build` could be something like:
+
+```
+global backend_name
+global backend_version
+global build_options
+
+puts "Configuring $backend_name $backend_version"
+if {$build_options(DEBUG) eq "on"} {
+    system ./configure --enable-debug
+} else {
+    system ./configure --disable-debug
+}
+
+puts "Building $backend_name $backend_version"
+system make
+
+# now move files of interest to lumo/build
+global lumo_dir
+set dest [file join $lumo_dir build]
+if {! [file isdirectory $dest]} { file mkdir $dest }
+file rename mybackend.h $dest
+foreach fn [glob liblmybackend.*] {
+    file rename $fn $dest
+}
+```
 
