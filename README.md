@@ -8,10 +8,15 @@
 
 # LumoSQL
 
-[LumoSQL](lumosql.org) is a modification (not a fork) of the [SQLite](https://sqlite.org)
-embedded data storage library. LumoSQL offers multiple backend storage
-systems selectable by the user and proposes other integrity and security features.
-There are currently three LumoSQL backends:
+[LumoSQL](lumosql.org) is a modification (not a fork) of the
+[SQLite](https://sqlite.org) embedded data storage library. LumoSQL offers
+multiple backend storage systems selectable by the user and proposes other
+integrity and security features. If you are an SQLite user familiar with C
+development wanting an easier way to benchmark and measure SQLite, or if you
+are wanting features only available in other key-value storage engines, then
+you may find LumoSQL interesting.
+
+In LumoSQL 0.4 there are currently three LumoSQL backends:
 
 * the default SQLite Btree storage system
 * [LMDB](https://github.com/LMDB/lmdb)
@@ -21,7 +26,9 @@ LumoSQL has a build and benchmarking tool for comparing vanilla SQLite versions
 and configurations with each other, as well as comparing the performance of
 different storage backends. LumoSQL is written in C, like SQLite. The
 benchmarking and other tools are written in Tcl, like much of the tooling and
-extensions for SQLite and Fossil.
+extensions for SQLite and Fossil. The build tool guarantees that options and
+configurations are always selected in the same way, so that benchmark results are 
+reliable.
 
 LumoSQL is distributed under [very liberal licence terms](LICENCES/README.md).
 
@@ -40,6 +47,7 @@ welcome via the [LumoSQL Fossil site](https://lumosql.org/src/lumosql).
 * [Participating, Not-Forking and Project Interactions](#participating-not-forking-and-project-interactions)
 * [LumoSQL, and SQLite's Billions of Users](#lumosql-and-sqlites-billions-of-users)
 * [Build Environment and Dependencies](#build-environment-and-dependencies)
+* [Limitations of LumoSQL](#limitations-of-lumosql)
 * [Using the Build and Benchmark System](#using-the-build-and-benchmark-system)
 * [A Brief History of LumoSQL](#a-brief-history-of-lumosql)
 
@@ -78,6 +86,7 @@ has become ubiquitous over two decades, which means there is a great deal of
 preparation needed when considering architectural changes.
 
 LumoSQL uses the [Fossil source code manager](https://fossil-scm.org) because:
+
 * Fossil is designed for projects of up to a million or so lines of code, unlike git (and therefore Github)
 * Fossil workflow and tools encourage inclusivity and collaboration rather than forking
 * Fossil and SQLite are symbiotic projects and test cases for each other, and therefore LumoSQL may be too 
@@ -94,19 +103,23 @@ Other tools can usually be installed from your operating system's standard packa
 On any reasonably recent Debian or Ubuntu-derived Linux distribution
 these installation commands should work:
 
+<b>
 ```sh
 sudo apt install git build-essential tclx
 sudo apt build-dep sqlite3
 ```
+</b>
 
 (`apt build-dep` requires `deb-src` lines uncommented in /etc/apt/sources.list).
 
 On any reasonably recent Fedora-derived Linux distribution:
 
+<b>
 ```sh
 sudo dnf install --assumeyes \
   git make gcc ncurses-devel readline-devel glibc-devel autoconf tcl-devel tclx-devel
 ```
+</b>
 
 The following steps have been tested on reaonably recent Debian and
 Fedora-related operating systems, and Gentoo. 
@@ -114,9 +127,25 @@ Fedora-related operating systems, and Gentoo.
 The not-forking tool will advise you with an error message if you ask for sources that
 require a tool or a version that is not installed. Here are the tool dependencies:
 
-* to build and benchmark just SQLite, you need to have [Fossil](https://fossil-scm.org/). Fossil version 2.13 or later from your distrbution, or [2.13 or 2.12.1 from the Fossil download page](https://fossil-scm.org/home/uv/download.html). You may want to [build trunk yourself](https://fossil-scm.org/home/doc/trunk/www/build.wiki), since it is very quick and easy even compared to LumoSQL.
-* to build and benchmark any of the LMDB targets, you need to have git version 2.22 or later.
-* to build and benchmark any of the Oracle Berkeley DB targets, you need either curl or wget, and GNU tar. Just about any version will be sufficient, even on Windows.
+* to build LumoSQL, you need [Fossil](https://fossil-scm.org/). Fossil version 2.13 or later from your distrbution, or [2.13 or 2.12.1 from the Fossil download page](https://fossil-scm.org/home/uv/download.html). You may want to [build trunk yourself](https://fossil-scm.org/home/doc/trunk/www/build.wiki), since it is quick and easy even compared to LumoSQL. Soon Fossil will be all you need, when the not-forking Fossil module is complete.
+* to build and benchmark just SQLite, you currently need to have git. version 2.22 or later. Git usually works, but can be fragile when pulling updated copies. If git updates fail, you can delete ~/.cache/LumoSQL/not-fork. Git users quite often need to delete their checked-out repository and start again, and this is the same scenario.
+* to build and benchmark any of the LMDB targets, you also currently need git version 2.22 or later.
+* to build and benchmark any of the Oracle Berkeley DB targets, you need either curl or wget, and GNU tar. Just about any version will be sufficient, even on Windows. Since Oracle has discontinued their port of SQLite to BDB, any further development of this port will be carried in the LumoSQL fossil tree.
+
+<a name="limitations-of-lumosql"></a>
+## Limitations of LumoSQL
+
+As of LumoSQL 0.4, there are many obvious limitations, including:
+
+* The tests used in benchmarking mostly come from an ancient version of SQLite's
+  speedtest.tcl modified many times. Experts in SQLite and LMDB database testing 
+  should review the files in not-fork.d/sqlite3/benchmark/*test , to which DATASIZE
+  and DEBUG have been added.
+* Neither LMDB nor BDB backends ship with latest SQLite builds. Now all the LumoSQL infrastructure
+  exists, that is a smaller, more maintainable and repeatable task. But it is not done yet.
+  There are some generic problems to be solved in the process, such as the optimal way to
+  address keysize disparities between a KVP store provider and SQLite's internal large keysize.
+
 
 <a name="using-the-build-and-benchmark-system"></a>
 ## Using the Build and Benchmark System
@@ -133,9 +162,12 @@ Benchmarking a single binary should take no longer than 4 minutes to complete de
 on hardware. The results are stored in an SQLite database stored in the LumoSQL 
 top-level directory by default, that is, the directory you just created using `fossil clone`.
 
-Start by building and benchmarking the official SQLite release version 3.34.0:
+Start by building and benchmarking the official SQLite release version 3.34.0, which is the current
+release at the time of writing this README.
 
+<b>
 `make benchmark USE_LMDB=no USE_BDB=no SQLITE_VERSIONS='3.34.0'`
+</b>
 
 All source files fetched are cached in ~/.cache/LumoSQL in a way that maximises reuse regardless of 
 their origin (Fossil, git, wget etc) and which minimises errors. The LumoSQL build system is driving the
@@ -144,6 +176,7 @@ version if most of the code is already in cache.
 
 The output from this make command will be something like this:
 
+<b>
 `
 tclsh tool/build.tcl database not-fork.d build benchmarks.sqlite
 Creating database benchmarks.sqlite
@@ -171,12 +204,168 @@ tclsh tool/build.tcl benchmark not-fork.d build benchmarks.sqlite  SQLITE_VERSIO
           OK     0.064  14 DROP TABLE
                 75.515 (total time)
 `
+</b>
 
 A database with the default name of `benchmarks.sqlite` has been created with
 two tables containing the results. This is one single test run, and the test
 run data is kept in the table `test_data`. The table `run_data` contains data
 relative to a set of runs (version numbers, time test started, etc). This is cumulative,
-so another invocation of `make benchmark ...` will add to `benchmarks.sqlite`.
+so another invocation of `make benchmark` will append to `benchmarks.sqlite`.
+
+Every run is assigned a SHA-256 hash, which helps in making results persistent over time and 
+across the internet.
+
+The tool `benchmark-filter.tcl` does some basic processing of these results:
+
+<b>
+tool/benchmark-filter.tcl
+RUN_ID                                                            TARGET  DATE        TIME         DURATION
+DF28B0624434217B09E54A422E077307B60A913F7DDA1E7BA46DDE1F142DB2F1  3.34.0  2021-01-08  19:55:04       75.515
+</b>
+
+The option DATASIZE=**parameter** is a multiplication factor on the size of the chunks that is used for 
+benchmarking. This is useful because it can affect the time it takes to run the tests by a very different
+multiplication factor:
+
+<b>
+```
+make benchmark USE_LMDB=no USE_BDB=no DATASIZE=2 SQLITE_VERSIONS='3.34.0 3.33.0'
+```
+</b>
+
+followed by:
+
+<b>
+```
+tool/benchmark-filter.tcl 
+RUN_ID                                                            TARGET              DATE        TIME         DURATION
+DF28B0624434217B09E54A422E077307B60A913F7DDA1E7BA46DDE1F142DB2F1  3.34.0              2021-01-08  19:55:04       75.515
+FCD1E838F9FC61EAA39F4721EA252F5F10DE9FE57ABA22115D3E2793F5EB1095  3.34.0++datasize-2  2021-01-08  21:54:18      321.976
+FA227B630BE52C537DCE1E4929D9335551F7AEE80A30EE2D449212CD2F94C727  3.33.0++datasize-2  2021-01-08  21:59:57      331.486
+```
+</b>
+
+Simplistically, these results suggest that SQLite version 3.34.0 is faster than
+3.33.0 on larger data sizes, but that 3.34.0 is much faster with smaller data
+sizes. After adding more versions and running the benchmarking tool again, we would
+soon discover that SQLite 3.25.0 seems faster than 3.33.0, and other interesting things. 
+Simplistic interpretations can be misleading :-)
+
+This is a Quickstart, so for full detail you will need the 
+[Build/Benchmark documentation](doc/lumo-build-benchmark.md). However as a teaser, and since LMDB
+was the original inspiration for LumoSQL (see the 
+[History section below]((#a-brief-history-of-lumosql) for more on that) here are some more things that
+can be done with the LMDB target:
+
+<b>
+```
+$ make what LMDB_VERSIONS=all
+tclsh tool/build.tcl what not-fork.d  LMDB_VERSIONS='all'
+BENCHMARK_DB=benchmarks.sqlite
+BENCHMARK_RUNS=1
+SQLITE_VERSIONS=3.34.0
+USE_SQLITE=yes
+USE_BDB=yes
+SQLITE_FOR_BDB=
+BDB_VERSIONS=
+BDB_STANDALONE=18.1.32=3.18.2
+USE_LMDB=yes
+SQLITE_FOR_LMDB=3.8.3.1
+LMDB_VERSIONS=all
+LMDB_STANDALONE=
+OPTION_DATASIZE=1
+OPTION_DEBUG=off
+BUILDS=
+    3.34.0
+    3.18.2
+    +bdb-18.1.32
+    3.8.3.1
+    3.8.3.1+lmdb-0.9.8
+    3.8.3.1+lmdb-0.9.9
+    3.8.3.1+lmdb-0.9.10
+    3.8.3.1+lmdb-0.9.11
+    3.8.3.1+lmdb-0.9.12
+    3.8.3.1+lmdb-0.9.13
+    3.8.3.1+lmdb-0.9.14
+    3.8.3.1+lmdb-0.9.15
+    3.8.3.1+lmdb-0.9.16
+    3.8.3.1+lmdb-0.9.17
+    3.8.3.1+lmdb-0.9.18
+    3.8.3.1+lmdb-0.9.19
+    3.8.3.1+lmdb-0.9.20
+    3.8.3.1+lmdb-0.9.21
+    3.8.3.1+lmdb-0.9.22
+    3.8.3.1+lmdb-0.9.23
+    3.8.3.1+lmdb-0.9.24
+    3.8.3.1+lmdb-0.9.25
+    3.8.3.1+lmdb-0.9.26
+    3.8.3.1+lmdb-0.9.27
+TARGETS=
+    3.34.0
+    3.18.2
+    +bdb-18.1.32
+    3.8.3.1
+    3.8.3.1+lmdb-0.9.8
+    3.8.3.1+lmdb-0.9.9
+    3.8.3.1+lmdb-0.9.10
+    3.8.3.1+lmdb-0.9.11
+    3.8.3.1+lmdb-0.9.12
+    3.8.3.1+lmdb-0.9.13
+    3.8.3.1+lmdb-0.9.14
+    3.8.3.1+lmdb-0.9.15
+    3.8.3.1+lmdb-0.9.16
+    3.8.3.1+lmdb-0.9.17
+    3.8.3.1+lmdb-0.9.18
+    3.8.3.1+lmdb-0.9.19
+    3.8.3.1+lmdb-0.9.20
+    3.8.3.1+lmdb-0.9.21
+    3.8.3.1+lmdb-0.9.22
+    3.8.3.1+lmdb-0.9.23
+    3.8.3.1+lmdb-0.9.24
+    3.8.3.1+lmdb-0.9.25
+    3.8.3.1+lmdb-0.9.26
+    3.8.3.1+lmdb-0.9.27
+
+```
+</b>
+
+After executing this build with `make benchmark` rather than `make what`, here are summary results using a 
+a new parameter to `benchmark-filter.tcl`:
+
+<b>
+```
+$ tool/benchmark-filter.tcl -fields TARGET,DURATION
+TARGET                  DURATION 
+3.8.3.1+lmdb-0.9.9        89.523 
+3.8.3.1+lmdb-0.9.10       88.351 
+3.8.3.1+lmdb-0.9.11       86.815 
+3.8.3.1+lmdb-0.9.12       99.207 
+3.8.3.1+lmdb-0.9.13       87.490 
+3.8.3.1+lmdb-0.9.14       88.241 
+3.8.3.1+lmdb-0.9.15       88.415 
+3.8.3.1+lmdb-0.9.16       86.958 
+3.8.3.1+lmdb-0.9.17       90.032 
+3.8.3.1+lmdb-0.9.18       89.872 
+3.8.3.1+lmdb-0.9.19       92.257 
+3.8.3.1+lmdb-0.9.21       93.398 
+3.8.3.1+lmdb-0.9.22       93.473 
+3.8.3.1+lmdb-0.9.23       93.908 
+3.8.3.1+lmdb-0.9.24       95.054 
+3.8.3.1+lmdb-0.9.25       89.829 
+3.8.3.1+lmdb-0.9.26      101.211 
+3.8.3.1+lmdb-0.9.27       90.744 
+3.8.3.1                   73.464 
+
+```
+</b>
+
+Again, simplistic interpretations are insufficient, but the data here suggests that LMDB has decreased
+in performance over time, and no version of LMDB is faster than native SQLite 3.8.3.1 . However, further
+benchmark runs indicates that is not the final story, as LMDB run on slower hard disks improve in relative 
+speed rapidly. And we need to try the latest version of SQLite with all the versions of LMDB available 
+in order to get an up-to-date picture. 
+
+The results for the Berkely DB backend are also most interesting.
 
 <a name="a-brief-history-of-lumosql"></a>
 ## A Brief History of LumoSQL
