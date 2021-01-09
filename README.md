@@ -243,9 +243,11 @@ across the internet.
 The tool `benchmark-filter.tcl` does some basic processing of these results:
 
 <b>
+```
 tool/benchmark-filter.tcl
 RUN_ID                                                            TARGET  DATE        TIME         DURATION
 DF28B0624434217B09E54A422E077307B60A913F7DDA1E7BA46DDE1F142DB2F1  3.34.0  2021-01-08  19:55:04       75.515
+```
 </b>
 
 The option DATASIZE=**parameter** is a multiplication factor on the size of the chunks that is used for 
