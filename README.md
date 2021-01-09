@@ -170,7 +170,7 @@ require a tool or a version that is not installed. Here are the tool dependencie
 * to build LumoSQL, you need [Fossil](https://fossil-scm.org/). Fossil version 2.13 or later from your distrbution, or [2.13 or 2.12.1 from the Fossil download page](https://fossil-scm.org/home/uv/download.html). You may want to [build trunk yourself](https://fossil-scm.org/home/doc/trunk/www/build.wiki), since it is quick and easy even compared to LumoSQL. Soon Fossil will be all you need, when the not-forking Fossil module is complete.
 * to build and benchmark just SQLite, you currently need to have git. version 2.22 or later. Git usually works, but can be fragile when pulling updated copies. If git updates fail, you can delete ~/.cache/LumoSQL/not-fork. Git users quite often need to delete their checked-out repository and start again, and this is the same scenario.
 * to build and benchmark any of the LMDB targets, you also currently need git version 2.22 or later.
-* to build and benchmark any of the Oracle Berkeley DB targets, you need either curl or wget, and GNU tar. Just about any version will be sufficient, even on Windows. Since Oracle has discontinued their port of SQLite to BDB, any further development of this port will be carried in the LumoSQL fossil tree.
+* to build and benchmark any of the Oracle Berkeley DB targets, you need either curl or wget, and also file, gzip and GNU tar. Just about any version of these will be sufficient, even on Windows. Since Oracle has discontinued their port of SQLite to BDB, any further development of this port will be carried in the LumoSQL fossil tree.
 
 <a name="using-the-build-and-benchmark-system"></a>
 ## Using the Build and Benchmark System
@@ -237,7 +237,7 @@ run data is kept in the table `test_data`. The table `run_data` contains data
 relative to a set of runs (version numbers, time test started, etc). This is cumulative,
 so another invocation of `make benchmark` will append to `benchmarks.sqlite`.
 
-Every run is assigned a SHA-256 hash, which helps in making results persistent over time and 
+Every run is assigned a SHA3 hash, which helps in making results persistent over time and 
 across the internet.
 
 The tool `benchmark-filter.tcl` does some basic processing of these results:
