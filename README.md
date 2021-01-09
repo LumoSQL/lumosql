@@ -92,13 +92,12 @@ As of LumoSQL 0.4, there are many obvious limitations, including:
 
 * The tests used in benchmarking mostly come from an ancient version of SQLite's
   speedtest.tcl modified many times. Experts in SQLite and LMDB database testing 
-  should review the files in not-fork.d/sqlite3/benchmark/*test , to which DATASIZE
+  should review the files in not-fork.d/sqlite3/benchmark/\*test , to which DATASIZE
   and DEBUG have been added.
 * Neither LMDB nor BDB backends ship with latest SQLite builds. Now all the LumoSQL infrastructure
   exists, that is a smaller, more maintainable and repeatable task. But it is not done yet.
   There are some generic problems to be solved in the process, such as the optimal way to
   address keysize disparities between a KVP store provider and SQLite's internal large keysize.
-
 
 <a name="build-environment-and-dependencies"></a>
 ## Build Environment and Dependencies
@@ -325,7 +324,6 @@ TARGETS=
     3.8.3.1+lmdb-0.9.25
     3.8.3.1+lmdb-0.9.26
     3.8.3.1+lmdb-0.9.27
-
 ```
 </b>
 
@@ -355,7 +353,6 @@ TARGET                  DURATION
 3.8.3.1+lmdb-0.9.26      101.211 
 3.8.3.1+lmdb-0.9.27       90.744 
 3.8.3.1                   73.464 
-
 ```
 </b>
 
