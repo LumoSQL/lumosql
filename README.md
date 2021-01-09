@@ -95,9 +95,10 @@ preparation needed when considering architectural changes.
 As of LumoSQL 0.4, there are many obvious limitations, including:
 
 * The tests used in benchmarking mostly come from an ancient version of SQLite's
-  speedtest.tcl modified many times. Experts in SQLite and LMDB database testing 
-  should review the files in not-fork.d/sqlite3/benchmark/\*test , to which DATASIZE
-  and DEBUG have been added. There are [9 tools named \*speed\*](https://sqlite.org/src/dir?ci=tip&name=tool) 
+  speedtest.tcl modified many times, to which DATASIZE
+  and DEBUG have been added. Experts in SQLite and LMDB database testing 
+  should review the files in not-fork.d/sqlite3/benchmark/\*test. There are 
+  [9 tools named \*speed\*](https://sqlite.org/src/dir?ci=tip&name=tool) 
   in the SQLite source, and any/all of them should be added here.
 * Neither LMDB nor BDB backends ship with latest SQLite builds. Now all the LumoSQL infrastructure
   exists, that is a smaller, more maintainable and repeatable task. But it is not done yet.
@@ -106,7 +107,8 @@ As of LumoSQL 0.4, there are many obvious limitations, including:
 * If we import more of the speed tests from SQLite identified above, then we will 
   have a problem with several LMDB and at least two BDB instances, where the SQLite
   tests will fail. In most cases this is about the LMDB port needing to be more 
-  complete but in some it is about relevance, where some backends will always need
+  complete but in some it is about relevance, where some SQLite tests will not apply. In
+  addition some backends will always need
   to have additional tests (for example, BDB has more extensive user management than 
   SQLite).
 
@@ -125,6 +127,8 @@ Fossil is the tool of choice for LumoSQL.
 The build system requires [the not-forking tool](https://lumosql.org/src/not-forking/).
 Other tools can usually be installed from your operating system's standard packages.
 
+#### Debian or Ubuntu-derived Operating Systems
+
 On any reasonably recent Debian or Ubuntu-derived Linux distribution
 these installation commands should work:
 
@@ -135,9 +139,18 @@ sudo apt build-dep sqlite3
 ```
 </b>
 
-(`apt build-dep` requires `deb-src` lines uncommented in /etc/apt/sources.list).
+(`apt build-dep` requires `deb-src` lines uncommented in /etc/apt/sources.list), for example
+for Ubuntu 20.04 a valid line is:
 
-On any reasonably recent Fedora-derived Linux distribution:
+<b>
+```
+deb-src http://gb.archive.ubuntu.com/ubuntu/ focal-backports main restricted universe multiverse
+```
+</b>
+
+#### Fedora-derived Operating Systems
+
+On any reasonably recent Fedora-derived Linux distribution, including Red Hat:
 
 <b>
 ```sh
@@ -145,6 +158,8 @@ sudo dnf install --assumeyes \
   git make gcc ncurses-devel readline-devel glibc-devel autoconf tcl-devel tclx-devel
 ```
 </b>
+
+#### Common to all Linux Operating Systems
 
 The following steps have been tested on reaonably recent Debian and
 Fedora-related operating systems, and Gentoo. 
