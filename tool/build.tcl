@@ -852,7 +852,7 @@ proc number_name {n} {
   return $txt
 }
 
-set notforking_id ""
+set notforking_id "NOT KNOWN"
 pushd $notfork
 catch {
     set notforking_tmp [exec fossil info]
