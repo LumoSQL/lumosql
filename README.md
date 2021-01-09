@@ -46,8 +46,8 @@ welcome via the [LumoSQL Fossil site](https://lumosql.org/src/lumosql).
 
 * [Participating, Not-Forking and Project Interactions](#participating-not-forking-and-project-interactions)
 * [LumoSQL, and SQLite's Billions of Users](#lumosql-and-sqlites-billions-of-users)
-* [Build Environment and Dependencies](#build-environment-and-dependencies)
 * [Limitations of LumoSQL](#limitations-of-lumosql)
+* [Build Environment and Dependencies](#build-environment-and-dependencies)
 * [Using the Build and Benchmark System](#using-the-build-and-benchmark-system)
 * [A Brief History of LumoSQL](#a-brief-history-of-lumosql)
 
@@ -85,6 +85,24 @@ The LumoSQL documentation project reviews dozens of relevant codebases.  SQLite
 has become ubiquitous over two decades, which means there is a great deal of
 preparation needed when considering architectural changes.
 
+<a name="limitations-of-lumosql"></a>
+## Limitations of LumoSQL
+
+As of LumoSQL 0.4, there are many obvious limitations, including:
+
+* The tests used in benchmarking mostly come from an ancient version of SQLite's
+  speedtest.tcl modified many times. Experts in SQLite and LMDB database testing 
+  should review the files in not-fork.d/sqlite3/benchmark/*test , to which DATASIZE
+  and DEBUG have been added.
+* Neither LMDB nor BDB backends ship with latest SQLite builds. Now all the LumoSQL infrastructure
+  exists, that is a smaller, more maintainable and repeatable task. But it is not done yet.
+  There are some generic problems to be solved in the process, such as the optimal way to
+  address keysize disparities between a KVP store provider and SQLite's internal large keysize.
+
+
+<a name="build-environment-and-dependencies"></a>
+## Build Environment and Dependencies
+
 LumoSQL uses the [Fossil source code manager](https://fossil-scm.org) because:
 
 * Fossil is designed for projects of up to a million or so lines of code, unlike git (and therefore Github)
@@ -93,9 +111,6 @@ LumoSQL uses the [Fossil source code manager](https://fossil-scm.org) because:
 
 LumoSQL is mirrored to Github and changes can be imported from Github, but
 Fossil is the tool of choice for LumoSQL.
-
-<a name="build-environment-and-dependencies"></a>
-## Build Environment and Dependencies
 
 The build system requires [the not-forking tool](https://lumosql.org/src/not-forking/).
 Other tools can usually be installed from your operating system's standard packages.
@@ -131,21 +146,6 @@ require a tool or a version that is not installed. Here are the tool dependencie
 * to build and benchmark just SQLite, you currently need to have git. version 2.22 or later. Git usually works, but can be fragile when pulling updated copies. If git updates fail, you can delete ~/.cache/LumoSQL/not-fork. Git users quite often need to delete their checked-out repository and start again, and this is the same scenario.
 * to build and benchmark any of the LMDB targets, you also currently need git version 2.22 or later.
 * to build and benchmark any of the Oracle Berkeley DB targets, you need either curl or wget, and GNU tar. Just about any version will be sufficient, even on Windows. Since Oracle has discontinued their port of SQLite to BDB, any further development of this port will be carried in the LumoSQL fossil tree.
-
-<a name="limitations-of-lumosql"></a>
-## Limitations of LumoSQL
-
-As of LumoSQL 0.4, there are many obvious limitations, including:
-
-* The tests used in benchmarking mostly come from an ancient version of SQLite's
-  speedtest.tcl modified many times. Experts in SQLite and LMDB database testing 
-  should review the files in not-fork.d/sqlite3/benchmark/*test , to which DATASIZE
-  and DEBUG have been added.
-* Neither LMDB nor BDB backends ship with latest SQLite builds. Now all the LumoSQL infrastructure
-  exists, that is a smaller, more maintainable and repeatable task. But it is not done yet.
-  There are some generic problems to be solved in the process, such as the optimal way to
-  address keysize disparities between a KVP store provider and SQLite's internal large keysize.
-
 
 <a name="using-the-build-and-benchmark-system"></a>
 ## Using the Build and Benchmark System
