@@ -44,26 +44,28 @@ welcome via the [LumoSQL Fossil site](https://lumosql.org/src/lumosql).
 
 # Table of Contents
 
-* [Participating, Not-Forking and Project Interactions](#participating-not-forking-and-project-interactions)
+* [Design, Not-Forking and Participating](#design-not-forking-and-participating)
 * [LumoSQL, and SQLite's Billions of Users](#lumosql-and-sqlites-billions-of-users)
 * [Limitations of LumoSQL](#limitations-of-lumosql)
 * [Build Environment and Dependencies](#build-environment-and-dependencies)
 * [Using the Build and Benchmark System](#using-the-build-and-benchmark-system)
 * [A Brief History of LumoSQL](#a-brief-history-of-lumosql)
 
-<a name="participating-not-forking-and-project-interactions"></a>
-## Participating, Not-Forking and Project Interactions
+<a name="design-not-forking-and-participating"></a>
+## Design, Not-Forking and Participating
 
 If you are reading this on Github, then you are looking at a mirror. LumoSQL is
 is maintained using [the Fossil repository](https://lumosql.org/src/lumosql). If you 
 want to participate in LumoSQL there is a forum, and if you have code contributions
 you can ask for access to the respository.
 
-LumoSQL has multiple upstreams, but does not fork any of them.
-The novel [Not-forking](https://lumosql.org/src/not-forking) tool is a requirement for 
-building LumoSQL. Between not-forking and the [LumoSQL Build and Benchmark System](doc/lumo-build-benchmark.md),
+LumoSQL has multiple upstreams, but does not fork any of them despite needing modifications.
+The novel [Not-forking](https://lumosql.org/src/not-forking) tool semi-automatically 
+tracks upstream changes and is a requirement for building LumoSQL. Between not-forking 
+and the [LumoSQL Build and Benchmark System](doc/lumo-build-benchmark.md),
 LumoSQL is as much about combining and configuring upstreams as it is about creating
-original database software.
+original database software. By maintaining Not-forking outside LumoSQL, we hope
+other projects will find it useful.
 
 The LumoSQL and SQLite projects are cooperating, so any merge friction is
 expected to become less over time, and key to that is the approach of not
