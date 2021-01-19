@@ -674,10 +674,10 @@ for {set i 0} {$i < [llength $build_list]} {incr i} {
     set sqlite3_commit_id ""
     if {$sqlite3_version ne ""} {
 	puts "    *** Getting sources: sqlite3 $sqlite3_version"
-	set pid [exec -ignorestderr not-fork -i $notfork --no-update -o $sources -v $sqlite3_version sqlite3 &]
+	set pid [exec -ignorestderr not-fork -i $notfork -o $sources -v $sqlite3_version sqlite3 &]
 	set ws [wait $pid]
 	if {[lindex $ws 1] ne "EXIT"} { return -code error }
-	set sqlite3_info [exec not-fork -i $notfork -q -v $sqlite3_version sqlite3]
+	set sqlite3_info [exec not-fork --no-update -i $notfork -q -v $sqlite3_version sqlite3]
 	regexp {***:(?n)^commit_id\s*=\s*(\S.*)$} $sqlite3_info skip sqlite3_commit_id
     } else {
 	set sqlite3_info [list]
@@ -687,10 +687,10 @@ for {set i 0} {$i < [llength $build_list]} {incr i} {
 	puts "    *** Getting sources: $backend_name $backend_version"
 	set backend_id " $backend_name $backend_version"
 	if {$backend_commit_id ne ""} { append backend_id " $backend_commit_id" }
-	set pid [exec -ignorestderr not-fork -i $notfork --no-update -o $sources -v $backend_version $backend_name &]
+	set pid [exec -ignorestderr not-fork -i $notfork -o $sources -v $backend_version $backend_name &]
 	set ws [wait $pid]
 	if {[lindex $ws 1] ne "EXIT"} { return -code error }
-	set backend_info [exec not-fork -i $notfork -q -v $backend_version $backend_name]
+	set backend_info [exec not-fork --no-update -i $notfork -q -v $backend_version $backend_name]
 	regexp {***:(?n)^commit_id\s*=\s*(\S.*)$} $backend_info skip backend_commit_id
     } else {
 	set backend_info [list]
