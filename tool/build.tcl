@@ -366,6 +366,39 @@ for {set i $argp} {$i < [llength $argv]} {incr i} {
     }
 }
 
+# helper array and function to pass "--no-update" to not-fork when
+# it makes sense to do so
+array set notfork_updated [list]
+
+proc update_notfork {target} {
+    global notfork_updated
+    if {[array names notfork_updated -exact $target] != ""} {
+	return 0
+    } else {
+	set notfork_updated($target) 1
+	return 1
+    }
+}
+
+# check not-fork tool can be found and is new enough
+
+set notfork_required "0.3"
+if {[catch {
+    set notfork_found [exec not-fork --check-version $notfork_required 2>@1]
+} notfork_results notfork_options]} {
+    set errorcode [lindex [dict get $notfork_options -errorcode] 0]
+    if {$errorcode eq "CHILDSTATUS"} {
+	set version_found ""
+	if {[regexp {^([\d\.]+)} $notfork_results skip version_found]} {
+	    set version_found " ($version_found)"
+	}
+	puts stderr "Installed version of not-fork$version_found is too old, $notfork_required required"
+    } else {
+	puts stderr "Cannot run not-fork, please check that it is installed and in PATH"
+    }
+    exit 1
+}
+
 set target_string $other_values(TARGETS)
 set benchmark_list [list]
 set build_list [list]
@@ -464,7 +497,11 @@ if {$target_string eq ""} {
 		set dver $other_values(SQLITE_FOR_$BACKEND)
 		set bver $other_values(${BACKEND}_VERSIONS)
 		if {$bver eq "all"} {
-		    set bver [exec not-fork -i $notfork --list-versions $backend]
+		    if {[update_notfork $backend]} {
+			set bver [exec not_fork -i $notfork --list-versions $backend]
+		    } else {
+			set bver [exec not_fork --no-update -i $notfork --list-versions $backend]
+		    }
 		}
 		foreach v [split $bver] {
 		    if {[regexp {^(.*?)\+(.*)$} $v skip sv bv]} {
@@ -477,7 +514,11 @@ if {$target_string eq ""} {
 		}
 		set bver $other_values(${BACKEND}_STANDALONE)
 		if {$bver eq "all"} {
-		    set bver [exec not-fork -i $notfork --list-versions $backend]
+		    if {[update_notfork $backend]} {
+			set bver [exec not_fork -i $notfork --list-versions $backend]
+		    } else {
+			set bver [exec not_fork --no-update -i $notfork --list-versions $backend]
+		    }
 		}
 		foreach v [split $bver] {
 		    if {[regexp {^(.*?)=(.*)$} $v skip bv sv]} {
@@ -597,25 +638,6 @@ if {$operation eq "what"} {
     exit 0
 }
 
-# check not-fork tool can be found and is new enough
-
-set notfork_required "0.2"
-if {[catch {
-    set notfork_found [exec not-fork --check-version $notfork_required 2>@1]
-} notfork_results notfork_options]} {
-    set errorcode [lindex [dict get $notfork_options -errorcode] 0]
-    if {$errorcode eq "CHILDSTATUS"} {
-	set version_found ""
-	if {[regexp {^([\d\.]+)} $notfork_results skip version_found]} {
-	    set version_found " ($version_found)"
-	}
-	puts stderr "Installed version of not-fork$version_found is too old, $notfork_required required"
-    } else {
-	puts stderr "Cannot run not-fork, please check that it is installed and in PATH"
-    }
-    exit 1
-}
-
 # now build all necessary targets
 # TODO - one day we may have options for building them in parallel
 
@@ -674,7 +696,11 @@ for {set i 0} {$i < [llength $build_list]} {incr i} {
     set sqlite3_commit_id ""
     if {$sqlite3_version ne ""} {
 	puts "    *** Getting sources: sqlite3 $sqlite3_version"
-	set pid [exec -ignorestderr not-fork -i $notfork -o $sources -v $sqlite3_version sqlite3 &]
+	if {[update_notfork sqlite3]} {
+	    set pid [exec not-fork -i $notfork -o $sources -v $sqlite3_version sqlite3 &]
+	} else {
+	    set pid [exec not-fork --no-update -i $notfork -o $sources -v $sqlite3_version sqlite3 &]
+	}
 	set ws [wait $pid]
 	if {[lindex $ws 1] ne "EXIT"} { return -code error }
 	set sqlite3_info [exec not-fork --no-update -i $notfork -q -v $sqlite3_version sqlite3]
@@ -687,7 +713,11 @@ for {set i 0} {$i < [llength $build_list]} {incr i} {
 	puts "    *** Getting sources: $backend_name $backend_version"
 	set backend_id " $backend_name $backend_version"
 	if {$backend_commit_id ne ""} { append backend_id " $backend_commit_id" }
-	set pid [exec -ignorestderr not-fork -i $notfork -o $sources -v $backend_version $backend_name &]
+	if {[update_notfork $backend]} {
+	    set pid [exec not-fork -i $notfork -o $sources -v $backend_version $backend_name &]
+	} else {
+	    set pid [exec not-fork --no-update -i $notfork -o $sources -v $backend_version $backend_name &]
+	}
 	set ws [wait $pid]
 	if {[lindex $ws 1] ne "EXIT"} { return -code error }
 	set backend_info [exec not-fork --no-update -i $notfork -q -v $backend_version $backend_name]
