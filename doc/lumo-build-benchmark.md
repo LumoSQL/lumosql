@@ -8,8 +8,12 @@
 
 # LumoSQL Build and Benchmark System
 
-[LumoSQL](https://lumosql.org) implements a meta-build system for SQLite. But
-how can we know if our changes to SQLite builds make a difference, and if so,
+[LumoSQL](https://lumosql.org) implements a meta-build system for SQLite, using
+the [Not-Forking tool](https://lumosql.org/src/not-forking) to handle many of
+the complexities so we can build a matrix of combined codebases and versions
+without having a mess of code specific to particular source trees.
+
+But once a binary is built, how can we know if our changes to SQLite make a difference, and
 what kind of difference? There was no standard way to compare software that
 implements the SQLite APIs, so we designed one.
 
