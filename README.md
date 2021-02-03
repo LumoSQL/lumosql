@@ -40,7 +40,7 @@ LumoSQL is supported by the [NLNet Foundation](https://nlnet.nl).
 
 Neither Windows nor Android are supported at present, despite being important
 SQLite targets. We do plan to do so, and in addition contributors are most
-welcome via the [LumoSQL Fossil site](https://lumosql.org/src/lumosql).
+welcome via the [LumoSQL Fossil site](/).
 
 # Table of Contents
 
@@ -55,7 +55,7 @@ welcome via the [LumoSQL Fossil site](https://lumosql.org/src/lumosql).
 ## Design, Not-Forking and Participating
 
 If you are reading this on Github, then you are looking at a mirror. LumoSQL is
-is maintained using [the Fossil repository](https://lumosql.org/src/lumosql). If you 
+is maintained using [the Fossil repository](/). If you 
 want to participate in LumoSQL there is a forum, and if you have code contributions
 you can ask for access to the respository.
 
@@ -181,7 +181,8 @@ This is a very brief quickstart, for full detail see the
 [Build and Benchmark System documentation](doc/lumo-build-benchmark.md). 
 
 Now you have the dependencies installed, clone the LumoSQL repository using
-`fossil clone https://lumosql.org/src/lumosql` .
+`fossil clone https://lumosql.org/src/lumosql` , which will create a new subdirectory called `lumosql` and
+a file called `lumosql.fossil` in the current directory.
 
 Try `make what` to see what the default sources and options are. The `what` target does not make any changes.
 
