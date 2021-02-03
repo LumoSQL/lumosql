@@ -17,14 +17,12 @@ But once a binary is built, how can we know if our changes to SQLite make a diff
 what kind of difference? There was no standard way to compare software that
 implements the SQLite APIs, so we designed one.
 
-The LumoSQL Build and Benchmark System is relevant to all SQLite
-users, not just SQLite users wondering about using different storage
-backends for SQLite.
-
-The LumoSQL project includes code to combine any version of SQLite with any
-version of third party storeage backends, and to run tests on the combined
-code. This requires small modifications to SQLite itself, and some new code
-to interface each backend.
+The LumoSQL Build and Benchmark System is relevant to all SQLite users wishing
+to compare different configurations and versions of standard SQLite.  In
+addition, the LumoSQL project includes code to combine any version of SQLite
+with any version of third party storeage backends, and to run tests on the
+combined code. This requires small modifications to SQLite itself, and some new
+code to interface each backend.
 
 # Questions The Build and Benchmark System Answers
 
