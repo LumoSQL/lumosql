@@ -4,12 +4,18 @@
 
 # LumoSQL build and benchmark
 
-# Copyright 2020 The LumoSQL Authors
+# Copyright 2020 The LumoSQL Authors, see LICENSES/MIT
 #
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2020 The LumoSQL Authors
+# SPDX-ArtifactOfProjectName: LumoSQL
+# SPDX-FileType: Tcl Script
+# SPDX-FileComment: Original by Claudio Calvelli, December 2020
 
-# see documentation for full details of usage; executive summary:
+# For full details see documentation in the LumoSQL source tree
+# at doc/lumo-build-benchmark.md .
+#
+# Executive summary:
 
 # build.tcl OPERATION NOTFORK_CONFIG ARGUMENTS
 
