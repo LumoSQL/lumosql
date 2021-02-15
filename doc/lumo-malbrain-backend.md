@@ -37,4 +37,4 @@ Features and experiments Karl mentions that may make this Btree interesting for 
 * the multi-root-node subdirectory removes the locking load on the root node by creating a read-only copy of the latest updated root version. The root is updated out-of-band.
 * threads2 version: Multi-Threaded with latching implemented by a latch manager with test & set latches in the first few btree pages.
 
-
+Karl's code is under the 2-Clause BSD.
