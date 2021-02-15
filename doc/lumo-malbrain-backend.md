@@ -16,6 +16,7 @@ at scale, are widely-ported and which have the property of being
 [MVCC](https://en.wikipedia.org/wiki/Multiversion_concurrency_control). As documented in
 [the LumoDoc Knowledgebase](https://lumosql.org/src/lumodoc/file?name=doc/lumo-relevant-knowledgebase.md&ci=tip)
  are:
+
 * SQLite's built-in btree
 * [LMDB](http://www.lmdb.tech/doc/)
 * [Comdb's BDB fork](https://github.com/bloomberg/comdb2)
