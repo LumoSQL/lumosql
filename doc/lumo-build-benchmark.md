@@ -35,7 +35,7 @@ following seemingly-simple questions:
 * Which compile options make a given version of SQLite faster?
 * How do different versions and compile options combine to change performance as
   data size gets larger?
-* Does SQLITE_DEBUG really make
+* Does SQLITE\_DEBUG really make
 [SQLite run approximately three times slower?](https://sqlite.org/compile.html)
 * What happens when a given set of compile options, versions and data size are
   tested on faster and slower disks?
@@ -245,6 +245,18 @@ if `list` is just the word `all`, then all known versions are benchmarked
 Alternatively, `TARGETS` can be specified to override all the makefile mechanism
 and build/benchmark a specific combination of options only, as explained in
 the next section.
+
+Some options are provided to control the use of the not-forking tool:
+
+* `NOTFORK_COMMAND=path` (default: look for `not-fork` in `$PATH`): the
+name of the not-forking tool
+* `NOTFORK_UPDATE=number` (default: 0): if nonzero, it will pass `--update`
+the first time the not-forking tool is called with a particular repository;
+this could be necessary if the defaults have been set to `--no-update`
+and the cached copy of the repository is older than the version required.
+* `NOTFORK_ONLINE=number` (default: 0): if nonzero, it will pass `--online`
+to the not-forking tool; this could be necessary if the defaults have been
+set to `--offline` and the operation cannot be completed with cached data.
 
 ## Encoding options in the target name
 

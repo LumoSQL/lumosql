@@ -250,11 +250,14 @@ read_options [file join $notfork sqlite3 benchmark]
 array set other_values [list \
 	BENCHMARK_DB     benchmarks.sqlite \
 	BENCHMARK_RUNS   1 \
+	NOTFORK_COMMAND  "not-fork" \
+	NOTFORK_ONLINE   0 \
+	NOTFORK_UPDATE   0 \
 	SQLITE_VERSIONS  $sqlite3_for_db \
-	TARGETS          "" \
 	USE_SQLITE       "yes" \
 ]
-set options_list [list BENCHMARK_DB BENCHMARK_RUNS SQLITE_VERSIONS USE_SQLITE]
+set options_list [lsort [array names other_values]]
+array set other_values [list TARGETS "" ]
 
 foreach backend_dir [glob -nocomplain -directory $notfork *] {
     if [file isdirectory [file join $backend_dir benchmark]] {
@@ -373,24 +376,41 @@ for {set i $argp} {$i < [llength $argv]} {incr i} {
 }
 
 # helper array and function to pass "--no-update" to not-fork when
-# it makes sense to do so
+# it makes sense to do so; also "--update" and "--online" if it
+# has been requested
 array set notfork_updated [list]
+set notfork_name $other_values(NOTFORK_COMMAND)
 
-proc update_notfork {target} {
+proc notfork_command {target args} {
     global notfork_updated
+    global other_values
+    global notfork_name
+    global notfork
+    set rargs [lreverse $args]
+    lappend rargs $notfork -i
     if {[array names notfork_updated -exact $target] != ""} {
-	return 0
+	lappend rargs "--no-update"
     } else {
 	set notfork_updated($target) 1
-	return 1
+	if {$other_values(NOTFORK_UPDATE)} {
+	    lappend rargs "--update"
+	}
     }
+    if {$other_values(NOTFORK_ONLINE)} {
+	lappend rargs "--online"
+    }
+    lappend rargs $notfork_name
+    lappend rargs -ignorestderr
+    set args [lreverse $rargs]
+    lappend args $target
+    return $args
 }
 
 # check not-fork tool can be found and is new enough
 
-set notfork_required "0.3"
+set notfork_required "0.3.1"
 if {[catch {
-    set notfork_found [exec not-fork --check-version $notfork_required 2>@1]
+    set notfork_found [exec $notfork_name --check-version $notfork_required 2>@1]
 } notfork_results notfork_options]} {
     set errorcode [lindex [dict get $notfork_options -errorcode] 0]
     if {$errorcode eq "CHILDSTATUS"} {
@@ -400,7 +420,7 @@ if {[catch {
 	}
 	puts stderr "Installed version of not-fork$version_found is too old, $notfork_required required"
     } else {
-	puts stderr "Cannot run not-fork, please check that it is installed and in PATH"
+	puts stderr "Cannot run $notfork_name, please check that it is installed and in PATH"
     }
     exit 1
 }
@@ -503,11 +523,11 @@ if {$target_string eq ""} {
 		set dver $other_values(SQLITE_FOR_$BACKEND)
 		set bver $other_values(${BACKEND}_VERSIONS)
 		if {$bver eq "all"} {
-		    if {[update_notfork $backend]} {
-			set bver [exec not_fork -i $notfork --list-versions $backend]
-		    } else {
-			set bver [exec not_fork --no-update -i $notfork --list-versions $backend]
-		    }
+		    # if a clone needs to happen that may result in
+		    # standard output which we don't want; so we call
+		    # not-fork twice
+		    eval exec [notfork_command $backend -q]
+		    set bver [eval exec [notfork_command $backend --list-versions]]
 		}
 		foreach v [split $bver] {
 		    if {[regexp {^(.*?)\+(.*)$} $v skip sv bv]} {
@@ -520,11 +540,11 @@ if {$target_string eq ""} {
 		}
 		set bver $other_values(${BACKEND}_STANDALONE)
 		if {$bver eq "all"} {
-		    if {[update_notfork $backend]} {
-			set bver [exec not_fork -i $notfork --list-versions $backend]
-		    } else {
-			set bver [exec not_fork --no-update -i $notfork --list-versions $backend]
-		    }
+		    # if a clone needs to happen that may result in
+		    # standard output which we don't want; so we call
+		    # not-fork twice
+		    eval exec [notfork_command $backend -q]
+		    set bver [eval exec [notfork_command $backend --list-versions]]
 		}
 		foreach v [split $bver] {
 		    if {[regexp {^(.*?)=(.*)$} $v skip bv sv]} {
@@ -702,14 +722,10 @@ for {set i 0} {$i < [llength $build_list]} {incr i} {
     set sqlite3_commit_id ""
     if {$sqlite3_version ne ""} {
 	puts "    *** Getting sources: sqlite3 $sqlite3_version"
-	if {[update_notfork sqlite3]} {
-	    set pid [exec not-fork -i $notfork -o $sources -v $sqlite3_version sqlite3 &]
-	} else {
-	    set pid [exec not-fork --no-update -i $notfork -o $sources -v $sqlite3_version sqlite3 &]
-	}
+	set pid [eval exec [notfork_command sqlite3 -o $sources -v $sqlite3_version] &]
 	set ws [wait $pid]
 	if {[lindex $ws 1] ne "EXIT"} { return -code error }
-	set sqlite3_info [exec not-fork --no-update -i $notfork -q -v $sqlite3_version sqlite3]
+	set sqlite3_info [eval exec [notfork_command sqlite3 -q -v $sqlite3_version]]
 	regexp {***:(?n)^commit_id\s*=\s*(\S.*)$} $sqlite3_info skip sqlite3_commit_id
     } else {
 	set sqlite3_info [list]
@@ -719,14 +735,10 @@ for {set i 0} {$i < [llength $build_list]} {incr i} {
 	puts "    *** Getting sources: $backend_name $backend_version"
 	set backend_id " $backend_name $backend_version"
 	if {$backend_commit_id ne ""} { append backend_id " $backend_commit_id" }
-	if {[update_notfork $backend]} {
-	    set pid [exec not-fork -i $notfork -o $sources -v $backend_version $backend_name &]
-	} else {
-	    set pid [exec not-fork --no-update -i $notfork -o $sources -v $backend_version $backend_name &]
-	}
+	set pid [eval exec [notfork_command $backend_name -o $sources -v $backend_version] &]
 	set ws [wait $pid]
 	if {[lindex $ws 1] ne "EXIT"} { return -code error }
-	set backend_info [exec not-fork --no-update -i $notfork -q -v $backend_version $backend_name]
+	set backend_info [eval exec [notfork_command $backend_name -q -v $backend_version]]
 	regexp {***:(?n)^commit_id\s*=\s*(\S.*)$} $backend_info skip backend_commit_id
     } else {
 	set backend_info [list]
@@ -739,6 +751,7 @@ for {set i 0} {$i < [llength $build_list]} {incr i} {
 	LUMO_BACKEND_VERSION $backend_version \
 	LUMO_BUILD $dest_tmp \
 	LUMO_SOURCES $sources \
+	MAKEFLAGS "" \
 	SQLITE3_COMMIT_ID $sqlite3_commit_id \
 	SQLITE3_VERSION $sqlite3_version \
     ]
