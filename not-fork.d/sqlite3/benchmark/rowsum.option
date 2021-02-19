@@ -1,17 +1,13 @@
-# "debug" build option
+# "rowsum" build option
 
-# this option controls whether the build process includes debugging code
-# (in future it may also control which debugging code)
-
-# for sqlite3 build, this results in adding -DSQLITE_DEBUG during build
-# as controlled by variable OPTION_DEBUG passed to lumo.mk and lumo.build
-
-# backends may specify their own debugging methods controlled by this option
+# this option controls whether the build process includes rowsum code:
+# the default rowsum algorithm is selected by build.mk but can be
+# changed with PRAGMAs
 
 # this option affects the build process
 build = yes
 
-# currently a Boolean (although in future this can change)
+# a Boolean: either we include the code, or we don't
 boolean
 
 # default value if not specified
