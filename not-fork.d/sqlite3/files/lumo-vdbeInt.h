@@ -5,6 +5,7 @@
 #include "lumo-sha3.c"
 
 #define LUMO_EXTENSIONS 1
+#define LUMO_ROWSUM_TYPE 1
 
 #define LUMO_ROWSUM_ID_sha3_512 0
 #define LUMO_ROWSUM_ID_sha3_384 1
@@ -12,39 +13,59 @@
 #define LUMO_ROWSUM_ID_sha3_224 3
 #define LUMO_ROWSUM_ID_sha3 LUMO_ROWSUM_ID_sha3_256
 
-#define LUMO_ROWSUM_GENERATE_sha3(d, p, l, k) { \
+#define LUMO_ROWSUM_DECLARATIONS_sha3(k) \
+  static void lumo_init_sha3_##k(void * ctx) { \
+    SHA3Init(ctx, k); \
+  } \
+  static void lumo_update_sha3_##k(void * ctx, const void * p, unsigned int n) { \
+    SHA3Update(ctx, p, n); \
+  } \
+  static void lumo_final_sha3_##k(void * ctx, void * d) { \
+    memcpy(d, SHA3Final(ctx), k / 8); \
+  } \
+  static void lumo_generate_sha3_##k(void * d, const void * p, unsigned int n) { \
     SHA3Context ctx; \
     SHA3Init(&ctx, k); \
-    SHA3Update(&ctx, p, l); \
+    SHA3Update(&ctx, p, n); \
     memcpy(d, SHA3Final(&ctx), k / 8); \
   }
 
-static void lumo_sha3_512(void * d, const void * p, unsigned int n)
-	LUMO_ROWSUM_GENERATE_sha3(d, p, n, 512)
-static void lumo_sha3_384(void * d, const void * p, unsigned int n)
-	LUMO_ROWSUM_GENERATE_sha3(d, p, n, 384)
-static void lumo_sha3_256(void * d, const void * p, unsigned int n)
-	LUMO_ROWSUM_GENERATE_sha3(d, p, n, 256)
-static void lumo_sha3_224(void * d, const void * p, unsigned int n)
-	LUMO_ROWSUM_GENERATE_sha3(d, p, n, 224)
+LUMO_ROWSUM_DECLARATIONS_sha3(512)
+LUMO_ROWSUM_DECLARATIONS_sha3(384)
+LUMO_ROWSUM_DECLARATIONS_sha3(256)
+LUMO_ROWSUM_DECLARATIONS_sha3(224)
 
-#undef LUMO_ROWSUM_GENERATE_sha3
+#undef LUMO_ROWSUM_DECLARATIONS_sha3
 
-#define LUMO_ROWSUM_TYPE 1
-#define LUMO_ROWSUM_LENGTH 66 /* must be >= 2 + maximum sum length */
+#define LUMO_ROWSUM_ELEMENT_sha3(k) \
+    [LUMO_ROWSUM_ID_sha3_##k] = { \
+	"sha3_" #k, \
+	k / 8, \
+	lumo_generate_sha3_##k, \
+	sizeof(SHA3Context), \
+	lumo_init_sha3_##k, \
+	lumo_update_sha3_##k, \
+	lumo_final_sha3_##k, \
+    },
 
 static struct {
     const char * name;
     int length;
     void (*generate)(void *, const void *, unsigned int);
+    size_t mem;
+    void (*init)(void *);
+    void (*update)(void *, const void *, unsigned int);
+    void (*final)(void *, void *);
 } lumo_rowsum_algorithms[] = {
-    [LUMO_ROWSUM_ID_sha3_512] = { "sha3_512",  64,  lumo_sha3_512 },
-    [LUMO_ROWSUM_ID_sha3_384] = { "sha3_384",  48,  lumo_sha3_384 },
-    [LUMO_ROWSUM_ID_sha3_256] = { "sha3_256",  32,  lumo_sha3_256 },
-    [LUMO_ROWSUM_ID_sha3_224] = { "sha3_224",  28,  lumo_sha3_224 },
+    LUMO_ROWSUM_ELEMENT_sha3(512)
+    LUMO_ROWSUM_ELEMENT_sha3(384)
+    LUMO_ROWSUM_ELEMENT_sha3(256)
+    LUMO_ROWSUM_ELEMENT_sha3(224)
 };
 static int lumo_rowsum_n_algorithms =
     sizeof(lumo_rowsum_algorithms) / sizeof(lumo_rowsum_algorithms[0]);
+
+#undef LUMO_ROWSUM_ELEMENT_sha3
 
 static struct {
     const char * name;
@@ -60,5 +81,11 @@ static unsigned int lumo_rowsum_algorithm = LUMO_ROWSUM_ID;
 
 /* help making sure we only look at our data */
 static const char lumo_extension_magic[4] = "Lumo";
+
+/* default value for "must check rowsum" pragma - if true, a column which
+** does not have a rowsum is considered corrupt; if false, the lack of
+** rowsum is ignored (this will help reading tables written without rowsum */
+static int lumo_extension_need_rowsum = 1;
+
 #endif
 
