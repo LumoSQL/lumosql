@@ -214,6 +214,9 @@ proc read_options {opt_dir} {
 		set syntax $value
 	    } elseif {$key eq "default"} {
 		set defval $value
+	    } elseif {$key eq "enum"} {
+		set lx [split $value ","]
+		set syntax [join $lx "|"]
 	    } elseif {$key eq "equiv"} {
 		set lx [split $value ","]
 		if {[llength $lx] < 2} {

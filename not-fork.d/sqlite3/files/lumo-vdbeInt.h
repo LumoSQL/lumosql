@@ -7,6 +7,7 @@
 #define LUMO_EXTENSIONS 1
 #define LUMO_ROWSUM_TYPE 1
 
+#define LUMO_ROWSUM_ID_none 65535
 #define LUMO_ROWSUM_ID_null 0
 #define LUMO_ROWSUM_ID_sha3_512 1
 #define LUMO_ROWSUM_ID_sha3_384 2
@@ -64,8 +65,8 @@ static struct {
     LUMO_ROWSUM_ELEMENT_sha3(256)
     LUMO_ROWSUM_ELEMENT_sha3(224)
 };
-static int lumo_rowsum_n_algorithms =
-    sizeof(lumo_rowsum_algorithms) / sizeof(lumo_rowsum_algorithms[0]);
+#define LUMO_ROWSUM_N_ALGORITHMS \
+    (sizeof(lumo_rowsum_algorithms) / sizeof(lumo_rowsum_algorithms[0]))
 
 #undef LUMO_ROWSUM_ELEMENT_sha3
 
@@ -74,7 +75,7 @@ static struct {
     unsigned int same_as;
 } lumo_rowsum_alias[] = {
     { "sha3",   LUMO_ROWSUM_ID_sha3_256 },
-    { "none",   ~1 },
+    { "none",   LUMO_ROWSUM_ID_none },
 };
 static int lumo_rowsum_n_alias =
     sizeof(lumo_rowsum_alias) / sizeof(lumo_rowsum_alias[0]);
@@ -88,7 +89,7 @@ static const char lumo_extension_magic[4] = "Lumo";
 /* default value for "must check rowsum" pragma - if true, a column which
 ** does not have a rowsum is considered corrupt; if false, the lack of
 ** rowsum is ignored (this will help reading tables written without rowsum */
-static int lumo_extension_need_rowsum = 1;
+static int lumo_extension_need_rowsum = LUMO_ROWSUM_ID < LUMO_ROWSUM_N_ALGORITHMS;
 
 #endif
 

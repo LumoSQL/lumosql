@@ -4,7 +4,7 @@
 method = patch
 --
 --- sqlite3/src/vdbe.c-orig	2021-02-11 09:36:38.605044099 +0100
-+++ sqlite3/src/vdbe.c	2021-02-19 21:19:03.051647599 +0100
++++ sqlite3/src/vdbe.c	2021-02-20 11:53:38.937658846 +0100
 @@ -21,6 +21,8 @@
  #include "sqliteInt.h"
  #include "vdbeInt.h"
@@ -120,10 +120,10 @@ method = patch
 +#ifdef LUMO_ROWSUM
 +	if (xtype == LUMO_ROWSUM_TYPE) {
 +	  rowsum_found = 1;
-+	  if (xsubtype < lumo_rowsum_n_algorithms) {
++	  if (xsubtype < LUMO_ROWSUM_N_ALGORITHMS) {
 +	    if (xlen == lumo_rowsum_algorithms[xsubtype].length){
 +	      /* this looks like a rowsum, check the row against it */
-+	      if (xlen != 0 && pC->isTable) {
++	      if (xlen != 0) {
 +		unsigned char rowsum[xlen];
 +		if( pC->szRow>=aOffset[p2] ){
 +		  /* the whole row fits in the page, so that's the easy case */
@@ -203,7 +203,7 @@ method = patch
 +  /* see if we'll be adding any extensions */
 +  iLumoExt = 0;
 +#ifdef LUMO_ROWSUM
-+  if (lumo_rowsum_algorithm < lumo_rowsum_n_algorithms) iLumoExt = 1;
++  if (lumo_rowsum_algorithm < LUMO_ROWSUM_N_ALGORITHMS) iLumoExt = 1;
 +#endif
 +#endif
 +
@@ -234,7 +234,7 @@ method = patch
 +  if (iLumoExt > 0) {
 +    pLumoExt.n = 4;
 +#ifdef LUMO_ROWSUM
-+    if (lumo_rowsum_algorithm < lumo_rowsum_n_algorithms) {
++    if (lumo_rowsum_algorithm < LUMO_ROWSUM_N_ALGORITHMS) {
 +      /* add space for the rowsum */
 +      pLumoExt.n += 3 + lumo_rowsum_algorithms[lumo_rowsum_algorithm].length;
 +    }
@@ -262,7 +262,7 @@ method = patch
 +    memcpy(zLumoExt, lumo_extension_magic, 4);
 +    zLumoPtr += 4;
 +#ifdef LUMO_ROWSUM
-+    if (lumo_rowsum_algorithm < lumo_rowsum_n_algorithms) {
++    if (lumo_rowsum_algorithm < LUMO_ROWSUM_N_ALGORITHMS) {
 +      /* add one extra BLOB with the rowsum */
 +      *zLumoPtr++ = LUMO_ROWSUM_TYPE;
 +      *zLumoPtr++ = lumo_rowsum_algorithm;

@@ -8,18 +8,8 @@ endif
 
 TCC += -I$(LUMO_SOURCES)/sqlite3/.lumosql
 
-# rowsum option - first translate from Boolean to enum (none, sha3)
-# so we are ready to add more algorithms later
-ifeq ($(OPTION_ROWSUM),)
-OPTION_ROWSUM := none
-else ifeq ($(OPTION_ROWSUM),off)
-OPTION_ROWSUM := none
-else ifeq ($(OPTION_ROWSUM),on)
-OPTION_ROWSUM := sha3
-endif
-
-ifneq ($(OPTION_ROWSUM),none)
-TCC += -DLUMO_ROWSUM='$(OPTION_ROWSUM)'
-TCC += -DLUMO_ROWSUM_ID='LUMO_ROWSUM_ID_$(OPTION_ROWSUM)'
+ifeq ($(OPTION_ROWSUM),on)
+TCC += -DLUMO_ROWSUM='$(OPTION_ROWSUM_ALGORITHM)'
+TCC += -DLUMO_ROWSUM_ID='LUMO_ROWSUM_ID_$(OPTION_ROWSUM_ALGORITHM)'
 endif
 
