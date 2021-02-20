@@ -830,6 +830,7 @@ const void *sqlite3BtreeKeyFetch(BtCursor *pCur, u32 *pAmt){
   if (rc)
     return NULL;
   else {
+	*pAmt = key.mv_size;
 	if (cursor_flags(mc) & MDB_INTEGERKEY)
 	  return key.mv_data;
 	else {

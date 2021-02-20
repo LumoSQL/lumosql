@@ -1,6 +1,6 @@
 set d5000 [expr $options(DATASIZE) * 5000]
 
-set name "$d5000 SELECTs"
+set name "$d5000 SELECTs with an index"
 
 set sql ""
 for {set i 0} {$i<$d5000} {incr i} {
