@@ -160,10 +160,10 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
 if {$sqlite3 eq ""} {
     # find a sqlite3
     # TODO - we need to get this info in the same way as build.tcl does
-    if {[file executable "build/3.34.0/sqlite3"]} {
-	set sqlite3 "./build/3.34.0/sqlite3"
-    } elseif {[file executable "build/3.33.0/sqlite3"]} {
-	set sqlite3 "./build/3.33.0/sqlite3"
+    if {[file executable "build/3.34.1/sqlite3"]} {
+	set sqlite3 "./build/3.34.1/sqlite3"
+    } elseif {[file executable "build/3.33.1/sqlite3"]} {
+	set sqlite3 "./build/3.33.1/sqlite3"
     } else {
 	set has_version ""
 	catch {
