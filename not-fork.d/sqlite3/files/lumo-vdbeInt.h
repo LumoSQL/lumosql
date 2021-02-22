@@ -1,3 +1,6 @@
+#ifndef _LUMO_VDBEINT_
+#define _LUMO_VDBEINT_ 1
+
 #ifdef LUMO_ROWSUM
 
 /* declarations needed for the rowsum code */
@@ -59,7 +62,7 @@ static struct {
     void (*update)(void *, const void *, unsigned int);
     void (*final)(void *, unsigned char *);
 } lumo_rowsum_algorithms[] = {
-    [LUMO_ROWSUM_ID_null] = { "null", 0, NULL, 0, NULL, NULL, NULL },
+    [LUMO_ROWSUM_ID_null] = { "empty", 0, NULL, 0, NULL, NULL, NULL },
     LUMO_ROWSUM_ELEMENT_sha3(512)
     LUMO_ROWSUM_ELEMENT_sha3(384)
     LUMO_ROWSUM_ELEMENT_sha3(256)
@@ -81,18 +84,19 @@ static struct {
     (sizeof(lumo_rowsum_alias) / sizeof(lumo_rowsum_alias[0]))
 
 /* default value when creating a new table */
-static unsigned int lumo_rowsum_algorithm = LUMO_ROWSUM_ID;
+extern unsigned int lumo_rowsum_algorithm;
 
-/* default value for "must check rowsum" pragma - if true, a column which
-** does not have a rowsum is considered corrupt; if false, the lack of
-** rowsum is ignored (this will help reading tables written without rowsum */
-static int lumo_extension_need_rowsum = LUMO_ROWSUM_ID < LUMO_ROWSUM_N_ALGORITHMS;
+/* how we check the rowsum: 0, we don't check it at all; 1, we check it
+** if present, but don't require it; 2, we require it to be there and
+** check it */
+extern int lumo_extension_check_rowsum;
 #endif
 
 #ifdef LUMO_EXTENSIONS
 #define LUMO_END_TYPE 0
 
 /* help making sure we only look at our data */
-static const char lumo_extension_magic[4] = "Lumo";
+#define LUMO_EXTENSION_MAGIC "Lumo"
 #endif
 
+#endif

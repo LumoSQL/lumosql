@@ -16,6 +16,7 @@ if {$build_options(DEBUG) eq "on"} {
     system ./configure
 }
 
+system tclsh tool/mkpragmatab.tcl
 system make
 
 # now move files of interest to lumo/build

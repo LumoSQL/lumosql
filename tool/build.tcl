@@ -173,6 +173,7 @@ proc set_bool {var val} {
 
 proc read_options {opt_dir} {
     global options
+    array set equiv { }
     foreach opt_file [glob -nocomplain -directory $opt_dir *.option] {
 	set option [file tail $opt_file]
 	set option [string replace $option end-6 end ""]
@@ -185,7 +186,7 @@ proc read_options {opt_dir} {
 	set build 0
 	set syntax {.*}
 	set defval ""
-	array set equiv { }
+	array unset equiv
 	foreach ln [split [read $rf] \n] {
 	    regsub {^\s+} $ln "" ln
 	    regsub {\s+$} $ln "" ln
@@ -598,6 +599,7 @@ if {$target_string eq ""} {
 		    set value $e2
 		}
 	    }
+	    if {$value eq [lindex $od 2]} { continue }
 	    set option [string toupper $option]
 	    array set opt_arr [list $option $value]
 	}

@@ -3,6 +3,9 @@ set d100 [expr $options(DATASIZE) * 100]
 set name "$d100 SELECTs on a string comparison"
 
 set sql ""
+if {$options(ROWSUM) == "on"} {
+  append sql "PRAGMA lumo_rowsum_algorithm=$options(ROWSUM_ALGORITHM);"
+}
 for {set i 1} {$i<=$d100} {incr i} {
     append sql "SELECT count(*), avg(b) FROM t2 WHERE c LIKE '%[number_name $i]%';\n"
 }

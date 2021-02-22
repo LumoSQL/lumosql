@@ -1,20 +1,149 @@
-# update vdbe.c to add new information in stored rows; currently
+# update various files to provide a Lumo extension; currently
 # used to add rowsum
 
 method = patch
 --
+--- sqlite3/src/pragma.c-orig	2021-02-22 15:29:35.146284010 +0100
++++ sqlite3/src/pragma.c	2021-02-22 20:57:26.765120763 +0100
+@@ -13,6 +13,8 @@
+ */
+ #include "sqliteInt.h"
+ 
++#include "lumo-vdbeInt.h"
++
+ #if !defined(SQLITE_ENABLE_LOCKING_STYLE)
+ #  if defined(__APPLE__)
+ #    define SQLITE_ENABLE_LOCKING_STYLE 1
+@@ -362,6 +364,68 @@
+   return addr;
+ }
+ 
++#ifdef LUMO_EXTENSIONS
++/* parse special Lumo pragmas */
++static int lumo_parse_pragma(
++	sqlite3 * db,           /* database connection */
++	const char * zDb,       /* database name */
++	const char * zLeft,     /* pragma ID */
++	const char * zRight,    /* value or NULL */
++	const char ** zResult,  /* string result value or error message */
++	int * nResult           /* integer result value */
++){
++  *zResult = 0;
++  if (strcmp(zLeft, "lumo_rowsum_algorithm") == 0) {
++    // XXX in future, we'll store this with the database, but for now is global
++    if (zRight) {
++      /* set the algorithm */
++      int i;
++      /* if it's an alias, see what's the real algorithm */
++      for (i = 0; i < LUMO_ROWSUM_N_ALIAS; i++) {
++	if (strcmp(zRight, lumo_rowsum_alias[i].name) == 0) {
++	  lumo_rowsum_algorithm = lumo_rowsum_alias[i].same_as;
++	  if (lumo_rowsum_algorithm >= LUMO_ROWSUM_N_ALGORITHMS)
++	    lumo_extension_check_rowsum = 0;
++	  return SQLITE_OK;
++	}
++      }
++      /* otherwise, see if it's an algorithm name */
++      for (i = 0; i < LUMO_ROWSUM_N_ALGORITHMS; i++) {
++	if (strcmp(zRight, lumo_rowsum_algorithms[i].name) == 0) {
++	  lumo_rowsum_algorithm = i;
++	  return SQLITE_OK;
++	}
++      }
++      /* not found */
++      *zResult = "Invalid rowsum algorithm";
++      return SQLITE_ERROR;
++    } else {
++      /* get the name of the algorithm */
++      const char * zAlg;
++      if (lumo_rowsum_algorithm < LUMO_ROWSUM_N_ALGORITHMS) {
++	*zResult = lumo_rowsum_algorithms[lumo_rowsum_algorithm].name;
++      } else {
++	*zResult = "none";
++      }
++      return SQLITE_OK;
++    }
++  }
++  if (strcmp(zLeft, "lumo_check_rowsum") == 0) {
++    // XXX in future, we'll store this with the database, but for now is global
++    if (zRight) {
++      if (strcmp(zRight, "always") == 0)
++	lumo_extension_check_rowsum = 2;
++      else
++	lumo_extension_check_rowsum = sqlite3GetBoolean(zRight, 1);
++    } else {
++      *nResult = lumo_extension_check_rowsum + 1;
++    }
++    return SQLITE_OK;
++  }
++  return SQLITE_NOTFOUND;
++}
++#endif /* LUMO_EXTENSIONS */
++
+ /*
+ ** Process a pragma statement.  
+ **
+@@ -395,6 +459,10 @@
+   Db *pDb;                     /* The specific database being pragmaed */
+   Vdbe *v = sqlite3GetVdbe(pParse);  /* Prepared statement */
+   const PragmaName *pPragma;   /* The pragma */
++#ifdef LUMO_EXTENSIONS
++  const char * zLumoResult = 0;
++  int nLumoResult = 0;
++#endif
+ 
+   if( v==0 ) return;
+   sqlite3VdbeRunOnlyOnce(v);
+@@ -465,6 +533,27 @@
+     goto pragma_out;
+   }
+ 
++#ifdef LUMO_EXTENSIONS
++  /* see if this is a special Lumo pragma */
++  rc = lumo_parse_pragma(db, zDb, zLeft, zRight, &zLumoResult, &nLumoResult);
++  if( rc==SQLITE_OK ){
++    sqlite3VdbeSetNumCols(v, 1);
++    sqlite3VdbeSetColName(v, 0, COLNAME_NAME, zLumoResult, SQLITE_TRANSIENT);
++    if (zLumoResult)
++      returnSingleText(v, zLumoResult);
++    else if (nLumoResult)
++      returnSingleInt(v, nLumoResult - 1);
++    goto pragma_out;
++  }
++  if( rc!=SQLITE_NOTFOUND ){
++    if( zLumoResult )
++      sqlite3ErrorMsg(pParse, "%s", zLumoResult);
++    pParse->nErr++;
++    pParse->rc = rc;
++    goto pragma_out;
++  }
++#endif
++
+   /* Locate the pragma in the lookup table */
+   pPragma = pragmaLocate(zLeft);
+   if( pPragma==0 ) goto pragma_out;
 --- sqlite3/src/vdbe.c-orig	2021-02-11 09:36:38.605044099 +0100
-+++ sqlite3/src/vdbe.c	2021-02-22 12:43:20.872151284 +0100
-@@ -21,6 +21,8 @@
++++ sqlite3/src/vdbe.c	2021-02-22 19:32:22.029862245 +0100
+@@ -21,6 +21,18 @@
  #include "sqliteInt.h"
  #include "vdbeInt.h"
  
 +#include "lumo-vdbeInt.h"
 +
++#ifdef LUMO_ROWSUM
++/* default value when creating a new table */
++unsigned int lumo_rowsum_algorithm = LUMO_ROWSUM_ID_sha3;
++
++/* how we check the rowsum: 0, we don't check it at all; 1, we check it
++** if present, but don't require it; 2, we require it to be there and
++** check it */
++int lumo_extension_check_rowsum = 2;
++#endif
++
  /*
  ** Invoke this macro on memory cells just prior to changing the
  ** value of the cell.  This macro verifies that shallow copies are
-@@ -2609,6 +2611,9 @@
+@@ -2609,6 +2621,9 @@
    u64 offset64;      /* 64-bit offset */
    u32 t;             /* A type code from the record header */
    Mem *pReg;         /* PseudoTable input register */
@@ -24,7 +153,7 @@ method = patch
  
    assert( pOp->p1>=0 && pOp->p1<p->nCursor );
    pC = p->apCsr[pOp->p1];
-@@ -2631,6 +2636,9 @@
+@@ -2631,6 +2646,9 @@
    assert( pC->eCurType!=CURTYPE_PSEUDO || pC->nullRow );
    assert( pC->eCurType!=CURTYPE_SORTER );
  
@@ -34,7 +163,7 @@ method = patch
    if( pC->cacheStatus!=p->cacheCtr ){                /*OPTIMIZATION-IF-FALSE*/
      if( pC->nullRow ){
        if( pC->eCurType==CURTYPE_PSEUDO ){
-@@ -2658,6 +2666,13 @@
+@@ -2658,6 +2676,13 @@
        if( pC->payloadSize > (u32)db->aLimit[SQLITE_LIMIT_LENGTH] ){
          goto too_big;
        }
@@ -48,7 +177,7 @@ method = patch
      }
      pC->cacheStatus = p->cacheCtr;
      pC->iHdrOffset = getVarint32(pC->aRow, aOffset[0]);
-@@ -2705,6 +2720,12 @@
+@@ -2705,6 +2730,12 @@
      }
    }
  
@@ -61,7 +190,7 @@ method = patch
    /* Make sure at least the first p2+1 entries of the header have been
    ** parsed and valid information is in aOffset[] and pC->aType[].
    */
-@@ -2771,6 +2792,17 @@
+@@ -2771,6 +2802,17 @@
      ** columns.  So the result will be either the default value or a NULL.
      */
      if( pC->nHdrParsed<=p2 ){
@@ -69,7 +198,7 @@ method = patch
 +      if (iLumoExt > 0){
 +	/* we tried to get the Lumo column, and it wasn't there */
 +#ifdef LUMO_ROWSUM
-+	if (lumo_extension_need_rowsum) goto op_column_corrupt;
++	if (lumo_extension_check_rowsum > 1) goto op_column_corrupt;
 +#endif
 +	p2 = iLumoExt-1;
 +	iLumoExt = 0;
@@ -79,7 +208,7 @@ method = patch
        if( pOp->p4type==P4_MEM ){
          sqlite3VdbeMemShallowCopy(pDest, pOp->p4.pMem, MEM_Static);
        }else{
-@@ -2838,7 +2870,20 @@
+@@ -2838,7 +2880,20 @@
        ** as that array is 256 bytes long (plenty for VdbeMemPrettyPrint())
        ** and it begins with a bunch of zeros.
        */
@@ -101,7 +230,7 @@ method = patch
      }else{
        rc = sqlite3VdbeMemFromBtree(pC->uc.pCursor, aOffset[p2], len, pDest);
        if( rc!=SQLITE_OK ) goto abort_due_to_error;
-@@ -2847,6 +2892,91 @@
+@@ -2847,6 +2902,91 @@
      }
    }
  
@@ -111,7 +240,7 @@ method = patch
 +    ** ours and process it if so; in any case we then need to repeat
 +    ** the opcode to get the correct column; our column must be at
 +    ** least 8 bytes to be useful so we check that t >= 12+8*2 or 28 */
-+    if (t>=28 && (t%2)==0 && memcmp(pDest->z, lumo_extension_magic, 4)==0){
++    if (t>=28 && (t%2)==0 && memcmp(pDest->z, LUMO_EXTENSION_MAGIC, 4)==0){
 +      int ptr = 4;
 +#ifdef LUMO_ROWSUM
 +      int rowsum_found = 0;
@@ -127,7 +256,7 @@ method = patch
 +	ptr += getVarint32(&pDest->z[ptr], xlen);
 +	if (len - ptr < xlen) goto op_column_corrupt;
 +#ifdef LUMO_ROWSUM
-+	if (xtype == LUMO_ROWSUM_TYPE) {
++	if (xtype == LUMO_ROWSUM_TYPE && lumo_extension_check_rowsum) {
 +	  rowsum_found = 1;
 +	  if (xsubtype < LUMO_ROWSUM_N_ALGORITHMS) {
 +	    if (xlen == lumo_rowsum_algorithms[xsubtype].length){
@@ -181,7 +310,7 @@ method = patch
 +	ptr += xlen;
 +      }
 +#ifdef LUMO_ROWSUM
-+      if (lumo_extension_need_rowsum && !rowsum_found) goto op_column_corrupt;
++      if (lumo_extension_check_rowsum > 1 && !rowsum_found) goto op_column_corrupt;
 +#endif
 +    }
 +    p2 = iLumoExt-1;
@@ -193,7 +322,7 @@ method = patch
  op_column_out:
    UPDATE_MAX_BLOBSIZE(pDest);
    REGISTER_TRACE(pOp->p3, pDest);
-@@ -2952,6 +3082,9 @@
+@@ -2952,6 +3092,9 @@
    u32 len;               /* Length of a field */
    u8 *zHdr;              /* Where to write next byte of the header */
    u8 *zPayload;          /* Where to write next byte of the payload */
@@ -203,7 +332,7 @@ method = patch
  
    /* Assuming the record contains N fields, the record format looks
    ** like this:
-@@ -3002,7 +3135,32 @@
+@@ -3002,7 +3145,32 @@
      }while( zAffinity[0] );
    }
  
@@ -236,7 +365,7 @@ method = patch
    /* NULLs can be safely trimmed from the end of the record, as long as
    ** as the schema format is 2 or more and none of the omitted columns
    ** have a non-NULL default value.  Also, the record must be left with
-@@ -3014,6 +3172,9 @@
+@@ -3014,6 +3182,9 @@
        nField--;
      }
    }
@@ -246,7 +375,7 @@ method = patch
  #endif
  
    /* Loop through the elements that will make up the record to figure
-@@ -3136,6 +3297,12 @@
+@@ -3136,6 +3307,12 @@
      if( pRec==pData0 ) break;
      pRec--;
    }while(1);
@@ -259,7 +388,7 @@ method = patch
  
    /* EVIDENCE-OF: R-22564-11647 The header begins with a single varint
    ** which determines the total number of bytes in the header. The varint
-@@ -3196,6 +3363,29 @@
+@@ -3196,6 +3373,29 @@
      ** immediately follow the header. */
      zPayload += sqlite3VdbeSerialPut(zPayload, pRec, serial_type); /* content */
    }while( (++pRec)<=pLast );
@@ -268,7 +397,7 @@ method = patch
 +    unsigned int uLen = zPayload - (u8*)pOut->z;
 +    /* put the column type first, as it may be used in the rowsum calculations */
 +    zHdr += putVarint32(zHdr, iLumoExt*2+12);
-+    memcpy(zPayload, lumo_extension_magic, 4);
++    memcpy(zPayload, LUMO_EXTENSION_MAGIC, 4);
 +    zPayload += 4;
 +#ifdef LUMO_ROWSUM
 +    if (lumo_rowsum_algorithm < LUMO_ROWSUM_N_ALGORITHMS) {
@@ -289,7 +418,7 @@ method = patch
    assert( nHdr==(int)(zHdr - (u8*)pOut->z) );
    assert( nByte==(int)(zPayload - (u8*)pOut->z) );
  
-@@ -3837,6 +4027,10 @@
+@@ -3837,6 +4037,10 @@
    }else if( pOp->p4type==P4_INT32 ){
      nField = pOp->p4.i;
    }
@@ -300,7 +429,7 @@ method = patch
    assert( pOp->p1>=0 );
    assert( nField>=0 );
    testcase( nField==0 );  /* Table with INTEGER PRIMARY KEY and nothing else */
-@@ -3883,7 +4077,12 @@
+@@ -3883,7 +4087,12 @@
    assert( pOrig );
    assert( pOrig->pBtx!=0 );  /* Only ephemeral cursors can be duplicated */
  
@@ -313,7 +442,7 @@ method = patch
    if( pCx==0 ) goto no_mem;
    pCx->nullRow = 1;
    pCx->isEphemeral = 1;
-@@ -5834,6 +6033,53 @@
+@@ -5834,6 +6043,53 @@
    assert( pC->isTable==0 );
    rc = ExpandBlob(pIn2);
    if( rc ) goto abort_due_to_error;
@@ -349,7 +478,7 @@ method = patch
 +      dPtr += lLumo;
 +    }
 +    if (hRowid >= 0 && tLumo >= 28 && (tLumo & 1) == 0 &&
-+        memcmp(&zHdr[dLumo], lumo_extension_magic, 4) == 0)
++        memcmp(&zHdr[dLumo], LUMO_EXTENSION_MAGIC, 4) == 0)
 +    {
 +      /* there is a Lumo blob at the end */
 +      int lNew;

@@ -4,14 +4,12 @@
 # one; it only makes sense together with "rowsum-on"
 
 # this is a runtime option
-#build = no
-# XXX this will be a runtime option but it's a build option for now
-build = yes
+build = no
 
 # value can be one of...
-enum = none,null,sha3_512,sha3_384,sha3_256,sha3_224,sha3
-equiv = sha3,sha3_256
+enum = none,empty,sha3_512,sha3_384,sha3_256,sha3_224,sha3
+equiv = sha3_256,sha3
 
 # default value if not specified
-default = sha3
+default = sha3_256
 

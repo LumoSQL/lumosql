@@ -1,4 +1,8 @@
 set name {A big INSERT after a big DELETE}
 
-set sql "INSERT INTO t2 SELECT * FROM t1;\n"
+set sql ""
+if {$options(ROWSUM) == "on"} {
+  append sql "PRAGMA lumo_rowsum_algorithm=$options(ROWSUM_ALGORITHM);"
+}
+append sql "INSERT INTO t2 SELECT * FROM t1;\n"
 

@@ -1,6 +1,10 @@
 set name "Creating an index"
 
-set sql {
+set sql ""
+if {$options(ROWSUM) == "on"} {
+  append sql "PRAGMA lumo_rowsum_algorithm=$options(ROWSUM_ALGORITHM);"
+}
+append sql {
 CREATE INDEX i2a ON t2(a);
 CREATE INDEX i2b ON t2(b);
 }

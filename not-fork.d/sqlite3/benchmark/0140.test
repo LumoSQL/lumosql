@@ -1,5 +1,9 @@
 set name {DROP TABLE}
 
-set sql "DROP TABLE t1;\n"
+set sql ""
+if {$options(ROWSUM) == "on"} {
+  append sql "PRAGMA lumo_rowsum_algorithm=$options(ROWSUM_ALGORITHM);"
+}
+append sql "DROP TABLE t1;\n"
 append sql "DROP TABLE t2;\n"
 
