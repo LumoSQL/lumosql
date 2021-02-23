@@ -32,6 +32,8 @@ We have design outlines and background documentation for the following.
 
 # Tooling tasks
 
+* Fix a documentation problem by writing a [Pandoc](https://pandoc.org) filter that understands [Fossil markdown](https://fossil-scm.org/home/md_rules). This was considered but abandoned as [out of scope for Fossil](https://fossil-scm.org/home/timeline?r=auto-toc). Pandoc processing of Markdown -> Markdown would give other advantages than TOCs.
+* Fix a documentation problem by writing a Pandoc filter that understands [Pikchr](https://pikchr.org), which would apply to all Pandoc inputs including Markdown documentation such as used by LumoSQL
 
 # Packaging tasks
 
