@@ -15,10 +15,26 @@ you are a student, you will be able to apply for GSoC starting March 29th 2021.
 
 # Benchmarking tasks
 
+We have design outlines and background documentation for the following.
+
+* LumoSQL benchmarking creates an SQLite database. Write a tool to accept these databases via the web and consolitate them, using the facilities existing in [benchmark-filter.tcl](../tool/benchmark-filter.tcl)
+* Write a tool to drive [benchmarking](./lumo-build-benchmark.md) runs for different [pragmas](https://sqlite.org/pragma.html#toc) to start to address the problem that [all SQLite performance papers are nonsense](https://lumosql.org/src/lumodoc/doc/trunk/doc/lumo-benchmarking.md#all-sqlite-performance-papers-are-nonsense).
+* Write a tool that analyses a consolidated benchmarking database and displays summary results over the web
+
 # Lumo Column tasks
 
 # Backend storage tasks
 
+* Document the LumoSQL-specific user interface changes needed for backends. This involves looking at the features of BDB and LMDB including the existing BDB pragmas, and designing something more generic. This needs to work across other backend stores too, so comparing BDB (which probably isn't going to be the amazing storage engine of the future!) and LMDB and native SQLite is likely to give reasonable results
+* Design a way of moving the BDB sources into a patch system like LumoSQL not-forking directory does for LMDB, rather than whole-file replacements
+* Implement a not-forking directory following the design developed above. This should mean that the BDB backend works with more recent versions of SQLite, and where it does not, that the changes will be more obvious and easier to make
+* Considering existing Not-Forking work done already, and the section "List of MVCC-capable KV store-related Knowledge" in the [LumoSQL Knowledgebase](https://lumosql.org/src/lumodoc/doc/trunk/doc/lumo-relevant-knowledgebase.md), prototype a backend for the Malbrain's btree. What might the advantages and disadvantges be of this storage engine? This is leading-edge experimentation, because there are very few new Btree storage engines, and exactly none of them under SQLite
+
 # Tooling tasks
 
+
 # Packaging tasks
+
+* Develop a Debian package for [Not-Forking](https://lumosql.org/src/not-forking) for inclusion in the Not-Forking source tree. There is already an ebuild
+* Develop a Debian package for LumoSQL for distribution in the LumoSQL source tree
+* Develop an ebuild for LumoSQL for distribution in the LumoSQL source tree
