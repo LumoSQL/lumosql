@@ -1,0 +1,5 @@
+set name "Creating database and tables"
+
+append sql "PRAGMA default_synchronous=on;\n"
+append sql "CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100));\n"
+

@@ -4,7 +4,7 @@
 method = patch
 --
 --- sqlite3/src/pragma.c-orig	2021-02-22 15:29:35.146284010 +0100
-+++ sqlite3/src/pragma.c	2021-02-22 20:57:26.765120763 +0100
++++ sqlite3/src/pragma.c	2021-02-23 12:46:09.574704069 +0100
 @@ -13,6 +13,8 @@
  */
  #include "sqliteInt.h"
@@ -14,7 +14,7 @@ method = patch
  #if !defined(SQLITE_ENABLE_LOCKING_STYLE)
  #  if defined(__APPLE__)
  #    define SQLITE_ENABLE_LOCKING_STYLE 1
-@@ -362,6 +364,68 @@
+@@ -362,6 +364,72 @@
    return addr;
  }
  
@@ -25,8 +25,7 @@ method = patch
 +	const char * zDb,       /* database name */
 +	const char * zLeft,     /* pragma ID */
 +	const char * zRight,    /* value or NULL */
-+	const char ** zResult,  /* string result value or error message */
-+	int * nResult           /* integer result value */
++	const char ** zResult   /* string result value or error message */
 +){
 +  *zResult = 0;
 +  if (strcmp(zLeft, "lumo_rowsum_algorithm") == 0) {
@@ -38,8 +37,12 @@ method = patch
 +      for (i = 0; i < LUMO_ROWSUM_N_ALIAS; i++) {
 +	if (strcmp(zRight, lumo_rowsum_alias[i].name) == 0) {
 +	  lumo_rowsum_algorithm = lumo_rowsum_alias[i].same_as;
-+	  if (lumo_rowsum_algorithm >= LUMO_ROWSUM_N_ALGORITHMS)
-+	    lumo_extension_check_rowsum = 0;
++	  /* if they disabled creation of rowsums, but the check is
++	  ** set to "always" the next update will fail, so set it
++	  ** to "yes" */
++	  if (lumo_rowsum_algorithm >= LUMO_ROWSUM_N_ALGORITHMS &&
++	      lumo_extension_check_rowsum > 1)
++	    lumo_extension_check_rowsum = 1;
 +	  return SQLITE_OK;
 +	}
 +      }
@@ -67,12 +70,13 @@ method = patch
 +  if (strcmp(zLeft, "lumo_check_rowsum") == 0) {
 +    // XXX in future, we'll store this with the database, but for now is global
 +    if (zRight) {
-+      if (strcmp(zRight, "always") == 0)
++      if (strcmp(zRight, "always") == 0 || strcmp(zRight, "require") == 0)
 +	lumo_extension_check_rowsum = 2;
 +      else
 +	lumo_extension_check_rowsum = sqlite3GetBoolean(zRight, 1);
 +    } else {
-+      *nResult = lumo_extension_check_rowsum + 1;
++      *zResult = lumo_extension_check_rowsum>1 ? "always" :
++		 (lumo_extension_check_rowsum ? "yes" : "no");
 +    }
 +    return SQLITE_OK;
 +  }
@@ -83,31 +87,28 @@ method = patch
  /*
  ** Process a pragma statement.  
  **
-@@ -395,6 +459,10 @@
+@@ -395,6 +463,9 @@
    Db *pDb;                     /* The specific database being pragmaed */
    Vdbe *v = sqlite3GetVdbe(pParse);  /* Prepared statement */
    const PragmaName *pPragma;   /* The pragma */
 +#ifdef LUMO_EXTENSIONS
 +  const char * zLumoResult = 0;
-+  int nLumoResult = 0;
 +#endif
  
    if( v==0 ) return;
    sqlite3VdbeRunOnlyOnce(v);
-@@ -465,6 +533,27 @@
+@@ -465,6 +536,25 @@
      goto pragma_out;
    }
  
 +#ifdef LUMO_EXTENSIONS
 +  /* see if this is a special Lumo pragma */
-+  rc = lumo_parse_pragma(db, zDb, zLeft, zRight, &zLumoResult, &nLumoResult);
++  rc = lumo_parse_pragma(db, zDb, zLeft, zRight, &zLumoResult);
 +  if( rc==SQLITE_OK ){
 +    sqlite3VdbeSetNumCols(v, 1);
 +    sqlite3VdbeSetColName(v, 0, COLNAME_NAME, zLumoResult, SQLITE_TRANSIENT);
 +    if (zLumoResult)
 +      returnSingleText(v, zLumoResult);
-+    else if (nLumoResult)
-+      returnSingleInt(v, nLumoResult - 1);
 +    goto pragma_out;
 +  }
 +  if( rc!=SQLITE_NOTFOUND ){

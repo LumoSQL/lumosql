@@ -156,6 +156,8 @@ values (without leading zeros); this key has no value
 numeric values (without leading zeros); this key has no value
 * `boolean` - abbreviation for `syntax=on|off|true|false`, `equiv=on,true`
 and `equiv=off,false`; this key has no value
+* `enum` - followed by a comma-separated list of values, abbreviation for
+`syntax=value1|value2|...|valuen` i.e. accept only values from the list
 
 For example, `not-fork.d/sqlite3/options/datasize.option` contains information
 about the `datasize` benchmark option:
@@ -170,9 +172,10 @@ Options which affect the build must be known to the `lumo.build` script and/or
 to the `lumo.mk` Makefile fragment to be effective; these files are installed
 by the not-forking configuration and control the build process.
 
-Options which affect the benchmark must be known to the benchmark code inside
-`tool/build.tcl` and they affect the way the executable is called and/or the
-data used for the tests.
+Options which affect the benchmark must be implemented by one or more of the
+tests actually ran, for example by changing data sizes or using `PRAGMA`
+statements; the `tool/build.tcl` tries to know as little as possible about
+what is being done, to help using the framework for other systems.
 
 Usually options which affect the benchmarking but not the build will be
 present in `not-fork.d/sqlite3/options` only but will apply to all benchmarks,
@@ -365,20 +368,37 @@ update the benchmark results database.
 
 # What tests will run
 
-The directory `not-fork.d/sqlite3/benchmark` can contain files matching the
-pattern `*.test` to specify what will be run: the benchmark will read these
-files in lexycographic order, and measure the time it takes to run each
+Each test is composed of three lists of SQL statements, the "before" list
+prepares the environment for the test, then the test itself runs and the
+time it takes is logged, finally the "after" list can do any necessary
+cleanup.  Two special files in `not-fork.d/sqlite3/benchmark` can provide
+common "before" and "after" code which will be included in every test;
+these files must have names `before-test` and `after-test` respectively.
+
+Files matching the pattern `*.test` in directory `not-fork.d/sqlite3/benchmark`
+contain the individual tests: the benchmark will read these files in lexycographic
+order to decide which tests to run and in which order; for each test, the
+contents of `before-test`, the test itself, and `after-test` are concatenated
+and the result interpreted as TCL code; it is expected that this TCL code
+sets the variable `name` to contain the name of the text, and also appends
+SQL statements to three variables: `before_sql`, `sql` and `after_sql`:
+these SQL statements will then be executed in the order listed, but only
+the middle (`sql`) one is timed, so that setup and cleanup code does not
+count towards the benchmarking.
+
+This TCL code can access a number of variables from the `build.tcl` script,
+in particular the array `options` contains the build and benchmark options;
 test; each file is a fragment of TCL expected to set two variables: `name`
 which is the name of the test, and `sql` which is the SQL to be executed;
 the fragment can access the array `options` to determine the build and
 benchmark options; examples are provided in the LumoSQL configuration to
-specify the default set of tests, we show here an example, test number 2:
+specify the default set of tests, we show here an example from one of the tests:
 
 ```
 set d25000 [expr $options(DATASIZE) * 25000]
 set name "$d25000 INSERTs in a transaction"
 
-set sql "BEGIN;\n"
+append sql "BEGIN;\n"
 append sql "CREATE TABLE t2(a INTEGER, b INTEGER, c VARCHAR(100));\n"
 for {set i 1} {$i<=$d25000} {incr i} {
   set r [expr {int(rand()*500000)}]

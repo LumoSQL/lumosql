@@ -874,6 +874,18 @@ foreach test_file [lsort [glob -directory [file join $notfork sqlite3 benchmark]
     lappend tests [read $fd]
     close $fd
 }
+set before_test ""
+if {[file exists [file join $notfork sqlite3 benchmark before-test]]} {
+    set fd [open [file join $notfork sqlite3 benchmark before-test] r]
+    set before_test [read $fd]
+    close $fd
+}
+set after_test ""
+if {[file exists [file join $notfork sqlite3 benchmark after-test]]} {
+    set fd [open [file join $notfork sqlite3 benchmark after-test] r]
+    set after_test [read $fd]
+    close $fd
+}
 
 # generate strings from numbers, used by some of the tests
 set ones {zero one two three four five six seven eight nine
@@ -979,9 +991,9 @@ for {set i 0} {$i < [llength $benchmark_list]} {incr i} {
 	} else {
 	    set space "    "
 	}
-	# create temp database
+	# create a directory for the temp database - the first test is
+	# expected to create the database the way it wants it
 	file mkdir $temp_db_dir
-	exec $sqlite3_to_test $temp_db_name { PRAGMA default_synchronous=on; }
 	set when_run [clock seconds]
 	set run_id [exec $sqlite3_for_db $database_name \
 	    "select hex(sha3('$benchmark' || randomblob(16) || '$when_run'));"]
@@ -1012,11 +1024,22 @@ for {set i 0} {$i < [llength $benchmark_list]} {incr i} {
 	set total_time 0
 	for {set test_number 1} {$test_number <= [llength $tests]} {incr test_number} {
 	    set test_name ""
-	    set test)sql ""
+	    set before_sql ""
+	    set test_sql ""
+	    set after_sql ""
+	    set test_tcl "$before_test [lindex $tests [expr $test_number - 1]] $after_test"
 	    apply \
 		[list {} "\
-		    upvar benchmark_options options test_name name test_sql sql
-		    [lindex $tests [expr $test_number - 1]]"]
+		    upvar benchmark_options options \
+			  test_name name \
+			  before_sql before_sql \
+			  test_sql sql \
+			  after_sql after_sql
+		    $test_tcl"]
+	    set sqlfd [open $temp_sql_file w]
+	    puts $sqlfd $before_sql
+	    close $sqlfd
+	    exec $sqlite3_to_test $temp_db_name < $temp_sql_file > /dev/null
 	    set sqlfd [open $temp_sql_file w]
 	    puts $sqlfd $test_sql
 	    close $sqlfd
@@ -1046,6 +1069,10 @@ for {set i 0} {$i < [llength $benchmark_list]} {incr i} {
 	    set wt [expr {($nwt - $owt) / 1000000.0}]
 	    set ut [expr {([lindex $nct 2] - [lindex $oct 2]) / 1000.0}]
 	    set st [expr {([lindex $nct 3] - [lindex $oct 3]) / 1000.0}]
+	    set sqlfd [open $temp_sql_file w]
+	    puts $sqlfd $after_sql
+	    close $sqlfd
+	    exec $sqlite3_to_test $temp_db_name < $temp_sql_file > /dev/null
 	    update_test $run_id $test_number [list \
 		"test-name"        $test_name \
 		"real-time"        $wt \

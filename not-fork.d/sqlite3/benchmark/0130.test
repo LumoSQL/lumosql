@@ -1,9 +1,5 @@
 set name {A big DELETE followed by many small INSERTs}
 
-set sql ""
-if {$options(ROWSUM) == "on"} {
-  append sql "PRAGMA lumo_rowsum_algorithm=$options(ROWSUM_ALGORITHM);"
-}
 append sql "BEGIN;\n"
 append sql "DELETE FROM t1;\n"
 for {set i 1} {$i<=3000} {incr i} {

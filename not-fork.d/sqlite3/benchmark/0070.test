@@ -2,10 +2,6 @@ set d25000 [expr $options(DATASIZE) * 25000]
 
 set name "$d25000 UPDATEs with an index"
 
-set sql ""
-if {$options(ROWSUM) == "on"} {
-  append sql "PRAGMA lumo_rowsum_algorithm=$options(ROWSUM_ALGORITHM);"
-}
 append sql "BEGIN;\n"
 for {set i 1} {$i<=$d25000} {incr i} {
     set r [expr {int(rand()*500000)}]

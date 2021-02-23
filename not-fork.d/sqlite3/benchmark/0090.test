@@ -1,9 +1,5 @@
 set name {INSERTs from a SELECT}
 
-set sql ""
-if {$options(ROWSUM) == "on"} {
-  append sql "PRAGMA lumo_rowsum_algorithm=$options(ROWSUM_ALGORITHM);"
-}
 append sql "BEGIN;\n"
 append sql "INSERT INTO t1 SELECT * FROM t2;\n"
 append sql "INSERT INTO t2 SELECT * FROM t1;\n"

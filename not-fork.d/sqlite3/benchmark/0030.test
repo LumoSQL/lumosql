@@ -2,10 +2,6 @@ set d100 [expr $options(DATASIZE) * 100]
 
 set name "$d100 SELECTs without an index"
 
-set sql ""
-if {$options(ROWSUM) == "on"} {
-  append sql "PRAGMA lumo_rowsum_algorithm=$options(ROWSUM_ALGORITHM);"
-}
 for {set i 0} {$i<$d100} {incr i} {
     set lwr [expr {$i*100}]
     set upr [expr {($i+10)*100}]
