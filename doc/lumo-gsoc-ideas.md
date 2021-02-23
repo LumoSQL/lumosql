@@ -23,6 +23,10 @@ We have design outlines and background documentation for the following.
 
 # Lumo Column tasks
 
+* Consider the LumoSQL "Lumo Column" implementation (full documentation not yet available). Look at the code for implementing per-row checksums in an implicit column that exists the same way as [SQLite ROWID](https://www.sqlite.org/lang_createtable.html#rowid) exists. All four sha3 hash formats are supported, besides "none" and "null". Add two new hash formats by extending the table for BLAKE2 and BLAKE3.
+* This is an advanced task: working with LumoSQL developers, design SQL row-level equivalents to Unix mtime, ctime and atime using Lumo Columns. A Lumo Column is a blob with a header; you will need to change the header used for rowsums. All of the work required for this will be within the file vdbe.c
+* Implement row-level mtime, ctime and atime using Lumo Columns
+
 # Backend storage tasks
 
 * Document the LumoSQL-specific user interface changes needed for backends. This involves looking at the features of BDB and LMDB including the existing BDB pragmas, and designing something more generic. This needs to work across other backend stores too, so comparing BDB (which probably isn't going to be the amazing storage engine of the future!) and LMDB and native SQLite is likely to give reasonable results
