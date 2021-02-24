@@ -7,8 +7,9 @@
 build = no
 
 # value can be one of...
-enum = none,empty,sha3_512,sha3_384,sha3_256,sha3_224,sha3
+enum = none,empty,sha3_512,sha3_384,sha3_256,sha3_224,sha3,blake3_512,blake3_384,blake3_256,blake3_224,blake3
 equiv = sha3_256,sha3
+equiv = blake3_256,blake3
 
 # default value if not specified
 default = sha3_256

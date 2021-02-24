@@ -14,15 +14,31 @@
 
 #include "lumo-sha3.c"
 
+#define BLAKE3_NO_SSE2 1
+#define BLAKE3_NO_SSE41 1
+#define BLAKE3_NO_AVX2 1
+#define BLAKE3_NO_AVX512 1
+#include "lumo-blake3.c"
+#include "lumo-blake3_dispatch.c"
+#include "lumo-blake3_portable.c"
+
 #define LUMO_ROWSUM_TYPE 1
 
 #define LUMO_ROWSUM_ID_none 65535
+
 #define LUMO_ROWSUM_ID_null 0
+
 #define LUMO_ROWSUM_ID_sha3_512 1
 #define LUMO_ROWSUM_ID_sha3_384 2
 #define LUMO_ROWSUM_ID_sha3_256 3
 #define LUMO_ROWSUM_ID_sha3_224 4
 #define LUMO_ROWSUM_ID_sha3 LUMO_ROWSUM_ID_sha3_256
+
+#define LUMO_ROWSUM_ID_blake3_512 5
+#define LUMO_ROWSUM_ID_blake3_384 6
+#define LUMO_ROWSUM_ID_blake3_256 7
+#define LUMO_ROWSUM_ID_blake3_224 8
+#define LUMO_ROWSUM_ID_blake3 LUMO_ROWSUM_ID_blake3_256
 
 #define LUMO_ROWSUM_DECLARATIONS_sha3(k) \
   static void lumo_init_sha3_##k(void * ctx) { \
@@ -48,16 +64,43 @@ LUMO_ROWSUM_DECLARATIONS_sha3(224)
 
 #undef LUMO_ROWSUM_DECLARATIONS_sha3
 
-#define LUMO_ROWSUM_ELEMENT_sha3(k) \
-    [LUMO_ROWSUM_ID_sha3_##k] = { \
-	"sha3_" #k, \
+#define LUMO_ROWSUM_DECLARATIONS_blake3(k) \
+  static void lumo_init_blake3_##k(void * ctx) { \
+    blake3_hasher_init(ctx); \
+  } \
+  static void lumo_update_blake3_##k(void * ctx, const void * p, unsigned int n) { \
+    blake3_hasher_update(ctx, p, n); \
+  } \
+  static void lumo_final_blake3_##k(void * ctx, unsigned char * d) { \
+    blake3_hasher_finalize(ctx, d, k / 8); \
+  } \
+  static void lumo_generate_blake3_##k(unsigned char * d, const void * p, unsigned int n) { \
+    blake3_hasher ctx; \
+    blake3_hasher_init(&ctx); \
+    blake3_hasher_update(&ctx, p, n); \
+    blake3_hasher_finalize(&ctx, d, k / 8); \
+  }
+
+LUMO_ROWSUM_DECLARATIONS_blake3(512)
+LUMO_ROWSUM_DECLARATIONS_blake3(384)
+LUMO_ROWSUM_DECLARATIONS_blake3(256)
+LUMO_ROWSUM_DECLARATIONS_blake3(224)
+
+#undef LUMO_ROWSUM_DECLARATIONS_blake3
+
+#define LUMO_ROWSUM_ELEMENT(a, k, s) \
+    [LUMO_ROWSUM_ID_##a##_##k] = { \
+	#a "_" #k, \
 	k / 8, \
-	lumo_generate_sha3_##k, \
-	sizeof(SHA3Context), \
-	lumo_init_sha3_##k, \
-	lumo_update_sha3_##k, \
-	lumo_final_sha3_##k, \
+	lumo_generate_##a##_##k, \
+	s, \
+	lumo_init_##a##_##k, \
+	lumo_update_##a##_##k, \
+	lumo_final_##a##_##k, \
     },
+
+#define LUMO_ROWSUM_ELEMENT_sha3(k) LUMO_ROWSUM_ELEMENT(sha3, k, sizeof(SHA3Context))
+#define LUMO_ROWSUM_ELEMENT_blake3(k) LUMO_ROWSUM_ELEMENT(blake3, k, sizeof(blake3_hasher))
 
 static struct {
     const char * name;
@@ -73,11 +116,17 @@ static struct {
     LUMO_ROWSUM_ELEMENT_sha3(384)
     LUMO_ROWSUM_ELEMENT_sha3(256)
     LUMO_ROWSUM_ELEMENT_sha3(224)
+    LUMO_ROWSUM_ELEMENT_blake3(512)
+    LUMO_ROWSUM_ELEMENT_blake3(384)
+    LUMO_ROWSUM_ELEMENT_blake3(256)
+    LUMO_ROWSUM_ELEMENT_blake3(224)
 };
 #define LUMO_ROWSUM_N_ALGORITHMS \
     (sizeof(lumo_rowsum_algorithms) / sizeof(lumo_rowsum_algorithms[0]))
 
 #undef LUMO_ROWSUM_ELEMENT_sha3
+#undef LUMO_ROWSUM_ELEMENT_blake3
+#undef LUMO_ROWSUM_ELEMENT
 
 static struct {
     const char * name;
