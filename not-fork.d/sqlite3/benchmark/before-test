@@ -1,6 +1,6 @@
 # this code is executed before each test; it can modify $before_sql and $sql
 
-if {$options(ROWSUM) == "on"} {
+if {$options(ROWSUM) eq "on"} {
   append sql "PRAGMA lumo_rowsum_algorithm=$options(ROWSUM_ALGORITHM);\n"
 }
 

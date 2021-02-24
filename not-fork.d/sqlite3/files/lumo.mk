@@ -8,7 +8,14 @@ endif
 
 TCC += -I$(LUMO_SOURCES)/sqlite3/.lumosql
 
+HAS_LUMO_EXTENSIONS := no
+
 ifeq ($(OPTION_ROWSUM),on)
-TCC += -DLUMO_ROWSUM='$(OPTION_ROWSUM_ALGORITHM)'
+TCC += -DLUMO_ROWSUM=on
+HAS_LUMO_EXTENSIONS := yes
+endif
+
+ifeq ($(HAS_LUMO_EXTENSIONS),yes)
+TCC += -DLUMO_EXTENSIONS=1
 endif
 

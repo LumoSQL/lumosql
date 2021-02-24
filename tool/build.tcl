@@ -412,7 +412,7 @@ proc notfork_command {target args} {
 
 # check not-fork tool can be found and is new enough
 
-set notfork_required "0.3.1"
+set notfork_required "0.3.2"
 if {[catch {
     set notfork_found [exec $notfork_name --check-version $notfork_required 2>@1]
 } notfork_results notfork_options]} {

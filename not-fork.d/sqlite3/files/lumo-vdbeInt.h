@@ -1,5 +1,12 @@
+#ifdef LUMO_EXTENSIONS
+
 #ifndef _LUMO_VDBEINT_
 #define _LUMO_VDBEINT_ 1
+
+#define LUMO_END_TYPE 0
+
+/* help making sure we only look at our data */
+#define LUMO_EXTENSION_MAGIC "Lumo"
 
 #ifdef LUMO_ROWSUM
 
@@ -7,7 +14,6 @@
 
 #include "lumo-sha3.c"
 
-#define LUMO_EXTENSIONS 1
 #define LUMO_ROWSUM_TYPE 1
 
 #define LUMO_ROWSUM_ID_none 65535
@@ -90,13 +96,7 @@ extern unsigned int lumo_rowsum_algorithm;
 ** if present, but don't require it; 2, we require it to be there and
 ** check it */
 extern int lumo_extension_check_rowsum;
-#endif
+#endif /* LUMO_ROWSUM */
 
-#ifdef LUMO_EXTENSIONS
-#define LUMO_END_TYPE 0
-
-/* help making sure we only look at our data */
-#define LUMO_EXTENSION_MAGIC "Lumo"
-#endif
-
-#endif
+#endif /* _LUMO_VDBEINT_ */
+#endif /* LUMO_EXTENSIONS */
