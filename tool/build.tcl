@@ -225,8 +225,8 @@ proc read_options {opt_dir} {
 		    exit 1
 		}
 		set rn [lindex $lx 0]
-		for {set i 1} {$i < [llength $lx]} {incr i} {
-		    array set equiv [list [lindex $lx $i] $rn]
+		for {set eqnum 1} {$eqnum < [llength $lx]} {incr eqnum} {
+		    array set equiv [list [lindex $lx $eqnum] $rn]
 		}
 	    } else {
 		puts stderr "$opt_file: invalid key $key"
@@ -254,6 +254,8 @@ read_options [file join $notfork sqlite3 benchmark]
 array set other_values [list \
 	BENCHMARK_DB     benchmarks.sqlite \
 	BENCHMARK_RUNS   1 \
+	COPY_DATABASES   "" \
+	COPY_SQL         "" \
 	NOTFORK_COMMAND  "not-fork" \
 	NOTFORK_ONLINE   0 \
 	NOTFORK_UPDATE   0 \
@@ -348,8 +350,8 @@ foreach {option od} [array get options] {
     array set option_values [list $option [lindex $od 2]]
 }
 
-for {set i $argp} {$i < [llength $argv]} {incr i} {
-    if {[regexp {^-(\w+)=(.*)$} [lindex $argv $i] skip option value]} {
+for {set anum $argp} {$anum < [llength $argv]} {incr anum} {
+    if {[regexp {^-(\w+)=(.*)$} [lindex $argv $anum] skip option value]} {
 	set od [array get options $option]
 	if {[llength $od] < 2} {
 	    puts stderr "Invalid benchmark option $option"
@@ -366,7 +368,7 @@ for {set i $argp} {$i < [llength $argv]} {incr i} {
 	    }
 	}
 	array set option_values [list $option $value]
-    } elseif {[regexp {^(\w+)=(.*)$} [lindex $argv $i] skip option value]} {
+    } elseif {[regexp {^(\w+)=(.*)$} [lindex $argv $anum] skip option value]} {
 	set od [array get other_values $option]
 	if {[llength $od] < 2} {
 	    puts stderr "Invalid option $option"
@@ -374,7 +376,7 @@ for {set i $argp} {$i < [llength $argv]} {incr i} {
 	}
 	array set other_values [list $option $value]
     } else {
-	puts stderr "Invalid option [lindex $argv $i]"
+	puts stderr "Invalid option [lindex $argv $anum]"
 	exit 1
     }
 }
@@ -690,11 +692,11 @@ proc run_build {dir prog} {
     popd
 }
 
-for {set i 0} {$i < [llength $build_list]} {incr i} {
-    set build [lindex $build_list $i]
+for {set bnum 0} {$bnum < [llength $build_list]} {incr bnum} {
+    set build [lindex $build_list $bnum]
     set dest_dir [file join $build_dir $build]
     if {[file isdirectory $dest_dir]} { continue }
-    set build_optlist [lindex $build_option_list $i]
+    set build_optlist [lindex $build_option_list $bnum]
     set tl [split $build "+"]
     set sqlite3_version [lindex $tl 0]
     if {[llength $tl] < 2} {
@@ -927,11 +929,11 @@ catch {
 popd
 
 array set benchmark_options { }
-for {set i 0} {$i < [llength $benchmark_list]} {incr i} {
-    set benchmark [lindex $benchmark_list $i]
-    set benchmark_optlist [lindex $benchmark_option_list $i]
+for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
+    set benchmark [lindex $benchmark_list $bnum]
+    set benchmark_optlist [lindex $benchmark_option_list $bnum]
     puts "*** Running benchmark $benchmark"
-    set build [lindex $benchmark_to_build $i]
+    set build [lindex $benchmark_to_build $bnum]
     set tl [split $build "+"]
     set sqlite3_version [lindex $tl 0]
     if {[llength $tl] < 2} {
@@ -1023,10 +1025,17 @@ for {set i 0} {$i < [llength $benchmark_list]} {incr i} {
 	set tests_intr 0
 	set total_time 0
 	for {set test_number 1} {$test_number <= [llength $tests]} {incr test_number} {
+	    if {$other_values(COPY_DATABASES) ne ""} {
+		if {[file exists $temp_db_name]} {
+		    file copy $temp_db_name \
+			 [format $other_values(COPY_DATABASES) $benchmark $test_number]
+		}
+	    }
 	    set test_name ""
 	    set before_sql ""
 	    set test_sql ""
 	    set after_sql ""
+	    set results [list]
 	    set test_tcl "$before_test [lindex $tests [expr $test_number - 1]] $after_test"
 	    apply \
 		[list {} "\
@@ -1034,7 +1043,8 @@ for {set i 0} {$i < [llength $benchmark_list]} {incr i} {
 			  test_name name \
 			  before_sql before_sql \
 			  test_sql sql \
-			  after_sql after_sql
+			  after_sql after_sql \
+			  results results
 		    $test_tcl"]
 	    set sqlfd [open $temp_sql_file w]
 	    puts $sqlfd $before_sql
@@ -1043,14 +1053,20 @@ for {set i 0} {$i < [llength $benchmark_list]} {incr i} {
 	    set sqlfd [open $temp_sql_file w]
 	    puts $sqlfd $test_sql
 	    close $sqlfd
+	    if {$other_values(COPY_SQL) ne ""} {
+		file copy $temp_sql_file \
+		     [format $other_values(COPY_SQL) $benchmark $test_number]
+	    }
 	    set delay 1000
 	    exec sync; after $delay;
 	    set status "?"
 	    set oct [times]
 	    set owt [clock microseconds]
 	    if {[catch {
-		exec $sqlite3_to_test $temp_db_name < $temp_sql_file > /dev/null
+		set output [exec $sqlite3_to_test $temp_db_name < $temp_sql_file]
 	    } res opt]} {
+		set nwt [clock microseconds]
+		set nct [times]
 		set S [dict get $opt -errorcode]
 		set E [lindex $S 0]
 		if {$E eq "CHILDKILLED"} {
@@ -1061,11 +1077,28 @@ for {set i 0} {$i < [llength $benchmark_list]} {incr i} {
 		    incr tests_fail
 		}
 	    } else {
+		set nwt [clock microseconds]
+		set nct [times]
 		set status "OK"
-		incr tests_ok
+		if {[llength $results] > 0} {
+		    set ol [split $output \n]
+		    if {[llength $results] > [llength $ol]} {
+			set status "NRESULTS"
+		    } else {
+			for {set rnum 0} {$rnum < [llength $results]} {incr rnum} {
+			    if {! [regexp [lindex $results $rnum] [lindex $ol $rnum]] } {
+				set status "RESULT[expr $rnum + 1]"
+				break
+			    }
+			}
+		    }
+		}
+		if {$status eq "OK"} {
+		    incr tests_ok
+		} else {
+		    incr tests_fail
+		}
 	    }
-	    set nwt [clock microseconds]
-	    set nct [times]
 	    set wt [expr {($nwt - $owt) / 1000000.0}]
 	    set ut [expr {([lindex $nct 2] - [lindex $oct 2]) / 1000.0}]
 	    set st [expr {([lindex $nct 3] - [lindex $oct 3]) / 1000.0}]

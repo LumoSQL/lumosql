@@ -8,3 +8,13 @@ for {set i 0} {$i<$d5000} {incr i} {
     append sql "SELECT count(*), avg(b) FROM t2 WHERE b>=$lwr AND b<$upr;\n"
 }
 
+if {$d5000 == 5000} {
+    lappend results \
+        {^5\|39\.0} \
+        {^4\|148\.5} \
+        {^4\|248\.5} \
+        {^4\|348\.5} \
+        {^4\|448\.5} \
+        {^4\|548\.5}
+}
+

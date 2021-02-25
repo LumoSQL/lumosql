@@ -6,3 +6,12 @@ for {set i 1} {$i<=$d100} {incr i} {
     append sql "SELECT count(*), avg(b) FROM t2 WHERE c LIKE '%[number_name $i]%';\n"
 }
 
+if {$d100 == 100} {
+    lappend results \
+	{^15859\|238012\.06} \
+	{^8538\|251259\.42} \
+	{^8506\|300266\.44} \
+	{^8773\|343643\.69} \
+	{^4602\|252464\.62}
+}
+

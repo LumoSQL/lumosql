@@ -8,3 +8,11 @@ for {set i 0} {$i<$d100} {incr i} {
     append sql "SELECT count(*), avg(b) FROM t2 WHERE b>=$lwr AND b<$upr;\n"
 }
 
+if {$d100 == 100} {
+    lappend results \
+	{^41\|486\.365} \
+	{^40\|598\.5} \
+	{^40\|698\.5} \
+	{^40\|798\.5}
+}
+
