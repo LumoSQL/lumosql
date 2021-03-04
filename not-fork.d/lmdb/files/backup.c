@@ -1,32 +1,18 @@
+/*
+
+  Copyright 2021 The LumoSQL Authors under the terms contained in the file LICENSES/MIT
+
+  SPDX-License-Identifier: MIT
+  SPDX-FileCopyrightText: 2021 The LumoSQL Authors
+  SPDX-ArtifactOfProjectName: LumoSQL
+  SPDX-FileType: Code
+  SPDX-FileComment: Original by Claudio Calvelli, 2021
+
+  not-fork.d/lmdb/files/backup.c
+*/
+
 #ifndef __LUMO_BACKEND_backup_c
 #define __LUMO_BACKEND_backup_c 1
-#include "sqliteInt.h"
-#include "lumo_btreeInt.h"
-
-/*
-** Structure allocated for each backup operation.
-*/
-struct sqlite3_backup {
-  sqlite3* pDestDb;        /* Destination database handle */
-  Btree *pDest;            /* Destination b-tree file */
-  u32 iDestSchema;         /* Original schema cookie in destination */
-  int bDestLocked;         /* True once a write-transaction is open on pDest */
-
-  Pgno iNext;              /* Page number of the next source page to copy */
-  sqlite3* pSrcDb;         /* Source database handle */
-  Btree *pSrc;             /* Source b-tree file */
-
-  int rc;                  /* Backup process error code */
-
-  /* These two variables are set by every call to backup_step(). They are
-  ** read by calls to backup_remaining() and backup_pagecount().
-  */
-  Pgno nRemaining;         /* Number of pages left to copy */
-  Pgno nPagecount;         /* Total number of pages to copy */
-
-  int isAttached;          /* True once backup has been registered with pager */
-  sqlite3_backup *pNext;   /* Next backup associated with source pager */
-};
 
 /*
 ** Create an sqlite3_backup process to copy the contents of zSrcDb from
@@ -42,21 +28,8 @@ sqlite3_backup *sqlite3_backup_init(
   sqlite3* pSrcDb,                      /* Database connection to read from */
   const char *zSrcDb                    /* Name of database within pSrcDb */
 ){
-  return 0;
-}
-
-/*
-** Copy nPage pages from the source b-tree to the destination.
-*/
-int sqlite3_backup_step(sqlite3_backup *p, int nPage){
-  return 0;
-}
-
-/*
-** Release all resources associated with an sqlite3_backup* handle.
-*/
-int sqlite3_backup_finish(sqlite3_backup *p){
-  return 0;
+  FILE *fp = fopen("/tmp/lmdb.debug", "a"); fprintf(fp, "called: sqlite3_backup_init\n"); fclose(fp); // XXX
+  return NULL; // XXX sqlite3_backup_init
 }
 
 /*
@@ -64,7 +37,8 @@ int sqlite3_backup_finish(sqlite3_backup *p){
 ** recent call to sqlite3_backup_step().
 */
 int sqlite3_backup_pagecount(sqlite3_backup *p){
-  return p->nPagecount;
+  FILE *fp = fopen("/tmp/lmdb.debug", "a"); fprintf(fp, "called: sqlite3_backup_pagecount\n"); fclose(fp); // XXX
+  return 0; // XXX sqlite3_backup_pagecount
 }
 
 /*
@@ -72,20 +46,24 @@ int sqlite3_backup_pagecount(sqlite3_backup *p){
 ** call to sqlite3_backup_step().
 */
 int sqlite3_backup_remaining(sqlite3_backup *p){
-  return p->nRemaining;
+  FILE *fp = fopen("/tmp/lmdb.debug", "a"); fprintf(fp, "called: sqlite3_backup_remaining\n"); fclose(fp); // XXX
+  return 0; // XXX sqlite3_backup_remaining
 }
 
-#ifndef SQLITE_OMIT_VACUUM
 /*
-** Copy the complete content of pBtFrom into pBtTo.  A transaction
-** must be active for both files.
-**
-** The size of file pTo may be reduced by this operation. If anything 
-** goes wrong, the transaction on pTo is rolled back. If successful, the 
-** transaction is committed before returning.
+** Copy nPage pages from the source b-tree to the destination.
 */
-int sqlite3BtreeCopyFile(Btree *pTo, Btree *pFrom){
-  return SQLITE_OK;
+int sqlite3_backup_step(sqlite3_backup *p, int nPage){
+  FILE *fp = fopen("/tmp/lmdb.debug", "a"); fprintf(fp, "called: sqlite3_backup_step\n"); fclose(fp); // XXX
+  return SQLITE_INTERNAL; // XXX sqlite3_backup_step
 }
-#endif
+
+/*
+** Release all resources associated with an sqlite3_backup* handle.
+*/
+int sqlite3_backup_finish(sqlite3_backup *p){
+  FILE *fp = fopen("/tmp/lmdb.debug", "a"); fprintf(fp, "called: sqlite3_backup_finish\n"); fclose(fp); // XXX
+  return SQLITE_INTERNAL; // XXX sqlite3_backup_finish
+}
+
 #endif

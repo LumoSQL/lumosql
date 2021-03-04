@@ -4,3 +4,5 @@ TCC += -I$(LUMO_BUILD)/lumo/build
 TLIBS += -L$(LUMO_BUILD)/lumo/build
 TLIBS += -llmdb
 
+TCC += -g
+
