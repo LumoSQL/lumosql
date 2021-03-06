@@ -1,0 +1,23 @@
+# "lmdb_debug" build option: add debugging code to the LMDB backend; this is
+# different from enabling debugging within LMDB itself, which is controlled
+# by another option; the debugging is produced in a file, not standard error,
+# to avoid confusing the benchmarking; the file name is in $LUMO_LMDB_DEBUG,
+# default "/tmp/lumo.lmdb.debug"
+
+# This option affects the build process
+build = yes
+
+# Option can have the following values
+# off    no debugging output
+# on     normal debugging output, logs most operations
+# insert extensive debugging output, also logs table contents before and after
+#        each insert: this is very slow and produces lots of output
+# if we add more debugging options, it may become a list of flags, with "off"
+# meaning "all unset", "on" meaning "just the base stuff set" and other values
+# indicating which flag(s) to set and which flag(s) to unset; for now there is
+# only one flag though so this is sufficient
+enum = off,on,insert
+
+# Default is off, no debugging
+default = off
+

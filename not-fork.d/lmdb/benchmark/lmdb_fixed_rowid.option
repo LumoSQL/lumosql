@@ -1,0 +1,15 @@
+# "lmdb_fixed_rowid" build option: change the table index to use a fixed 8 byte
+# integer instead of a variable length one, for comparing speeds; the resulting
+# database formats are not compatible (they can be made compatible and this can
+# even be changed to a runtime option and/or pragma, if it turns out there may
+# be reasons to do so).  Testing suggests that this option be left off.
+
+# This option affects the build process
+build = yes
+
+# Boolean function
+boolean
+
+# Default is variable length, i.e. option off
+default = off
+

@@ -586,6 +586,10 @@ if {$target_string eq ""} {
 		puts stderr "Invalid option $optstring"
 		exit 1
 	    }
+	    if {[llength [array names options -exact [string toupper $option]]] == 0} {
+		puts stderr "Invalid option name: $option"
+		exit 1
+	    }
 	    set od $options([string toupper $option])
 	    if {[llength $od] < 2} {
 		puts stderr "Invalid option name: $option"
