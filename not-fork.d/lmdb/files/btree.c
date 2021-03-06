@@ -173,7 +173,6 @@ static u64 get8(const MDB_val *d) {
 static void put8(MDB_val *d, unsigned char *b, u64 v) {
   int size = 0;
   b += 8;
-  LUMO_LOG("put8 %llu", (unsigned long long)v);
   /* we could replace this with a while(v) { ... } but this can be
   ** used as key and we don't necessarily want empty keys */
   do {
@@ -714,7 +713,6 @@ int sqlite3BtreeRollback(Btree *p, int tripCode, int writeOnly) {
       // XXX invalidate all / all write cursors
     }
     closeAllSavepoints(p, -1, 0);
-    //XXX mdb_dbi_close(p->env, p->dataDbi);
     LUMO_LOG("sqlite3BtreeRollback %s abort %p\n", p->path, p->svp->txn);
     mdb_txn_abort(p->svp->txn);
     p->inTrans = SQLITE_TXN_NONE;
@@ -783,7 +781,6 @@ int sqlite3BtreeCreateTable(Btree *p, Pgno *piTable, int flags) {
   rc = get_table(p, pgnoRoot, get_table_create | ((flags & BTREE_INTKEY) ? 0 : get_table_index), &dbi);
   LUMO_LOG("sqlite3BtreeCreateTable(%u): %d\n", pgnoRoot, rc);
   if (rc) return error_map(rc);
-  //XXX mdb_dbi_close(p->env, dbi);
   return sqlite3BtreeUpdateMeta(p, BTREE_LARGEST_ROOT_PAGE, pgnoRoot);
 }
 
@@ -1072,7 +1069,6 @@ int sqlite3BtreeCursor(
   rc = mdb_cursor_open(p->svp->txn, pCur->dbi, &pCur->cursor);
   if (rc) {
     LUMO_LOG("sqlite3BtreeCursor (%s, %u): open fail %d\n", p->path, iTable, rc);
-    //XXX mdb_dbi_close(p->env, pCur->dbi);
     return error_map(rc);
   }
   pCur->atEof = 0;
@@ -1130,8 +1126,6 @@ int sqlite3BtreeCloseCursor(BtCursor *pCur) {
 	     pCur->pBtree->path, pCur->rootPage,
 	     pCur->pBtree->svp->txn, pCur, pCur->cursor);
     mdb_cursor_close(pCur->cursor);
-    // XXX we need to see if we are going to close this table or not
-    //XXX mdb_dbi_close(pCur->pBtree->env, pCur->dbi);
     pCur->cursor = NULL;
   }
   return SQLITE_OK;
@@ -1537,10 +1531,15 @@ const void *sqlite3BtreePayloadFetch(BtCursor *pCur, u32 *pAmt){
     *pAmt = 0;
     return "";
   }
-  if (! pCur->pKeyInfo) LUMO_LOG("ID(%lld) ", (long long)get8(&key));
+#ifdef LUMO_LMDB_DEBUG
+  if (! pCur->pKeyInfo) {
+    LUMO_LOG("ID(%lld) ", (long long)get8(&key));
+    LUMO_LOG_DATA(key.mv_size, key.mv_data);
+  }
   LUMO_LOG("payload(%zd)", pCur->pKeyInfo ? key.mv_size : data.mv_size);
   LUMO_LOG_DATA(pCur->pKeyInfo ? key.mv_size : data.mv_size, pCur->pKeyInfo ? key.mv_data : data.mv_data);
   LUMO_LOG("\n");
+#endif
   if (pCur->pKeyInfo) {
     *pAmt = key.mv_size;
     return key.mv_data;
