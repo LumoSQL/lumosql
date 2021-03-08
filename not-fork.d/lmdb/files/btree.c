@@ -55,6 +55,7 @@ struct Btree {
   u8 isTemp;
   u8 isMemdb;
   u8 inBackup;
+  u8 hasData;
   char path[];
 };
 
@@ -237,6 +238,7 @@ static int get_int(Btree *p, unsigned int idx) {
   MDB_val key, data;
   int rc;
   unsigned char bidx = idx;
+  if (! p->hasData) return 0;
   key.mv_data = &bidx;
   key.mv_size = 1;
   rc = mdb_get(p->svp->txn, p->dataDbi, &key, &data);
@@ -251,6 +253,7 @@ static int put_int(Btree *p, unsigned int idx, u32 iValue) {
   char buffer[4];
   unsigned char bidx = idx;
   MDB_val key, data;
+  if (! p->hasData) return EACCES;
   key.mv_data = &bidx;
   key.mv_size = 1;
   data.mv_data = buffer;
@@ -293,7 +296,7 @@ static int get_table(Btree *p, unsigned int iTable, get_table_t tableFlags, MDB_
   unsigned int mdbFlags = 0;
   if (iTable < 1) return SQLITE_CORRUPT_BKPT;
   if (! p->svp) return SQLITE_INTERNAL;
-  if (iTable == 1 || (tableFlags & get_table_create) != 0) mdbFlags |= MDB_CREATE;
+  if ((tableFlags & get_table_create) != 0) mdbFlags |= MDB_CREATE;
   snprintf(dbiName, sizeof(dbiName), "t%08x", (unsigned int)iTable);
   LUMO_LOG("get_table: %d %x => <%s>\n", iTable, tableFlags, dbiName);
   rc = mdb_dbi_open(p->svp->txn, dbiName, mdbFlags, dbi);
@@ -389,6 +392,7 @@ int sqlite3BtreeOpen(
 ){
   char dirPathName[BTREE_MAX_PATH];
   Btree *p;
+  MDB_txn *txn = NULL;
   int rc;
   int envClose = 0;
   int mdbFlags;
@@ -464,9 +468,28 @@ int sqlite3BtreeOpen(
   mdb_env_set_maxreaders(p->env, 254);
   mdb_env_set_maxdbs(p->env, isTempDb ? 64 : 1024);
   rc = mdb_env_open(p->env, dirPathName, mdbFlags, SQLITE_DEFAULT_FILE_PERMISSIONS);
+  if (rc) goto error;
+  /* if we are opening read/write, make sure that the main btree and
+  ** the one where we store the metadata are present */
+  if (! (vfsFlags & SQLITE_OPEN_READONLY)) {
+    MDB_dbi dbi;
+    rc = mdb_txn_begin(p->env, NULL, 0, &txn);
+    LUMO_LOG("mdb_txn_begin: %d\n", rc);
+    if (rc) goto error;
+    rc = mdb_dbi_open(txn, "t00000001", MDB_CREATE, &dbi);
+    LUMO_LOG("mdb_dbi_open t00000001: %d\n", rc);
+    if (rc) goto error;
+    rc = mdb_dbi_open(txn, "meta", MDB_CREATE, &dbi);
+    LUMO_LOG("mdb_dbi_open meta: %d\n", rc);
+    if (rc) goto error;
+    rc = mdb_txn_commit(txn);
+    txn = NULL;
+    if (rc) goto error;
+  }
   *ppBtree = p;
   return SQLITE_OK;
 error:
+  if (txn) mdb_txn_abort(txn);
   if (envClose) mdb_env_close(p->env);
   if (isTempDb || isMemdb)
     removeTempDb(dirPathName);
@@ -618,32 +641,48 @@ int sqlite3BtreeBeginTrans(Btree *p, int wrFlag, int *pSchemaVersion) {
   if (wrFlag && isReadonly != 0)
     return SQLITE_READONLY;
   if (p->inTrans != SQLITE_TXN_NONE) {
+#ifdef LUMO_LMDB_TRANSACTION
     if (wrFlag) p->inTrans = SQLITE_TXN_WRITE;
     goto get_version;
+#else
+    if (p->inTrans == SQLITE_TXN_WRITE) goto get_version;
+    if (! wrFlag) goto get_version;
+    return SQLITE_READONLY;
+#endif
   }
   if (p->svp) return SQLITE_INTERNAL;
   p->svp = sqlite3DbMallocZero(0, sizeof(struct BtreeSavepoint));
   if (! p->svp) return SQLITE_NOMEM;
   p->svp->prev = NULL;
   p->svp->nSavepoint = -1;
+#ifdef LUMO_LMDB_TRANSACTION
   /* we always begin a writable transaction as long as the database itself
   ** is writable (i.e. readonly is not specified in vfsFlags); this is so
   ** that we can upgrade to a writable transaction later if necessary
   ** as lmdb doesn't have a method to do that */
   rc = mdb_txn_begin(p->env, NULL, isReadonly ? MDB_RDONLY : 0, &p->svp->txn);
+#else
+  /* we create a r/o transaction if appropriate but we won't be able to
+  ** upgrade it to r/w */
+  rc = mdb_txn_begin(p->env, NULL, wrFlag ? 0 : MDB_RDONLY, &p->svp->txn);
+#endif
   if (rc) {
     LUMO_LOG("sqlite3BtreeBeginTrans (%d): begin fail %d\n", wrFlag, rc);
     sqlite3_free(p->svp);
     p->svp = NULL;
     return error_map(rc);
   }
-  rc = mdb_dbi_open(p->svp->txn, "meta", isReadonly ? 0 : MDB_CREATE, &p->dataDbi);
-  if (rc && !(isReadonly && rc == MDB_NOTFOUND)) {
+  rc = mdb_dbi_open(p->svp->txn, "meta", 0, &p->dataDbi);
+  if (rc == MDB_NOTFOUND && !wrFlag) {
+    p->hasData = 0;
+  } else if (rc) {
     mdb_txn_abort(p->svp->txn);
     sqlite3_free(p->svp);
     p->svp = NULL;
     LUMO_LOG("sqlite3BtreeBeginTrans (%d): dbi open fail %d\n", wrFlag, rc);
     return error_map(rc);
+  } else {
+    p->hasData = 1;
   }
   p->inTrans = wrFlag ? SQLITE_TXN_WRITE : SQLITE_TXN_READ;
 get_version:

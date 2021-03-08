@@ -15,5 +15,9 @@ ifneq ($(OPTION_LMDB_FIXED_ROWID),off)
 TCC += -DLUMO_LMDB_FIXED_ROWID
 endif
 
+ifneq ($(OPTION_LMDB_TRANSACTION),off)
+TCC += -DLUMO_LMDB_TRANSACTION
+endif
+
 TCC += -g
 
