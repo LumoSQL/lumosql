@@ -1,0 +1,16 @@
+# "lmdb_transaction" build option: allows transactions to be upgraded from
+# readonly to readwrite; sqlite seems to allow starting a readonly
+# transaction and the upgrading it to readwrite (but not to exclusive)
+# so this may be necessary; however the only way to do this with LMDB
+# is to start all transactions readwrite and just pretend that they are
+# readonly, which removes any possibility of concurrent read access
+
+# This option affects the build process
+build = yes
+
+# Option is Boolean
+boolean
+
+# Default is off, no upgrading, but better concurrency
+default = off
+

@@ -1,0 +1,12 @@
+# Option to change the sqlite3 journal_mode from the default
+
+# option is runtime only
+build = no
+
+# values accepted by sqlite3 at the time of typing, plus "default"
+# to indicate "no change" (currently this means "delete")
+enum = default,delete,persist,off,truncate,memory,wal
+
+# default value is... default
+default = default
+

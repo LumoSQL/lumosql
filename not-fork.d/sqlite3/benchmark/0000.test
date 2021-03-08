@@ -1,5 +1,10 @@
 set name "Creating database and tables"
 
 append sql "PRAGMA default_synchronous=on;\n"
+
+if {$options(SQLITE3_JOURNAL) ne "default"} {
+  append sql "PRAGMA journal_mode=$options(SQLITE3_JOURNAL);\n"
+}
+
 append sql "CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100));\n"
 

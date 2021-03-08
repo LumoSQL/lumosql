@@ -4,3 +4,10 @@ if {$options(ROWSUM) eq "on"} {
   append sql "PRAGMA lumo_rowsum_algorithm=$options(ROWSUM_ALGORITHM);\n"
 }
 
+# journal modes other than "wal" don't appear to persist
+if {$options(SQLITE3_JOURNAL) ne "default"} {
+  append sql "PRAGMA journal_mode=$options(SQLITE3_JOURNAL);\n"
+  # the above will print the journal mode, causing the result tests to fail
+  lappend results "$options(SQLITE3_JOURNAL)"
+}
+
