@@ -13,6 +13,10 @@
 
 // FIXME - we completely omit any shared cache code in this version
 
+// FIXME - this version does not lock structures which could be accessed
+// concurrently when multithreaded (LMDB calls are OK as they do their
+// own locking)
+
 #ifndef __LUMO_BACKEND_btree_c
 #define __LUMO_BACKEND_btree_c 1
 
@@ -66,6 +70,7 @@ struct BtCursor {
 
 static struct BtCursor fakeCursor = {
   .atEof = 1,
+  .cursor = NULL,
 };
 
 #ifdef LUMO_LMDB_DEBUG
@@ -186,6 +191,8 @@ static void put8(MDB_val *d, unsigned char *b, u64 v) {
 }
 #endif
 
+/* taken from sqlightning; sometimes there isn't an exact map of LMDB errors to
+** sqlite errors but at least we can report that something went wrong */
 static int error_map(int rc) {
   switch(rc) {
     case 0:
@@ -224,6 +231,8 @@ static int error_map(int rc) {
   return SQLITE_INTERNAL;
 }
 
+/* get an integer from the "dataDbi" table, which is open to the metadata;
+** the index is assumed to be between 0 and 15 */
 static int get_int(Btree *p, unsigned int idx) {
   MDB_val key, data;
   int rc;
@@ -236,6 +245,8 @@ static int get_int(Btree *p, unsigned int idx) {
   return sqlite3Get4byte(data.mv_data);
 }
 
+/* put an integer into the "dataDbi" table, which is open to the metadata;
+** the index is assumed to be between 0 and 15 */
 static int put_int(Btree *p, unsigned int idx, u32 iValue) {
   char buffer[4];
   unsigned char bidx = idx;
@@ -249,7 +260,8 @@ static int put_int(Btree *p, unsigned int idx, u32 iValue) {
 }
 
 #ifndef LUMO_LMDB_FIXED_ROWID
-/* compare two rowid values stored by get8() */
+/* compare two rowid values stored by get8(); this function is not needed
+** if using fixed rowid fields */
 static int rowid_compare(const MDB_val *a, const MDB_val *b) {
   if (a->mv_size < b->mv_size) return -1;
   if (a->mv_size > b->mv_size) return 1;
@@ -303,6 +315,7 @@ static int closeAllSavepoints(Btree *p, int nTo, int commit) {
     struct BtreeSavepoint * S = p->svp;
     p->svp = S->prev;
     LUMO_LOG("closeAllSavepoints(%d, %d, %d) %p\n", S->nSavepoint, nTo, commit, S->txn);
+    // FIXME invalidate any cursor on S->txn
     if (commit) {
       int rc1 = mdb_txn_commit(S->txn);
       if (rc1 && ! rc) rc = rc1;
@@ -314,13 +327,15 @@ static int closeAllSavepoints(Btree *p, int nTo, int commit) {
   return rc;
 }
 
+/* See comment at the top of the file: FIXME we don't have any shared code in
+** this version */
 int sqlite3_enable_shared_cache(int enable) { }
 
+/* non-vfs routine to delete all files in a directory, then the
+** directory itself; to get to the point of calling this we
+** must have gone through the creation of a temporary database,
+** which needs also be fixed o use vfs calls */
 static void removeTempDb(const char *zDir) {
-  /* non-vfs routine to delete all files in a directory, then the
-  ** directory itself; to get to the point of calling this we
-  ** must have gone through the creation of a temporary database,
-  ** which needs also be fixed o use vfs calls */
   DIR * dp = opendir(zDir);
   if (dp) {
     /* give us a buffer large enough for any files LMDB may create;
@@ -428,6 +443,7 @@ int sqlite3BtreeOpen(
     goto error;
   }
   p->inTrans = SQLITE_TXN_NONE;
+  p->svp = NULL;
   p->inBackup = 0;
   p->db = db;
   p->flags = flags;
@@ -448,7 +464,6 @@ int sqlite3BtreeOpen(
   mdb_env_set_maxreaders(p->env, 254);
   mdb_env_set_maxdbs(p->env, isTempDb ? 64 : 1024);
   rc = mdb_env_open(p->env, dirPathName, mdbFlags, SQLITE_DEFAULT_FILE_PERMISSIONS);
-  // XXX any more initialisations
   *ppBtree = p;
   return SQLITE_OK;
 error:
@@ -460,15 +475,19 @@ error:
   return error_map(rc);
 }
 
+/*
+** Close an open database and invalidate all cursors.
+*/
 int sqlite3BtreeClose(Btree *p) {
   LUMO_LOG("sqlite3BtreeClose %s\n", p->path);
-  // XXX invalidate all cursors
   if (p->svp) {
     LUMO_LOG("  aborting txn %p\n", p->svp->txn);
     closeAllSavepoints(p, -1, 0);
+    // FIXME invalidate any cursor on p->svp->txn
     if (p->svp->txn) mdb_txn_abort(p->svp->txn);
     sqlite3_free(p->svp);
   }
+  // FIXME invalidate all cursors remaining on p
   mdb_env_close(p->env);
   if (p->isTemp && *p->path)
     removeTempDb(p->path);
@@ -668,6 +687,7 @@ int sqlite3BtreeCommitPhaseOne(Btree *p, const char *zSuperJrnl) {
   if (p->inTrans != SQLITE_TXN_NONE) {
     int rc = closeAllSavepoints(p, -1, 1);
     if (rc) return error_map(rc);
+    // FIXME invalidate all cursors on p->svp->txn
     if (p->inTrans == SQLITE_TXN_WRITE) {
       rc = mdb_txn_commit(p->svp->txn);
       p->inTrans = SQLITE_TXN_NONE;
@@ -709,13 +729,15 @@ int sqlite3BtreeCommit(Btree *p) {
 */
 int sqlite3BtreeRollback(Btree *p, int tripCode, int writeOnly) {
   if (p->inTrans != SQLITE_TXN_NONE) {
-    if (tripCode != SQLITE_OK) {
-      // XXX invalidate all / all write cursors
-    }
     closeAllSavepoints(p, -1, 0);
+    /* FIXME - invalidate cursors; note that LMDB may require invalidating
+    ** all cursors even if tripCode is SQLITE_OK, or else create new
+    ** cursors and move them to the old position */
     LUMO_LOG("sqlite3BtreeRollback %s abort %p\n", p->path, p->svp->txn);
     mdb_txn_abort(p->svp->txn);
     p->inTrans = SQLITE_TXN_NONE;
+    sqlite3_free(p->svp);
+    p->svp = NULL;
   }
   LUMO_LOG("sqlite3BtreeRollback done\n");
   return SQLITE_OK;
@@ -841,16 +863,22 @@ int sqlite3BtreeLockTable(Btree *p, int iTab, u8 isWriteLock) {
 ** transaction remains open.
 */
 int sqlite3BtreeSavepoint(Btree *p, int op, int iSavepoint) {
+  struct BtreeSavepoint * S;
   int rc = closeAllSavepoints(p, iSavepoint, op == SAVEPOINT_RELEASE);
   LUMO_LOG("sqlite3BtreeSavepoint %s %d %d -> %d\n",
 	   p->path, op == SAVEPOINT_RELEASE, iSavepoint, rc);
   if (rc) return error_map(rc);
   if (iSavepoint >= 0) return SQLITE_OK;
   assert(op == SAVEPOINT_ROLLBACK);
-  // FIXME we abort this transaction but in reality we are supposed to keep
-  // it open; we'll add a sub-transaction to deal with this case
-  LUMO_LOG("aborting txn=%p\n", p->svp->txn);
-  mdb_txn_abort(p->svp->txn);
+  /* FIXME we abort this transaction but in reality we are supposed to keep
+  ** it open; we cannot call mdb_txn_renew as that only works with readonly
+  ** transactions */
+  /* FIXME also we need to invalidate cursors on S->txn if we don't keep it */
+  S = p->svp;
+  LUMO_LOG("aborting txn=%p\n", S->txn);
+  mdb_txn_abort(S->txn);
+  p->svp = S->prev;
+  sqlite3_free(S);
   p->inTrans = SQLITE_TXN_NONE;
   return SQLITE_OK;
 }
