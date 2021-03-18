@@ -696,10 +696,35 @@ proc run_build {dir prog} {
     popd
 }
 
+proc search_dir {rootdir exclude} {
+    global dest_dir
+    global mtime
+    if {! [file isdirectory $rootdir]} { return 1 }
+    foreach fn [glob -directory $rootdir -nocomplain *] {
+	set bn [lindex [file split $fn] end]
+	if {[lsearch -exact $exclude $bn] < 0} {
+	    if {[file isdirectory $fn]} {
+		if {! [search_dir $fn [list]]} {
+		    return 0
+		}
+	    } else {
+		file stat $rootdir buildstat
+		set dmtime $buildstat(mtime)
+		if {$mtime < $dmtime} { return 0 }
+	    }
+	}
+    }
+    return 1;
+}
+
+proc check_mtime {subdir} {
+    global notfork
+    return [search_dir [file join $notfork $subdir] [list benchmark]]
+}
+
 for {set bnum 0} {$bnum < [llength $build_list]} {incr bnum} {
     set build [lindex $build_list $bnum]
     set dest_dir [file join $build_dir $build]
-    if {[file isdirectory $dest_dir]} { continue }
     set build_optlist [lindex $build_option_list $bnum]
     set tl [split $build "+"]
     set sqlite3_version [lindex $tl 0]
@@ -710,7 +735,23 @@ for {set bnum 0} {$bnum < [llength $build_list]} {incr bnum} {
 	set backend_name ""
 	set backend_version ""
     }
-    puts "*** Building $build"
+    if {[file isdirectory $dest_dir]} {
+	# check if the build is at least as recent as our files
+	set skip_rebuild 1
+	file stat [file join $dest_dir lumo build] buildstat
+	set mtime $buildstat(mtime)
+	if {$skip_rebuild && $sqlite3_version ne ""} {
+	    set skip_rebuild [check_mtime sqlite3]
+	}
+	if {$skip_rebuild && $backend_version ne ""} {
+	    set skip_rebuild [check_mtime $backend_name]
+	}
+	if {$skip_rebuild} {continue}
+	file delete -force $dest_dir
+	puts "*** Reuilding $build (sources changed)"
+    } else {
+	puts "*** Building $build"
+    }
     if {$sqlite3_version ne ""} {
 	puts "    SQLITE3_VERSION = $sqlite3_version"
     }
