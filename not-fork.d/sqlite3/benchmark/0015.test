@@ -1,0 +1,11 @@
+set d100 [expr $options(DATASIZE) * 100]
+set name "$d100 UPDATEs without an index, upgrading a read-only transaction"
+
+append sql "BEGIN;\n"
+append sql "SELECT * from t1 LIMIT 1;\n"
+for {set i 1} {$i<=$d100} {incr i} {
+  set r [expr {int(rand()*100000)}]
+  append sql "UPDATE t1 SET b=$r, c='[number_name $r]' WHERE a=$i;\n"
+}
+append sql "COMMIT;\n"
+

@@ -15,8 +15,15 @@ ifneq ($(OPTION_LMDB_FIXED_ROWID),off)
 TCC += -DLUMO_LMDB_FIXED_ROWID
 endif
 
-ifneq ($(OPTION_LMDB_TRANSACTION),off)
-TCC += -DLUMO_LMDB_TRANSACTION
+# this will be replaced by a runtime option and a PRAGMA later
+ifeq ($(OPTION_LMDB_TRANSACTION),noupgrade)
+TCC += -DLUMO_LMDB_TRANSACTION=0
+else
+ifeq ($(OPTION_LMDB_TRANSACTION),optimistic)
+TCC += -DLUMO_LMDB_TRANSACTION=1
+else
+TCC += -DLUMO_LMDB_TRANSACTION=2
+endif
 endif
 
 TCC += -g

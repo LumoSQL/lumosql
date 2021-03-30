@@ -33,8 +33,15 @@
 ** for more details */
 #define LUMO_LMDB_MAX_KEY 479
 
+/* our additional keys in the metadata list; note that sqlite only
+** uses values up to 15 and it's not likely to use more as that would
+** require a change in file format */
+#define LUMO_LMDB_META_COUNTER   101
+
+/* we implement savepoints as nested transactions: this is the stack */
+typedef struct BtreeSavepoint BtreeSavepoint;
 struct BtreeSavepoint {
-  struct BtreeSavepoint *prev;
+  BtreeSavepoint *prev;
   MDB_txn *txn;
   int nSavepoint;
 };
@@ -43,7 +50,9 @@ struct Btree {
   sqlite3 *db;
   sqlite3_vfs *pVfs;
   MDB_env *env;
-  struct BtreeSavepoint *svp;
+  BtreeSavepoint *svp;
+  BtCursor *first_cursor;
+  BtCursor *last_cursor;
   MDB_dbi dataDbi;
   void * pSchema;
   void (*xFreeSchema)(void *);
@@ -61,17 +70,23 @@ struct Btree {
 
 struct BtCursor {
   Btree * pBtree;
+  BtCursor * prev;
+  BtCursor * next;
   MDB_dbi dbi;
   MDB_cursor * cursor;
   struct KeyInfo *pKeyInfo;
   Pgno rootPage;
+  int tripCode;
   unsigned int hints;
   u8 atEof;
+  u8 wrFlag;
+  MDB_val savedKey;
 };
 
 static struct BtCursor fakeCursor = {
   .atEof = 1,
   .cursor = NULL,
+  .tripCode = SQLITE_OK,
 };
 
 #ifdef LUMO_LMDB_DEBUG
@@ -233,8 +248,9 @@ static int error_map(int rc) {
 }
 
 /* get an integer from the "dataDbi" table, which is open to the metadata;
-** the index is assumed to be between 0 and 15 */
-static int get_int(Btree *p, unsigned int idx) {
+** the index is assumed to be between 0 and 15 or one of our extra metadata
+** index values */
+static int get_meta_32(Btree *p, unsigned int idx) {
   MDB_val key, data;
   int rc;
   unsigned char bidx = idx;
@@ -246,10 +262,22 @@ static int get_int(Btree *p, unsigned int idx) {
   if (data.mv_size != 4) return 0;
   return sqlite3Get4byte(data.mv_data);
 }
+static int get_meta_64(Btree *p, unsigned int idx) {
+  MDB_val key, data;
+  int rc;
+  unsigned char bidx = idx;
+  if (! p->hasData) return 0;
+  key.mv_data = &bidx;
+  key.mv_size = 1;
+  rc = mdb_get(p->svp->txn, p->dataDbi, &key, &data);
+  if (rc) return 0;
+  return get8(&data);
+}
 
 /* put an integer into the "dataDbi" table, which is open to the metadata;
-** the index is assumed to be between 0 and 15 */
-static int put_int(Btree *p, unsigned int idx, u32 iValue) {
+** the index is assumed to be between 0 and 15 or one of our extra metadata
+** index values */
+static int put_meta_32(Btree *p, unsigned int idx, u32 iValue) {
   char buffer[4];
   unsigned char bidx = idx;
   MDB_val key, data;
@@ -259,6 +287,16 @@ static int put_int(Btree *p, unsigned int idx, u32 iValue) {
   data.mv_data = buffer;
   data.mv_size = 4;
   sqlite3Put4byte(buffer, iValue);
+  return mdb_put(p->svp->txn, p->dataDbi, &key, &data, 0);
+}
+static int put_meta_64(Btree *p, unsigned int idx, u64 uValue) {
+  char buffer[8];
+  unsigned char bidx = idx;
+  MDB_val key, data;
+  if (! p->hasData) return EACCES;
+  key.mv_data = &bidx;
+  key.mv_size = 1;
+  put8(&data, buffer, uValue);
   return mdb_put(p->svp->txn, p->dataDbi, &key, &data, 0);
 }
 
@@ -311,16 +349,74 @@ static int get_table(Btree *p, unsigned int iTable, get_table_t tableFlags, MDB_
   return rc;
 }
 
-static int closeAllSavepoints(Btree *p, int nTo, int commit) {
+/* go through the list of all cursor and if any is on the transaction
+** pointed to by "svp" invalidate them; if tripCode is SQLITE_OK it also
+** saves their position before invalidating so they can restored later:
+** otherwise it will return tripCode when using the cursors; all
+** cursors are invalidated, but tripCode only applies to write cursors
+** if writeOnly is nonzero */
+static int invalidateCursors(Btree *p,
+			     BtreeSavepoint * svp,
+			     int tripCode,
+			     int writeOnly)
+{
+  BtCursor *pList;
   int rc = 0;
-  if (! p->svp) return 0;
+  if (!p->first_cursor) return 0;
+  LUMO_LOG("invalidateCursors(tripCode=%d, writeOnlu=%d, p=%p, svp=%p)\n",
+	   tripCode, writeOnly, p, svp);
+  pList = p->first_cursor;
+  while (pList) {
+    BtCursor *pCur = pList;
+    pList = pList->next;
+    if (pCur->tripCode == SQLITE_OK && pCur->cursor != NULL) {
+      if (tripCode == SQLITE_OK) {
+	/* save cursor position before invalidating */
+	MDB_val key, data;
+	int rc1 = mdb_cursor_get(pCur->cursor, &key, &data, MDB_CURRENT);
+	if (rc1) goto error;
+	pCur->savedKey.mv_data = sqlite3DbMallocRaw(0, key.mv_size);
+	if (!pCur->savedKey.mv_data) {
+	  rc1 = ENOMEM;
+	error:
+	  pCur->tripCode = error_map(rc1);
+	  if (!rc) rc = rc1;
+	  continue;
+	}
+	pCur->savedKey.mv_size = key.mv_size;
+	memcpy(pCur->savedKey.mv_data, key.mv_data, key.mv_size);
+	/* this cursor will no longer work, we'll have to make a new one */
+	mdb_cursor_close(pCur->cursor);
+	pCur->cursor = NULL;
+      }
+      if (pCur->wrFlag || !writeOnly)
+	pCur->tripCode = tripCode;
+    }
+  }
+  return rc;
+}
+
+/* close all savepoints up the specified "nTo" (-1 to close all); the
+** main transaction is never closed by this function; if "commit" is
+** nonzero, the transaction will be committed otherwise it will be
+** rolled back; all cursors on the savepoints being closed will be
+** invalidated; if "tripCde" is SQLITE_OK, their position will be saved
+** so they can be restored later; otherwise they will return tripCode
+** if used */
+static int closeAllSavepoints(Btree *p, int nTo, int commit, int tripCode) {
+  int rc = 0;
+  if (! p->svp || ! p->svp->prev) return 0;
+  LUMO_LOG("closeAllSavepoints(nTo=%d, commit=%d, tripCode=%d) %p\n",
+	   nTo, commit, tripCode, p);
   while (p->svp->prev && p->svp->nSavepoint != nTo) {
-    struct BtreeSavepoint * S = p->svp;
+    BtreeSavepoint * S = p->svp;
+    int rc1;
     p->svp = S->prev;
-    LUMO_LOG("closeAllSavepoints(%d, %d, %d) %p\n", S->nSavepoint, nTo, commit, S->txn);
-    // FIXME invalidate any cursor on S->txn
-    if (commit) {
-      int rc1 = mdb_txn_commit(S->txn);
+    LUMO_LOG("    nSavepoint=%d %p\n", S->nSavepoint, S->txn);
+    rc1 = invalidateCursors(p, p->svp, tripCode, 0);
+    if (rc1 && ! rc) rc = rc1;
+    if (commit && ! rc) {
+      rc1 = mdb_txn_commit(S->txn);
       if (rc1 && ! rc) rc = rc1;
     } else {
       mdb_txn_abort(S->txn);
@@ -448,6 +544,8 @@ int sqlite3BtreeOpen(
   }
   p->inTrans = SQLITE_TXN_NONE;
   p->svp = NULL;
+  p->first_cursor = NULL;
+  p->last_cursor = NULL;
   p->inBackup = 0;
   p->db = db;
   p->flags = flags;
@@ -505,12 +603,11 @@ int sqlite3BtreeClose(Btree *p) {
   LUMO_LOG("sqlite3BtreeClose %s\n", p->path);
   if (p->svp) {
     LUMO_LOG("  aborting txn %p\n", p->svp->txn);
-    closeAllSavepoints(p, -1, 0);
-    // FIXME invalidate any cursor on p->svp->txn
+    closeAllSavepoints(p, -1, 0, SQLITE_INTERNAL);
+    invalidateCursors(p, p->svp, SQLITE_INTERNAL, 0);
     if (p->svp->txn) mdb_txn_abort(p->svp->txn);
     sqlite3_free(p->svp);
   }
-  // FIXME invalidate all cursors remaining on p
   mdb_env_close(p->env);
   if (p->isTemp && *p->path)
     removeTempDb(p->path);
@@ -637,34 +734,70 @@ int sqlite3BtreeBeginTrans(Btree *p, int wrFlag, int *pSchemaVersion) {
   const int isReadonly = p->vfsFlags & SQLITE_OPEN_READONLY;
   LUMO_LOG("sqlite3BtreeBeginTrans(%d/%d, %d, %s) %s\n",
 	   wrFlag, isReadonly, p->inTrans, LUMO_TXN(p->inTrans), p->path);
+  /* if we already have a read/write transaction, there's nothing
+  ** more to do */
   if (p->inTrans == SQLITE_TXN_WRITE) goto get_version;
   if (wrFlag && isReadonly != 0)
     return SQLITE_READONLY;
   if (p->inTrans != SQLITE_TXN_NONE) {
-#ifdef LUMO_LMDB_TRANSACTION
-    if (wrFlag) p->inTrans = SQLITE_TXN_WRITE;
+    /* we already have a read-only transaction; if wrFlag is zero we
+    ** don't need to do anything */
+    if (! wrFlag) goto get_version;
+    /* we need to upgrade a read-only transaction to read/write; how
+    ** we do that depends on the transaction model requested */
+#if LUMO_LMDB_TRANSACTION == 0
+    /* "noupgrade" - we cannot go from a read-only to a read/write
+    ** transaction */
+    return SQLITE_BUSY;
+#elif LUMO_LMDB_TRANSACTION == 1
+    /* "optimistic" - we try to go from read-only to read/write
+    ** transaction by beginning a new read/write transaction and
+    ** comparing the commit counter: if unchanged, we "copy" all
+    ** cursors across and abort the read-only transaction */
+    u64 uCounterRO = get_meta_64(p, LUMO_LMDB_META_COUNTER);
+    int rc;
+    rc = invalidateCursors(p, p->svp, SQLITE_OK, 0);
+    if (rc) return error_map(rc);
+    /* we must abort the r/o transaction before beginning a new one */
+    p->hasData = 0;
+    mdb_txn_abort(p->svp->txn);
+    rc = mdb_txn_begin(p->env, NULL, 0, &p->svp->txn);
+    if (rc) goto out_error;
+    rc = mdb_dbi_open(p->svp->txn, "meta", 0, &p->dataDbi);
+    if (rc) {
+      mdb_txn_abort(p->svp->txn);
+    out_error:
+      LUMO_LOG("sqlite3BtreeBeginTrans: upgrade fail %d\n", rc);
+      sqlite3_free(p->svp);
+      p->svp = NULL;
+      return error_map(rc);
+    }
+    if (uCounterRO != get_meta_64(p, LUMO_LMDB_META_COUNTER))
+      return SQLITE_BUSY;
+    p->hasData = 1;
+    p->inTrans = SQLITE_TXN_WRITE;
     goto get_version;
 #else
-    if (p->inTrans == SQLITE_TXN_WRITE) goto get_version;
-    if (! wrFlag) goto get_version;
-    return SQLITE_READONLY;
+    /* "serialise" all transactions by always using a read/write
+    ** transaction; obviously, upgrading read-only to read/write
+    ** is very easy, we just need to remember that "commit" will
+    ** be a real thing */
+    p->inTrans = SQLITE_TXN_WRITE;
+    goto get_version;
 #endif
   }
   if (p->svp) return SQLITE_INTERNAL;
-  p->svp = sqlite3DbMallocZero(0, sizeof(struct BtreeSavepoint));
+  p->svp = sqlite3DbMallocZero(0, sizeof(BtreeSavepoint));
   if (! p->svp) return SQLITE_NOMEM;
   p->svp->prev = NULL;
   p->svp->nSavepoint = -1;
-#ifdef LUMO_LMDB_TRANSACTION
-  /* we always begin a writable transaction as long as the database itself
-  ** is writable (i.e. readonly is not specified in vfsFlags); this is so
-  ** that we can upgrade to a writable transaction later if necessary
-  ** as lmdb doesn't have a method to do that */
-  rc = mdb_txn_begin(p->env, NULL, isReadonly ? MDB_RDONLY : 0, &p->svp->txn);
-#else
-  /* we create a r/o transaction if appropriate but we won't be able to
-  ** upgrade it to r/w */
+#if LUMO_LMDB_TRANSACTION < 2
+  /* "noupgrade" or "optimistic" - begin a read-only or read/write transaction
+  ** as requested */
   rc = mdb_txn_begin(p->env, NULL, wrFlag ? 0 : MDB_RDONLY, &p->svp->txn);
+#else
+  /* "serialise" - always begin a read/write transaction */
+  rc = mdb_txn_begin(p->env, NULL, isReadonly ? MDB_RDONLY : 0, &p->svp->txn);
 #endif
   if (rc) {
     LUMO_LOG("sqlite3BtreeBeginTrans (%d): begin fail %d\n", wrFlag, rc);
@@ -687,9 +820,10 @@ int sqlite3BtreeBeginTrans(Btree *p, int wrFlag, int *pSchemaVersion) {
   p->inTrans = wrFlag ? SQLITE_TXN_WRITE : SQLITE_TXN_READ;
 get_version:
   if (pSchemaVersion)
-    *pSchemaVersion = get_int(p, BTREE_SCHEMA_VERSION);
+    *pSchemaVersion = get_meta_32(p, BTREE_SCHEMA_VERSION);
   LUMO_LOG("sqlite3BtreeBeginTrans(%d, %d) OK txn=%p %s\n",
-	   wrFlag, pSchemaVersion ? *pSchemaVersion : get_int(p, BTREE_SCHEMA_VERSION),
+	   wrFlag,
+	   pSchemaVersion ? *pSchemaVersion : get_meta_32(p, BTREE_SCHEMA_VERSION),
 	   p->svp->txn, p->path);
   return SQLITE_OK;
 }
@@ -724,17 +858,29 @@ int sqlite3BtreeCommitPhaseOne(Btree *p, const char *zSuperJrnl) {
   LUMO_LOG("sqlite3BtreeCommitPhaseOne(%d, %s) txn=%p %s\n",
 	   p->inTrans, LUMO_TXN(p->inTrans), p->svp ? p->svp->txn : NULL, p->path);
   if (p->inTrans != SQLITE_TXN_NONE) {
-    int rc = closeAllSavepoints(p, -1, 1);
+    int rc = closeAllSavepoints(p, -1, p->inTrans == SQLITE_TXN_WRITE, SQLITE_INTERNAL);
     if (rc) return error_map(rc);
-    // FIXME invalidate all cursors on p->svp->txn
+    invalidateCursors(p, p->svp, SQLITE_INTERNAL, 0);
     if (p->inTrans == SQLITE_TXN_WRITE) {
+      u64 uCounter = get_meta_64(p, LUMO_LMDB_META_COUNTER) + 1;
+      rc = put_meta_64(p, LUMO_LMDB_META_COUNTER, uCounter);
+      if (rc) {
+	LUMO_LOG("sqlite3BtreeCommitPhaseOne: fail updating commit counter %p %d\n",
+	         p->svp->txn, rc);
+	mdb_txn_abort(p->svp->txn);
+	sqlite3_free(p->svp);
+	p->svp = NULL;
+	p->inTrans = SQLITE_TXN_NONE;
+	return error_map(rc);
+      }
       rc = mdb_txn_commit(p->svp->txn);
       p->inTrans = SQLITE_TXN_NONE;
       if (rc) {
 	LUMO_LOG("sqlite3BtreeCommitPhaseOne: fail %p %d\n", p->svp->txn, rc);
 	return error_map(rc);
       }
-      LUMO_LOG("sqlite3BtreeCommitPhaseOne: OK %p\n", p->svp->txn);
+      LUMO_LOG("sqlite3BtreeCommitPhaseOne: OK %p, commit counter=%lld\n",
+	       p->svp->txn, (long long)uCounter);
     } else {
       mdb_txn_abort(p->svp->txn);
       LUMO_LOG("sqlite3BtreeCommitPhaseOne: abort r/o transaction %p\n", p->svp->txn);
@@ -743,7 +889,6 @@ int sqlite3BtreeCommitPhaseOne(Btree *p, const char *zSuperJrnl) {
     sqlite3_free(p->svp);
     p->svp = NULL;
   }
-  LUMO_LOG("sqlite3BtreeCommitPhaseOne OK\n");
   return SQLITE_OK;
 }
 
@@ -768,11 +913,9 @@ int sqlite3BtreeCommit(Btree *p) {
 */
 int sqlite3BtreeRollback(Btree *p, int tripCode, int writeOnly) {
   if (p->inTrans != SQLITE_TXN_NONE) {
-    closeAllSavepoints(p, -1, 0);
-    /* FIXME - invalidate cursors; note that LMDB may require invalidating
-    ** all cursors even if tripCode is SQLITE_OK, or else create new
-    ** cursors and move them to the old position */
     LUMO_LOG("sqlite3BtreeRollback %s abort %p\n", p->path, p->svp->txn);
+    closeAllSavepoints(p, -1, 0, tripCode);
+    invalidateCursors(p, p->svp, tripCode, writeOnly);
     mdb_txn_abort(p->svp->txn);
     p->inTrans = SQLITE_TXN_NONE;
     sqlite3_free(p->svp);
@@ -802,15 +945,17 @@ int sqlite3BtreeRollback(Btree *p, int tripCode, int writeOnly) {
 */
 int sqlite3BtreeBeginStmt(Btree *p, int iStatement) {
   int rc;
-  struct BtreeSavepoint * S = sqlite3DbMallocZero(0, sizeof(struct BtreeSavepoint));
+  BtreeSavepoint * S = sqlite3DbMallocZero(0, sizeof(BtreeSavepoint));
   if (! S) return SQLITE_NOMEM;
   rc = mdb_txn_begin(p->env, p->svp ? p->svp->txn : NULL, 0, &S->txn);
   if (rc) {
     sqlite3_free(S);
-    LUMO_LOG("sqlite3BtreeBeginStmt(%d): %p fail %d\n", iStatement, p->svp ? p->svp->txn : NULL, rc);
+    LUMO_LOG("sqlite3BtreeBeginStmt(%d): %p fail %d\n",
+	     iStatement, p->svp ? p->svp->txn : NULL, rc);
     return error_map(rc);
   }
-  LUMO_LOG("sqlite3BtreeBeginStmt(%d): %p OK %p\n", iStatement, p->svp ? p->svp->txn : NULL, S->txn);
+  LUMO_LOG("sqlite3BtreeBeginStmt(%d): %p OK %p\n",
+	   iStatement, p->svp ? p->svp->txn : NULL, S->txn);
   S->nSavepoint = iStatement;
   S->prev = p->svp;
   p->svp = S;
@@ -839,7 +984,9 @@ int sqlite3BtreeCreateTable(Btree *p, Pgno *piTable, int flags) {
   else
     pgnoRoot++;
   *piTable = pgnoRoot;
-  rc = get_table(p, pgnoRoot, get_table_create | ((flags & BTREE_INTKEY) ? 0 : get_table_index), &dbi);
+  rc = get_table(p, pgnoRoot,
+		 get_table_create | ((flags & BTREE_INTKEY) ? 0 : get_table_index),
+		 &dbi);
   LUMO_LOG("sqlite3BtreeCreateTable(%u): %d\n", pgnoRoot, rc);
   if (rc) return error_map(rc);
   return sqlite3BtreeUpdateMeta(p, BTREE_LARGEST_ROOT_PAGE, pgnoRoot);
@@ -902,8 +1049,8 @@ int sqlite3BtreeLockTable(Btree *p, int iTab, u8 isWriteLock) {
 ** transaction remains open.
 */
 int sqlite3BtreeSavepoint(Btree *p, int op, int iSavepoint) {
-  struct BtreeSavepoint * S;
-  int rc = closeAllSavepoints(p, iSavepoint, op == SAVEPOINT_RELEASE);
+  BtreeSavepoint * S;
+  int rc = closeAllSavepoints(p, iSavepoint, op == SAVEPOINT_RELEASE, SQLITE_OK);
   LUMO_LOG("sqlite3BtreeSavepoint %s %d %d -> %d\n",
 	   p->path, op == SAVEPOINT_RELEASE, iSavepoint, rc);
   if (rc) return error_map(rc);
@@ -911,10 +1058,14 @@ int sqlite3BtreeSavepoint(Btree *p, int op, int iSavepoint) {
   assert(op == SAVEPOINT_ROLLBACK);
   /* FIXME we abort this transaction but in reality we are supposed to keep
   ** it open; we cannot call mdb_txn_renew as that only works with readonly
-  ** transactions */
-  /* FIXME also we need to invalidate cursors on S->txn if we don't keep it */
+  ** transactions; we could use the same trick as the upgrade from r/o to
+  ** r/w and create a new txn; the alternative would be to always have a
+  ** subtransaction off the main one so we can roll it back and open a new
+  ** subtransaction */
+  LUMO_LOG("sqlite3BtreeSavepoint: aborting transaction, should keep it open\n");
   S = p->svp;
   LUMO_LOG("aborting txn=%p\n", S->txn);
+  invalidateCursors(p, S, SQLITE_OK, 0);
   mdb_txn_abort(S->txn);
   p->svp = S->prev;
   sqlite3_free(S);
@@ -1055,7 +1206,7 @@ void sqlite3BtreeGetMeta(Btree *p, int idx, u32 *pValue) {
   if (idx == BTREE_DATA_VERSION)
     *pValue = p->iDataVersion;
   else
-    *pValue = get_int(p, idx);
+    *pValue = get_meta_32(p, idx);
   LUMO_LOG("sqlite3BtreeGetMeta(%d: %d)\n", idx, *pValue);
 }
 
@@ -1064,7 +1215,7 @@ void sqlite3BtreeGetMeta(Btree *p, int idx, u32 *pValue) {
 ** read-only and may not be written.
 */
 int sqlite3BtreeUpdateMeta(Btree *p, int idx, u32 iValue) {
-  int rc = put_int(p, idx, iValue);
+  int rc = put_meta_32(p, idx, iValue);
   if (rc) {
     LUMO_LOG("sqlite3BtreeUpdateMeta(%d): fail %d\n", idx, rc);
     return error_map(rc);
@@ -1124,6 +1275,12 @@ int sqlite3BtreeCursor(
 ){
   MDB_val key, data;
   int rc;
+  LUMO_LOG("sqlite3BtreeCursor(p=%p pCur=%p iTable=%u wrflag=%d info=%s\n",
+	   p, pCur, (unsigned int)iTable, wrFlag, pKeyInfo ? "yes" : "no");
+  if (pCur->prev || pCur->next) {
+    LUMO_LOG("sqlite3BtreeCursor: %p prev=%p next=%p\n", pCur, pCur->prev, pCur->next);
+    return SQLITE_INTERNAL;
+  }
   pCur->pBtree = p;
   pCur->pKeyInfo = pKeyInfo;
   pCur->rootPage = iTable;
@@ -1143,6 +1300,15 @@ int sqlite3BtreeCursor(
 	   p->path, iTable, p->svp->txn, pCur, pCur->cursor);
   rc = mdb_cursor_get(pCur->cursor, &key, &data, MDB_FIRST);
   if (rc) pCur->atEof = 1;
+  /* add cursor to p's list */
+  pCur->prev = p->last_cursor;
+  pCur->next = NULL;
+  if (p->last_cursor)
+    p->last_cursor->next = pCur;
+  else
+    p->first_cursor = pCur;
+  p->last_cursor = pCur;
+  pCur->wrFlag = wrFlag ? 1 : 0;
   return SQLITE_OK;
 }
 
@@ -1172,8 +1338,9 @@ int sqlite3BtreeCursorSize(void){
 ** of run-time by skipping the initialization of those elements.
 */
 void sqlite3BtreeCursorZero(BtCursor *p){
-  // memset(p, 0, offsetof(BtCursor, BTCURSOR_FIRST_UNINIT));
+  LUMO_LOG("sqlite3BtreeCursorZero(%p)\n", p);
   memset(p, 0, sizeof(BtCursor));
+  p->tripCode = SQLITE_OK;
 }
 
 /*
@@ -1188,6 +1355,7 @@ void sqlite3BtreeCursorHintFlags(BtCursor *pCur, unsigned x) {
 ** when the last cursor is closed.
 */
 int sqlite3BtreeCloseCursor(BtCursor *pCur) {
+  Btree *p;
   if (pCur->cursor) {
     LUMO_LOG("sqlite3BtreeCloseCursor %s, %u txn=%p cur=%p %p\n",
 	     pCur->pBtree->path, pCur->rootPage,
@@ -1195,6 +1363,87 @@ int sqlite3BtreeCloseCursor(BtCursor *pCur) {
     mdb_cursor_close(pCur->cursor);
     pCur->cursor = NULL;
   }
+  if (pCur->savedKey.mv_data) {
+    sqlite3DbFree(0, pCur->savedKey.mv_data);
+    pCur->savedKey.mv_data = NULL;
+  }
+  p = pCur->pBtree;
+  if (p) {
+    /* remove this cursor from the btree's list */
+#ifdef LUMO_LMDB_DEBUG
+    /* check consistency */
+    BtCursor *pList = p->first_cursor, *pPrev = NULL;
+    int found = 0;
+LUMO_LOG("pCur=%p p=%p first_cursor=%p last_cursor=%p\n", pCur, p, pList, p->last_cursor);
+    while (pList) {
+      if (pList == pCur) found = 1;
+LUMO_LOG("    %p  ->next=%p  ->prev=%p  ->pBtree=%p\n",
+	 pList, pList->next, pList->prev, pList->pBtree);
+      if (pList->prev != pPrev) {
+	LUMO_LOG("sqlite3BtreeCloseCursor(pCur=%p): pList=%p, ->prev=%p != %p\n",
+		 pCur, pList, pList->prev, pPrev);
+	return SQLITE_INTERNAL;
+      }
+      if (pList->pBtree != p) {
+	LUMO_LOG("sqlite3BtreeCloseCursor(pCur=%p): pList=%p, ->pBtree=%p != %p\n",
+		 pCur, pList, pList->pBtree, p);
+	return SQLITE_INTERNAL;
+      }
+      pPrev = pList;
+      pList = pList->next;
+    }
+    if (p->last_cursor != pPrev) {
+      LUMO_LOG("sqlite3BtreeCloseCursor(pCur=%p): last=%p != %p\n",
+	       pCur, pPrev, p->last_cursor);
+      return SQLITE_INTERNAL;
+    }
+    if (! found) {
+      LUMO_LOG("sqlite3BtreeCloseCursor(pCur=%p): cursor not in tree's list (p=%p)\n",
+	       pCur, p);
+      return SQLITE_INTERNAL;
+    }
+#endif
+    if (pCur->prev)
+      pCur->prev->next = pCur->next;
+    else
+      p->first_cursor = pCur->next;
+    if (pCur->next)
+      pCur->next->prev = pCur->prev;
+    else
+      p->last_cursor = pCur->prev;
+    pCur->pBtree = NULL;
+  } else {
+    LUMO_LOG("sqlite3BtreeCloseCursor: pCur->pBtree is NULL! (pCur=%p)\n", pCur);
+  }
+  return SQLITE_OK;
+}
+
+/* restore cursor if needed; positioning may be skipped if the next operation
+ * would be a move */
+int restoreCursor(BtCursor *pCur, int reposition) {
+  Btree *p = pCur->pBtree;
+  int rc;
+  /* if we weren't supposed to use this cursor, well, don't */
+  if (pCur->tripCode != SQLITE_OK) return pCur->tripCode;
+  /* if the cursor is valid, that'll be all */
+  if (!pCur->savedKey.mv_data) return SQLITE_OK;
+  /* pCur->cursor should be NULL; if it isn't, something went wrong
+  ** somewhere and we fix it now */
+  if (pCur->cursor) mdb_cursor_close(pCur->cursor);
+  pCur->cursor = NULL;
+  /* get a new cursor */
+  rc = get_table(p, pCur->rootPage, pCur->pKeyInfo ? get_table_index : 0, &pCur->dbi);
+  if (rc) return error_map(rc);
+  rc = mdb_cursor_open(p->svp->txn, pCur->dbi, &pCur->cursor);
+  if (rc) return error_map(rc);
+  /* did they want it repositioned? */
+  if (reposition) {
+    MDB_val data;
+    rc = mdb_cursor_get(pCur->cursor, &pCur->savedKey, &data, MDB_SET);
+    if (rc) return error_map(rc);
+  }
+  sqlite3DbFree(0, pCur->savedKey.mv_data);
+  pCur->savedKey.mv_data = NULL;
   return SQLITE_OK;
 }
 
@@ -1239,6 +1488,8 @@ int sqlite3BtreeMovetoUnpacked(
   MDB_val key[2], data;
   u64 keyVal = intKey;
   int rc;
+  rc = restoreCursor(pCur, 0);
+  if (rc != SQLITE_OK) return rc;
   pCur->atEof = 0;
   if (pIdxKey) {
     /* Move in an index or a WITHOUT ROWID table */
@@ -1259,19 +1510,23 @@ int sqlite3BtreeMovetoUnpacked(
       LUMO_LOG("sqlite3BtreeMovetoUnpacked bias=%d => found (%d)\n", biasRight, *pRes);
     } else {
       *pRes = keyVal != get8(key);
-      LUMO_LOG("sqlite3BtreeMovetoUnpacked idx=%lld bias=%d => found %lld (%d)\n", (long long)keyVal, biasRight, (long long)get8(key), *pRes);
+      LUMO_LOG("sqlite3BtreeMovetoUnpacked idx=%lld bias=%d => found %lld (%d)\n",
+	       (long long)keyVal, biasRight, (long long)get8(key), *pRes);
     }
     return SQLITE_OK;
   }
   if (rc != MDB_NOTFOUND) {
-    LUMO_LOG("sqlite3BtreeMovetoUnpacked idx=%d bias=%d => failed (MDB_SET_RANGE) %d\n", (int)intKey, biasRight, rc);
+    LUMO_LOG("sqlite3BtreeMovetoUnpacked idx=%d bias=%d => failed (MDB_SET_RANGE) %d\n",
+	     (int)intKey, biasRight, rc);
     return error_map(rc);
   }
-  LUMO_LOG("sqlite3BtreeMovetoUnpacked idx=%d bias=%d => not found\n", (int)intKey, biasRight);
+  LUMO_LOG("sqlite3BtreeMovetoUnpacked idx=%d bias=%d => not found\n",
+	   (int)intKey, biasRight);
   /* we'll pretend the cursor is on the first item */
   mdb_cursor_get(pCur->cursor, key, &data, MDB_FIRST);
   *pRes = -1;
-  LUMO_LOG("sqlite3BtreeMovetoUnpacked idx=%d bias=%d => empty, returning first\n", (int)intKey, biasRight);
+  LUMO_LOG("sqlite3BtreeMovetoUnpacked idx=%d bias=%d => empty, returning first\n",
+	   (int)intKey, biasRight);
   return SQLITE_OK;
 }
 
@@ -1290,6 +1545,7 @@ int sqlite3BtreeCursorHasMoved(BtCursor *pCur) {
 
 int sqlite3BtreeCursorRestore(BtCursor *pCur, int *pDifferentRow) {
   LUMO_LOG("called: sqlite3BtreeCursorRestore\n");
+  // FIXME - if cursor has saved position restore to it, otherwise return an error
   return SQLITE_INTERNAL; // XXX int sqlite3BtreeCursorRestore(BtCursor*, int*);
 }
 /*
@@ -1313,9 +1569,19 @@ int sqlite3BtreeDelete(BtCursor *pCur, u8 flags) {
   /* mdb_cursor_del will leave the cursor in such a state that a call to
   ** mdb_cursor_get with MDB_NEXT or MDB_PREV does the required thing,
   ** so no need to do anything special for BTREE_SAVEPOSITION */
-  int rc = mdb_cursor_del(pCur->cursor, 0);
-  LUMO_LOG("sqlite3BtreeDelete: %d\n", rc);
-  if (rc) return error_map(rc);
+  int rc;
+  LUMO_LOG("sqlite3BtreeDelete\n");
+  rc = restoreCursor(pCur, 1);
+  if (rc != SQLITE_OK) {
+    LUMO_LOG("sqlite3BtreeDelete: restore: %d\n", rc);
+    return rc;
+  }
+  rc = mdb_cursor_del(pCur->cursor, 0);
+  if (rc) {
+    LUMO_LOG("sqlite3BtreeDelete: delete: %d\n", rc);
+    return error_map(rc);
+  }
+  LUMO_LOG("sqlite3BtreeDelete: OK\n");
   return SQLITE_OK;
 }
 
@@ -1364,6 +1630,8 @@ int sqlite3BtreeInsert(
   LUMO_LOG("sqlite3BtreeInsert: data before\n");
   LUMO_LOG_CURSOR(pCur->cursor, pCur->pKeyInfo != NULL);
 #endif
+  rc = restoreCursor(pCur, 0);
+  if (rc != SQLITE_OK) return rc;
   if (pCur->pKeyInfo) {
     /* inserting into an index or a WITHOUT ROWID table
     ** we allow the caller to provide data as well as key and this
@@ -1480,24 +1748,32 @@ out:
   return rc;
 }
 
-/* Move the cursor to the first entry in the table.  Return SQLITE_OK
-** on success.  Set *pRes to 0 if the cursor actually points to something
-** or set *pRes to 1 if the table is empty.
-*/
-int sqlite3BtreeFirst(BtCursor *pCur, int *pRes) {
+/* common code for cursor moves to first, last, next, prev */
+static int cursorMove(BtCursor *pCur, int *pRes, MDB_cursor_op op, int reposition) {
   MDB_val key, data;
-  int rc = mdb_cursor_get(pCur->cursor, &key, &data, MDB_FIRST);
+  int rc;
+  rc = restoreCursor(pCur, reposition);
+  if (rc != SQLITE_OK) return rc;
+  rc = mdb_cursor_get(pCur->cursor, &key, &data, op);
   if (rc) {
     if (rc != MDB_NOTFOUND) {
-      LUMO_LOG("sqlite3BtreeFirst (%u): fail %d\n", pCur->rootPage, rc);
+      LUMO_LOG("cursorMove %d (%u): fail %d\n", (int)op, pCur->rootPage, rc);
       return error_map(rc);
     }
     pCur->atEof = *pRes = 1;
   } else {
     pCur->atEof = *pRes = 0;
   }
-  LUMO_LOG("sqlite3BtreeFirst(%u): %d\n", pCur->rootPage, *pRes);
+  LUMO_LOG("cursorMove %d (%u): %d\n", (int)op, pCur->rootPage, *pRes);
   return SQLITE_OK;
+}
+
+/* Move the cursor to the first entry in the table.  Return SQLITE_OK
+** on success.  Set *pRes to 0 if the cursor actually points to something
+** or set *pRes to 1 if the table is empty.
+*/
+int sqlite3BtreeFirst(BtCursor *pCur, int *pRes) {
+  return cursorMove(pCur, pRes, MDB_FIRST, 0);
 }
 
 /* Move the cursor to the last entry in the table.  Return SQLITE_OK
@@ -1505,45 +1781,28 @@ int sqlite3BtreeFirst(BtCursor *pCur, int *pRes) {
 ** or set *pRes to 1 if the table is empty.
 */
 int sqlite3BtreeLast(BtCursor *pCur, int *pRes) {
-  MDB_val key, data;
-  int rc = mdb_cursor_get(pCur->cursor, &key, &data, MDB_LAST);
-  if (rc) {
-    if (rc != MDB_NOTFOUND) {
-      LUMO_LOG("sqlite3BtreeLast (%u): fail %d\n", pCur->rootPage, rc);
-      return error_map(rc);
-    }
-    pCur->atEof = *pRes = 1;
-  } else {
-    pCur->atEof = *pRes = 0;
-  }
-  LUMO_LOG("sqlite3BtreeLast(%u): %d\n", pCur->rootPage, *pRes);
-  return SQLITE_OK;
+  return cursorMove(pCur, pRes, MDB_LAST, 0);
 }
 
 int sqlite3BtreeNext(BtCursor *pCur, int flags) {
-  MDB_val key, data;
-  int rc = mdb_cursor_get(pCur->cursor, &key, &data, MDB_NEXT);
-  if (rc) {
-    if (rc != MDB_NOTFOUND) {
-      LUMO_LOG("sqlite3BtreeNext (%u): fail %d\n", pCur->rootPage, rc);
-      return error_map(rc);
-    }
-    LUMO_LOG("sqlite3BtreeNext(%u): eof\n", pCur->rootPage);
-    pCur->atEof = 1;
-    return SQLITE_DONE;
-  }
-  LUMO_LOG("sqlite3BtreeNext(%u): OK\n", pCur->rootPage);
+  int pRes, rc;
+  rc = cursorMove(pCur, &pRes, MDB_NEXT, 1);
+  if (rc != SQLITE_OK) return rc;
+  if (pCur->atEof) return SQLITE_DONE;
+  return SQLITE_OK;
+}
+
+int sqlite3BtreePrevious(BtCursor *pCur, int flags) {
+  int pRes, rc;
+  rc = cursorMove(pCur, &pRes, MDB_PREV, 1);
+  if (rc != SQLITE_OK) return rc;
+  if (pCur->atEof) return SQLITE_DONE;
   return SQLITE_OK;
 }
 
 int sqlite3BtreeEof(BtCursor *pCur) {
   LUMO_LOG("sqlite3BtreeEof %u: %d\n", pCur->rootPage, (int)pCur->atEof);
   return pCur->atEof;
-}
-
-int sqlite3BtreePrevious(BtCursor *pCur, int flags) {
-  LUMO_LOG("called: sqlite3BtreePrevious\n");
-  return SQLITE_INTERNAL; // XXX int sqlite3BtreePrevious(BtCursor*, int flags);
 }
 
 /*
@@ -1555,8 +1814,17 @@ int sqlite3BtreePrevious(BtCursor *pCur, int flags) {
 i64 sqlite3BtreeIntegerKey(BtCursor *pCur) {
   MDB_val key, data;
   i64 res;
-  int rc = mdb_cursor_get(pCur->cursor, &key, &data, MDB_GET_CURRENT);
-  res = rc ? 0 : get8(&key);
+  int rc;
+  /* if the cursor has a saved position, don't bother restoring it, as the
+  ** saved position is the required key; if the payload is actually needed,
+  ** we restore the cursor at that point */
+  if (pCur->savedKey.mv_data) {
+    rc = 0;
+    res = get8(&pCur->savedKey);
+  } else {
+    rc = mdb_cursor_get(pCur->cursor, &key, &data, MDB_GET_CURRENT);
+    res = rc ? 0 : get8(&key);
+  }
   LUMO_LOG("sqlite3BtreeIntegerKey %u: %d %zd (%lld)\n", pCur->rootPage, rc, key.mv_size, (long long)res);
   return res;
 }
@@ -1592,19 +1860,39 @@ int sqlite3BtreePayload(BtCursor *pCur, u32 offset, u32 amt, void *pBuf) {
 */
 const void *sqlite3BtreePayloadFetch(BtCursor *pCur, u32 *pAmt){
   MDB_val key, data;
-  int rc = mdb_cursor_get(pCur->cursor, &key, &data, MDB_GET_CURRENT);
+  int rc;
+  if (pCur->pKeyInfo) {
+    /* if the cursor has a saved position, the saved position is the
+    ** payload, so don't bother restoring it */
+    if (pCur->savedKey.mv_data) {
+      key = pCur->savedKey;
+      LUMO_LOG("sqlite3BtreePayloadFetch %u: using saved key\n", pCur->rootPage);
+      goto skip_fetch;
+    }
+  } else {
+    /* check if we need to restore the cursor */
+    rc = restoreCursor(pCur, 1);
+    LUMO_LOG("sqlite3BtreePayloadFetch %u: restore: %d\n", pCur->rootPage, rc);
+    if (rc != SQLITE_OK) {
+      *pAmt = 0;
+      return "";
+    }
+  }
+  rc = mdb_cursor_get(pCur->cursor, &key, &data, MDB_GET_CURRENT);
   LUMO_LOG("sqlite3BtreePayloadFetch %u: %d\n", pCur->rootPage, rc);
   if (rc) {
     *pAmt = 0;
     return "";
   }
+skip_fetch:
 #ifdef LUMO_LMDB_DEBUG
   if (! pCur->pKeyInfo) {
     LUMO_LOG("ID(%lld) ", (long long)get8(&key));
     LUMO_LOG_DATA(key.mv_size, key.mv_data);
   }
   LUMO_LOG("payload(%zd)", pCur->pKeyInfo ? key.mv_size : data.mv_size);
-  LUMO_LOG_DATA(pCur->pKeyInfo ? key.mv_size : data.mv_size, pCur->pKeyInfo ? key.mv_data : data.mv_data);
+  LUMO_LOG_DATA(pCur->pKeyInfo ? key.mv_size : data.mv_size,
+	        pCur->pKeyInfo ? key.mv_data : data.mv_data);
   LUMO_LOG("\n");
 #endif
   if (pCur->pKeyInfo) {
@@ -1627,7 +1915,18 @@ const void *sqlite3BtreePayloadFetch(BtCursor *pCur, u32 *pAmt){
 */
 u32 sqlite3BtreePayloadSize(BtCursor *pCur){
   MDB_val key, data;
-  int rc = mdb_cursor_get(pCur->cursor, &key, &data, MDB_GET_CURRENT);
+  int rc;
+  if (pCur->pKeyInfo) {
+    /* if the cursor has a saved position, the saved position is the
+    ** payload, so don't bother restoring it */
+    if (pCur->savedKey.mv_data) return pCur->savedKey.mv_size;
+  } else {
+    /* check if we need to restore the cursor */
+    rc = restoreCursor(pCur, 1);
+    LUMO_LOG("sqlite3BtreePayloadFetch %u: restore: %d\n", pCur->rootPage, rc);
+    if (rc != SQLITE_OK) return 0;
+  }
+  rc = mdb_cursor_get(pCur->cursor, &key, &data, MDB_GET_CURRENT);
   if (rc) return 0;
   if (pCur->pKeyInfo) return key.mv_size;
   return data.mv_size;
@@ -1741,4 +2040,4 @@ int sqlite3PagerIsMemdb(Pager *pPager){
   return p->isMemdb;
 }
 
-#endif
+#endif /* __LUMO_BACKEND_btree_c */

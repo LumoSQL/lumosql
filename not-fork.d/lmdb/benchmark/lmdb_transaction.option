@@ -5,12 +5,33 @@
 # is to start all transactions readwrite and just pretend that they are
 # readonly, which removes any possibility of concurrent read access
 
-# This option affects the build process
+# this is a build time option (we'll change it later to use a PRAGMA
+# and be a runtime option)
 build = yes
 
-# Option is Boolean
-boolean
+# Option has the following possible values:
+enum = noupgrade,optimistic,serialise,serialize
+# noupgrade  - transactions started as read-only cannot be upgraded to
+#              read/write; some applicatins may run faster if they don't
+#              use SQL sequences which result in this upgrade
+# optimistic - transactions can be upgraded from read-only to read-write
+#              as long as nobody else has made any changes in the meantime;
+#              this is more or less equivalent to the way sqlite3 does
+#              things when journal_mode=wal; however it's potentially
+#              slower because it needs to work around the lack of LMDB
+#              support for this sort of transaction upgrade
+# serialise  - always serialise transactions; this reduces concurrency
+#              considerably but may be faster for applications in which
+#              such concurrent access simply doesn't happen but still
+#              use transactions of the form: "BEGIN; SELECT ...; UPDATE
+#              ...; COMMIT;" to guarantee that the SELECT and UPDATE
+#              remain atomic even if an error occurs in the middle;
+#              this can be written as "serialize" if one is on the
+#              opposite side of the Atlantic
 
-# Default is off, no upgrading, but better concurrency
-default = off
+# cope with differences in spelling from different countries
+equiv = serialise,serialize
+
+# Default is "optimistic", more concurrency, while preserving correctness
+default = optimistic
 
