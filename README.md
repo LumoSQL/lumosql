@@ -136,10 +136,6 @@ deb-src http://gb.archive.ubuntu.com/ubuntu focal main restricted
 ```
 </b>
 
-These *exact* commands have been tested on a pristine install of Ubuntu 20.04.2
-LTS, installed from ISO or as one of the operating systems shipped with
-Windows Services for Linux.
-
 Then run
 <b>
 ```
@@ -149,6 +145,10 @@ sudo apt install git build-essential tclx
 sudo apt build-dep sqlite3
 ```
 </b>
+
+The *exact* commands above have been tested on a pristine install of Ubuntu
+20.04.2 LTS, as installed from ISO or one of the operating systems shipped with
+Windows Services for Linux.
 
 
 #### Fedora-derived Operating Systems
@@ -174,7 +174,11 @@ Here are the tool dependencies:
 * [the not-forking tool](https://lumosql.org/src/not-forking/), 
 which is a script that needs to be downloaded and installed manually (we will be packaging
 it as soon as we can.) The instructions for not-forking are on its website.
-* [Fossil](https://fossil-scm.org/). Fossil version 2.13 or later from your distrbution, or [2.13 or 2.12.1 from the Fossil download page](https://fossil-scm.org/home/uv/download.html). *Note!* Ubuntu 20.04 and Debian Buster do not include a sufficiently modern Fossil. Since you now have a development environment you may find it easiest to [build trunk yourself](https://fossil-scm.org/home/doc/trunk/www/build.wiki). These instructions have been tested on Ubuntu 20.04:
+* [Fossil](https://fossil-scm.org/). Fossil is extremely backwards-compatible so any version > 2.0 can be
+  made to work. However it's easiest to get version 2.13 or later from your distrbution or build from source. 
+  (*Note!* Ubuntu 20.04, Debian Buster and Gentoo do not include a sufficiently modern Fossil, while NetBSD
+  and Ubuntu 20.10 do.) Since you now have a development environment anyway you can 
+  [build Fossil trunk according to the official instructions](https://fossil-scm.org/home/doc/trunk/www/build.wiki) or this simpler version (tested on Ubuntu 20.04 LTS):
     * wget -O- https://fossil-scm.org/home/tarball/trunk/Fossil-trunk.tar.gz |  tar -zxf -
     * sudo apt install libssl-dev
     * cd Fossil-trunk ; ./configure ; make
