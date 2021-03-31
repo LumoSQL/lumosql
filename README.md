@@ -126,29 +126,30 @@ LumoSQL uses the [Fossil source code manager](https://fossil-scm.org) because:
 LumoSQL is mirrored to Github and changes can be imported from Github, but
 Fossil is the tool of choice for LumoSQL.
 
-The build system requires [the not-forking tool](https://lumosql.org/src/not-forking/).
-Other tools can usually be installed from your operating system's standard packages.
-
 #### Debian or Ubuntu-derived Operating Systems
 
-On any reasonably recent Debian or Ubuntu-derived Linux distribution
-these installation commands should work:
-
+Uncomment existing `deb-src` line in /etc/apt/sources.list, for example
+for Ubuntu 20.04.2 a valid line is:
 <b>
-```sh
+```
+deb-src http://gb.archive.ubuntu.com/ubuntu focal main restricted
+```
+</b>
+
+These *exact* commands have been tested on a pristine install of Ubuntu 20.04.2
+LTS, installed from ISO or as one of the operating systems shipped with
+Windows Services for Linux.
+
+Then run
+<b>
+```
+sudo apt update                              # this fetches the deb-src updates
+sudo apt full-upgrade                        # this gets the latest OS updates
 sudo apt install git build-essential tclx
 sudo apt build-dep sqlite3
 ```
 </b>
 
-(`apt build-dep` requires `deb-src` lines uncommented in /etc/apt/sources.list), for example
-for Ubuntu 20.04 a valid line is:
-
-<b>
-```
-deb-src http://gb.archive.ubuntu.com/ubuntu/ focal-backports main restricted universe multiverse
-```
-</b>
 
 #### Fedora-derived Operating Systems
 
@@ -163,16 +164,27 @@ sudo dnf install --assumeyes \
 
 #### Common to all Linux Operating Systems
 
-The following steps have been tested on reaonably recent Debian and
-Fedora-related operating systems, and Gentoo. 
+Once you have done the setup specific to your operating system in the previous
+steps, the following should work on reaonably recent Debian and Fedora-related
+operating systems, and Gentoo. 
 
-The not-forking tool will advise you with an error message if you ask for sources that
-require a tool or a version that is not installed. Here are the tool dependencies:
+Other required tools can be installed from your operating system's standard packages.
+Here are the tool dependencies:
 
-* to build LumoSQL, you need [Fossil](https://fossil-scm.org/). Fossil version 2.13 or later from your distrbution, or [2.13 or 2.12.1 from the Fossil download page](https://fossil-scm.org/home/uv/download.html). You may want to [build trunk yourself](https://fossil-scm.org/home/doc/trunk/www/build.wiki), since it is quick and easy even compared to LumoSQL. Soon Fossil will be all you need, when the not-forking Fossil module is complete.
-* to build and benchmark just SQLite, you currently need to have git. version 2.22 or later. Git usually works, but can be fragile when pulling updated copies. If git updates fail, you can delete ~/.cache/LumoSQL/not-fork. Git users quite often need to delete their checked-out repository and start again, and this is the same scenario.
-* to build and benchmark any of the LMDB targets, you also currently need git version 2.22 or later.
-* to build and benchmark any of the Oracle Berkeley DB targets, you need either curl or wget, and also file, gzip and GNU tar. Just about any version of these will be sufficient, even on Windows. Since Oracle has discontinued their port of SQLite to BDB, any further development of this port will be carried in the LumoSQL fossil tree.
+* [the not-forking tool](https://lumosql.org/src/not-forking/), 
+which is a script that needs to be downloaded and installed manually (we will be packaging
+it as soon as we can.) The instructions for not-forking are on its website.
+* [Fossil](https://fossil-scm.org/). Fossil version 2.13 or later from your distrbution, or [2.13 or 2.12.1 from the Fossil download page](https://fossil-scm.org/home/uv/download.html). *Note!* Ubuntu 20.04 and Debian Buster do not include a sufficiently modern Fossil. Since you now have a development environment you may find it easiest to [build trunk yourself](https://fossil-scm.org/home/doc/trunk/www/build.wiki). These instructions have been tested on Ubuntu 20.04:
+    * wget -O- https://fossil-scm.org/home/tarball/trunk/Fossil-trunk.tar.gz |  tar -zxf -
+    * sudo apt install libssl-dev
+    * cd Fossil-trunk ; ./configure ; make
+    * sudo make install
+* For completeness (although every modern Linux/Unix includes these), to build and benchmark any of the Oracle Berkeley DB targets, you need either "curl" or "wget", and also "file", "gzip" and GNU "tar". Just about any version of these will be sufficient, even on Windows.
+
+One of the many helpful features of the not-forking tool is that it will advise
+you with an error message if you ask for sources that require a tool or a
+version that is not installed. So if you didn't quite get everything in the above list 
+it won't be difficult notice.
 
 <a name="using-the-build-and-benchmark-system"></a>
 ## Using the Build and Benchmark System
@@ -184,7 +196,15 @@ Now you have the dependencies installed, clone the LumoSQL repository using
 `fossil clone https://lumosql.org/src/lumosql` , which will create a new subdirectory called `lumosql` and
 a file called `lumosql.fossil` in the current directory.
 
-Try `make what` to see what the default sources and options are. The `what` target does not make any changes.
+Try:
+<b>
+```
+cd lumosql
+make what
+```
+</b>
+
+To see what the default sources and options are. The `what` target does not make any changes.
 
 Benchmarking a single binary should take no longer than 4 minutes to complete depending
 on hardware. The results are stored in an SQLite database stored in the LumoSQL 
