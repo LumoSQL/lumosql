@@ -18,3 +18,4 @@ README. These are also covered by the MIT license, to avoid any misunderstanding
 Virtually all of the LumoSQL documentation can be found at the 
 [LumoSQL Documentation Project](https://lumosql.org/src/lumodoc).
 
+To even further avoid misunderstanding, we maintain the site [license.lumosql.org](https://license.lumosql.org).
