@@ -754,10 +754,13 @@ int sqlite3BtreeBeginTrans(Btree *p, int wrFlag, int *pSchemaVersion) {
     ** transaction by beginning a new read/write transaction and
     ** comparing the commit counter: if unchanged, we "copy" all
     ** cursors across and abort the read-only transaction */
-    u64 uCounterRO = get_meta_64(p, LUMO_LMDB_META_COUNTER);
+    u64 uCounterRO = get_meta_64(p, LUMO_LMDB_META_COUNTER), uCounterRW;
     int rc;
     rc = invalidateCursors(p, p->svp, SQLITE_OK, 0);
-    if (rc) return error_map(rc);
+    if (rc) {
+      LUMO_LOG("sqlite3BtreeBeginTrans: invalidateCursors -> %d\n", rc);
+      return error_map(rc);
+    }
     /* we must abort the r/o transaction before beginning a new one */
     p->hasData = 0;
     mdb_txn_abort(p->svp->txn);
@@ -772,9 +775,12 @@ int sqlite3BtreeBeginTrans(Btree *p, int wrFlag, int *pSchemaVersion) {
       p->svp = NULL;
       return error_map(rc);
     }
-    if (uCounterRO != get_meta_64(p, LUMO_LMDB_META_COUNTER))
-      return SQLITE_BUSY;
     p->hasData = 1;
+    uCounterRW = get_meta_64(p, LUMO_LMDB_META_COUNTER);
+    LUMO_LOG("uCounterRO=%llu  uCounterRW=%llu\n",
+	     (unsigned long long)uCounterRO, (unsigned long long)uCounterRW);
+    if (uCounterRO != uCounterRW)
+      return SQLITE_BUSY;
     p->inTrans = SQLITE_TXN_WRITE;
     goto get_version;
 #else
