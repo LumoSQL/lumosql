@@ -186,6 +186,12 @@ you with an error message if you ask for sources that require a tool or a
 version that is not installed. So if you didn't quite get everything in the above list 
 it won't be difficult notice.
 
+On [Debian 10 "Buster" Stable Release](https://www.debian.org/releases/buster/), the not-forking makefile
+("perl Makefile.PL") will warn that git needs to be version 2.22 or higher.
+Buster has version 2.20, however this is not a critical error. If you don't
+like error messages scrolling past during a build, then install a more recent
+git [from Buster backports](https://backports.debian.org/Instructions/).
+
 <a name="using-the-build-and-benchmark-system"></a>
 ## Using the Build and Benchmark System
 
