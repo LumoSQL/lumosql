@@ -1,6 +1,6 @@
 # sqlite3 version to use by default if one not specified
-=3.34.1
-#=3.35.3
+#=3.34.1
+=3.35.3
 
 # LMDB backend versions we use by default; each line consists of two fields,
 # separated by a plus sign: sqlite3_version+lmdb_version; or else by a single

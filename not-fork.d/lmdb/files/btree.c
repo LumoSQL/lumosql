@@ -38,6 +38,13 @@
 ** require a change in file format */
 #define LUMO_LMDB_META_COUNTER   101
 
+/* newer versions of sqlite3 use this during an "insert from select"; if
+** not defined, we define it as zero which will skip any optimised code
+** depending on it */
+#ifndef BTREE_PREFORMAT
+#define BTREE_PREFORMAT 0
+#endif
+
 /* we implement savepoints as nested transactions: this is the stack */
 typedef struct BtreeSavepoint BtreeSavepoint;
 struct BtreeSavepoint {
@@ -80,6 +87,8 @@ struct BtCursor {
   unsigned int hints;
   u8 atEof;
   u8 wrFlag;
+  BtCursor * srcCursor;
+  i64 srcKey;
   MDB_val savedKey;
 };
 
@@ -373,7 +382,7 @@ static int invalidateCursors(Btree *p,
       if (tripCode == SQLITE_OK) {
 	/* save cursor position before invalidating */
 	MDB_val key, data;
-	int rc1 = mdb_cursor_get(pCur->cursor, &key, &data, MDB_CURRENT);
+	int rc1 = mdb_cursor_get(pCur->cursor, &key, &data, MDB_GET_CURRENT);
 	if (rc1) goto error;
 	pCur->savedKey.mv_data = sqlite3DbMallocRaw(0, key.mv_size);
 	if (!pCur->savedKey.mv_data) {
@@ -1554,6 +1563,7 @@ int sqlite3BtreeCursorRestore(BtCursor *pCur, int *pDifferentRow) {
   // FIXME - if cursor has saved position restore to it, otherwise return an error
   return SQLITE_INTERNAL; // XXX int sqlite3BtreeCursorRestore(BtCursor*, int*);
 }
+
 /*
 ** Delete the entry that the cursor is pointing to. 
 **
@@ -1588,6 +1598,32 @@ int sqlite3BtreeDelete(BtCursor *pCur, u8 flags) {
     return error_map(rc);
   }
   LUMO_LOG("sqlite3BtreeDelete: OK\n");
+  return SQLITE_OK;
+}
+
+/*
+** This function is used as part of copying the current row from cursor
+** pSrc into cursor pDest. If the cursors are open on intkey tables, then
+** parameter iKey is used as the rowid value when the record is copied
+** into pDest. Otherwise, the record is copied verbatim.
+**
+** This function does not actually write the new value to cursor pDest.
+** Instead, it creates and populates any required overflow pages and
+** writes the data for the new cell into the BtShared.pTmpSpace buffer
+** for the destination database. The size of the cell, in bytes, is left
+** in BtShared.nPreformatSize. The caller completes the insertion by
+** calling sqlite3BtreeInsert() with the BTREE_PREFORMAT flag specified.
+**
+** SQLITE_OK is returned if successful, or an SQLite error code otherwise.
+**
+** For the LMDB backend we currently just save the source cursor and
+** the next call, which must be sqlite3BtreeInsert(), will use it
+*/
+int sqlite3BtreeTransferRow(BtCursor *pDest, BtCursor *pSrc, i64 iKey){
+  LUMO_LOG("sqlite3BtreeTransferRow pDest=%p pSrc=%p iKey=%lld\n",
+	   pDest, pSrc, (long long)iKey);
+  pDest->srcCursor = pSrc;
+  pDest->srcKey = iKey;
   return SQLITE_OK;
 }
 
@@ -1629,6 +1665,8 @@ int sqlite3BtreeInsert(
 ){
   MDB_val key[2], data;
   UnpackedRecord *pUnpacked = NULL, aUnpacked;
+  unsigned char bKey[8];
+  u64 nKey = pX->nKey;
   int rc;
   unsigned int mdbFlags = 0;
   const int lumoData = pCur->pBtree->flags & BTREE_LUMO_EXTENSIONS;
@@ -1637,7 +1675,30 @@ int sqlite3BtreeInsert(
   LUMO_LOG_CURSOR(pCur->cursor, pCur->pKeyInfo != NULL);
 #endif
   rc = restoreCursor(pCur, 0);
+  LUMO_LOG("sqlite3BtreeInsert: restoreCursor: %d\n", rc);
   if (rc != SQLITE_OK) return rc;
+  if (flags & BTREE_PREFORMAT) {
+    /* we are copying a row from pCur->srcCursor so just get key and value
+    ** from there */
+    rc = restoreCursor(pCur->srcCursor, 1);
+    if (rc != SQLITE_OK) {
+      LUMO_LOG("restoreCursor: %d\n", rc);
+      return rc;
+    }
+    rc = mdb_cursor_get(pCur->srcCursor->cursor, key, &data, MDB_GET_CURRENT);
+    pCur->srcCursor = NULL;
+    if (rc) {
+      LUMO_LOG("mdb_cursor_get: %d\n", rc);
+      return error_map(rc);
+    }
+    LUMO_LOG("key(%zd):", key[0].mv_size);
+    LUMO_LOG_DATA(key[0].mv_size, key[0].mv_data);
+    LUMO_LOG("\n");
+    LUMO_LOG("data(%zd):", data.mv_size);
+    LUMO_LOG_DATA(data.mv_size, data.mv_data);
+    LUMO_LOG("\n");
+    nKey = pCur->srcKey;
+  }
   if (pCur->pKeyInfo) {
     /* inserting into an index or a WITHOUT ROWID table
     ** we allow the caller to provide data as well as key and this
@@ -1663,6 +1724,9 @@ int sqlite3BtreeInsert(
 	goto out;
       }
     }
+    /* if we were copying from another cursor, we've now set up the
+    ** unpacked data for comparisons and don't want to do more */
+    if (flags & BTREE_PREFORMAT) goto insert_it;
     /* an LMDB key is limited in length to the value returned by
     ** mdb_env_get_maxkeysize (normally 511); we can change that while
     ** building LMDB, but we can't do that on a system-built LMDB so
@@ -1697,47 +1761,54 @@ int sqlite3BtreeInsert(
     mdbFlags = MDB_RESERVE;
   } else {
     /* inserting into a WITH ROWID table */
-    unsigned char bKey[8];
-    u64 keyVal = pX->nKey;
-    put8(key, bKey, keyVal);
-    LUMO_LOG("sqlite3BtreeInsert(%u) key=%lld:", pCur->rootPage, (long long)keyVal);
+    put8(key, bKey, nKey);
+    LUMO_LOG("sqlite3BtreeInsert(%u) key=%lld:", pCur->rootPage, (long long)nKey);
     LUMO_LOG_DATA(key[0].mv_size, key[0].mv_data);
-    LUMO_LOG(", data(%d+%d):", (int)pX->nData, (int)pX->nZero);
-    LUMO_LOG_DATA(pX->nData, pX->pData);
-    LUMO_LOG("\n");
-    data.mv_size = pX->nData + pX->nZero;
-    if (pX->nZero) {
-      mdbFlags = MDB_RESERVE;
+    if (flags & BTREE_PREFORMAT) {
+      LUMO_LOG(", data(%zd):", data.mv_size);
+      LUMO_LOG_DATA(data.mv_size, data.mv_data);
+      LUMO_LOG("\n");
     } else {
-      data.mv_data = (void *)pX->pData;
+      LUMO_LOG(", data(%d+%d):", (int)pX->nData, (int)pX->nZero);
+      LUMO_LOG_DATA(pX->nData, pX->pData);
+      LUMO_LOG("\n");
+      data.mv_size = pX->nData + pX->nZero;
+      if (pX->nZero) {
+	mdbFlags = MDB_RESERVE;
+      } else {
+	data.mv_data = (void *)pX->pData;
+      }
     }
   }
+insert_it:
   rc = mdb_cursor_put(pCur->cursor, key, &data, mdbFlags);
   if (rc) {
     LUMO_LOG("sqlite3BtreeInsert(%u): failed(%d)\n", pCur->rootPage, rc);
     goto out_map;
   }
-  if (pCur->pKeyInfo) {
-    /* copy index data if required */
-    unsigned char * ptr = data.mv_data;
-    if (pX->nKey > LUMO_LMDB_MAX_KEY) {
-      // FIXME - add the appropriate code
-    } else {
-      ptr += putVarint32(ptr, 0);
-      if (lumoData)
-	memcpy(ptr, pX->pData, pX->nData);
+  if (! (flags & BTREE_PREFORMAT)) {
+    if (pCur->pKeyInfo) {
+      /* copy index data if required */
+      unsigned char * ptr = data.mv_data;
+      if (pX->nKey > LUMO_LMDB_MAX_KEY) {
+	// FIXME - add the appropriate code
+      } else {
+	ptr += putVarint32(ptr, 0);
+	if (lumoData)
+	  memcpy(ptr, pX->pData, pX->nData);
+      }
+      LUMO_LOG("  ==> LMDB key(%zd)", (size_t)key[0].mv_size);
+      LUMO_LOG_DATA(key[0].mv_size, key[0].mv_data);
+      LUMO_LOG("  -- data(%zd)", (size_t)data.mv_size);
+      LUMO_LOG_DATA(data.mv_size, data.mv_data);
+      LUMO_LOG("\n");
+    } else if (pX->nZero) {
+      /* copy data and the required number of zeros */
+      unsigned char * ptr = data.mv_data;
+      memcpy(ptr, pX->pData, pX->nData);
+      ptr += pX->nData;
+      memset(ptr, 0, pX->nZero);
     }
-    LUMO_LOG("  ==> LMDB key(%zd)", (size_t)key[0].mv_size);
-    LUMO_LOG_DATA(key[0].mv_size, key[0].mv_data);
-    LUMO_LOG("  -- data(%zd)", (size_t)data.mv_size);
-    LUMO_LOG_DATA(data.mv_size, data.mv_data);
-    LUMO_LOG("\n");
-  } else if (pX->nZero) {
-    /* copy data and the required number of zeros */
-    unsigned char * ptr = data.mv_data;
-    memcpy(ptr, pX->pData, pX->nData);
-    ptr += pX->nData;
-    memset(ptr, 0, pX->nZero);
   }
   LUMO_LOG("sqlite3BtreeInsert(%u): OK\n", pCur->rootPage);
   rc = SQLITE_OK;
