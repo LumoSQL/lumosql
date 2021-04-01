@@ -7,6 +7,7 @@
 global backend_name
 global backend_version
 global sqlite3_version
+global make_command
 
 puts "Configuring $backend_name $backend_version"
 file delete -force build_unix
@@ -22,7 +23,7 @@ if {$sqlite3_version ne ""} {
 }
 
 puts "Building $backend_name $backend_version"
-system make
+system $make_command
 
 # now move files of interest to lumo/build
 global lumo_dir

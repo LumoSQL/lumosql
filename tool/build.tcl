@@ -256,6 +256,7 @@ array set other_values [list \
 	BENCHMARK_RUNS   1 \
 	COPY_DATABASES   "" \
 	COPY_SQL         "" \
+	MAKE_COMMAND     "make" \
 	NOTFORK_COMMAND  "not-fork" \
 	NOTFORK_ONLINE   0 \
 	NOTFORK_UPDATE   0 \
@@ -386,6 +387,7 @@ for {set anum $argp} {$anum < [llength $argv]} {incr anum} {
 # has been requested
 array set notfork_updated [list]
 set notfork_name $other_values(NOTFORK_COMMAND)
+set make_command $other_values(MAKE_COMMAND)
 
 proc notfork_command {target args} {
     global notfork_updated

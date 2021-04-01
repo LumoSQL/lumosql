@@ -5,11 +5,12 @@
 # to the top of the backend sources
 
 global build_options
+global make_command
 
 if {$build_options(DEBUG) eq "on"} {
-    system make CPPFLAGS=-DMDB_DEBUG
+    system $make_command CPPFLAGS=-DMDB_DEBUG
 } else {
-    system make
+    system $make_command
 }
 
 # now move files of interest to lumo/build

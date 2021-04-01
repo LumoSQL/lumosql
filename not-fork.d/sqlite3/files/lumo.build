@@ -9,6 +9,7 @@
 # which sets up the correct environment etc
 
 global build_options
+global make_command
 
 if {$build_options(DEBUG) eq "on"} {
     system ./configure --enable-debug
@@ -16,7 +17,7 @@ if {$build_options(DEBUG) eq "on"} {
     system ./configure
 }
 
-system make
+system $make_command
 
 # now move files of interest to lumo/build
 global lumo_dir
