@@ -158,9 +158,25 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
 }
 
 if {$sqlite3 eq ""} {
-    # find a sqlite3
-    # TODO - we need to get this info in the same way as build.tcl does
-    if {[file executable "build/3.34.1/sqlite3"]} {
+    # if build.tcl provided a build info, use it to see if it points to a valid sqlite3
+    if {[file isfile .build.info]} {
+	set rd [open .build.info]
+	set build_info [split [read $rd] \n]
+	close $rd
+	if {[llength $build_info] >= 2} {
+	    set sqlite3_for_db [file join [lindex $build_info 0] [lindex $build_info 1] sqlite3]
+	    if {[file executable $sqlite3_for_db]} {
+		set sqlite3 $sqlite3_for_db
+	    }
+	}
+    }
+}
+
+if {$sqlite3 eq ""} {
+    # the above didn't see a valid sqlite3, look for one
+    if {[file executable "build/3.35.3/sqlite3"]} {
+	set sqlite3 "./build/3.35.3/sqlite3"
+    } elseif {[file executable "build/3.34.1/sqlite3"]} {
 	set sqlite3 "./build/3.34.1/sqlite3"
     } elseif {[file executable "build/3.33.1/sqlite3"]} {
 	set sqlite3 "./build/3.33.1/sqlite3"

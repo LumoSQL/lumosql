@@ -416,7 +416,7 @@ proc notfork_command {target args} {
 
 # check not-fork tool can be found and is new enough
 
-set notfork_required "0.3.2"
+set notfork_required "0.3.4"
 if {[catch {
     set notfork_found [exec $notfork_name --check-version $notfork_required 2>@1]
 } notfork_results notfork_options]} {
@@ -723,6 +723,11 @@ proc check_mtime {subdir} {
     global notfork
     return [search_dir [file join $notfork $subdir] [list benchmark]]
 }
+
+set wd [open .build.info w]
+puts $wd $build_dir
+puts $wd $sqlite3_for_db
+close $wd
 
 for {set bnum 0} {$bnum < [llength $build_list]} {incr bnum} {
     set build [lindex $build_list $bnum]
