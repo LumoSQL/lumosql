@@ -80,6 +80,7 @@ struct BtCursor {
   BtCursor * prev;
   BtCursor * next;
   MDB_dbi dbi;
+  MDB_txn *txn;
   MDB_cursor * cursor;
   struct KeyInfo *pKeyInfo;
   Pgno rootPage;
@@ -1299,20 +1300,21 @@ int sqlite3BtreeCursor(
   pCur->pBtree = p;
   pCur->pKeyInfo = pKeyInfo;
   pCur->rootPage = iTable;
+  pCur->txn = p->svp->txn;
   pCur->cursor = NULL;
   rc = get_table(p, iTable, pKeyInfo ? get_table_index : 0, &pCur->dbi);
   if (rc) {
     LUMO_LOG("sqlite3BtreeCursor(%s, %u): table fail %d\n", p->path, iTable, rc);
     return error_map(rc);
   }
-  rc = mdb_cursor_open(p->svp->txn, pCur->dbi, &pCur->cursor);
+  rc = mdb_cursor_open(pCur->txn, pCur->dbi, &pCur->cursor);
   if (rc) {
     LUMO_LOG("sqlite3BtreeCursor (%s, %u): open fail %d\n", p->path, iTable, rc);
     return error_map(rc);
   }
   pCur->atEof = 0;
   LUMO_LOG("sqlite3BtreeCursor(%s, %u) txn=%p cur=%p %p\n",
-	   p->path, iTable, p->svp->txn, pCur, pCur->cursor);
+	   p->path, iTable, pCur->txn, pCur, pCur->cursor);
   rc = mdb_cursor_get(pCur->cursor, &key, &data, MDB_FIRST);
   if (rc) pCur->atEof = 1;
   /* add cursor to p's list */
@@ -2076,9 +2078,23 @@ int sqlite3BtreeCursorIsValidNN(BtCursor *pCur) {
   return SQLITE_INTERNAL; // XXX int sqlite3BtreeCursorIsValidNN(BtCursor*);
 }
 
+/*
+** The first argument, pCur, is a cursor opened on some b-tree. Count the
+** number of entries in the b-tree and write the result to *pnEntry.
+**
+** SQLITE_OK is returned if the operation is successfully executed. 
+** Otherwise, if an error is encountered (i.e. an IO error or database
+** corruption) an SQLite error code is returned.
+*/
 int sqlite3BtreeCount(sqlite3 *db, BtCursor *pCur, i64 *pnEntry) {
-  LUMO_LOG("called: sqlite3BtreeCount\n");
-  return SQLITE_INTERNAL; // XXX int sqlite3BtreeCount(sqlite3*, BtCursor*, i64*);
+  MDB_stat st;
+  int rc;
+  rc = mdb_stat(pCur->txn, pCur->dbi, &st);
+  LUMO_LOG("sqlite3BtreeCount db=%p pCur=%p => rc=%d num=%zd\n",
+	   db, pCur, rc, (size_t)(rc ? 0 : st.ms_entries));
+  if (rc) return error_map(rc);
+  *pnEntry = (i64)st.ms_entries;
+  return SQLITE_OK;
 }
 
 int sqlite3BtreeSharable(Btree *p) {

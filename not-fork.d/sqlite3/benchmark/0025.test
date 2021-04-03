@@ -1,0 +1,14 @@
+set d1000 [expr $options(DATASIZE) * 1000]
+set d25000 [expr $options(DATASIZE) * 25000]
+
+set name "Row count without an index"
+
+# repeat this a few time otherwise it's too fast to measure properly
+for {set i 0} {$i < 1000} {incr i} {
+  append sql "SELECT COUNT(*) FROM t1;\n"
+  append sql "SELECT COUNT(*) FROM t2;\n"
+}
+
+# but only need to check first result
+lappend results "^$d1000\$" "^$d25000\$"
+
