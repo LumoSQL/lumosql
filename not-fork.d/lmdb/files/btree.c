@@ -108,9 +108,9 @@ static void lumo_log_open(void) {
 	_log_fp = fopen(name, "a");
     }
 }
-#define LUMO_LOG(fmt, ...) do { \
+#define LUMO_LOG(...) do { \
   lumo_log_open(); \
-  fprintf(_log_fp, fmt __VA_OPT__(,) __VA_ARGS__); \
+  fprintf(_log_fp, __VA_ARGS__); \
   fflush(_log_fp); \
  } while(0)
 static void LUMO_LOG_DATA(int n, const unsigned char * d) {
@@ -446,6 +446,7 @@ int sqlite3_enable_shared_cache(int enable) { }
 ** which needs also be fixed o use vfs calls */
 static void removeTempDb(const char *zDir) {
   DIR * dp = opendir(zDir);
+  LUMO_LOG("removeTempDb(%s): dp=%p\n", zDir, dp);
   if (dp) {
     /* give us a buffer large enough for any files LMDB may create;
     ** we do not need to cope with arbitrary filenames here */
@@ -456,6 +457,7 @@ static void removeTempDb(const char *zDir) {
     buffer[pLen++] = '/';
     while ((ent = readdir(dp)) != NULL) {
       if (ent->d_name[0] != '.' || ent->d_name[1] != '.' || ent->d_name[2]) {
+	LUMO_LOG("  rm %s (%zd)\n", ent->d_name, strlen(ent->d_name));
 	if (strlen(ent->d_name) < 30) {
 	  strcpy(&buffer[pLen], ent->d_name);
 	  unlink(buffer);
@@ -532,6 +534,7 @@ int sqlite3BtreeOpen(
     dirPathName[sizeof(dirPathName) - 7] = 0;
     strcat(dirPathName, "XXXXXX");
     if (! mkdtemp(dirPathName)) {
+      LUMO_LOG("sqlite3BtreeOpen: mkdtemp failed\n");
       rc = EIO;
       goto error;
     }
@@ -542,7 +545,7 @@ int sqlite3BtreeOpen(
 #if 0
     mdbFlags |= MDB_NOSUBDIR;
 #else
-    /* LMDB requires a temporary directory to already exist so let's make
+    /* LMDB requires a database directory to already exist so let's make
     ** sure there is one */
     mkdir(dirPathName, 0777);
 #endif
@@ -550,6 +553,7 @@ int sqlite3BtreeOpen(
   p = sqlite3MallocZero(sizeof(Btree) + strlen(dirPathName) + 1);
   if (!p) {
     rc = ENOMEM;
+    LUMO_LOG("sqlite3BtreeOpen: sqlite3MallocZero failed\n");
     goto error;
   }
   p->inTrans = SQLITE_TXN_NONE;
@@ -576,6 +580,7 @@ int sqlite3BtreeOpen(
   mdb_env_set_maxreaders(p->env, 254);
   mdb_env_set_maxdbs(p->env, isTempDb ? 64 : 1024);
   rc = mdb_env_open(p->env, dirPathName, mdbFlags, SQLITE_DEFAULT_FILE_PERMISSIONS);
+  LUMO_LOG("sqlite3BtreeOpen: mdb_env_open rc=%d\n", rc);
   if (rc) goto error;
   /* if we are opening read/write, make sure that the main btree and
   ** the one where we store the metadata are present */
@@ -592,6 +597,7 @@ int sqlite3BtreeOpen(
     if (rc) goto error;
     rc = mdb_txn_commit(txn);
     txn = NULL;
+    LUMO_LOG("mdb_dbi_open commit: %d\n", rc);
     if (rc) goto error;
   }
   *ppBtree = p;
@@ -1429,6 +1435,12 @@ LUMO_LOG("    %p  ->next=%p  ->prev=%p  ->pBtree=%p\n",
     else
       p->last_cursor = pCur->prev;
     pCur->pBtree = NULL;
+#ifdef BTREE_SINGLE
+    if (p->flags & BTREE_SINGLE) {
+      LUMO_LOG("sqlite3BtreeCloseCursor: BTREE_SINGLE: closing btree\n");
+      sqlite3BtreeClose(p);
+    }
+#endif
   } else {
     LUMO_LOG("sqlite3BtreeCloseCursor: pCur->pBtree is NULL! (pCur=%p)\n", pCur);
   }
