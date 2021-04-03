@@ -742,18 +742,25 @@ for {set bnum 0} {$bnum < [llength $build_list]} {incr bnum} {
 	set backend_name ""
 	set backend_version ""
     }
+    set ts_file [file join $dest_dir build_time]
     if {[file isdirectory $dest_dir]} {
 	# check if the build is at least as recent as our files
-	set skip_rebuild 1
-	file stat [file join $dest_dir lumo build] buildstat
-	set mtime $buildstat(mtime)
-	if {$skip_rebuild && $sqlite3_version ne ""} {
-	    set skip_rebuild [check_mtime sqlite3]
+	if {[file exists $ts_file]} {
+	    set skip_rebuild 1
+	    set rd [open $ts_file]
+	    set mtime [read -nonewline $rd]
+	    close $rd
+	    if {! [regexp {^\d+$} $mtime]} {
+		set skip_rebuild 0
+	    }
+	    if {$skip_rebuild && $sqlite3_version ne ""} {
+		set skip_rebuild [check_mtime sqlite3]
+	    }
+	    if {$skip_rebuild && $backend_version ne ""} {
+		set skip_rebuild [check_mtime $backend_name]
+	    }
+	    if {$skip_rebuild} {continue}
 	}
-	if {$skip_rebuild && $backend_version ne ""} {
-	    set skip_rebuild [check_mtime $backend_name]
-	}
-	if {$skip_rebuild} {continue}
 	file delete -force $dest_dir
 	puts "*** Reuilding $build (sources changed)"
     } else {
@@ -772,11 +779,12 @@ for {set bnum 0} {$bnum < [llength $build_list]} {incr bnum} {
 	array set env [list "OPTION_$option" $value]
 	array set build_options [list $option $value]
     }
-    set dest_tmp [file join $build_dir ".$build.tmp"]
-    file delete -force $dest_tmp
-    file mkdir $dest_tmp
-    set sources [file join $dest_tmp sources]
-    set lumo_dir [file join $dest_tmp lumo]
+    file mkdir $dest_dir
+    # get the "build time" from the filesystem's own clock by...
+    file stat $dest_dir build_stat
+    set build_time $build_stat(mtime)
+    set sources [file join $dest_dir sources]
+    set lumo_dir [file join $dest_dir lumo]
     file mkdir $lumo_dir
     set sqlite3_commit_id ""
     if {$sqlite3_version ne ""} {
@@ -808,7 +816,7 @@ for {set bnum 0} {$bnum < [llength $build_list]} {incr bnum} {
 	BACKEND_COMMIT_ID $backend_commit_id \
 	LUMO_BACKEND_NAME $backend_name \
 	LUMO_BACKEND_VERSION $backend_version \
-	LUMO_BUILD $dest_tmp \
+	LUMO_BUILD $dest_dir \
 	LUMO_SOURCES $sources \
 	MAKEFLAGS "" \
 	SQLITE3_COMMIT_ID $sqlite3_commit_id \
@@ -832,7 +840,7 @@ for {set bnum 0} {$bnum < [llength $build_list]} {incr bnum} {
     write_data $lumo_dir "backend_commit_id" $backend_commit_id
     write_data $lumo_dir "backend_name" $backend_name
     write_data $lumo_dir "backend_version" $backend_version
-    set exe [file join $dest_tmp sqlite3]
+    set exe [file join $dest_dir sqlite3]
     set libs [file join $dest_dir lumo build]
     set fd [open $exe w]
     puts $fd "#!/bin/sh"
@@ -846,9 +854,10 @@ for {set bnum 0} {$bnum < [llength $build_list]} {incr bnum} {
     puts $fd "exec '$libs/sqlite3' \"\$@\""
     close $fd
     catch { chmod a+rx $exe }
-    # build will have copied files of interest to lumo/ so...
-    file delete -force $sources
-    file rename $dest_tmp $dest_dir
+    # file delete -force $sources
+    set td [open $ts_file w]
+    puts $td $build_time
+    close $td
 }
 
 if {$operation eq "build"} { exit 0 }
