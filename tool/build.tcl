@@ -710,7 +710,7 @@ proc search_dir {rootdir exclude} {
 		    return 0
 		}
 	    } else {
-		file stat $rootdir buildstat
+		file stat $fn buildstat
 		set dmtime $buildstat(mtime)
 		if {$mtime < $dmtime} { return 0 }
 	    }
