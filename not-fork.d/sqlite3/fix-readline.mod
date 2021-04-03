@@ -12,5 +12,6 @@ hasfile /usr/include/readline/readline.h !/usr/include/editline/readline.h
 method = sed
 
 --
+src/shell.c : \n#\s*include\s+<editline/readline.h> = \n#include <readline/readline.h>
 src/shell.c.in : \n#\s*include\s+<editline/readline.h> = \n#include <readline/readline.h>
 
