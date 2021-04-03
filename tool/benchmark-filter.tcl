@@ -628,8 +628,8 @@ if {$out_list} {
 	} elseif {$field eq "DURATION"} {
 	    add_test_op "duration" "real-time" "sum(value)"
 	    set width 11
-	    lappend fmt "%11.3f"
-	    lappend op {[dict get $d "duration"]}
+	    lappend fmt "%11s"
+	    lappend op {[if_key $d "duration" {format "%11.3f" $v} "-"]}
 	} else {
 	    puts stderr "Invalid field: $field"
 	    exit 1
