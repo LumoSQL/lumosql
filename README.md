@@ -197,7 +197,7 @@ like error messages scrolling past during a build, then install a more recent
 git [from Buster backports](https://backports.debian.org/Instructions/).
 
 <a name="using-the-build-and-benchmark-system"></a>
-## Using the Build and Benchmark System
+## Quickstart: Using the Build and Benchmark System
 
 This is a very brief quickstart, for full detail see the
 [Build and Benchmark System documentation](doc/lumo-build-benchmark.md). 
