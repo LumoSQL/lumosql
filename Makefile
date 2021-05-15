@@ -36,6 +36,9 @@ build: Makefile.options
 benchmark: Makefile.options $(DATABASE_NAME)
 	$(TCL) tool/build.tcl benchmark not-fork.d $(BUILD_DIR) $(DATABASE_NAME) $(BUILD_OPTIONS)
 
+test: Makefile.options
+	$(TCL) tool/build.tcl test not-fork.d $(BUILD_DIR) $(BUILD_OPTIONS)
+
 database: $(DATABASE_NAME)
 $(DATABASE_NAME):
 	$(TCL) tool/build.tcl database not-fork.d $(BUILD_DIR) $(DATABASE_NAME)

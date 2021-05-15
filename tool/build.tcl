@@ -4,7 +4,7 @@
 
 # LumoSQL build and benchmark
 
-# Copyright 2020 The LumoSQL Authors, see LICENSES/MIT
+# Copyright 2021 The LumoSQL Authors, see LICENSES/MIT
 #
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2020 The LumoSQL Authors
@@ -38,7 +38,11 @@
 
 # OPERATION: benchmark
 # ARGUMENTS: BUILD_DIR DATABASE_NAME BUILD_OPTIONS
-#            run benchmarks
+#            run benchmarks (run all tests marked for benchmarking and save timings)
+
+# OPERATION: test
+# ARGUMENTS: BUILD_DIR BUILD_OPTIONS
+#            run tests (run all tests without saving timings)
 
 package require Tclx 8.0
 
@@ -76,6 +80,13 @@ if {$operation eq "options"} {
 } elseif {$operation eq "build"} {
     if {[llength $argv] < 3} {
 	puts stderr "Usage: build.tcl build NOTFORK_CONFIG BUILD_DIR BUILD_OPTIONS..."
+	exit 1
+    }
+    set build_dir [lindex $argv 2]
+    set argp 3
+} elseif {$operation eq "test"} {
+    if {[llength $argv] < 3} {
+	puts stderr "Usage: build.tcl test NOTFORK_CONFIG BUILD_DIR BUILD_OPTIONS..."
 	exit 1
     }
     set build_dir [lindex $argv 2]
@@ -854,6 +865,20 @@ for {set bnum 0} {$bnum < [llength $build_list]} {incr bnum} {
     puts $fd "exec '$libs/sqlite3' \"\$@\""
     close $fd
     catch { chmod a+rx $exe }
+    # and let's make one to run under a debugger too
+    set exe [file join $dest_dir sqlite3.gdb]
+    set fd [open $exe w]
+    puts $fd "#!/bin/sh"
+    puts $fd "if \[ -n \"\$LD_LIBRARY_PATH\" \]"
+    puts $fd "then"
+    puts $fd "    LD_LIBRARY_PATH='$libs':\"\$LD_LIBRARY_PATH\""
+    puts $fd "else"
+    puts $fd "    LD_LIBRARY_PATH='$libs'"
+    puts $fd "fi"
+    puts $fd "export LD_LIBRARY_PATH"
+    puts $fd "exec gdb '$libs/sqlite3' \"\$@\""
+    close $fd
+    catch { chmod a+rx $exe }
     # file delete -force $sources
     set td [open $ts_file w]
     puts $td $build_time
@@ -862,42 +887,45 @@ for {set bnum 0} {$bnum < [llength $build_list]} {incr bnum} {
 
 if {$operation eq "build"} { exit 0 }
 
-# if the database exists, check it has the correct schema;
-# if it does not exist, create it
-
-set run_schema {
-    CREATE TABLE run_data (
-	run_id VARCHAR(128),
-	key VARCHAR(256),
-	value TEXT
-    );
-    CREATE INDEX run_data_index ON run_data (run_id, key);
-}
-set test_schema {
-    CREATE TABLE test_data (
-	run_id VARCHAR(128),
-	test_number INTEGER,
-	key VARCHAR(256),
-	value TEXT
-    );
-    CREATE INDEX test_data_index_1 ON test_data (run_id, test_number, key);
-    CREATE INDEX test_data_index_2 ON test_data (run_id, key, test_number);
-}
-
 set sqlite3_for_db [file join $build_dir $sqlite3_for_db sqlite3]
 
-if {[file exists $database_name]} {
-    # TODO get table schemas and check them
-} else {
-    puts "Creating database $database_name"
-    flush stdout
-    set sqlfd [open "| $sqlite3_for_db $database_name" w]
-    puts $sqlfd $run_schema
-    puts $sqlfd $test_schema
-    close $sqlfd
+if {$operation ne "test"} {
+    # if the database exists, check it has the correct schema;
+    # if it does not exist, create it
+
+    set run_schema {
+	CREATE TABLE run_data (
+	    run_id VARCHAR(128),
+	    key VARCHAR(256),
+	    value TEXT
+	);
+	CREATE INDEX run_data_index ON run_data (run_id, key);
+    }
+
+    set test_schema {
+	CREATE TABLE test_data (
+	    run_id VARCHAR(128),
+	    test_number INTEGER,
+	    key VARCHAR(256),
+	    value TEXT
+	);
+	CREATE INDEX test_data_index_1 ON test_data (run_id, test_number, key);
+	CREATE INDEX test_data_index_2 ON test_data (run_id, key, test_number);
+    }
+
+    if {[file exists $database_name]} {
+	# TODO get table schemas and check them
+    } else {
+	puts "Creating database $database_name"
+	flush stdout
+	set sqlfd [open "| $sqlite3_for_db $database_name" w]
+	puts $sqlfd $run_schema
+	puts $sqlfd $test_schema
+	close $sqlfd
+    }
 }
 
-if {$operation ne "benchmark"} { exit 0 }
+if {$operation ne "benchmark" && $operation ne "test"} { exit 0 }
 
 # and finally run benchmarks
 
@@ -993,7 +1021,7 @@ array set benchmark_options { }
 for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
     set benchmark [lindex $benchmark_list $bnum]
     set benchmark_optlist [lindex $benchmark_option_list $bnum]
-    puts "*** Running benchmark $benchmark"
+    puts "*** Running $operation $benchmark"
     set build [lindex $benchmark_to_build $bnum]
     set tl [split $build "+"]
     set sqlite3_version [lindex $tl 0]
@@ -1058,132 +1086,146 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 	# expected to create the database the way it wants it
 	file mkdir $temp_db_dir
 	set when_run [clock seconds]
-	set run_id [exec $sqlite3_for_db $database_name \
-	    "select hex(sha3('$benchmark' || randomblob(16) || '$when_run'));"]
-	puts "${space}RUN_ID = $run_id"
-	update_run $run_id [list \
-	    "when-run"        $when_run \
-	    "sqlite-version"  $sqlite3_version \
-	    "sqlite-id"       $sqlite3_commit_id \
-	    "target"          $benchmark \
-	    "title"           $title \
-	    "sqlite-name"     $sqlite3_name \
-	    "notforking-id"   $notforking_id \
-	]
-	foreach {option value} $benchmark_optlist {
-	    update_run $run_id [list "option-[string tolower $option]" $value]
-	}
-	if {$backend_name ne ""} {
+	if {$operation eq "benchmark"} {
+	    set run_id [exec $sqlite3_for_db $database_name \
+		"select hex(sha3('$benchmark' || randomblob(16) || '$when_run'));"]
+	    puts "${space}RUN_ID = $run_id"
 	    update_run $run_id [list \
-		"backend-name"     $backend_name \
-		"backend-version"  $backend_version \
-		"backend"          $backend_name-$backend_version \
-		"backend-id"       $backend_commit_id \
+		"when-run"        $when_run \
+		"sqlite-version"  $sqlite3_version \
+		"sqlite-id"       $sqlite3_commit_id \
+		"target"          $benchmark \
+		"title"           $title \
+		"sqlite-name"     $sqlite3_name \
+		"notforking-id"   $notforking_id \
 	    ]
+	    foreach {option value} $benchmark_optlist {
+		update_run $run_id [list "option-[string tolower $option]" $value]
+	    }
+	    if {$backend_name ne ""} {
+		update_run $run_id [list \
+		    "backend-name"     $backend_name \
+		    "backend-version"  $backend_version \
+		    "backend"          $backend_name-$backend_version \
+		    "backend-id"       $backend_commit_id \
+		]
+	    }
+	} else {
+	    set run_id ""
 	}
 	set tests_ok 0
 	set tests_fail 0
 	set tests_intr 0
 	set total_time 0
-	for {set test_number 1} {$test_number <= [llength $tests]} {incr test_number} {
+	set test_number 0
+	for {set test_index 1} {$test_index <= [llength $tests]} {incr test_index} {
 	    if {$other_values(COPY_DATABASES) ne ""} {
 		if {[file exists $temp_db_name]} {
 		    file copy $temp_db_name \
-			 [format $other_values(COPY_DATABASES) $benchmark $test_number]
+			 [format $other_values(COPY_DATABASES) $benchmark $test_index]
 		}
 	    }
 	    set test_name ""
 	    set before_sql ""
 	    set test_sql ""
 	    set after_sql ""
+	    set is_benchmark 1
 	    set results [list]
-	    set test_tcl "$before_test [lindex $tests [expr $test_number - 1]] $after_test"
+	    set test_tcl "$before_test [lindex $tests [expr $test_index - 1]] $after_test"
 	    apply \
 		[list {} "\
 		    upvar benchmark_options options \
+			  is_benchmark is_benchmark \
 			  test_name name \
 			  before_sql before_sql \
 			  test_sql sql \
 			  after_sql after_sql \
 			  results results
 		    $test_tcl"]
-	    set sqlfd [open $temp_sql_file w]
-	    puts $sqlfd $before_sql
-	    close $sqlfd
-	    exec $sqlite3_to_test $temp_db_name < $temp_sql_file > /dev/null
-	    set sqlfd [open $temp_sql_file w]
-	    puts $sqlfd $test_sql
-	    close $sqlfd
-	    if {$other_values(COPY_SQL) ne ""} {
-		file copy $temp_sql_file \
-		     [format $other_values(COPY_SQL) $benchmark $test_number]
-	    }
-	    set delay 1000
-	    exec sync; after $delay;
-	    set status "?"
-	    set oct [times]
-	    set owt [clock microseconds]
-	    if {[catch {
-		set output [exec $sqlite3_to_test $temp_db_name < $temp_sql_file]
-	    } res opt]} {
-		set nwt [clock microseconds]
-		set nct [times]
-		set S [dict get $opt -errorcode]
-		set E [lindex $S 0]
-		if {$E eq "CHILDKILLED"} {
-		    set status [lindex $S 2]
-		    incr tests_intr
-		} elseif {$E eq "CHILDSTATUS"} {
-		    set status "ERR[lindex $S 2]"
-		    incr tests_fail
+	    if {$is_benchmark || $operation ne "benchmark"} {
+		incr test_number
+		set sqlfd [open $temp_sql_file w]
+		puts $sqlfd $before_sql
+		close $sqlfd
+		exec $sqlite3_to_test $temp_db_name < $temp_sql_file > /dev/null
+		set sqlfd [open $temp_sql_file w]
+		puts $sqlfd $test_sql
+		close $sqlfd
+		if {$other_values(COPY_SQL) ne ""} {
+		    file copy $temp_sql_file \
+			 [format $other_values(COPY_SQL) $benchmark $test_number]
 		}
-	    } else {
-		set nwt [clock microseconds]
-		set nct [times]
-		set status "OK"
-		if {[llength $results] > 0} {
-		    set ol [split $output \n]
-		    if {[llength $results] > [llength $ol]} {
-			set status "NRESULTS"
-		    } else {
-			for {set rnum 0} {$rnum < [llength $results]} {incr rnum} {
-			    if {! [regexp [lindex $results $rnum] [lindex $ol $rnum]] } {
-				set status "RESULT[expr $rnum + 1]"
-				break
+		set delay 1000
+		exec sync; after $delay;
+		set status "?"
+		set oct [times]
+		set owt [clock microseconds]
+		if {[catch {
+		    set output [exec $sqlite3_to_test $temp_db_name < $temp_sql_file]
+		} res opt]} {
+		    set nwt [clock microseconds]
+		    set nct [times]
+		    set S [dict get $opt -errorcode]
+		    set E [lindex $S 0]
+		    if {$E eq "CHILDKILLED"} {
+			set status [lindex $S 2]
+			incr tests_intr
+		    } elseif {$E eq "CHILDSTATUS"} {
+			set status "ERR[lindex $S 2]"
+			incr tests_fail
+		    }
+		} else {
+		    set nwt [clock microseconds]
+		    set nct [times]
+		    set status "OK"
+		    if {[llength $results] > 0} {
+			set ol [split $output \n]
+			if {[llength $results] > [llength $ol]} {
+			    set status "NRESULTS"
+			} else {
+			    for {set rnum 0} {$rnum < [llength $results]} {incr rnum} {
+				if {! [regexp [lindex $results $rnum] [lindex $ol $rnum]] } {
+				    set status "RESULT[expr $rnum + 1]"
+				    break
+				}
 			    }
 			}
 		    }
+		    if {$status eq "OK"} {
+			incr tests_ok
+		    } else {
+			incr tests_fail
+		    }
 		}
-		if {$status eq "OK"} {
-		    incr tests_ok
-		} else {
-		    incr tests_fail
+		set wt [expr {($nwt - $owt) / 1000000.0}]
+		set ut [expr {([lindex $nct 2] - [lindex $oct 2]) / 1000.0}]
+		set st [expr {([lindex $nct 3] - [lindex $oct 3]) / 1000.0}]
+		set sqlfd [open $temp_sql_file w]
+		puts $sqlfd $after_sql
+		close $sqlfd
+		exec $sqlite3_to_test $temp_db_name < $temp_sql_file > /dev/null
+		if {$operation eq "benchmark"} {
+		    update_test $run_id $test_number [list \
+			"test-name"        $test_name \
+			"real-time"        $wt \
+			"user-cpu-time"    $ut \
+			"system-cpu-time"  $st \
+			"status"           $status \
+		    ]
 		}
+		set total_time [expr $total_time + $wt]
+		puts [format "%s%8s %9.3f %3d %s" $space $status $wt $test_number $test_name]
 	    }
-	    set wt [expr {($nwt - $owt) / 1000000.0}]
-	    set ut [expr {([lindex $nct 2] - [lindex $oct 2]) / 1000.0}]
-	    set st [expr {([lindex $nct 3] - [lindex $oct 3]) / 1000.0}]
-	    set sqlfd [open $temp_sql_file w]
-	    puts $sqlfd $after_sql
-	    close $sqlfd
-	    exec $sqlite3_to_test $temp_db_name < $temp_sql_file > /dev/null
-	    update_test $run_id $test_number [list \
-		"test-name"        $test_name \
-		"real-time"        $wt \
-		"user-cpu-time"    $ut \
-		"system-cpu-time"  $st \
-		"status"           $status \
-	    ]
-	    set total_time [expr $total_time + $wt]
-	    puts [format "%s%8s %9.3f %3d %s" $space $status $wt $test_number $test_name]
 	}
-	set end_run [clock seconds]
-	update_run $run_id [list \
-	    "end-run"         $end_run \
-	    "tests-ok"        $tests_ok \
-	    "tests-intr"      $tests_intr \
-	    "tests-fail"      $tests_fail \
-	]
+	if {$operation eq "benchmark"} {
+	    set end_run [clock seconds]
+	    update_run $run_id [list \
+		"end-run"         $end_run \
+		"tests-ok"        $tests_ok \
+		"tests-intr"      $tests_intr \
+		"tests-fail"      $tests_fail \
+	    ]
+	}
 	puts [format "%s        %10.3f (total time)" $space $total_time]
 	# delete temp database
 	file delete -force $temp_db_dir
