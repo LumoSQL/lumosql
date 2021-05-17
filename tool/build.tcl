@@ -53,7 +53,7 @@ if {[llength $argv] < 2} {
 }
 
 set operation [lindex $argv 0]
-set notfork [lindex $argv 1]
+set notfork_dir [lindex $argv 1]
 set prn 0
 
 if {$operation eq "options"} {
@@ -106,8 +106,8 @@ if {$operation eq "options"} {
 
 # read not-forking configuration
 
-if {! [file isdirectory $notfork]} {
-    puts stderr "Configuration directory $notfork not found"
+if {! [file isdirectory $notfork_dir]} {
+    puts stderr "Configuration directory $notfork_dir not found"
     exit 1
 }
 
@@ -253,14 +253,14 @@ proc read_options {opt_dir} {
 set backends [list]
 set sqlite3_versions [list]
 array set options { }
-read_versions [file join $notfork sqlite3 benchmark versions] "" sqlite3_versions ""
+read_versions [file join $notfork_dir sqlite3 benchmark versions] "" sqlite3_versions ""
 if {[llength $sqlite3_versions] < 1} {
     puts stderr "No SQLite versions specified?"
     exit 1
 }
 set sqlite3_for_db [lindex $sqlite3_versions 0]
 
-read_options [file join $notfork sqlite3 benchmark]
+read_options [file join $notfork_dir sqlite3 benchmark]
 
 array set other_values [list \
 	BENCHMARK_DB     benchmarks.sqlite \
@@ -277,7 +277,7 @@ array set other_values [list \
 set options_list [lsort [array names other_values]]
 array set other_values [list TARGETS "" ]
 
-foreach backend_dir [glob -nocomplain -directory $notfork *] {
+foreach backend_dir [glob -nocomplain -directory $notfork_dir *] {
     if [file isdirectory [file join $backend_dir benchmark]] {
 	set backend [file tail $backend_dir]
 	if {$backend eq "sqlite3"} { continue }
@@ -400,13 +400,40 @@ array set notfork_updated [list]
 set notfork_name $other_values(NOTFORK_COMMAND)
 set make_command $other_values(MAKE_COMMAND)
 
+# not-fork version 0.4.1 is required for --use-version which we need
+set notfork_minimum "0.4.1"
+if {[catch {
+    set notfork_found [exec $notfork_name --check-version $notfork_minimum 2>@1]
+} notfork_results notfork_options]} {
+    set errorcode [lindex [dict get $notfork_options -errorcode] 0]
+    if {$errorcode eq "CHILDSTATUS"} {
+	set version_found ""
+	if {[regexp {^([\d\.]+)} $notfork_results skip version_found]} {
+	    set version_found " ($version_found)"
+	}
+	puts stderr "Installed version of not-fork$version_found is too old, $notfork_minimum required"
+    } else {
+	puts stderr "Cannot run $notfork_name, please check that it is installed and in PATH"
+    }
+    exit 1
+}
+
+# not-fork 1.0 may introduce incompatible changes and we don't want that, so
+# we ask it to confirm that it can find a version older than that
+set notfork_maximum "0.999"
+exec $notfork_name --quiet --find-version "$notfork_minimum:$notfork_maximum"
+
+# from now on, not-fork will be called with --use-version
+
 proc notfork_command {target args} {
     global notfork_updated
     global other_values
     global notfork_name
-    global notfork
+    global notfork_dir
+    global notfork_minimum
+    global notfork_maximum
     set rargs [lreverse $args]
-    lappend rargs $notfork -i
+    lappend rargs $notfork_dir -i
     if {[array names notfork_updated -exact $target] != ""} {
 	lappend rargs "--no-update"
     } else {
@@ -418,30 +445,12 @@ proc notfork_command {target args} {
     if {$other_values(NOTFORK_ONLINE)} {
 	lappend rargs "--online"
     }
+    lappend rargs "$notfork_minimum:$notfork_maximum" --use-version
     lappend rargs $notfork_name
     lappend rargs -ignorestderr
     set args [lreverse $rargs]
     lappend args $target
     return $args
-}
-
-# check not-fork tool can be found and is new enough
-
-set notfork_required "0.3.4"
-if {[catch {
-    set notfork_found [exec $notfork_name --check-version $notfork_required 2>@1]
-} notfork_results notfork_options]} {
-    set errorcode [lindex [dict get $notfork_options -errorcode] 0]
-    if {$errorcode eq "CHILDSTATUS"} {
-	set version_found ""
-	if {[regexp {^([\d\.]+)} $notfork_results skip version_found]} {
-	    set version_found " ($version_found)"
-	}
-	puts stderr "Installed version of not-fork$version_found is too old, $notfork_required required"
-    } else {
-	puts stderr "Cannot run $notfork_name, please check that it is installed and in PATH"
-    }
-    exit 1
 }
 
 set target_string $other_values(TARGETS)
@@ -731,8 +740,8 @@ proc search_dir {rootdir exclude} {
 }
 
 proc check_mtime {subdir} {
-    global notfork
-    return [search_dir [file join $notfork $subdir] [list benchmark]]
+    global notfork_dir
+    return [search_dir [file join $notfork_dir $subdir] [list benchmark]]
 }
 
 set wd [open .build.info w]
@@ -960,20 +969,20 @@ proc read_data {dir name} {
 
 # see what tests we have
 set tests [list]
-foreach test_file [lsort [glob -directory [file join $notfork sqlite3 benchmark] *.test]] {
+foreach test_file [lsort [glob -directory [file join $notfork_dir sqlite3 benchmark] *.test]] {
     set fd [open $test_file r]
     lappend tests [read $fd]
     close $fd
 }
 set before_test ""
-if {[file exists [file join $notfork sqlite3 benchmark before-test]]} {
-    set fd [open [file join $notfork sqlite3 benchmark before-test] r]
+if {[file exists [file join $notfork_dir sqlite3 benchmark before-test]]} {
+    set fd [open [file join $notfork_dir sqlite3 benchmark before-test] r]
     set before_test [read $fd]
     close $fd
 }
 set after_test ""
-if {[file exists [file join $notfork sqlite3 benchmark after-test]]} {
-    set fd [open [file join $notfork sqlite3 benchmark after-test] r]
+if {[file exists [file join $notfork_dir sqlite3 benchmark after-test]]} {
+    set fd [open [file join $notfork_dir sqlite3 benchmark after-test] r]
     set after_test [read $fd]
     close $fd
 }
@@ -1010,7 +1019,7 @@ proc number_name {n} {
 }
 
 set notforking_id "NOT KNOWN"
-pushd $notfork
+pushd $notfork_dir
 catch {
     set notforking_tmp [exec fossil info]
     regexp {***:(?n)^checkout\s*:\s*(\S+)} $notforking_tmp skip notforking_id
