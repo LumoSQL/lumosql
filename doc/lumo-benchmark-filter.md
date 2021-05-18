@@ -236,9 +236,9 @@ unless specified otherwise
 included by default plus `TITLE` (strings like "sqlite 3.34.0 with lmdb 0.9.27"),
 `SQLITE_NAME` (output of `sqlite3 --version`), `END_DATE` and `END_TIME` (like
 `DATE` and `TIME` but referring to when the run completed; or a "-" if it did not
-complete) and `DONE` ("YES" if the run completed, "NO" if it didn't)
-so one can only reorder them or select a subset of fields; later versions will have
-more possibilities
+complete), `DONE` ("YES" if the run completed, "NO" if it didn't), "OK", "INTR"
+and "FAIL" reporting the count of runs which succeeded, were interrupted and failed
+for some other reason.
 * `-summary`  - display a summary of each test in each selected run; this only works if the selected runs have the same tests; cannot be combined with `-details`
 * `-details`  - display full details for each test in each selected run including all the information in the database; cannot be combined with `-summary`
 * `-export` `FILE`  - write the selected runs to `FILE` in a text format, useful for example to send the run information by email
@@ -250,4 +250,18 @@ If no output format options (other than `-average`) are specified, the default i
 
 * `-add` `NAME=VALUE` - adds some run information, for example to find older benchmark results which did not include the default value for `datasize` and to update them to have it, one could specify: "`-missing datasize -add option-datasize=1`"
 * `-delete` - delete the selected runs from the database; it is recommended to run the tool with `-list` instead of `-delete` first, and/or make a copy of the database before running `-delete`
+
+## checking test results
+
+When running tests (as opposed to benchmarks) the build tool will store the results in a different database and the useful data could be different; one can get a summary of test results with:
+
+```
+tool/benchmark-filter.tcl -database tests.sqlite -list -fields TARGET,DONE,OK,INTR,FAIL
+```
+
+or have complete information about targets with failed tests:
+
+```
+tool/benchmark-filter.tcl -database tests.sqlite -details -failed
+```
 

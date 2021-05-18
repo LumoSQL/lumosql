@@ -41,7 +41,7 @@
 #            run benchmarks (run all tests marked for benchmarking and save timings)
 
 # OPERATION: test
-# ARGUMENTS: BUILD_DIR BUILD_OPTIONS
+# ARGUMENTS: BUILD_DIR DATABASE_NAME BUILD_OPTIONS
 #            run tests (run all tests without saving timings)
 
 package require Tclx 8.0
@@ -84,16 +84,9 @@ if {$operation eq "options"} {
     }
     set build_dir [lindex $argv 2]
     set argp 3
-} elseif {$operation eq "test"} {
-    if {[llength $argv] < 3} {
-	puts stderr "Usage: build.tcl test NOTFORK_CONFIG BUILD_DIR BUILD_OPTIONS..."
-	exit 1
-    }
-    set build_dir [lindex $argv 2]
-    set argp 3
-} elseif {$operation eq "benchmark"} {
+} elseif {$operation eq "test" || $operation eq "benchmark"} {
     if {[llength $argv] < 4} {
-	puts stderr "Usage: build.tcl benchmark NOTFORK_CONFIG BUILD_DIR DATABASE_NAME BUILD_OPTIONS..."
+	puts stderr "Usage: build.tcl $operation NOTFORK_CONFIG BUILD_DIR DATABASE_NAME BUILD_OPTIONS..."
 	exit 1
     }
     set build_dir [lindex $argv 2]
@@ -898,47 +891,49 @@ if {$operation eq "build"} { exit 0 }
 
 set sqlite3_for_db [file join $build_dir $sqlite3_for_db sqlite3]
 
-if {$operation ne "test"} {
-    # if the database exists, check it has the correct schema;
-    # if it does not exist, create it
+# if the database exists, check it has the correct schema;
+# if it does not exist, create it
 
-    set run_schema {
-	CREATE TABLE run_data (
-	    run_id VARCHAR(128),
-	    key VARCHAR(256),
-	    value TEXT
-	);
-	CREATE INDEX run_data_index ON run_data (run_id, key);
-    }
+set run_schema {
+    CREATE TABLE run_data (
+	run_id VARCHAR(128),
+	key VARCHAR(256),
+	value TEXT
+    );
+    CREATE INDEX run_data_index ON run_data (run_id, key);
+}
 
-    set test_schema {
-	CREATE TABLE test_data (
-	    run_id VARCHAR(128),
-	    test_number INTEGER,
-	    key VARCHAR(256),
-	    value TEXT
-	);
-	CREATE INDEX test_data_index_1 ON test_data (run_id, test_number, key);
-	CREATE INDEX test_data_index_2 ON test_data (run_id, key, test_number);
-    }
+set test_schema {
+    CREATE TABLE test_data (
+	run_id VARCHAR(128),
+	test_number INTEGER,
+	key VARCHAR(256),
+	value TEXT
+    );
+    CREATE INDEX test_data_index_1 ON test_data (run_id, test_number, key);
+    CREATE INDEX test_data_index_2 ON test_data (run_id, key, test_number);
+}
 
-    if {[file exists $database_name]} {
-	# TODO get table schemas and check them
-    } else {
-	puts "Creating database $database_name"
-	flush stdout
-	set sqlfd [open "| $sqlite3_for_db $database_name" w]
-	puts $sqlfd $run_schema
-	puts $sqlfd $test_schema
-	close $sqlfd
-    }
+if {[file exists $database_name]} {
+    # TODO get table schemas and check them
+} else {
+    puts "Creating database $database_name"
+    flush stdout
+    set sqlfd [open "| $sqlite3_for_db $database_name" w]
+    puts $sqlfd $run_schema
+    puts $sqlfd $test_schema
+    close $sqlfd
 }
 
 if {$operation ne "benchmark" && $operation ne "test"} { exit 0 }
 
 # and finally run benchmarks
 
-set repeat $other_values(BENCHMARK_RUNS)
+if {$operation eq "test"} {
+    set repeat 1
+} else {
+    set repeat $other_values(BENCHMARK_RUNS)
+}
 
 proc update_run {run_id data} {
     global sqlite3_for_db
@@ -1027,6 +1022,7 @@ catch {
 popd
 
 array set benchmark_options { }
+set test_result [list]
 for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
     set benchmark [lindex $benchmark_list $bnum]
     set benchmark_optlist [lindex $benchmark_option_list $bnum]
@@ -1095,32 +1091,28 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 	# expected to create the database the way it wants it
 	file mkdir $temp_db_dir
 	set when_run [clock seconds]
-	if {$operation eq "benchmark"} {
-	    set run_id [exec $sqlite3_for_db $database_name \
-		"select hex(sha3('$benchmark' || randomblob(16) || '$when_run'));"]
-	    puts "${space}RUN_ID = $run_id"
+	set run_id [exec $sqlite3_for_db $database_name \
+	    "select hex(sha3('$benchmark' || randomblob(16) || '$when_run'));"]
+	puts "${space}RUN_ID = $run_id"
+	update_run $run_id [list \
+	    "when-run"        $when_run \
+	    "sqlite-version"  $sqlite3_version \
+	    "sqlite-id"       $sqlite3_commit_id \
+	    "target"          $benchmark \
+	    "title"           $title \
+	    "sqlite-name"     $sqlite3_name \
+	    "notforking-id"   $notforking_id \
+	]
+	foreach {option value} $benchmark_optlist {
+	    update_run $run_id [list "option-[string tolower $option]" $value]
+	}
+	if {$backend_name ne ""} {
 	    update_run $run_id [list \
-		"when-run"        $when_run \
-		"sqlite-version"  $sqlite3_version \
-		"sqlite-id"       $sqlite3_commit_id \
-		"target"          $benchmark \
-		"title"           $title \
-		"sqlite-name"     $sqlite3_name \
-		"notforking-id"   $notforking_id \
+		"backend-name"     $backend_name \
+		"backend-version"  $backend_version \
+		"backend"          $backend_name-$backend_version \
+		"backend-id"       $backend_commit_id \
 	    ]
-	    foreach {option value} $benchmark_optlist {
-		update_run $run_id [list "option-[string tolower $option]" $value]
-	    }
-	    if {$backend_name ne ""} {
-		update_run $run_id [list \
-		    "backend-name"     $backend_name \
-		    "backend-version"  $backend_version \
-		    "backend"          $backend_name-$backend_version \
-		    "backend-id"       $backend_commit_id \
-		]
-	    }
-	} else {
-	    set run_id ""
 	}
 	set tests_ok 0
 	set tests_fail 0
@@ -1164,8 +1156,10 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 		    file copy $temp_sql_file \
 			 [format $other_values(COPY_SQL) $benchmark $test_number]
 		}
-		set delay 1000
-		exec sync; after $delay;
+		if {$operation eq "benchmark"} {
+		    set delay 1000
+		    exec sync; after $delay;
+		}
 		set status "?"
 		set oct [times]
 		set owt [clock microseconds]
@@ -1213,32 +1207,46 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 		puts $sqlfd $after_sql
 		close $sqlfd
 		exec $sqlite3_to_test $temp_db_name < $temp_sql_file > /dev/null
-		if {$operation eq "benchmark"} {
-		    update_test $run_id $test_number [list \
-			"test-name"        $test_name \
-			"real-time"        $wt \
-			"user-cpu-time"    $ut \
-			"system-cpu-time"  $st \
-			"status"           $status \
-		    ]
-		}
+		update_test $run_id $test_number [list \
+		    "test-name"        $test_name \
+		    "real-time"        $wt \
+		    "user-cpu-time"    $ut \
+		    "system-cpu-time"  $st \
+		    "status"           $status \
+		]
 		set total_time [expr $total_time + $wt]
 		puts [format "%s%8s %9.3f %3d %s" $space $status $wt $test_number $test_name]
 	    }
 	}
-	if {$operation eq "benchmark"} {
-	    set end_run [clock seconds]
-	    update_run $run_id [list \
-		"end-run"         $end_run \
-		"tests-ok"        $tests_ok \
-		"tests-intr"      $tests_intr \
-		"tests-fail"      $tests_fail \
-	    ]
-	}
+	set end_run [clock seconds]
+	update_run $run_id [list \
+	    "end-run"         $end_run \
+	    "tests-ok"        $tests_ok \
+	    "tests-intr"      $tests_intr \
+	    "tests-fail"      $tests_fail \
+	]
 	puts [format "%s        %10.3f (total time)" $space $total_time]
+	lappend test_result $benchmark $tests_ok $tests_intr $tests_fail
 	# delete temp database
 	file delete -force $temp_db_dir
     }
+}
+
+if {$operation eq "test"} {
+    puts ""
+    puts "*** Test summary:"
+    set width 0
+    foreach {title tests_ok tests_intr tests_fail} $test_result {
+	set t [string length $title]
+	if {$t > $width} {set width $t}
+    }
+    puts [format "%-${width}s   OK INTR FAIL" "TARGET"]
+    set all_ok 1
+    foreach {title tests_ok tests_intr tests_fail} $test_result {
+	puts [format "%-${width}s %4d %4d %4d" $title $tests_ok $tests_intr $tests_fail]
+	if {$tests_intr > 0 || $tests_fail > 0} {set all_ok 0}
+    }
+    if {$all_ok == 0} {exit 1}
 }
 
 # all done

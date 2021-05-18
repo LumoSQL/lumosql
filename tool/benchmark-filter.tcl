@@ -625,6 +625,12 @@ if {$out_list} {
 	    add_run_key "tests-intr"
 	    add_run_key "tests-fail"
 	    lappend op {[show_done $d]}
+	} elseif {$field eq "OK" || $field eq "INTR" || $field eq "FAIL"} {
+	    set fname "tests-[string tolower $field]"
+	    set width 4
+	    lappend fmt "%4d"
+	    add_run_key $fname
+	    lappend op "\[dict get \$d $fname\]"
 	} elseif {$field eq "DURATION"} {
 	    add_test_op "duration" "real-time" "sum(value)"
 	    set width 11
