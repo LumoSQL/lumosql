@@ -26,6 +26,7 @@ BUILD_DIR ?= build
 
 # database name
 DATABASE_NAME ?= benchmarks.sqlite
+TEST_DATABASE_NAME ?= tests.sqlite
 
 # default target will build SQLITE_VERSIONS and all the other TARGETS
 all: build
