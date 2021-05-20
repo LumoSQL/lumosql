@@ -78,6 +78,7 @@ struct Btree {
   u8 isMemdb;
   u8 inBackup;
   u8 hasData;
+  u8 transType;
   char path[];
 };
 
@@ -281,6 +282,7 @@ static int get_meta_32(Btree *p, unsigned int idx) {
   if (! p->hasData) return 0;
   return get_meta_32_direct(p->svp->txn, p->dataDbi, idx);
 }
+#if 0 /* not currently used
 static int get_meta_32_notxn(Btree *p, unsigned int idx, u32 * pValue) {
   MDB_dbi dbi;
   MDB_txn *abort_txn = NULL, *use_txn;
@@ -303,6 +305,7 @@ error:
   if (abort_txn) mdb_txn_abort(abort_txn);
   return error_map(rc);
 }
+#endif
 static int get_meta_64(Btree *p, unsigned int idx) {
   MDB_val key, data;
   int rc;
@@ -388,8 +391,9 @@ int lumo_backend_pragma(
   *zResult = 0;
   if (strcmp(zLeft, "lmdb_transaction") == 0) {
     Btree * p = db->aDb[0].pBt;
-    u32 trans;
     if (zRight) {
+	int rc;
+	u32 trans;
 	/* set the transaction type */
 	if (strcmp(zRight, "optimistic") == 0) {
 	  trans = LMDB_TRANSACTION_OPTIMISTIC;
@@ -401,17 +405,16 @@ int lumo_backend_pragma(
 	  *zResult = "Invalid rowsum algorithm";
 	  return SQLITE_ERROR;
 	}
-	return put_meta_32_notxn(p, LUMO_LMDB_TRANSACTION, trans);
+	rc = put_meta_32_notxn(p, LUMO_LMDB_TRANSACTION, trans);
+	if (rc == SQLITE_OK) p->transType = trans;
+	return rc;
     } else {
-	int rc;
 	/* get the transaction type */
-	rc = get_meta_32_notxn(p, LUMO_LMDB_TRANSACTION, &trans);
-	if (rc != SQLITE_OK) return rc;
-	if (trans == LMDB_TRANSACTION_OPTIMISTIC) {
+	if (p->transType == LMDB_TRANSACTION_OPTIMISTIC) {
 	  *zResult = "optimistic";
-	} else if (trans == LMDB_TRANSACTION_NOUPGRADE) {
+	} else if (p->transType == LMDB_TRANSACTION_NOUPGRADE) {
 	  *zResult = "noupgrade";
-	} else if (trans == LMDB_TRANSACTION_SERIALISE) {
+	} else if (p->transType == LMDB_TRANSACTION_SERIALISE) {
 	  *zResult = "serialise";
 	} else {
 	  *zResult = "Internal error, invalid value stored in database";
@@ -614,12 +617,15 @@ int sqlite3BtreeOpen(
   char dirPathName[BTREE_MAX_PATH];
   Btree *p;
   MDB_txn *txn = NULL;
+  MDB_dbi dbi;
   int rc;
   int envClose = 0;
   int mdbFlags;
 
   /* True if opening an ephemeral, temporary database */
   const int isTempDb = zFilename==0 || zFilename[0]==0;
+
+  const int isReadonly = (vfsFlags & SQLITE_OPEN_READONLY);
 
   /* Set the variable isMemdb to true for an in-memory database, or 
   ** false for a file-based database.
@@ -634,7 +640,7 @@ int sqlite3BtreeOpen(
 
   LUMO_LOG("sqlite3BtreeOpen(%d, %d, %s)\n", isTempDb, isMemdb, zFilename ? zFilename : "?");
   mdbFlags = 0;
-  if (vfsFlags & SQLITE_OPEN_READONLY) mdbFlags |= MDB_RDONLY;
+  if (isReadonly) mdbFlags |= MDB_RDONLY;
   if (isMemdb || isTempDb) {
     /* FIXME there isn't a vfs function to create a temporary directory or
     ** some other "safe" temporary name; sqlightning used tempnam() which
@@ -696,22 +702,37 @@ int sqlite3BtreeOpen(
   LUMO_LOG("sqlite3BtreeOpen: mdb_env_open rc=%d\n", rc);
   if (rc) goto error;
   /* if we are opening read/write, make sure that the main btree and
-  ** the one where we store the metadata are present */
-  if (! (vfsFlags & SQLITE_OPEN_READONLY)) {
-    MDB_dbi dbi;
-    rc = mdb_txn_begin(p->env, NULL, 0, &txn);
-    LUMO_LOG("mdb_txn_begin: %d\n", rc);
-    if (rc) goto error;
+  ** the one where we store the metadata are present; if opening readonly
+  ** we still want to get the transaction type metadata */
+  rc = mdb_txn_begin(p->env, NULL, isReadonly ? MDB_RDONLY : 0, &txn);
+  LUMO_LOG("mdb_txn_begin: %d\n", rc);
+  if (rc) goto error;
+  if (isReadonly) {
+    rc = mdb_dbi_open(txn, "meta", 0, &dbi);
+  } else {
     rc = mdb_dbi_open(txn, "t00000001", MDB_CREATE, &dbi);
     LUMO_LOG("mdb_dbi_open t00000001: %d\n", rc);
     if (rc) goto error;
     rc = mdb_dbi_open(txn, "meta", MDB_CREATE, &dbi);
-    LUMO_LOG("mdb_dbi_open meta: %d\n", rc);
-    if (rc) goto error;
+  }
+  LUMO_LOG("mdb_dbi_open meta: %d\n", rc);
+  if (rc) goto error;
+  p->transType = get_meta_32_direct(txn, dbi, LUMO_LMDB_TRANSACTION);
+  if (p->transType != LMDB_TRANSACTION_OPTIMISTIC &&
+      p->transType != LMDB_TRANSACTION_NOUPGRADE &&
+      p->transType != LMDB_TRANSACTION_SERIALISE) {
+    rc = SQLITE_CORRUPT_BKPT;
+    goto error;
+  }
+  if (isReadonly) {
+    mdb_txn_abort(txn);
+  } else {
     rc = mdb_txn_commit(txn);
-    txn = NULL;
     LUMO_LOG("mdb_dbi_open commit: %d\n", rc);
-    if (rc) goto error;
+    if (rc) {
+      txn = NULL;
+      goto error;
+    }
   }
   *ppBtree = p;
   return SQLITE_OK;
@@ -860,7 +881,7 @@ int sqlite3BtreeGetAutoVacuum(Btree *p) {
 */
 int sqlite3BtreeBeginTrans(Btree *p, int wrFlag, int *pSchemaVersion) {
   const int isReadonly = p->vfsFlags & SQLITE_OPEN_READONLY;
-  int rc, lmdb_transaction;
+  int rc;
   LUMO_LOG("sqlite3BtreeBeginTrans(%d/%d, %d, %s) %s\n",
 	   wrFlag, isReadonly, p->inTrans, LUMO_TXN(p->inTrans), p->path);
   /* if we already have a read/write transaction, there's nothing
@@ -874,13 +895,12 @@ int sqlite3BtreeBeginTrans(Btree *p, int wrFlag, int *pSchemaVersion) {
     if (! wrFlag) goto get_version;
     /* we need to upgrade a read-only transaction to read/write; how
     ** we do that depends on the transaction model requested */
-    lmdb_transaction = get_meta_32(p, LUMO_LMDB_TRANSACTION);
-    if (lmdb_transaction == LMDB_TRANSACTION_NOUPGRADE) {
+    if (p->transType == LMDB_TRANSACTION_NOUPGRADE) {
       /* "noupgrade" - we cannot go from a read-only to a read/write
       ** transaction */
       return SQLITE_BUSY;
     }
-    if (lmdb_transaction == LMDB_TRANSACTION_OPTIMISTIC) {
+    if (p->transType == LMDB_TRANSACTION_OPTIMISTIC) {
       /* "optimistic" - we try to go from read-only to read/write
       ** transaction by beginning a new read/write transaction and
       ** comparing the commit counter: if unchanged, we "copy" all
@@ -914,7 +934,7 @@ int sqlite3BtreeBeginTrans(Btree *p, int wrFlag, int *pSchemaVersion) {
       p->inTrans = SQLITE_TXN_WRITE;
       goto get_version;
     }
-    if (lmdb_transaction == LMDB_TRANSACTION_SERIALISE) {
+    if (p->transType == LMDB_TRANSACTION_SERIALISE) {
       /* "serialise" all transactions by always using a read/write
       ** transaction; obviously, upgrading read-only to read/write
       ** is very easy, we just need to remember that "commit" will
@@ -924,17 +944,13 @@ int sqlite3BtreeBeginTrans(Btree *p, int wrFlag, int *pSchemaVersion) {
     }
     /* invalid transaction value... */
     return SQLITE_CORRUPT_BKPT;
-  } else {
-    /* we need to know how to create a transaction */
-    rc = get_meta_32_notxn(p, LUMO_LMDB_TRANSACTION, &lmdb_transaction);
-    if (rc != SQLITE_OK) return rc;
   }
   if (p->svp) return SQLITE_INTERNAL;
   p->svp = sqlite3DbMallocZero(0, sizeof(BtreeSavepoint));
   if (! p->svp) return SQLITE_NOMEM;
   p->svp->prev = NULL;
   p->svp->nSavepoint = -1;
-  if (lmdb_transaction != LMDB_TRANSACTION_SERIALISE) {
+  if (p->transType != LMDB_TRANSACTION_SERIALISE) {
     /* "noupgrade" or "optimistic" - begin a read-only or read/write transaction
     ** as requested */
     rc = mdb_txn_begin(p->env, NULL, wrFlag ? 0 : MDB_RDONLY, &p->svp->txn);
