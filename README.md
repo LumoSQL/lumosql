@@ -214,17 +214,17 @@ make what
 ```
 </b>
 
-To see what the default sources and options are. The `what` target does not make any changes.
+To see what the default sources and options are. The `what` target does not make any changes although it may generate a file `Makefile.options` to help `make` parse the command line.
 
 Benchmarking a single binary should take no longer than 4 minutes to complete depending
 on hardware. The results are stored in an SQLite database stored in the LumoSQL 
 top-level directory by default, that is, the directory you just created using `fossil clone`.
 
-Start by building and benchmarking the official SQLite release version 3.34.0, which is the current
+Start by building and benchmarking the official SQLite release version 3.35.5, which is the current
 release at the time of writing this README.
 
 <b>
-`make benchmark USE_LMDB=no USE_BDB=no SQLITE_VERSIONS='3.34.0'`
+`make benchmark USE_LMDB=no USE_BDB=no SQLITE_VERSIONS='3.35.5'`
 </b>
 
 All source files fetched are cached in ~/.cache/LumoSQL in a way that maximises reuse regardless of 
@@ -232,36 +232,42 @@ their origin (Fossil, git, wget etc) and which minimises errors. The LumoSQL bui
 `not-fork` tool, which maintains the cache. Not-fork will download just the differences of a remote 
 version if most of the code is already in cache.
 
-The output from this make command will be something like this:
+The output from this make command will be lots of build messages followed by something like this:
 
 <b>
-`
-tclsh tool/build.tcl database not-fork.d build benchmarks.sqlite
-Creating database benchmarks.sqlite
-tclsh tool/build.tcl benchmark not-fork.d build benchmarks.sqlite  SQLITE_VERSIONS='3.34.0' USE_BDB='no' USE_LMDB='no'
-*** Running benchmark 3.34.0
-    TITLE = sqlite 3.34.0
-    SQLITE_ID = 384f5c26f48b92e8bfcb168381d4a8caf3ea59e7
-    SQLITE_NAME = 3.34.0 2020-12-01 16:14:00 a26b6597e3ae272231b96f9982c3bcc17ddec2f2b6eb4df06a224b91089falt1
+```
+*** Running benchmark 3.35.5
+    TITLE = sqlite 3.35.5
+    SQLITE_ID = 1b256d97b553a9611efca188a3d995a2fff71275
+    SQLITE_NAME = 3.35.5 2021-04-19 18:32:05 1b256d97b553a9611efca188a3d995a2fff712759044ba480f9a0c9e98faalt1
     DATASIZE = 1
     DEBUG = off
-    RUN_ID = DF28B0624434217B09E54A422E077307B60A913F7DDA1E7BA46DDE1F142DB2F1
-          OK    16.314   1 1000 INSERTs
-          OK     0.135   2 25000 INSERTs in a transaction
-          OK     0.208   3 100 SELECTs without an index
-          OK     0.499   4 100 SELECTs on a string comparison
-          OK     7.011   5 5000 SELECTs
-          OK     0.095   6 1000 UPDATEs without an index
-          OK    25.471   7 25000 UPDATEs with an index
-          OK    25.250   8 25000 text UPDATEs with an index
-          OK     0.087   9 INSERTs from a SELECT
-          OK     0.142  10 DELETE without an index
-          OK     0.076  11 DELETE with an index
-          OK     0.072  12 A big INSERT after a big DELETE
-          OK     0.091  13 A big DELETE followed by many small INSERTs
-          OK     0.064  14 DROP TABLE
-                75.515 (total time)
-`
+    LMDB_DEBUG = off
+    LMDB_FIXED_ROWID = off
+    LMDB_TRANSACTION = optimistic
+    ROWSUM = off
+    ROWSUM_ALGORITHM = sha3_256
+    SQLITE3_JOURNAL = default
+    RUN_ID = 70EA47101F68CDD6D3C0ED255962A2AA50F1540EE4FEBB46A03FAD888B49676C
+          OK     0.003   1 Creating database and tables
+          OK     0.019   2 1000 INSERTs
+          OK     0.007   3 100 UPDATEs without an index, upgrading a read-only transaction
+          OK     0.052   4 25000 INSERTs in a transaction
+          OK     0.113   5 100 SELECTs without an index
+          OK     0.243   6 100 SELECTs on a string comparison
+          OK     0.012   7 Creating an index
+          OK     0.046   8 5000 SELECTs with an index
+          OK     0.036   9 1000 UPDATEs without an index
+          OK     0.113  10 25000 UPDATEs with an index
+          OK     0.093  11 25000 text UPDATEs with an index
+          OK     0.032  12 INSERTs from a SELECT
+          OK     0.020  13 DELETE without an index
+          OK     0.028  14 DELETE with an index
+          OK     0.027  15 A big INSERT after a big DELETE
+          OK     0.010  16 A big DELETE followed by many small INSERTs
+          OK     0.005  17 DROP TABLE
+                 0.859 (total time)
+```
 </b>
 
 A database with the default name of `benchmarks.sqlite` has been created with
@@ -279,7 +285,7 @@ The tool `benchmark-filter.tcl` does some basic processing of these results:
 ```
 tool/benchmark-filter.tcl
 RUN_ID                                                            TARGET  DATE        TIME         DURATION
-DF28B0624434217B09E54A422E077307B60A913F7DDA1E7BA46DDE1F142DB2F1  3.34.0  2021-01-08  19:55:04       75.515
+70EA47101F68CDD6D3C0ED255962A2AA50F1540EE4FEBB46A03FAD888B49676C  3.35.5  2021-05-20  16:13:18        0.859
 ```
 </b>
 
@@ -289,7 +295,7 @@ multiplication factor:
 
 <b>
 ```
-make benchmark USE_LMDB=no USE_BDB=no DATASIZE=2 SQLITE_VERSIONS='3.34.0 3.33.0'
+make benchmark USE_LMDB=no USE_BDB=no DATASIZE=2 SQLITE_VERSIONS='3.35.5 3.33.0'
 ```
 </b>
 
@@ -299,14 +305,14 @@ followed by:
 ```
 tool/benchmark-filter.tcl 
 RUN_ID                                                            TARGET              DATE        TIME         DURATION
-DF28B0624434217B09E54A422E077307B60A913F7DDA1E7BA46DDE1F142DB2F1  3.34.0              2021-01-08  19:55:04       75.515
-FCD1E838F9FC61EAA39F4721EA252F5F10DE9FE57ABA22115D3E2793F5EB1095  3.34.0++datasize-2  2021-01-08  21:54:18      321.976
-FA227B630BE52C537DCE1E4929D9335551F7AEE80A30EE2D449212CD2F94C727  3.33.0++datasize-2  2021-01-08  21:59:57      331.486
+70EA47101F68CDD6D3C0ED255962A2AA50F1540EE4FEBB46A03FAD888B49676C  3.35.5              2021-05-20  16:13:18        0.859
+65DD0759B133FF5DFBBD04C494F4631E013C64E475FC5AC06EC70F4E0333372F  3.35.5++datasize-2  2021-05-20  16:18:30        2.511
+931B1489FC4477A41914A5E0AFDEF3927C306339FBB863B5FB4CF801C8F2F3D0  3.33.0++datasize-2  2021-05-20  16:18:51        2.572
 ```
 </b>
 
-Simplistically, these results suggest that SQLite version 3.34.0 is faster than
-3.33.0 on larger data sizes, but that 3.34.0 is much faster with smaller data
+Simplistically, these results suggest that SQLite version 3.35.5 is faster than
+3.33.0 on larger data sizes, but that 3.35.5 is much faster with smaller data
 sizes. After adding more versions and running the benchmarking tool again, we would
 soon discover that SQLite 3.25.0 seems faster than 3.33.0, and other interesting things. 
 Simplistic interpretations can be misleading :-)
@@ -320,71 +326,78 @@ can be done with the LMDB target:
 <b>
 ```
 $ make what LMDB_VERSIONS=all
-tclsh tool/build.tcl what not-fork.d  LMDB_VERSIONS='all'
-BENCHMARK_DB=benchmarks.sqlite
+tclsh tool/build.tcl what not-fork.d MAKE_COMMAND='make' LMDB_VERSIONS='all'
 BENCHMARK_RUNS=1
-SQLITE_VERSIONS=3.34.0
+COPY_DATABASES=
+COPY_SQL=
+MAKE_COMMAND=make
+NOTFORK_COMMAND=not-fork
+NOTFORK_ONLINE=0
+NOTFORK_UPDATE=0
+SQLITE_VERSIONS=3.35.5
 USE_SQLITE=yes
 USE_BDB=yes
 SQLITE_FOR_BDB=
 BDB_VERSIONS=
 BDB_STANDALONE=18.1.32=3.18.2
 USE_LMDB=yes
-SQLITE_FOR_LMDB=3.8.3.1
+SQLITE_FOR_LMDB=3.35.5
 LMDB_VERSIONS=all
 LMDB_STANDALONE=
 OPTION_DATASIZE=1
 OPTION_DEBUG=off
+OPTION_LMDB_DEBUG=off
+OPTION_LMDB_FIXED_ROWID=off
+OPTION_LMDB_TRANSACTION=optimistic
+OPTION_ROWSUM=off
+OPTION_ROWSUM_ALGORITHM=sha3_256
+OPTION_SQLITE3_JOURNAL=default
 BUILDS=
-    3.34.0
+    3.35.5
     3.18.2
     +bdb-18.1.32
-    3.8.3.1
-    3.8.3.1+lmdb-0.9.8
-    3.8.3.1+lmdb-0.9.9
-    3.8.3.1+lmdb-0.9.10
-    3.8.3.1+lmdb-0.9.11
-    3.8.3.1+lmdb-0.9.12
-    3.8.3.1+lmdb-0.9.13
-    3.8.3.1+lmdb-0.9.14
-    3.8.3.1+lmdb-0.9.15
-    3.8.3.1+lmdb-0.9.16
-    3.8.3.1+lmdb-0.9.17
-    3.8.3.1+lmdb-0.9.18
-    3.8.3.1+lmdb-0.9.19
-    3.8.3.1+lmdb-0.9.20
-    3.8.3.1+lmdb-0.9.21
-    3.8.3.1+lmdb-0.9.22
-    3.8.3.1+lmdb-0.9.23
-    3.8.3.1+lmdb-0.9.24
-    3.8.3.1+lmdb-0.9.25
-    3.8.3.1+lmdb-0.9.26
-    3.8.3.1+lmdb-0.9.27
+    3.35.5+lmdb-0.9.11
+    3.35.5+lmdb-0.9.12
+    3.35.5+lmdb-0.9.13
+    3.35.5+lmdb-0.9.14
+    3.35.5+lmdb-0.9.15
+    3.35.5+lmdb-0.9.16
+    3.35.5+lmdb-0.9.17
+    3.35.5+lmdb-0.9.18
+    3.35.5+lmdb-0.9.19
+    3.35.5+lmdb-0.9.20
+    3.35.5+lmdb-0.9.21
+    3.35.5+lmdb-0.9.22
+    3.35.5+lmdb-0.9.23
+    3.35.5+lmdb-0.9.24
+    3.35.5+lmdb-0.9.25
+    3.35.5+lmdb-0.9.26
+    3.35.5+lmdb-0.9.27
+    3.35.5+lmdb-0.9.28
+    3.35.5+lmdb-0.9.29
 TARGETS=
-    3.34.0
+    3.35.5
     3.18.2
     +bdb-18.1.32
-    3.8.3.1
-    3.8.3.1+lmdb-0.9.8
-    3.8.3.1+lmdb-0.9.9
-    3.8.3.1+lmdb-0.9.10
-    3.8.3.1+lmdb-0.9.11
-    3.8.3.1+lmdb-0.9.12
-    3.8.3.1+lmdb-0.9.13
-    3.8.3.1+lmdb-0.9.14
-    3.8.3.1+lmdb-0.9.15
-    3.8.3.1+lmdb-0.9.16
-    3.8.3.1+lmdb-0.9.17
-    3.8.3.1+lmdb-0.9.18
-    3.8.3.1+lmdb-0.9.19
-    3.8.3.1+lmdb-0.9.20
-    3.8.3.1+lmdb-0.9.21
-    3.8.3.1+lmdb-0.9.22
-    3.8.3.1+lmdb-0.9.23
-    3.8.3.1+lmdb-0.9.24
-    3.8.3.1+lmdb-0.9.25
-    3.8.3.1+lmdb-0.9.26
-    3.8.3.1+lmdb-0.9.27
+    3.35.5+lmdb-0.9.11
+    3.35.5+lmdb-0.9.12
+    3.35.5+lmdb-0.9.13
+    3.35.5+lmdb-0.9.14
+    3.35.5+lmdb-0.9.15
+    3.35.5+lmdb-0.9.16
+    3.35.5+lmdb-0.9.17
+    3.35.5+lmdb-0.9.18
+    3.35.5+lmdb-0.9.19
+    3.35.5+lmdb-0.9.20
+    3.35.5+lmdb-0.9.21
+    3.35.5+lmdb-0.9.22
+    3.35.5+lmdb-0.9.23
+    3.35.5+lmdb-0.9.24
+    3.35.5+lmdb-0.9.25
+    3.35.5+lmdb-0.9.26
+    3.35.5+lmdb-0.9.27
+    3.35.5+lmdb-0.9.28
+    3.35.5+lmdb-0.9.29
 ```
 </b>
 
@@ -394,34 +407,34 @@ a new parameter to `benchmark-filter.tcl`:
 <b>
 ```
 $ tool/benchmark-filter.tcl -fields TARGET,DURATION
-TARGET                  DURATION 
-3.8.3.1+lmdb-0.9.9        89.523 
-3.8.3.1+lmdb-0.9.10       88.351 
-3.8.3.1+lmdb-0.9.11       86.815 
-3.8.3.1+lmdb-0.9.12       99.207 
-3.8.3.1+lmdb-0.9.13       87.490 
-3.8.3.1+lmdb-0.9.14       88.241 
-3.8.3.1+lmdb-0.9.15       88.415 
-3.8.3.1+lmdb-0.9.16       86.958 
-3.8.3.1+lmdb-0.9.17       90.032 
-3.8.3.1+lmdb-0.9.18       89.872 
-3.8.3.1+lmdb-0.9.19       92.257 
-3.8.3.1+lmdb-0.9.21       93.398 
-3.8.3.1+lmdb-0.9.22       93.473 
-3.8.3.1+lmdb-0.9.23       93.908 
-3.8.3.1+lmdb-0.9.24       95.054 
-3.8.3.1+lmdb-0.9.25       89.829 
-3.8.3.1+lmdb-0.9.26      101.211 
-3.8.3.1+lmdb-0.9.27       90.744 
-3.8.3.1                   73.464 
+TARGET                 DURATION
+3.35.5                    0.852
+3.35.5+lmdb-0.9.11        1.201
+3.35.5+lmdb-0.9.12        1.211
+3.35.5+lmdb-0.9.13        1.212
+3.35.5+lmdb-0.9.14        1.219
+3.35.5+lmdb-0.9.15        1.193
+3.35.5+lmdb-0.9.16        1.191
+3.35.5+lmdb-0.9.17        1.213
+3.35.5+lmdb-0.9.18        1.217
+3.35.5+lmdb-0.9.19        1.209
+3.35.5+lmdb-0.9.20        1.223
+3.35.5+lmdb-0.9.21        1.229
+3.35.5+lmdb-0.9.22        1.230
+3.35.5+lmdb-0.9.23        1.215
+3.35.5+lmdb-0.9.24        1.218
+3.35.5+lmdb-0.9.25        1.219
+3.35.5+lmdb-0.9.26        1.220
+3.35.5+lmdb-0.9.27        1.220
+3.35.5+lmdb-0.9.28        1.209
+3.35.5+lmdb-0.9.29        1.209
 ```
 </b>
 
 Again, simplistic interpretations are insufficient, but the data here suggests that LMDB has decreased
-in performance over time, and no version of LMDB is faster than native SQLite 3.8.3.1 . However, further
-benchmark runs indicates that is not the final story, as LMDB run on slower hard disks improve in relative 
-speed rapidly. And we need to try the latest version of SQLite with all the versions of LMDB available 
-in order to get an up-to-date picture. 
+in performance over time, to improve again with the most recent versions, and no version of LMDB is faster than native SQLite 3.35.5 . However, further
+benchmark runs indicate that is not the final story, as LMDB run on slower hard disks improve in relative 
+speed rapidly. And using the `DATASIZE` option also changes the picture.
 
 The results for the Berkely DB backend are also most interesting.
 
@@ -457,8 +470,4 @@ By January 2020 the LumoSQL project concluded:
   including for example in error handling. An abstraction layer was needed.
 
 Since then, many new possibilities have emerged for LumoSQL, and new collaborations.
-
-
-
-
 

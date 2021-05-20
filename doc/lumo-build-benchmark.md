@@ -177,8 +177,9 @@ tests actually ran, for example by changing data sizes or using `PRAGMA`
 statements; the `tool/build.tcl` tries to know as little as possible about
 what is being done, to help using the framework for other systems.
 
-Usually options which affect the benchmarking but not the build will be
-present in `not-fork.d/sqlite3/options` only but will apply to all benchmarks,
+Options which apply to all backends are usually found in
+`not-fork.d/sqlite3/benchmark`; options which apply to a single backend
+will be found in the corresponding directory `not-fork.d/BACKEND/benchmark`.
 no matter which backend they use. Options which affect the build could be
 in any directory; currently there is no mechanism to address the case of the
 same option is present in multiple directories, and it is undefined which
@@ -186,8 +187,10 @@ one will take precedence.
 
 ## Backends as of LumoSQL 0.4
 
-At present the only backend provided is the `lmdb` backend derived from the
-sqlightning sources but modified to work with more versions of lmdb and sqlite3;
+At present the only backend provided (in addition to sqlite's own `btree`)
+is the `lmdb` backend; this was originally
+derived from the sqlightning sources but has been rewritten to work with more
+recent versions of lmdb and sqlite3;
 however to add new backends see [Adding new backends](#adding-backends) below.
 
 A third backend, based on Oracle's Berkeley DB is in progress; a special target
@@ -241,7 +244,7 @@ version and the version of sqlite3 it will build, respectively; the sqlite3
 version is not used by the build process as it expects the backend to do what is
 necessary, however if known it will be added to the benchmarks for comparison;
 if `list` is just the word `all`, then all known versions are benchmarked
-* `BENCHMARK_DB=filename` - where to store benchmark results, default is
+* `DATABASE_NAME=filename` - where to store benchmark results, default is
 `benchmarks.sqlite`
 * `BENCHMARK_RUNS=number` - how many times to repeat each benchmark, default 1.
 
@@ -260,6 +263,28 @@ and the cached copy of the repository is older than the version required.
 * `NOTFORK_ONLINE=number` (default: 0): if nonzero, it will pass `--online`
 to the not-forking tool; this could be necessary if the defaults have been
 set to `--offline` and the operation cannot be completed with cached data.
+
+To help debugging, some options provide a mechanism to copy intermediate
+files, as well as the SQL statement used:
+
+* `COPY_DATABASES=path` (default: empty, meaning the option is disabled).
+The `path` must contain a `%s` which will be replaced with the target name,
+and a `%d` which will be replaced with the test number, for example
+`COPY_DATABASES=/tmp/testdbs/%s.%d`.  The database at the beginning of each
+test will be copied to the resulting path, so the same test can be repeated
+by calling the program on the copy of the database.
+* `COPY_SQL=path` (defaul: empty, meaning the option is disabled). The
+`path` must contain a `%s` and a `%d` like `COPY_DATABASES`: the complete
+list of SQL statements executed by a test will be written to the file,
+so it's possible to re-run them on the copy of the database.
+
+The `make` target `test` is similar to `benchmark`, however it produces
+output in a different database (by default `tests.sqlite` and can run some
+extra tests which are not useful as benchmarks; also, some code which
+helps produce precise timing is skipped in favour of speed of execution:
+the aim here is to check that a backend works, not how long it takes.
+The name of the `tests.sqlite` database can be changed using the option
+`TEST_DATABASE_NAME=newname`.
 
 ## Encoding options in the target name
 
@@ -293,12 +318,14 @@ defined:
 
 * `options` - creates a Makefile fragment to instruct `make` to accept
 the command-line options described elsewhere in this document; this
-is provided with LumoSQL in file `Makefile.options` but may need to be
-regenerated if the configuration changes; `ARGUMENTS` contains just the
-name of the file to write.
+is normally generated automatically by `make` the first time it's needed
+but may need to be regenerated if the configuration changes in a way
+that `make` does not notice; `ARGUMENTS` contains just the name
+of the file to write.
 
 * `build` - builds all necessary binaries so that a benchmark can run;
-the `ARGUMENTS` are of the form `-OPTION=VALUE` to set options specified
+the `ARGUMENTS` are the destination directory for the build followed
+by build options of the form `-OPTION=VALUE` to set options specified
 by an `*.options` file, or `OPTION=VALUE` for other options (such as
 `USE_backend` and `TARGETS`); if the `VALUE` contains spaces or other
 characters which may be special to the shell it will need to be quoted.
@@ -308,20 +335,26 @@ also be done automatically if required before running benchmarks;
 `ARGUMENTS` contains just the database file name.
 
 * `benchmark` - runs all benchmarks taking into account applicable options;
-`ARGUMENTS`  is the same as for `build`.
+the `ARGUMENTS` are the destination directory for the build followed
+by the name of the database where to store the results, followed
+by build and runtime options in the same form as the `build` operation.
+
+* `test` - runs all tests (a superset of the benchmarks) taking into
+account applicable options; the `ARGUMENTS` are the same as for `benchmark`.
 
 * `what` - outputs a description of what it would be built and benchmarked
-as well as the values of any options; `ARGUMENTS` is the same as for `build`
-and `benchmark` and if present will modify the output as appropriate.
+as well as the values of any options; `ARGUMENTS` is just the build options,
+like `build`, but without the destination directory; the output will show
+the effect of applying these options without building or running anything.
 
-Note that apart from the slightly different syntax, build/benchmark options
+Note that apart from the slightly different syntax, build/benchmark/test options
 are specified in the same way as standard `Makefile` arguments.
 
 For example, to build two versions of plain sqlite3, two versions of sqlite3+LMDB
 and one version of BDB with its own sqlite3:
 
 ```
-tclsh tool/build.tcl build not-fork.d \
+tclsh tool/build.tcl build not-fork.d /tmp/objects \
       SQLITE3_VERSION='3.14.15 3.33.0' \
       USE_LMDB=yes LMDB_VERSIONS='0.9.9 0.9.27' SQLITE_FOR_LMDB=3.8.0 \
       USE_BDB=yes BDB_STANDALONE='18.1.32'
@@ -330,14 +363,14 @@ tclsh tool/build.tcl build not-fork.d \
 To do the same build as above but specifying the target strings directly:
 
 ```
-tclsh tool/build.tcl build not-fork.d \
+tclsh tool/build.tcl build not-fork.d /tmp/objects \
       TARGETS='3.14.15 3.33.0 3.8.0+lmdb-0.9.9 3.8.0+lmdb-0.9.27 +bdb-18.1.32'
 ```
 
 To add option `debug=on` to the build:
 
 ```
-tclsh tool/build.tcl build not-fork.d \
+tclsh tool/build.tcl build not-fork.d /tmp/objects myresults.sqlite \
       SQLITE3_VERSION='3.14.15 3.33.0' \
       USE_LMDB=yes LMDB_VERSIONS='0.9.9 0.9.27' SQLITE_FOR_LMDB=3.8.0 \
       USE_BDB=yes BDB_STANDALONE='18.1.32' \
@@ -347,20 +380,20 @@ tclsh tool/build.tcl build not-fork.d \
 or, with an explicit list of targets:
 
 ```
-tclsh tool/build.tcl build not-fork.d \
+tclsh tool/build.tcl build not-fork.d /tmp/objects \
       TARGETS='3.14.15++debug-on 3.33.0++debug-on \
       3.8.0+lmdb-0.9.9+debug-on 3.8.0+lmdb-0.9.27+debug-on \
       +bdb-18.1.32+debug-on'
 ```
 
 To run the benchmarks rather just building the targets, replace `build` with
-`benchmark`, for example:
+`benchmark`, and add the name of the output database, for example:
 
 ```
-tclsh tool/build.tcl benchmark not-fork.d \
-      SQLITE3_VERSION='3.14.15 3.33.0' \
-      USE_LMDB=yes LMDB_VERSIONS='0.9.9 0.9.27' SQLITE_FOR_LMDB=3.8.0 \
-      USE_BDB=yes BDB_STANDALONE='18.1.32'
+tclsh tool/build.tcl benchmark not-fork.d /tmp/objects myresults.sqlite \
+      TARGETS='3.14.15++debug-on 3.33.0++debug-on \
+      3.8.0+lmdb-0.9.9+debug-on 3.8.0+lmdb-0.9.27+debug-on \
+      +bdb-18.1.32+debug-on'
 ```
 
 The first version of sqlite3 provided (in this case 3.14.15) will be used to
@@ -375,6 +408,14 @@ cleanup.  Two special files in `not-fork.d/sqlite3/benchmark` can provide
 common "before" and "after" code which will be included in every test;
 these files must have names `before-test` and `after-test` respectively.
 
+A backend can add some extra statements to these lists: the special file
+`not-fork.d/BACKEND/benchmark/before`, if present, runs just after the
+one in the `sqlite3` directory; and similarly the special file
+`not-fork.d/BACKEND/benchmark/after`, if present, runs just before the
+one in the `sqlite3` directory: the idea is that the backend's "before"
+file executes some extra initialisation after the generic one, and
+the backend's "after" file does some extra cleanup before the generic one.
+
 Files matching the pattern `*.test` in directory `not-fork.d/sqlite3/benchmark`
 contain the individual tests: the benchmark will read these files in lexycographic
 order to decide which tests to run and in which order; for each test, the
@@ -385,6 +426,14 @@ SQL statements to three variables: `before_sql`, `sql` and `after_sql`:
 these SQL statements will then be executed in the order listed, but only
 the middle (`sql`) one is timed, so that setup and cleanup code does not
 count towards the benchmarking.
+
+If a backend defined a file with the same name as one in the directory
+`not-fork.d/sqlite3/benchmark`, that file will be executed immediately
+after the generic one and can modify the list of statement as appropriate;
+for example in the current distribution the first test to run,
+`not-fork.d/sqlite3/benchmark/0000.test`, creates a database; the LMDB
+backend has `not-fork.d/lmdb/benchmark/0000.test` which adds a
+`PRAGMA` to specify some backend-specific runtime options to the database.
 
 This TCL code can access a number of variables from the `build.tcl` script,
 in particular the array `options` contains the build and benchmark options;
@@ -416,9 +465,22 @@ When running the benchmark, the program will measure just the time required to
 run the appropriate version of sqlite3/backend on the sql generated by each
 test.
 
+The code fragment can optionally append to two more variables: `before_sql`
+is executed at the start, but not included in the time measurement, and
+`after_sql` is likewise executed at the end and not included in the time
+measurement.
+
 At present, tests must be specified in the `sqlite3` directory and not a backend
 one: this is so that we run the same tests for unmodified sqlite3 as we do for
-the one modified by a backend, to guarantee a meaningful comparison.
+the one modified by a backend, to guarantee a meaningful comparison. If a
+test appears in a backend directory, it is considered additional code to
+add to the generic test, as described above.
+
+Some of the test files do not produce meaningful timings, but are useful
+to help checking correctness of backends: to inform the build system of
+this fact, they can set variable `is_benchmark` to 0 (by default it has
+value 1). These tests will then be skipped by `make benchmark` but still
+included by `make test`.
 
 # Adding new backends <a name="adding-backends"></a>
 
@@ -433,7 +495,7 @@ backend with sqlite3: see an existing backend for a quick example, or
 read the more comprehensive documentation below
 * `files/FILENAME`: every file mentioned in `lumo-new-files.mod` needs
 to be provided in the `files/` directory
-* at least one of `benchmark/versions` and `benchmark/standalone`; the
+* at least one of `benchmark/versions` or `benchmark/standalone`; the
 former includes versions of the backend to build and link against a
 "standard" sqlite, as well as specifying which versions of sqlite are
 compatible with that; the latter specifies versions to build using an

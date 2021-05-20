@@ -256,7 +256,6 @@ set sqlite3_for_db [lindex $sqlite3_versions 0]
 read_options [file join $notfork_dir sqlite3 benchmark]
 
 array set other_values [list \
-	BENCHMARK_DB     benchmarks.sqlite \
 	BENCHMARK_RUNS   1 \
 	COPY_DATABASES   "" \
 	COPY_SQL         "" \
