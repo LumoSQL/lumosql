@@ -279,7 +279,7 @@ list of SQL statements executed by a test will be written to the file,
 so it's possible to re-run them on the copy of the database.
 
 The `make` target `test` is similar to `benchmark`, however it produces
-output in a different database (by default `tests.sqlite` and can run some
+output in a different database (by default `tests.sqlite`) and can run some
 extra tests which are not useful as benchmarks; also, some code which
 helps produce precise timing is skipped in favour of speed of execution:
 the aim here is to check that a backend works, not how long it takes.
