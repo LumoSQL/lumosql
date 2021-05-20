@@ -5,9 +5,8 @@
 # is to start all transactions readwrite and just pretend that they are
 # readonly, which removes any possibility of concurrent read access
 
-# this is a build time option (we'll change it later to use a PRAGMA
-# and be a runtime option)
-build = yes
+# this is a runtime option
+build = no
 
 # Option has the following possible values:
 enum = noupgrade,optimistic,serialise,serialize

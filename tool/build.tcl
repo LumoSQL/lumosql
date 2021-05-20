@@ -965,6 +965,7 @@ proc read_data {dir name} {
 # see what tests we have
 set tests [list]
 foreach test_file [lsort [glob -directory [file join $notfork_dir sqlite3 benchmark] *.test]] {
+    lappend tests [lindex [file split $test_file] end]
     set fd [open $test_file r]
     lappend tests [read $fd]
     close $fd
@@ -1080,6 +1081,21 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
     }
     set temp_db_name [file join $temp_db_dir db]
     set temp_sql_file [file join $temp_db_dir sql]
+    set backend_before_test ""
+    set backend_after_test ""
+    if {$backend_name ne ""} {
+	set backend_notfork [file join $notfork_dir $backend_name benchmark]
+	if {[file exists [file join $backend_notfork before-test]]} {
+	    set fd [open [file join $backend_notfork before-test] r]
+	    set backend_before_test [read $fd]
+	    close $fd
+	}
+	if {[file exists [file join $backend_notfork after-test]]} {
+	    set fd [open [file join $backend_notfork after-test] r]
+	    set backend_after_test [read $fd]
+	    close $fd
+	}
+    }
     for {set r 1} {$r <= $repeat} {incr r} {
 	if {$repeat > 1} {
 	    puts "    *** Run $r / $repeat"
@@ -1119,20 +1135,26 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 	set tests_intr 0
 	set total_time 0
 	set test_number 0
-	for {set test_index 1} {$test_index <= [llength $tests]} {incr test_index} {
-	    if {$other_values(COPY_DATABASES) ne ""} {
-		if {[file exists $temp_db_name]} {
-		    file copy $temp_db_name \
-			 [format $other_values(COPY_DATABASES) $benchmark $test_index]
-		}
-	    }
+	foreach {test_file test_data} $tests {
 	    set test_name ""
 	    set before_sql ""
 	    set test_sql ""
 	    set after_sql ""
 	    set is_benchmark 1
 	    set results [list]
-	    set test_tcl "$before_test [lindex $tests [expr $test_index - 1]] $after_test"
+	    set test_tcl [list]
+	    lappend test_tcl $before_test
+	    lappend test_tcl $backend_before_test
+	    lappend test_tcl $test_data
+	    # if there's something special for this backend, add it now
+	    if {$backend_name ne "" && \
+		    [file exists [file join $backend_notfork $test_file]]} {
+		set fd [open [file join $backend_notfork $test_file]]
+		lappend test_tcl [read $fd]
+		close $fd
+	    }
+	    lappend test_tcl $backend_after_test
+	    lappend test_tcl $after_test
 	    apply \
 		[list {} "\
 		    upvar benchmark_options options \
@@ -1142,9 +1164,20 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 			  test_sql sql \
 			  after_sql after_sql \
 			  results results
-		    $test_tcl"]
+		    [join $test_tcl]"]
 	    if {$is_benchmark || $operation ne "benchmark"} {
 		incr test_number
+		if {$other_values(COPY_DATABASES) ne ""} {
+		    if {[file exists $temp_db_name]} {
+			set dest_file \
+			     [format $other_values(COPY_DATABASES) $benchmark $test_number]
+			set dest_dir [file dirname $dest_file]
+			if {! [file isdirectory $dest_dir]} {
+			    file mkdir $dest_dir
+			}
+			file copy $temp_db_name $dest_file
+		    }
+		}
 		set sqlfd [open $temp_sql_file w]
 		puts $sqlfd $before_sql
 		close $sqlfd
@@ -1153,8 +1186,12 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 		puts $sqlfd $test_sql
 		close $sqlfd
 		if {$other_values(COPY_SQL) ne ""} {
-		    file copy $temp_sql_file \
-			 [format $other_values(COPY_SQL) $benchmark $test_number]
+		    set dest_file [format $other_values(COPY_SQL) $benchmark $test_number]
+		    set dest_dir [file dirname $dest_file]
+		    if {! [file isdirectory $dest_dir]} {
+			file mkdir $dest_dir
+		    }
+		    file copy $temp_sql_file $dest_file
 		}
 		if {$operation eq "benchmark"} {
 		    set delay 1000

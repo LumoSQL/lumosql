@@ -1,0 +1,4 @@
+# when creating a new database, add transaction type
+
+append sql "PRAGMA lmdb_transaction = $options(LMDB_TRANSACTION);\n"
+

@@ -5,12 +5,11 @@ method = patch
 version >= 3.30
 --
 --- sqlite3/src/pragma.c-orig	2021-02-22 15:29:35.146284010 +0100
-+++ sqlite3/src/pragma.c	2021-02-23 18:11:23.722135116 +0100
-@@ -362,6 +362,72 @@
++++ sqlite3/src/pragma.c	2021-05-20 11:38:16.807953100 +0200
+@@ -362,6 +362,76 @@
    return addr;
  }
  
-+#ifdef LUMO_EXTENSIONS
 +/* parse special Lumo pragmas */
 +static int lumo_parse_pragma(
 +	sqlite3 * db,           /* database connection */
@@ -20,6 +19,7 @@ version >= 3.30
 +	const char ** zResult   /* string result value or error message */
 +){
 +  *zResult = 0;
++#ifdef LUMO_ROWSUM
 +  if (strcmp(zLeft, "lumo_rowsum_algorithm") == 0) {
 +    // XXX in future, we'll store this with the database, but for now is global
 +    if (zRight) {
@@ -72,28 +72,31 @@ version >= 3.30
 +    }
 +    return SQLITE_OK;
 +  }
++#endif /* LUMO_ROWSUM */
++#ifdef LUMO_BACKEND_PRAGMA
++  return lumo_backend_pragma(db, zDb, zLeft, zRight, zResult);
++#else
 +  return SQLITE_NOTFOUND;
++#endif
 +}
-+#endif /* LUMO_EXTENSIONS */
 +
  /*
  ** Process a pragma statement.  
  **
-@@ -395,6 +461,9 @@
+@@ -395,6 +465,7 @@
    Db *pDb;                     /* The specific database being pragmaed */
    Vdbe *v = sqlite3GetVdbe(pParse);  /* Prepared statement */
    const PragmaName *pPragma;   /* The pragma */
-+#ifdef LUMO_EXTENSIONS
 +  const char * zLumoResult = 0;
-+#endif
  
    if( v==0 ) return;
    sqlite3VdbeRunOnlyOnce(v);
-@@ -465,6 +534,25 @@
+@@ -463,6 +534,23 @@
+     pParse->nErr++;
+     pParse->rc = rc;
      goto pragma_out;
-   }
- 
-+#ifdef LUMO_EXTENSIONS
++  }
++
 +  /* see if this is a special Lumo pragma */
 +  rc = lumo_parse_pragma(db, zDb, zLeft, zRight, &zLumoResult);
 +  if( rc==SQLITE_OK ){
@@ -109,12 +112,9 @@ version >= 3.30
 +    pParse->nErr++;
 +    pParse->rc = rc;
 +    goto pragma_out;
-+  }
-+#endif
-+
+   }
+ 
    /* Locate the pragma in the lookup table */
-   pPragma = pragmaLocate(zLeft);
-   if( pPragma==0 ) goto pragma_out;
 --- sqlite3/src/vdbe.c-orig	2021-02-11 09:36:38.605044099 +0100
 +++ sqlite3/src/vdbe.c	2021-02-24 14:25:51.686543044 +0100
 @@ -21,6 +21,20 @@
