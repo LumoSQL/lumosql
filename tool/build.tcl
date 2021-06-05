@@ -932,6 +932,9 @@ if {$operation eq "test"} {
     set repeat 1
 } else {
     set repeat $other_values(BENCHMARK_RUNS)
+    set wd [open .benchdb.info w]
+    puts $wd $database_name
+    close $wd
 }
 
 proc update_run {run_id data} {

@@ -12,7 +12,7 @@
 ###############################################################################
 # initialise and parse options
 
-set database "benchmarks.sqlite"
+set database ""
 set import [list]
 set sqlite3 ""
 
@@ -194,6 +194,23 @@ if {$sqlite3 eq ""} {
 	}
     }
 }
+
+if {$database eq ""} {
+    # if build.tcl provided a database info, use it to see if it points to a valid file
+    if {[file isfile .benchdb.info]} {
+	set rd [open .benchdb.info]
+	set benchdb_info [split [read $rd] \n]
+	close $rd
+	if {[llength $benchdb_info] >= 1} {
+	    set benchdb_info [lindex $benchdb_info 0]
+	    if {[file readable $benchdb_info]} {
+		set database $benchdb_info
+	    }
+	}
+    }
+}
+
+if {$database eq ""} { set database "benchmarks.sqlite" }
 
 # TODO if imports were specified, create a temporary database with the
 # TODO imported runs, and replace $database to point at it, and also
