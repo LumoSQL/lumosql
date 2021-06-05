@@ -482,6 +482,18 @@ this fact, they can set variable `is_benchmark` to 0 (by default it has
 value 1). These tests will then be skipped by `make benchmark` but still
 included by `make test`.
 
+# Benchmark run comments <a name="benchmark-comments"></a>
+
+When running benchmarks it's possible to add up to two free-form comments
+which will be saved in the database but otherwise ignored by the program;
+these are intended to contain information about the system, and are
+specified using the command-line options `DISK_COMMENT` and
+`CPU_COMMENT` with the obvious intended meaning, for example:
+
+```
+make benchmark DISK_COMMENT='fast NVME' CPU_COMMENT='AMD Ryzen 3700x'
+```
+
 # Adding new backends <a name="adding-backends"></a>
 
 To add new backends, create a new directory inside `not-fork.d` (or inside the

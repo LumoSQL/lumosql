@@ -564,6 +564,22 @@ proc get_test_key {run_id key} {
     return $result
 }
 
+proc field_width {key min} {
+    global rundict
+    global key_added
+    global runlist
+    if {! [dict exists $key_added $key]} { return $min }
+    for {set i 0} {$i < [llength $runlist]} {incr i} {
+	set run_id [lindex $runlist $i]
+	set d [dict get $rundict $run_id]
+	if {[dict exists $d $key]} {
+	    set kl [string length [dict get $d $key]]
+	    if {$kl > $min} { set min $kl }
+	}
+    }
+    return $min
+}
+
 if {$out_default} {
     if {$has_selection} {
 	set out_summary 1
@@ -653,6 +669,16 @@ if {$out_list} {
 	    set width 11
 	    lappend fmt "%11s"
 	    lappend op {[if_key $d "duration" {format "%11.3f" $v} "-"]}
+	} elseif {$field eq "DISK_COMMENT" || $field eq "DISK"} {
+	    add_run_key "disk-comment"
+	    set width -[field_width "disk-comment" [string length $field]]
+	    lappend fmt "%${width}s"
+	    lappend op {[dict get $d "disk-comment" ]}
+	} elseif {$field eq "CPU_COMMENT" || $field eq "CPU"} {
+	    add_run_key "cpu-comment"
+	    set width -[field_width "cpu-comment" [string length $field]]
+	    lappend fmt "%${width}s"
+	    lappend op {[dict get $d "cpu-comment" ]}
 	} else {
 	    puts stderr "Invalid field: $field"
 	    exit 1

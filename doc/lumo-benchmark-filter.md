@@ -238,7 +238,9 @@ included by default plus `TITLE` (strings like "sqlite 3.34.0 with lmdb 0.9.27")
 `DATE` and `TIME` but referring to when the run completed; or a "-" if it did not
 complete), `DONE` ("YES" if the run completed, "NO" if it didn't), "OK", "INTR"
 and "FAIL" reporting the count of runs which succeeded, were interrupted and failed
-for some other reason.
+for some other reason. If comments were added to the run using `DISK_COMMENT` and
+`CPU_COMMENT` these can be added to the output using fields by the same name, optionally
+without the `_COMMENT`, for example `-fields` `TARGET,CPU,DISK,DURATION`
 * `-summary`  - display a summary of each test in each selected run; this only works if the selected runs have the same tests; cannot be combined with `-details`
 * `-details`  - display full details for each test in each selected run including all the information in the database; cannot be combined with `-summary`
 * `-export` `FILE`  - write the selected runs to `FILE` in a text format, useful for example to send the run information by email

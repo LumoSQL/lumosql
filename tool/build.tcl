@@ -259,6 +259,9 @@ array set other_values [list \
 	BENCHMARK_RUNS   1 \
 	COPY_DATABASES   "" \
 	COPY_SQL         "" \
+	CPU_COMMENT      "" \
+	DB_DIR           "" \
+	DISK_COMMENT     "" \
 	MAKE_COMMAND     "make" \
 	NOTFORK_COMMAND  "not-fork" \
 	NOTFORK_ONLINE   0 \
@@ -1077,7 +1080,11 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
     } else {
 	set space "        "
     }
-    set temp_db_dir [file join $dest_dir tests]
+    if {$other_values(DB_DIR) eq ""} {
+	set temp_db_dir [file join $dest_dir tests]
+    } else {
+	set temp_db_dir [file join $other_values(DB_DIR) $build]
+    }
     if {[file isdirectory $temp_db_dir]} {
 	file delete -force $temp_db_dir
     }
@@ -1120,6 +1127,8 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 	    "title"           $title \
 	    "sqlite-name"     $sqlite3_name \
 	    "notforking-id"   $notforking_id \
+	    "disk-comment"    $other_values(DISK_COMMENT) \
+	    "cpu-comment"     $other_values(CPU_COMMENT) \
 	]
 	foreach {option value} $benchmark_optlist {
 	    update_run $run_id [list "option-[string tolower $option]" $value]
