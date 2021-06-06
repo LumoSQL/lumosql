@@ -375,7 +375,9 @@ if ($only_invalid) {
 	puts $sql ")"
     }
 
-    puts $sql "order by value desc limit [expr {$limit + 1}];"
+    puts $sql "order by value desc";
+    if {$limit > 0} { puts $sql "limit [expr {$limit + 1}]" }
+    puts $sql ";"
 }
 
 flush $sql
@@ -390,7 +392,7 @@ while {[gets $fd rv] >= 0} {
 	puts stderr "Invalid data from $sqlite3: $rv"
 	exit 1
     }
-    if {[llength $runlist] >= $limit} {
+    if {$limit > 0 && [llength $runlist] >= $limit} {
 	incr excess
 	continue
     }

@@ -20,7 +20,7 @@
 # build.tcl OPERATION NOTFORK_CONFIG ARGUMENTS
 
 # OPERATION: options
-# ARGUMENTS: OUTPUT_FILE
+# ARGUMENTS: [OUTPUT_FILE]
 #            create a Makefile fragment so that "make" can accept
 #            command-line options corresponding to build options
 
@@ -57,13 +57,17 @@ set notfork_dir [lindex $argv 1]
 set prn 0
 
 if {$operation eq "options"} {
-    if {[llength $argv] != 3} {
-	puts stderr "Usage: build.tcl options NOTFORK_CONFIG OUTPUT_FILE"
+    if {[llength $argv] == 2} {
+	set argp 2
+	set outf [dup stdout]
+    } elseif {[llength $argv] == 3} {
+	set outname [lindex $argv 2]
+	set argp 3
+	set outf [open "$outname.tmp" w]
+    } else {
+	puts stderr "Usage: build.tcl options NOTFORK_CONFIG [OUTPUT_FILE]"
 	exit 1
     }
-    set outname [lindex $argv 2]
-    set argp 3
-    set outf [open "$outname.tmp" w]
     puts $outf "BUILD_OPTIONS :="
     puts $outf ""
     set prn 1
@@ -346,7 +350,7 @@ if {$prn} {
     puts $outf "endif"
     puts $outf ""
     close $outf
-    file rename -force "$outname.tmp" $outname
+    if {[llength $argv] > 2} { file rename -force "$outname.tmp" $outname }
     exit 0
 }
 
