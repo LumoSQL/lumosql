@@ -945,7 +945,8 @@ proc update_run {run_id data} {
     global database_name
     set sqlfd [open "| $sqlite3_for_db $database_name" w]
     foreach {key value} $data {
-	puts $sqlfd "INSERT INTO run_data (run_id, key, value) VALUES ('$run_id', '$key', '$value');"
+	set qvalue [regsub -all {'} $value {''}]
+	puts $sqlfd "INSERT INTO run_data (run_id, key, value) VALUES ('$run_id', '$key', '$qvalue');"
     }
     close $sqlfd
 }
