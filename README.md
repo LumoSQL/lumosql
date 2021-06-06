@@ -174,7 +174,7 @@ Here are the tool dependencies:
 * [the not-forking tool](https://lumosql.org/src/not-forking/), 
 which is a script that needs to be downloaded and installed manually (we will be packaging
 it as soon as we can.) The instructions for not-forking are on its website.
-* [Fossil](https://fossil-scm.org/). Fossil is extremely backwards-compatible so any version > 2.0 can be
+* [Fossil](https://fossil-scm.org/). Fossil is extremely backwards-compatible so any version > 2.10 can be
   made to work. However it's easiest to get version 2.13 or later from your distrbution or build from source. 
   (*Note!* Ubuntu 20.04, Debian Buster and Gentoo do not include a sufficiently modern Fossil, while NetBSD
   and Ubuntu 20.10 do.) Since you now have a development environment anyway you can 
