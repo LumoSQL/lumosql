@@ -1,0 +1,12 @@
+# run on ramdisk
+DB_DIR = /tmp/dbs
+DISK_COMMENT = ramdisk
+
+# run on nvme
+DB_DIR = /var/tmp/dbs
+DISK_COMMENT = nvme
+
+# run on disk
+DB_DIR = /mnt/disk/tmp/dbs
+DISK_COMMENT = sata disk
+

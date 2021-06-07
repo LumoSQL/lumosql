@@ -1,0 +1,6 @@
+TOOL = tclsh tool/build.tcl
+NOTFORK = not-fork.d
+BUILD_DIR = /tmp/build
+#CPU_COMMENT = AMD Ryzen 3700X
+DATABASE_NAME = benchmarks.batch.sqlite
+
