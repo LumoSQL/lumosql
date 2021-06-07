@@ -1,0 +1,113 @@
+#!/usr/bin/perl -w
+
+# run a batch of LumoSQL builds/benchmarks/tests varying varions dimensions
+
+# Copyright 2021 The LumoSQL Authors
+
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2020 The LumoSQL Authors
+
+# see documentation for full details of usage; executive summary:
+
+# multibuild FILE [FILE]... OPERATION
+
+# OPERATION is one of what, build, benchmark or test
+
+# reads the first file one paragraph at a time, getting build/benchmark options
+# from it; then for each paragraph reads the second file one paragraph at a time,
+# addint the options to the ones from the outer loop; and so on.
+
+use Text::ParseWords qw(shellwords);
+
+@ARGV >= 2 or die "Usage: multibuild FILE [FILE]... OPERATION\n";
+my $op = pop @ARGV;
+
+my %operations = (
+    what       => [],
+    build      => [qw(BUILD_DIR)],
+    benchmark  => [qw(BUILD_DIR DATABASE_NAME)],
+    test       => [qw(BUILD_DIR DATABASE_NAME)],
+);
+exists $operations{lc $op} or die "Invalid OPERATION $op\n";
+$op = lc $op;
+
+my %default_opts = (
+    BUILD_DIR     => [ 'build', 'build' ],
+    DATABASE_NAME => [ 'benchmarks.sqlite', 'benchmarks.sqlite' ],
+    TOOL          => [ [qw(tclsh tool/build.tcl)], 'tclsh tool/build.tcl' ],
+    NOTFORK       => [ 'not-fork.d', 'not-fork.d' ],
+);
+
+my @list = ();
+$/ = "";
+my $ok = 1;
+run(\%default_opts, @ARGV);
+$ok or exit 1;
+
+for my $lp (@list) {
+    my $prn = shift @$lp;
+    print "* $prn\n";
+    system @$lp;
+}
+
+sub run {
+    my ($opts, $fn, @rest) = @_;
+    open(my $fh, '<', $fn) or die "$fn: $!\n";
+    while (defined (my $text = <$fh>)) {
+	my @lines = grep { /^./ && ! /^\s*#/ } split(/\n/, $text);
+	@lines or next;
+	my %opts = %$opts;
+	for my $line (@lines) {
+	    chomp $line;
+	    $line =~ s/^\s+//;
+	    $line =~ /^#/ || $line =~ /^$/ and next;
+	    $line =~ s/\s+$//;
+	    if ($line =~ /^(\S+)\s*=\s*(\S.*)$/ || $line =~ /^(\S+)\s*(\S,*)$/) {
+		my ($name, $value) = (uc $1, $2);
+		my $prn = $value;
+		if ($name eq 'TOOL') {
+		    $value = [shellwords($value)];
+		} elsif ($value =~ m|[^-\w.=+/]|) {
+		    $prn =~ s/(['\\])/\\$1/g;
+		    $prn = "'$prn'";
+		}
+		$opts{$name} = [$value, $prn];
+	    } elsif ($line =~ /^\S+$/) {
+		$opts{$line} = undef;
+	    } else {
+		warn "$fn: Invalid line format ($line)\n";
+		$ok = 0;
+	    }
+	}
+	if (@rest) {
+	    run(\%opts, @rest);
+	} else {
+	    my %bd = ();
+	    for my $key (qw(BUILD_DIR DATABASE_NAME NOTFORK TOOL)) {
+		$bd{$key} = (delete $opts{$key})->[0];
+	    }
+	    my @tool = (
+		@{$bd{TOOL}},
+		$op,
+		$bd{NOTFORK}, @bd{@{$operations{$op}}},
+	    );
+	    my $tool = join(' ', @tool);
+	    open(my $th, '-|', @{$bd{TOOL}}, 'options', $bd{NOTFORK}) or die "$tool[0]: $!\n";
+	    while (defined (my $opt = <$th>)) {
+		$opt =~ s/\s+/ /g;
+		while ($opt =~ s/\bifneq\s+\(\$\(([^()]+)\),(.*?)endif//) {
+		    my ($on, $rest) = ($1, $2);
+		    exists $opts{$on} or next;
+		    $rest =~ /\+=\s+(.*?)=/ or next;
+		    my $nv = $1;
+		    push @tool, "$nv=$opts{$on}[0]";
+		    $tool .= " $nv=$opts{$on}[1]";
+		}
+	    }
+	    close $th;
+	    push @list, [$tool, @tool];
+	}
+    }
+    close $fh;
+}
+
