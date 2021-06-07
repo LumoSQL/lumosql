@@ -184,6 +184,7 @@ it as soon as we can.) The instructions for not-forking are on its website.
     * cd Fossil-trunk ; ./configure ; make
     * sudo make install
 * For completeness (although every modern Linux/Unix includes these), to build and benchmark any of the Oracle Berkeley DB targets, you need either "curl" or "wget", and also "file", "gzip" and GNU "tar". Just about any version of these will be sufficient, even on Windows.
+* If you are running inside a fresh [Docker](https://docker.io) or similar container system, Fossil may be confused about the user id. One solution is to add a user (eg "adduser lumosql" and answer the questions) and then "export USER=lumosql".
 
 One of the many helpful features of the not-forking tool is that it will advise
 you with an error message if you ask for sources that require a tool or a
