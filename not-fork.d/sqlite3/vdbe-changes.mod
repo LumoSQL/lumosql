@@ -1,12 +1,13 @@
-# update various files to provide a Lumo extension; currently
-# used to add rowsum
+# automatically generated file for not-forking fragment_patch
 
-method = patch
+method = fragment_patch
 version >= 3.30
---
---- sqlite3/src/pragma.c-orig	2021-02-22 15:29:35.146284010 +0100
-+++ sqlite3/src/pragma.c	2021-05-20 11:38:16.807953100 +0200
-@@ -362,6 +362,76 @@
+
+-----
+src/pragma.c
+/(?^:^((?:static\s+)?(?:void|int)\s+\S+)\b)/ static\x20int\x20integrityCheckResultRow(Vdbe
+/(?^:^\*\*\s+(Process\s+a\s+pragma\b))/
+@@ -7,4 +7,74 @@
    return addr;
  }
  
@@ -81,9 +82,10 @@ version >= 3.30
 +}
 +
  /*
- ** Process a pragma statement.  
- **
-@@ -395,6 +465,7 @@
+---
+/(?^:^((?:static\s+)?(?:void|int)\s+\S+)\b)/ void\x20sqlite3Pragma
+/(?^:^\s*case\s+PragTyp_(.*?[^:])\s*:)/
+@@ -16,6 +16,7 @@
    Db *pDb;                     /* The specific database being pragmaed */
    Vdbe *v = sqlite3GetVdbe(pParse);  /* Prepared statement */
    const PragmaName *pPragma;   /* The pragma */
@@ -91,7 +93,7 @@ version >= 3.30
  
    if( v==0 ) return;
    sqlite3VdbeRunOnlyOnce(v);
-@@ -463,6 +534,23 @@
+@@ -84,6 +85,23 @@
      pParse->nErr++;
      pParse->rc = rc;
      goto pragma_out;
@@ -115,8 +117,11 @@ version >= 3.30
    }
  
    /* Locate the pragma in the lookup table */
---- sqlite3/src/vdbe.c-orig	2021-02-11 09:36:38.605044099 +0100
-+++ sqlite3/src/vdbe.c	2021-02-24 14:25:51.686543044 +0100
+---
+-----
+src/vdbe.c
+start
+/(?^:^((?:static\s+)?(?:void|int)\s+\S+)\b)/
 @@ -21,6 +21,20 @@
  #include "sqliteInt.h"
  #include "vdbeInt.h"
@@ -138,7 +143,10 @@ version >= 3.30
  /*
  ** Invoke this macro on memory cells just prior to changing the
  ** value of the cell.  This macro verifies that shallow copies are
-@@ -2609,6 +2623,9 @@
+---
+/(?^:^\s*case\s+OP_(.*?[^:])\s*:)/ Column
+/(?^:^\s*case\s+OP_(.*?[^:])\s*:)/
+@@ -13,6 +13,9 @@
    u64 offset64;      /* 64-bit offset */
    u32 t;             /* A type code from the record header */
    Mem *pReg;         /* PseudoTable input register */
@@ -148,7 +156,7 @@ version >= 3.30
  
    assert( pOp->p1>=0 && pOp->p1<p->nCursor );
    pC = p->apCsr[pOp->p1];
-@@ -2658,6 +2675,12 @@
+@@ -62,6 +65,12 @@
        if( pC->payloadSize > (u32)db->aLimit[SQLITE_LIMIT_LENGTH] ){
          goto too_big;
        }
@@ -161,7 +169,7 @@ version >= 3.30
      }
      pC->cacheStatus = p->cacheCtr;
      pC->iHdrOffset = getVarint32(pC->aRow, aOffset[0]);
-@@ -2759,6 +2782,99 @@
+@@ -163,6 +172,99 @@
          }
        }
  
@@ -261,7 +269,10 @@ version >= 3.30
        pC->nHdrParsed = i;
        pC->iHdrOffset = (u32)(zHdr - zData);
        if( pC->aRow==0 ) sqlite3VdbeMemRelease(&sMem);
-@@ -3002,6 +3118,7 @@
+---
+/(?^:^\s*case\s+OP_(.*?[^:])\s*:)/ MakeRecord
+/(?^:^\s*case\s+OP_(.*?[^:])\s*:)/
+@@ -64,6 +64,7 @@
      }while( zAffinity[0] );
    }
  
@@ -269,7 +280,7 @@ version >= 3.30
  #ifdef SQLITE_ENABLE_NULL_TRIM
    /* NULLs can be safely trimmed from the end of the record, as long as
    ** as the schema format is 2 or more and none of the omitted columns
-@@ -3015,6 +3132,7 @@
+@@ -77,6 +78,7 @@
      }
    }
  #endif
@@ -277,7 +288,10 @@ version >= 3.30
  
    /* Loop through the elements that will make up the record to figure
    ** out how much space is required for the new record.  After this loop,
-@@ -5071,6 +5189,11 @@
+---
+/(?^:^\s*case\s+OP_(.*?[^:])\s*:)/ Insert
+/(?^:^\s*case\s+OP_(.*?[^:])\s*:)/
+@@ -6,6 +6,11 @@
    const char *zDb;  /* database name - used by the update hook */
    Table *pTab;      /* Table structure - used by update and pre-update hooks */
    BtreePayload x;   /* Payload to be inserted */
@@ -289,7 +303,7 @@ version >= 3.30
  
    pData = &aMem[pOp->p2];
    assert( pOp->p1>=0 && pOp->p1<p->nCursor );
-@@ -5115,6 +5238,77 @@
+@@ -50,6 +55,77 @@
    if( pOp->p5 & OPFLAG_ISNOOP ) break;
  #endif
  
@@ -367,7 +381,7 @@ version >= 3.30
    if( pOp->p5 & OPFLAG_NCHANGE ) p->nChange++;
    if( pOp->p5 & OPFLAG_LASTROWID ) db->lastRowid = x.nKey;
    assert( (pData->flags & (MEM_Blob|MEM_Str))!=0 || pData->n==0 );
-@@ -5133,6 +5327,9 @@
+@@ -68,6 +144,9 @@
    );
    pC->deferredMoveto = 0;
    pC->cacheStatus = CACHE_STALE;
@@ -377,3 +391,5 @@ version >= 3.30
  
    /* Invoke the update-hook if required. */
    if( rc ) goto abort_due_to_error;
+---
+-----

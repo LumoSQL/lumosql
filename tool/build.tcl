@@ -400,9 +400,9 @@ set notfork_name $other_values(NOTFORK_COMMAND)
 set make_command $other_values(MAKE_COMMAND)
 
 # not-fork version 0.4.1 is required for --use-version which we need
-set notfork_minimum "0.4.1"
+set notfork_required "0.4.1"
 if {[catch {
-    set notfork_found [exec $notfork_name --check-version $notfork_minimum 2>@1]
+    set notfork_found [exec $notfork_name --check-version $notfork_required 2>@1]
 } notfork_results notfork_options]} {
     set errorcode [lindex [dict get $notfork_options -errorcode] 0]
     if {$errorcode eq "CHILDSTATUS"} {
@@ -410,7 +410,7 @@ if {[catch {
 	if {[regexp {^([\d\.]+)} $notfork_results skip version_found]} {
 	    set version_found " ($version_found)"
 	}
-	puts stderr "Installed version of not-fork$version_found is too old, $notfork_minimum required"
+	puts stderr "Installed version of not-fork$version_found is too old, $notfork_required required"
     } else {
 	puts stderr "Cannot run $notfork_name, please check that it is installed and in PATH"
     }
@@ -420,6 +420,10 @@ if {[catch {
 # not-fork 1.0 may introduce incompatible changes and we don't want that, so
 # we ask it to confirm that it can find a version older than that
 set notfork_maximum "0.999"
+# and we'll need 0.4.2 to take advantage of the new methods it introduced
+# (append and fragment_patch)
+set notfork_minimum "0.4.2"
+# see if it knows how to find a suitable version
 exec $notfork_name --quiet --find-version "$notfork_minimum:$notfork_maximum"
 
 # from now on, not-fork will be called with --use-version
