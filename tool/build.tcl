@@ -1138,6 +1138,11 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 	    "notforking-id"   $notforking_id \
 	    "disk-comment"    $other_values(DISK_COMMENT) \
 	    "cpu-comment"     $other_values(CPU_COMMENT) \
+	    "cpu-type"        $tcl_platform(machine) \
+	    "os-type"         $tcl_platform(os) \
+	    "os-version"      $tcl_platform(osVersion) \
+	    "byte-order"      $tcl_platform(byteOrder) \
+	    "word-size"       $tcl_platform(wordSize) \
 	]
 	foreach {option value} $benchmark_optlist {
 	    update_run $run_id [list "option-[string tolower $option]" $value]

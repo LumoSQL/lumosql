@@ -17,11 +17,11 @@ set import [list]
 set sqlite3 ""
 
 set out_list 0
-set list_fields [list RUN_ID TARGET DATE TIME DURATION]
+set list_fields [list]
 set out_summary 0
 set out_add [list]
 set out_export [list]
-set out_copy [list]
+set out_copy ""
 set out_stats 0
 set out_delete 0
 set out_default 1
@@ -43,13 +43,13 @@ set only_backends [list]
 set only_option [list]
 set has_selection 0
 
-proc optarg {re} {
+proc optarg {re what} {
     global o
     global a
     global argv
     incr a
     if {$a >= [llength $argv]} {
-	puts stderr "Option $o requires a file name"
+	puts stderr "Option $o requires a $what"
 	exit 1
     }
     set oo $o
@@ -60,19 +60,42 @@ proc optarg {re} {
     }
 }
 
+proc optlist {var what {delim ""}} {
+    global a
+    global argv
+    incr a
+    set done 0
+    upvar 1 $var LS
+    while {$a < [llength $argv] && ! [regexp {^-} [lindex $argv $a]]} {
+	incr done
+	if {$delim eq ""} {
+	    lappend LS [lindex $argv $a]
+	} else {
+	    foreach ap [split [lindex $argv $a] $delim] {
+		lappend LS $ap
+	    }
+	}
+	incr a
+    }
+    incr a -1
+    if {$done == 0} {
+	puts stderr "Option $o requires a $what"
+	exit 1
+    }
+}
+
 for {set a 0} {$a < [llength $argv]} {incr a} {
     set o [lindex $argv $a]
     if {$o eq "-db" || $o eq "-database"} {
-	optarg {^}
+	optarg {^} "file name"
 	set database $o
     } elseif {$o eq "-import"} {
-	optarg {^}
-	lappend import $o
+	optlist import "list of files"
     } elseif {$o eq "-sqlite"} {
-	optarg {^}
+	optarg {^} "file name"
 	set sqlite3 $o
     } elseif {$o eq "-limit"} {
-	optarg {^\d+$}
+	optarg {^\d+$} "number"
 	set limit $o
     } elseif {$o eq "-average"} {
 	set average 1
@@ -80,8 +103,7 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
 	set out_list 1
 	set out_default 0
     } elseif {$o eq "-fields"} {
-	optarg {^}
-	set list_fields [split $o ,]
+	optlist list_fields "list of fields" ","
     } elseif {$o eq "-summary"} {
 	set out_summary 1
 	set out_default 0
@@ -89,38 +111,38 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
 	set out_summary 2
 	set out_default 0
     } elseif {$o eq "-export"} {
-	optarg {^}
+	optarg {^} "file name"
 	lappend out_export $o
 	set out_default 0
     } elseif {$o eq "-copy"} {
-	optarg {^}
-	lappend out_copy $o
+	optarg {^} "file name"
+	set out_copy $o
 	set out_default 0
     } elseif {[regexp {^[[:xdigit:]]{64}$} $o]} {
 	lappend only_ids $o
 	set has_selection 1
     } elseif {$o eq "-datasize"} {
-	optarg {^\d+$}
+	optarg {^\d+$} "number"
 	lappend only_option "datasize-$o"
 	set has_selection 1
     } elseif {$o eq "-option"} {
-	optarg {^\w+-}
+	optarg {^\w+-} "option name and value"
 	lappend only_option $o
 	set has_selection 1
     } elseif {$o eq "-target"} {
-	optarg {^}
+	optarg {^} "target specification"
 	lappend only_targets $o
 	set has_selection 1
     } elseif {$o eq "-version"} {
-	optarg {^}
+	optarg {^} "version specification"
 	lappend only_versions $o
 	set has_selection 1
     } elseif {$o eq "-backend"} {
-	optarg {^\w+(-.+)?$}
+	optarg {^\w+(-.+)?$} "backend name and optional version"
 	lappend only_backends $o
 	set has_selection 1
     } elseif {$o eq "-missing"} {
-	optarg {^\w+$}
+	optarg {^\w+$} "keyword"
 	lappend only_missing $o
 	set has_selection 1
     } elseif {$o eq "-failed"} {
@@ -142,7 +164,7 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
 	set only_invalid 1
 	set has_selection 1
     } elseif {$o eq "-add"} {
-	optarg {^[-\w]+=}
+	optarg {^[-\w]+=} "keyword and value"
 	lappend out_add $o
 	set out_default 0
     } elseif {$o eq "-delete"} {
@@ -155,6 +177,10 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
 	puts stderr "Invalid option $o"
 	exit 1
     }
+}
+
+if {[llength $list_fields] == 0} {
+    set list_fields [list RUN_ID TARGET DATE TIME DURATION]
 }
 
 if {$sqlite3 eq ""} {
@@ -212,11 +238,97 @@ if {$database eq ""} {
 
 if {$database eq ""} { set database "benchmarks.sqlite" }
 
-# TODO if imports were specified, create a temporary database with the
-# TODO imported runs, and replace $database to point at it, and also
-# TODO remember to delete the temporary database at the end
+proc make_database {name} {
+    # XXX this is duplicate from build.tcl but it will do for now
+    set run_schema {
+	CREATE TABLE run_data (
+	    run_id VARCHAR(128),
+	    key VARCHAR(256),
+	    value TEXT
+	);
+	CREATE INDEX run_data_index ON run_data (run_id, key);
+    }
+    set test_schema {
+	CREATE TABLE test_data (
+	    run_id VARCHAR(128),
+	    test_number INTEGER,
+	    key VARCHAR(256),
+	    value TEXT
+	);
+	CREATE INDEX test_data_index_1 ON test_data (run_id, test_number, key);
+	CREATE INDEX test_data_index_2 ON test_data (run_id, key, test_number);
+    }
+    global sqlite3
+    set sqlfd [open "| $sqlite3 $name" w]
+    puts $sqlfd $run_schema
+    puts $sqlfd $test_schema
+    close $sqlfd
+}
 
-if {! [file isfile $database]} {
+# if imports were specified, create a temporary database with the
+# imported runs, and replace $database to point at it, and also
+# remember to delete the temporary database at the end
+set database_orig ""
+if {[llength $import] > 0} {
+    set database_orig $database
+    set tempdb [file tempfile database]
+    close $tempdb
+    file delete $database
+    make_database $database
+    set sqlfd [open "| $sqlite3 $database" w]
+    foreach import $import {
+	set impfd [open $import r]
+	if {[gets $impfd line] < 0 || ! [regexp {LumoSQL.*benchmark.*data} $line]} {
+	    puts stderr "$import: Invalid import file: invalid initial line"
+	    close $sqlfd
+	    file delete $database
+	    exit 1
+	}
+	while {[gets $impfd line] >= 0} {
+	    if {! [regexp {^([[:xdigit:]]{64}) (\d+)} $line -> run_id tests]} {
+		puts stderr "$import: Invalid import file: invalid run start line ($line)"
+		close $sqlfd
+		file delete $database
+		exit 1
+	    }
+	    set num 0
+	    while {[gets $impfd line] >= 0} {
+		if {$line eq ""} {break}
+		if {[regexp {^--(\d+)} $line -> tnum]} {
+		    incr num
+		    if {$num != $tnum} {
+			puts stderr "$import: Invalid import file: test $tnum out of sequence"
+			close $sqlfd
+			file delete $database
+			exit 1
+		    }
+		    continue;
+		}
+		if {[regexp {^([-\w]+)\s+(.*)$} $line -> key value]} {
+		    set qvalue [regsub -all {'} $value {''}]
+		    if {$num == 0} {
+			puts $sqlfd "INSERT INTO run_data (run_id, key, value) VALUES ('$run_id', '$key', '$qvalue');"
+		    } else {
+			puts $sqlfd "INSERT INTO test_data (run_id, test_number, key, value) VALUES ('$run_id', $num, '$key', '$value');"
+		    }
+		    continue
+		}
+		puts stderr "$import: Invalid input line ($line)";
+		close $sqlfd
+		file delete $database
+		exit 1
+	    }
+	    if {$num != $tests} {
+		puts stderr "$import: Invalid import file: expected $tests tests, found $num"
+		close $sqlfd
+		file delete $database
+		exit 1
+	    }
+	}
+	close $impfd
+    }
+    close $sqlfd
+} elseif {! [file isfile $database]} {
     puts stderr "Database not found: $database"
     exit 1
 }
@@ -390,6 +502,7 @@ while {[gets $fd rv] >= 0} {
     set r [split $rv "|"]
     if {[llength $r] != 2} {
 	puts stderr "Invalid data from $sqlite3: $rv"
+	if {$database_orig ne ""} {file delete $database}
 	exit 1
     }
     if {$limit > 0 && [llength $runlist] >= $limit} {
@@ -407,6 +520,7 @@ file delete $sql_file
 
 if {[llength $runlist] == 0} {
     puts stderr "No runs selected"
+    if {$database_orig ne ""} {file delete $database}
     exit 1
 }
 
@@ -447,6 +561,7 @@ proc add_run_key {key} {
 	set r [split $rv "|"]
 	if {[llength $r] != 2} {
 	    puts stderr "Invalid data from $sqlite3: $rv"
+	    if {$database_orig ne ""} {file delete $database}
 	    exit 1
 	}
 	set run_id [lindex $r 0]
@@ -479,6 +594,7 @@ proc add_test_op {name key op} {
 	set r [split $rv "|"]
 	if {[llength $r] != 2} {
 	    puts stderr "Invalid data from $sqlite3: $rv"
+	    if {$database_orig ne ""} {file delete $database}
 	    exit 1
 	}
 	set run_id [lindex $r 0]
@@ -509,6 +625,7 @@ proc get_run_data {run_id} {
 	set r [split $rv "|"]
 	if {[llength $r] != 2} {
 	    puts stderr "Invalid data from $sqlite3: $rv"
+	    if {$database_orig ne ""} {file delete $database}
 	    exit 1
 	}
 	lappend result $r
@@ -535,6 +652,7 @@ proc get_test_data {run_id test_no} {
 	set r [split $rv "|"]
 	if {[llength $r] != 2} {
 	    puts stderr "Invalid data from $sqlite3: $rv"
+	    if {$database_orig ne ""} {file delete $database}
 	    exit 1
 	}
 	lappend result $r
@@ -681,8 +799,19 @@ if {$out_list} {
 	    set width -[field_width "cpu-comment" [string length $field]]
 	    lappend fmt "%${width}s"
 	    lappend op {[dict get $d "cpu-comment" ]}
+	} elseif {$field eq "CPU_TYPE" || $field eq "ARCH"} {
+	    add_run_key "cpu-type"
+	    set width -[field_width "cpu-type" [string length $field]]
+	    lappend fmt "%${width}s"
+	    lappend op {[dict get $d "cpu-type" ]}
+	} elseif {$field eq "OS_TYPE" || $field eq "OS"} {
+	    add_run_key "os-type"
+	    set width -[field_width "os-type" [string length $field]]
+	    lappend fmt "%${width}s"
+	    lappend op {[dict get $d "os-type" ]}
 	} else {
 	    puts stderr "Invalid field: $field"
+	    if {$database_orig ne ""} {file delete $database}
 	    exit 1
 	}
 	append title [format "  %${width}s" $field]
@@ -723,6 +852,9 @@ if {$out_summary} {
 	add_run_key "backend-name"
 	add_run_key "backend-version"
 	add_test_op "n-tests" "test-name" "count(*)"
+	set xspace "    "
+    } else {
+	set xspace ""
     }
     set hdr ""
     set adj ""
@@ -738,29 +870,29 @@ if {$out_summary} {
 	    append adj $dash
 	    set dash "------"
 	} else {
-	    set hdr "       TIME "
+	    set hdr "$xspace       TIME "
 	}
 	set d [dict get $rundict $run_id]
-	puts "Benchmark: [dict get $d "title"]"
-	puts "   Target: [dict get $d "target"]"
+	puts "${xspace}Benchmark: [dict get $d "title"]"
+	puts "$xspace   Target: [dict get $d "target"]"
 	if {$out_summary > 1} {
-	    puts "       ID: $run_id"
+	    puts "$xspace       ID: $run_id"
 	    if {[dict exists $d "backend-name"]} {
 		set v [dict get $d "backend-name"]
 		if {[dict exists $d "backend-version"]} {
 		    append v "-[dict get $d "backend-version"]"
 		}
-		puts "  Backend: $v"
+		puts "$xspace  Backend: $v"
 	    }
 	}
-	puts "          ([dict get $d "sqlite-name"])"
-	puts "   Ran at: [clock format [dict get $d "when-run"] -format "%Y-%m-%d %H:%M:%S"]"
-	puts [format " Duration: %.3f" [dict get $d "duration"]]
+	puts "$xspace          ([dict get $d "sqlite-name"])"
+	puts "$xspace   Ran at: [clock format [dict get $d "when-run"] -format "%Y-%m-%d %H:%M:%S"]"
+	puts [format "$xspace Duration: %.3f" [dict get $d "duration"]]
 	set nnames [get_test_key $run_id "test-name"]
 	if {$out_summary > 1} {
 	    # print more information about this run
 	    set rd [get_run_data $run_id]
-	    set options "  Options:"
+	    set options "      Options:"
 	    set tests_ok 0
 	    set tests_fail 0
 	    set tests_intr 0
@@ -771,7 +903,7 @@ if {$out_summary} {
 		set value [lindex $rp 1];
 		if {[string compare -length 7 $key "option-"] == 0} {
 		    puts "$options [string range $key 7 end]-$value"
-		    set options "          "
+		    set options "              "
 		} elseif {$key eq "tests-ok"} {
 		    set tests_ok $value
 		} elseif {$key eq "tests-intr"} {
@@ -791,7 +923,7 @@ if {$out_summary} {
 		    $key ne "title" &&
 		    $key ne "when-run" } \
 		{
-		    puts [format "%9s: %s" $key $value]
+		    puts [format "%13s: %s" $key $value]
 		}
 	    }
 	    set n_tests [dict get $d "n-tests"]
@@ -833,6 +965,7 @@ if {$out_summary} {
 	    if {$i > 0} {
 		if {! [list_eq $nnames $tnames]} {
 		    puts stderr "Runs $run_id and [lindex $runlist 0] have different tests"
+		    if {$database_orig ne ""} {file delete $database}
 		    exit 1
 		}
 	    } else {
@@ -870,6 +1003,7 @@ for {set a 0} {$a < [llength $out_export]} {incr a} {
     set fn [lindex $out_export $a]
     if {[file exists $fn]} {
 	puts stderr "Will not overwrite file $fn"
+	if {$database_orig ne ""} {file delete $database}
 	exit 1
     }
     set fd [open $fn w]
@@ -903,11 +1037,6 @@ for {set a 0} {$a < [llength $out_export]} {incr a} {
     close $fd
 }
 
-for {set a 0} {$a < [llength $out_copy]} {incr a} {
-    set dn [lindex $out_copy $a]
-    # TODO copy to $dn
-}
-
 if {[llength $out_add] > 0} {
     # TODO we should check that the selected runs don't have any of these
     # TODO options already (and/or add a flag to overwrite them)
@@ -926,6 +1055,27 @@ if {[llength $out_add] > 0} {
     file delete $sql_file
 }
 
+if {$out_copy ne ""} {
+    # copy all runs to $out_copy, creating the tables if the file does not exist
+    if {! [file exists $out_copy]} {
+	make_database $out_copy
+    }
+    set sql [file tempfile sql_file]
+    set qout_copy [regsub -all {'} $out_copy {''}]
+    set qdatabase [regsub -all {'} $database {''}]
+    puts $sql "ATTACH '$qout_copy' as NEW;"
+    puts $sql "ATTACH '$qdatabase' as OLD;"
+    for {set i 0} {$i < [llength $runlist]} {incr i} {
+	set run_id [lindex $runlist $i]
+	puts $sql "INSERT INTO NEW.run_data select * FROM OLD.run_data WHERE run_id='$run_id';"
+	puts $sql "INSERT INTO NEW.test_data select * FROM OLD.test_data WHERE run_id='$run_id';"
+    }
+    flush $sql
+    exec $sqlite3 < $sql_file
+    close $sql
+    file delete $sql_file
+}
+
 if {$out_delete} {
     # TODO delete these runs from both tables
 }
@@ -936,5 +1086,6 @@ if {$excess} {
     puts "FIlter returned more than $limit runs, list has been truncated"
 }
 
+if {$database_orig ne ""} {file delete $database}
 exit 0
 
