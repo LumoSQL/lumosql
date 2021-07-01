@@ -692,7 +692,7 @@ int sqlite3BtreeOpen(
   rc = mdb_env_create(&p->env);
   if (rc) goto error;
   envClose = 1;
-  if (sizeof(size_t) < 8)
+  if (sizeof(size_t) < 8 || isTempDb)
     mdb_env_set_mapsize(p->env, 1024 * 1024 * 1024);
   else
     mdb_env_set_mapsize(p->env, 1024ULL * 1044 * 1024 * 1024);
