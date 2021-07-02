@@ -84,9 +84,42 @@ proc optlist {var what {delim ""}} {
     }
 }
 
+# This is a mild duplication of information, but simpler on the whole
+proc display_help {} {
+	puts stderr "                                                                                                  "
+	puts stderr "     -db, -database     LumoSQL benchmark file                      /tmp/benchmark-data.sqlite    "
+	puts stderr "     -import            benchmark db(s) to append to default db     bench1.sqlite, bench2.sqlite  "
+	puts stderr "     -sqlite            path to a valid SQLite3 binary              ~/tmp/path/to/sqlite3         "
+	puts stderr "     -limit             maximum number of SQL rows to return        50                            "
+	puts stderr "     -average           average across all runs, per dimension      NOT IMPLEMENTED YET           "
+	puts stderr "     -list              (still needed?)                                                           "
+	puts stderr "     -fields            list of fields to return                    ARCH,OS,TARGET,DURATION       "
+	puts stderr "     -summary           describe each column before returning all timings                         "
+	puts stderr "     -details           return every field and row                                                "
+	puts stderr "     -export            plain text dump of entire benchmark db                                    "
+	puts stderr "     -copy                                                                                        "
+	puts stderr "     -option                                                                                      "
+	puts stderr "     -target                                                                                      "
+	puts stderr "     -version                                                                                     "
+	puts stderr "     -backend                                                                                     "
+	puts stderr "     -missing                                                                                     "
+	puts stderr "     -failed                                                                                      "
+	puts stderr "     -completed         only return completed runs                                                "
+	puts stderr "     -interrupted       only return interrupted runs                                              "
+	puts stderr "     -crashed           only return crashed runs                                                  "
+	puts stderr "     -empty             only return empty runs                                                    "
+	puts stderr "     -invalid           only return invalid runs                                                  "
+	puts stderr "     -add               add a column (?) to a benchmark db                                        "
+	puts stderr "     -delete            delete specified runs from database(s)      NOT IMPLEMENTED YET           "
+	puts stderr "     -stats             summary statistics for all runs             NOT IMPLEMENTED YET           "
+}
+
 for {set a 0} {$a < [llength $argv]} {incr a} {
     set o [lindex $argv $a]
-    if {$o eq "-db" || $o eq "-database"} {
+    if {$o eq "-h" || $o eq "-help" || $o eq "-?"} {
+	display_help
+	exit 1
+    } elseif {$o eq "-db" || $o eq "-database"} {
 	optarg {^} "file name"
 	set database $o
     } elseif {$o eq "-import"} {
@@ -173,7 +206,7 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
     } elseif {$o eq "-stats"} {
 	set out_stats 1
 	set out_default 0
-    } else {
+   } else {
 	puts stderr "Invalid option $o"
 	exit 1
     }
