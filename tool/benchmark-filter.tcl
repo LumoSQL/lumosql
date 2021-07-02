@@ -207,7 +207,7 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
 	set out_stats 1
 	set out_default 0
    } else {
-	puts stderr "Invalid option $o"
+	puts stderr "Invalid option $o . Try -help"
 	exit 1
     }
 }
