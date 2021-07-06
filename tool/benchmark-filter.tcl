@@ -767,8 +767,9 @@ if {$out_list} {
     set title ""
     set op [list]
     set flist [list TARGET TITLE SQLITE_NAME]
-    foreach field $list_fields {
-	if {$field eq "RUN_ID"} {
+    foreach lfield $list_fields {
+	set field [string toupper $lfield]
+	if {$field eq "RUN_ID" || $field eq "ID"} {
 	    set width -64
 	    lappend fmt "%-64s"
 	    lappend op {$run_id}

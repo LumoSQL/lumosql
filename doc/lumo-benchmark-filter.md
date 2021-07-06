@@ -200,10 +200,10 @@ The tool accepts a large set of options:
 
 ## environment
 
-* `-database` `PATH_TO_DATABASE`  - the database to read, default is `benchmarks.sqlite` (the database produced by the benchmark tool)
+* `-database` `PATH_TO_DATABASE`  - the database to read, default is the last database updated by `make benchmark`, normally `benchmarks.sqlite`
 * `-sqlite` `PATH_TO_SQLITE`  - the sqlite3 executable; by default the tool tries to find it either in the LumoSQL build directory or installed on the system
 * `-limit` `N`  - limit the output to the most recent `N` runs which match other criteria; the default is 20
-* `-import` `FILE`  - instead of using runs in the database, read `FILE` (which must have been created using the `-export` option) into a temporary database, then process the data as normal; if it is desired to import the runs into a permanent database, see the `-copy` option below
+* `-import` `FILE`  - instead of using runs in the database, read `FILE` (which must have been created using the `-export` option) into a temporary database, then process the data as normal; if it is desired to import the runs into a permanent database, see the `-copy` option below; multiple files can be specified, for example `-import FILE1 FILE2` or `-import downloads/data.*`
 
 ## selecting runs
 
@@ -230,23 +230,45 @@ More than one output format option can appear in the command line, and they all 
 unless specified otherwise
 
 * `-average`  - instead of displaying run details, calculates an average of runs with the same properties and displays that instead (currently unimplemented)
-* `-list`  - list the selected runs, one per line, with no information about the single tests
+* `-list`  - list the selected runs, one per line, with no information about the single tests; this is the default if there are no selection options
 * `-fields` `FIELD[,FIELD]...` - change the fields printed by `-list`, default is
-`RUN_ID,TARGET,DATE,TIME,DURATION`; at present, the available fields are the ones
-included by default plus `TITLE` (strings like "sqlite 3.34.0 with lmdb 0.9.27"),
-`SQLITE_NAME` (output of `sqlite3 --version`), `END_DATE` and `END_TIME` (like
-`DATE` and `TIME` but referring to when the run completed; or a "-" if it did not
-complete), `DONE` ("YES" if the run completed, "NO" if it didn't), "OK", "INTR"
-and "FAIL" reporting the count of runs which succeeded, were interrupted and failed
-for some other reason. If comments were added to the run using `DISK_COMMENT` and
-`CPU_COMMENT` these can be added to the output using fields by the same name, optionally
-without the `_COMMENT`, for example `-fields` `TARGET,CPU,DISK,DURATION`
-* `-summary`  - display a summary of each test in each selected run; this only works if the selected runs have the same tests; cannot be combined with `-details`
+`RUN_ID,TARGET,DATE,TIME,DURATION`; see below for the possible values
+* `-summary`  - display a summary of each test in each selected run; this only works if the selected runs have the same tests; cannot be combined with `-details`; this is the default if there are some selection options
 * `-details`  - display full details for each test in each selected run including all the information in the database; cannot be combined with `-summary`
 * `-export` `FILE`  - write the selected runs to `FILE` in a text format, useful for example to send the run information by email
-* `-copy` `DATABASE`  - copies all information about the selected runs to `DATABASE` which must already exist, have the same schema as the benchmarks database, and must not already contain the same runs
+* `-copy` `DATABASE`  - copies all information about the selected runs to `DATABASE`;
+if the database already exists, it must have the same schema and must not already
+contain the selected runs (the database will be created if it does not exist)
 
 If no output format options (other than `-average`) are specified, the default is `-list` if there are no specific run selection criteria, `-summary` if there are any criteria.
+
+### list columns
+
+The following entries are valid values for the `-field` option, selecting which
+columns are displayed:
+
+* `RUN_ID` or `ID`: the run identifier, a long hexadecimal string which identifies
+the run uniquely
+* `TARGET`: the encoded target, for example `3.36.0` or `3.36.0+lmdb-0.9.29`;
+using this with the build tool allows to repeat the benchmark with exactly the
+same options
+* `TITLE`: a human-readable version of `TARGET`, for example "sqlite 3.36.0 with
+lmdb 0.9.29"
+* `SQLITE_NAME`: the output of `sqlite -version`
+* `DATE` and `TIME`: a representation of the date or time the run started
+* `END_DATE` and `END_TIME`: a representation of the date or time the run
+completed, or `-` for runs which did not complete
+* `DONE`: "YES" or "NO", depending on whether the run completed or not
+* `OK`, `INTR` or `FAIL`: the count of tests which succeeded, were interrupted
+or failed with some error, respectively
+* `CPU_TYPE` or `ARCH`: the CPU architecture used to run the tests, for example
+`x86_64`, `arm` or `s390x`
+* `OS_TYPE` or `OS`: the operating system used to run the tests, for example
+`Linux` or `NetBSD`
+* `CPU_COMMENT` or `CPU`: a user-provided comment intended to describe the
+system used for the benchmark; if not provided, it shows as "-"
+* `DISK_COMMENT` or `DISK`: a user-provided comment intended to describe the
+storage medium used for the databases during the benchmark, or "-" if not provided
 
 ## extra actions
 
