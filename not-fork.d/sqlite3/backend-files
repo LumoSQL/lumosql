@@ -1,5 +1,6 @@
-# List of files a backend may replace with new ones; other files in this
-# directory are generated from this list (see Makefile)
+# List of files a LumoSQL backend may replace with new ones; other files in this
+# directory are generated from this list (see Makefile). The replacement files may
+# be empty or have no effect.
 
 backup.c
 backup.h

@@ -16,7 +16,7 @@ esac
 
 if $header
 then
-    echo '# Generated file: do not edit; instead edit "backend-files" and run "make"'
+    echo '# Generated not-fork configuration: do not edit; instead edit "backend-files" and run "make"'
     echo
     echo "method = $method"
     echo '--'

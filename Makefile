@@ -86,7 +86,7 @@ container:
 		--cmd bin \
 		"$$container1" && \
 	buildah commit --rm "$$container1" make
-# To build and run withint a container:
+# To build and run within a container:
 #   make container
 #   podman run -v .:/usr/src:Z make
 #   podman run -v .:/usr/src:Z make bld-LMDB_0.9.9

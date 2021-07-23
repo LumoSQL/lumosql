@@ -1,4 +1,4 @@
-# Generate a few files in this directory
+# Generate a few files in this directory before Not-Fork is run
 
 FILES = $(shell awk '/^[^\#]/ { print "files/lumo_" $0 }' backend-files)
 
