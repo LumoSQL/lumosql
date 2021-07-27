@@ -1,8 +1,8 @@
 LumoSQL RBAC Permissions System
 ===============================
 
-Existing Schemes
-----------------
+Existing SQLite Permission Schemes
+----------------------------------
 
 SQLite has a [user authentication extension](https://www.sqlite.org/src/doc/trunk/ext/userauth/user-auth.txt)
 which provides some basic access control, and seems to be quite rarely used. If
@@ -44,7 +44,7 @@ per-row checksum code in LumoSQL.
 Roles
 -----
 
-Guiding description: https://www.postgresql.org/docs/13/user-manag.html
+Adapted from [roles in Postgres 13](https://www.postgresql.org/docs/13/user-manag.html).
 
 Roles take the place of users and groups. They can be called anything.
 
@@ -62,7 +62,7 @@ Example: "CREATE ROLE admins SUPERUSER"
 Privileges
 ----------
 
-Guiding description: https://www.postgresql.org/docs/13/ddl-priv.html
+Adapted from [privileges in Postgres 13](https://www.postgresql.org/docs/13/ddl-priv.html).
 
 Privileges are hard-coded and cannot be extended.
 
@@ -83,7 +83,7 @@ the future.
 Granting membership to a Role
 -----------------------------
 
-Guiding description: https://www.postgresql.org/docs/13/sql-grant.html
+Adapted from [GRANT in Postgres 13](https://www.postgresql.org/docs/13/sql-grant.html).
 
 GRANT command grants membership in a role to one or more other
 roles. Membership in a role is significant because it conveys the
@@ -111,8 +111,6 @@ are accessible with ALL privileges.
 
 Examples: GRANT INSERT ON some_table TO nikita;
           GRANT ALL ON some_table TO nikita WHERE ROWID=54321;
-
-where 54321 is a ROWID
 
 REVOKE undoes GRANT. REVOKing table permissions does not revoke
 row permissions, or vice versa.
