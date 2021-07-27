@@ -1,6 +1,21 @@
 LumoSQL RBAC Permissions System
 ===============================
 
+[Role-based Access
+Control](https://en.wikipedia.org/wiki/Role-based_access_control) (RBAC) is the
+way that online relational databases make sure that only authorised users can
+access information. The SQL standard has the concept of "roles", rrather like
+job titles. As a simple example, someone with "engineering cadet" role will see
+different things in the database to someone with the "sales manager" role. RBAC
+gets complicated, because people in organisations will often be in several
+different roles, and roles can have different levels of privilege. Privileges
+are things like "read-only access" and "full read/write and edit" access, and
+"allowed to create new roles".
+
+A full RBAC implementation covering the many dozens of combinations of RBAC
+possibilities is beyond the scope of the current LumoSQL Phase II.
+
+
 Existing SQLite Permission Schemes
 ----------------------------------
 
