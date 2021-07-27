@@ -40,9 +40,11 @@ LumoSQL retains and builds on Phase I features including:
 
 Further info from these URLs:
 
-   LumoSQL Database: https://lumosql.org/src/lumosql
-   Not-Forking reproducibility tool: https://lumosql.org/src/not-forking
-   NLNet NGI Assure fund:  https://nlnet.nl/assure/
+   [LumoSQL Database](https://lumosql.org/src/lumosql)
+
+   [Not-Forking reproducibility tool](https://lumosql.org/src/not-forking)
+
+   [NLNet NGI Assure fund](https://nlnet.nl/assure/)
 
 
 --
