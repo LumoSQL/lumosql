@@ -1,7 +1,9 @@
 Announcing LumoSQL Database Phase II
 ====================================
 
-July 27, 2021
+| July 27, 2021 |
+|Dan Shearer    |
+|dan@lumosql.org|
 
 LumoSQL is a derivative of SQLite, the most-used software in the world.
 Our focus is on privacy, at-rest encryption, reproducibility and the
@@ -10,7 +12,8 @@ support LumoSQL, this time via the NGI Assure fund linked below.
 
 In LumoSQL Phase II, the team is focussing on:
 
-* Implementing a small subset of the Postgresql 13 RBAC permissions model via
+* Implementing a small [subset of the Postgresql 13 RBAC](./rbac-design.md)
+  permissions model via
   the SQL statements CREATE ROLE/GRANT/REVOKE etc. An important addition to
   Postgres is to allow per-row permissions as well as per-table.
 
@@ -47,6 +50,3 @@ Further info from these URLs:
    [NLNet NGI Assure fund](https://nlnet.nl/assure/)
 
 
---
-Dan Shearer
-dan@lumosql.org
