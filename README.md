@@ -177,10 +177,9 @@ operating systems, and Gentoo.
 Other required tools can be installed from your operating system's standard packages.
 Here are the tool dependencies:
 
-* [the not-forking tool](https://lumosql.org/src/not-forking/), 
-which is a script that needs to be downloaded and installed manually (we will be packaging
-it as soon as we can.) The instructions for not-forking are on its website.
-* [Fossil](https://fossil-scm.org/). As described above, you don't necessarily need Fossil. But Fossil is very easy to install: if you can't get version 2.13 or later from your distrbution then it is easy to build from source. 
+* Mandatory: [the not-forking tool](https://lumosql.org/src/not-forking/), 
+which is a Perl script that needs to be downloaded and installed manually. The instructions for not-forking are on its website.
+* Recommended: [Fossil](https://fossil-scm.org/). As described above, you don't necessarily need Fossil. But Fossil is very easy to install: if you can't get version 2.13 or later from your distrbution then it is easy to build from source. 
   (*Note!* Ubuntu 20.04, Debian Buster and Gentoo do not include a sufficiently modern Fossil, while NetBSD
   and Ubuntu 20.10 do.) Since you now have a development environment anyway you can 
   [build Fossil trunk according to the official instructions](https://fossil-scm.org/home/doc/trunk/www/build.wiki) or this simpler version (tested on Ubuntu 20.04 LTS):
@@ -191,10 +190,8 @@ it as soon as we can.) The instructions for not-forking are on its website.
 * For completeness (although every modern Linux/Unix includes these), to build and benchmark any of the Oracle Berkeley DB targets, you need either "curl" or "wget", and also "file", "gzip" and GNU "tar". Just about any version of these will be sufficient, even on Windows.
 * If you are running inside a fresh [Docker](https://docker.io) or similar container system, Fossil may be confused about the user id. One solution is to add a user (eg "adduser lumosql" and answer the questions) and then "export USER=lumosql".
 
-One of the many helpful features of the not-forking tool is that it will advise
-you with an error message if you ask for sources that require a tool or a
-version that is not installed. So if you didn't quite get everything in the above list 
-it won't be difficult notice.
+The not-forking tool will advise you with a message
+if you need a tool or a version that is not installed. 
 
 On [Debian 10 "Buster" Stable Release](https://www.debian.org/releases/buster/), the not-forking makefile
 ("perl Makefile.PL") will warn that git needs to be version 2.22 or higher.
