@@ -117,14 +117,20 @@ As of LumoSQL 0.4, there are many obvious limitations, including:
 <a name="build-environment-and-dependencies"></a>
 ## Build Environment and Dependencies
 
-LumoSQL uses the [Fossil source code manager](https://fossil-scm.org) because:
+Most developers already have the required minimum of git and core *ix
+development tools. SQLite has very few dependencies (mostly Tcl), and
+LumoSQL adds one Perl-based processing tool.
 
-* Fossil is designed for projects of up to a million or so lines of code, unlike git (and therefore Github)
-* Fossil workflow and tools encourage inclusivity and collaboration rather than forking
-* Fossil and SQLite are symbiotic projects and test cases for each other, and therefore LumoSQL may be too 
+LumoSQL is mirrored to Github and application developers can use git
+with Github in the usual way. LumoSQL developers working on the LumoSQL
+library internals choose to use [Fossil source code
+manager](https://fossil-scm.org) instead of git, and if you're planning
+to develop LumoSQL internals then you need Fossil.
 
-LumoSQL is mirrored to Github and changes can be imported from Github, but
-Fossil is the tool of choice for LumoSQL.
+There are many [reasons why people choose
+Fossil](https://www.fossil-scm.org/home/doc/trunk/www/fossil-v-git.wiki).
+For LumoSQL one of them is that SQLite and Fossil are symbiotic
+projects, each written in the other.
 
 #### Debian or Ubuntu-derived Operating Systems
 
@@ -174,8 +180,7 @@ Here are the tool dependencies:
 * [the not-forking tool](https://lumosql.org/src/not-forking/), 
 which is a script that needs to be downloaded and installed manually (we will be packaging
 it as soon as we can.) The instructions for not-forking are on its website.
-* [Fossil](https://fossil-scm.org/). Fossil is extremely backwards-compatible so any version > 2.10 can be
-  made to work. However it's easiest to get version 2.13 or later from your distrbution or build from source. 
+* [Fossil](https://fossil-scm.org/). As described above, you don't necessarily need Fossil. But Fossil is very easy to install: if you can't get version 2.13 or later from your distrbution then it is easy to build from source. 
   (*Note!* Ubuntu 20.04, Debian Buster and Gentoo do not include a sufficiently modern Fossil, while NetBSD
   and Ubuntu 20.10 do.) Since you now have a development environment anyway you can 
   [build Fossil trunk according to the official instructions](https://fossil-scm.org/home/doc/trunk/www/build.wiki) or this simpler version (tested on Ubuntu 20.04 LTS):
