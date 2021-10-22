@@ -15,12 +15,12 @@ There are 4 key-value stores written in C that are used
 at scale, are widely-ported and which have the property of being
 [MVCC](https://en.wikipedia.org/wiki/Multiversion_concurrency_control). As documented in
 [the LumoDoc Knowledgebase](https://lumosql.org/src/lumodoc/file?name=doc/lumo-relevant-knowledgebase.md&ci=tip)
- are:
+they are:
 
-* SQLite's built-in btree
-* [LMDB](http://www.lmdb.tech/doc/)
-* [Comdb's BDB fork](https://github.com/bloomberg/comdb2)
-* Oracle BDB
+* SQLite's built-in btree, which as the K-V store underneath the software which is most-deployed by at least two orders of magnitude, must therefore be the most-deployed K-V store.
+* Oracle BDB, once ubiquitous, effectively dead due to Oracle licensing changes. LumoSQL works with a relatively recent version of this out-of-date K-V store.
+* [LMDB](http://www.lmdb.tech/doc/), which seems to have replaced BDB in most contexts, and which is modern, well-tested and uses mmap() instead of the older idea of Write Ahead Logs.
+* [Comdb's BDB fork](https://github.com/bloomberg/comdb2) (counting it as the spiritual successor to BDB, but [Bloomberg](https://bloomberg.com) is in fact the only user. In another universe perhaps this could have become BDB-ng if LMDB didn't exist.
 
 # A possible new contender to consider
 
