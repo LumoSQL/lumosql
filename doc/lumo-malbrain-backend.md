@@ -14,7 +14,7 @@ Notes Regarding Karl Malbrain's C Btree Code
 There are 4 key-value stores written in C that are used
 at scale, are widely-ported and which have the property of being
 [MVCC](https://en.wikipedia.org/wiki/Multiversion_concurrency_control). As documented in
-[the LumoDoc Knowledgebase](https://lumosql.org/src/lumodoc/file?name=doc/lumo-relevant-knowledgebase.md&ci=tip)
+[the LumoDoc Knowledgebase](https://lumosql.org/src/lumodoc/doc/trunk/doc/lumo-relevant-knowledgebase.md)
 they are:
 
 * SQLite's built-in btree, which as the K-V store underneath the software which is most-deployed by at least two orders of magnitude, must therefore be the most-deployed K-V store.
