@@ -22,6 +22,9 @@ In LumoSQL 0.4 there are currently three LumoSQL backends:
 * [LMDB](https://github.com/LMDB/lmdb)
 * [the Berkley Database](https://en.wikipedia.org/wiki/Berkeley_DB)
 
+in the [next phase of LumoSQL](./doc/LumoSQL-PhaseII-Announce.md) we are building on 
+the existing optional per-row checksums to add per-row RBAC encryption and more.
+
 LumoSQL has a build and benchmarking tool for comparing vanilla SQLite versions
 and configurations with each other, as well as comparing the performance of
 different storage backends. LumoSQL is written in C, like SQLite. The
