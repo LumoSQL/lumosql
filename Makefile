@@ -10,7 +10,7 @@
 # 
 # /Makefile
 #
-# Documented at https://lumosql.org/src/lumosql/doc/tip/doc/lumo-test-build.md
+# Documented at https://lumosql.org/src/lumosql/doc/tip/doc/lumo-build-benchmark.md
 
 # if there is a Makefile.local we use it to get defaults
 -include Makefile.local

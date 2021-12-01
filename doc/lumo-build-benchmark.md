@@ -107,6 +107,42 @@ Where the user has requested average results, the tests may be run several times
 
 # Build and benchmark options
 
+## Commandline parameters
+
+(this section is included verbatim comments at the top of `build.tcl`, which is the master
+ version. It helps to have it here for context for the rest of the documentation.)
+
+Executive summary:
+
+```
+	# build.tcl OPERATION NOTFORK_CONFIG ARGUMENTS
+
+	# OPERATION: options
+	# ARGUMENTS: [OUTPUT_FILE]
+	#            create a Makefile fragment so that "make" can accept
+	#            command-line options corresponding to build options
+
+	# OPERATION: database
+	# ARGUMENTS: BUILD_DIR DATABASE_NAME
+	#            create database
+
+	# OPERATION: what
+	# ARGUMENTS: BUILD_OPTIONS
+	#            show what targets/options have been selected based on command-line
+
+	# OPERATION: build
+	# ARGUMENTS: BUILD_DIR BUILD_OPTIONS
+	#            build LumoSQL, if necessary
+
+	# OPERATION: benchmark
+	# ARGUMENTS: BUILD_DIR DATABASE_NAME BUILD_OPTIONS
+	#            run benchmarks (run all tests marked for benchmarking and save timings)
+
+	# OPERATION: test
+	# ARGUMENTS: BUILD_DIR DATABASE_NAME BUILD_OPTIONS
+	#            run tests (run all tests without saving timings)
+```
+
 ## Build and Benchmark configuration
 
 A special subdirectory `benchmark` in `not-fork.d/NAME` contain files to
