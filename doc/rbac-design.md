@@ -1,3 +1,11 @@
+<!-- Copyright 2021 The LumoSQL Authors, see LICENSES/MIT -->
+
+<!-- SPDX-License-Identifier: MIT -->
+<!-- SPDX-FileCopyrightText: 2020 The LumoSQL Authors -->
+<!-- SPDX-ArtifactOfProjectName: LumoSQL -->
+<!-- SPDX-FileType: Documentation -->
+<!-- SPDX-FileComment: Original by Dan Shearer, August 2020 -->
+
 LumoSQL RBAC Permissions System
 ===============================
 
