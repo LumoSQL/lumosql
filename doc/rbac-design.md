@@ -6,6 +6,127 @@
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Dan Shearer, August 2020 -->
 
+# The LumoSQL Security Design and Implementation
+
+SQLite is an embedded database, and traditionally there has been no need of
+access security in the main SQLite use case. The application took care of any
+security needs, with a little-used password system for database access provided
+by the C API. However once connected, there is little distinction between a
+superuser or other users, and no encryption. Various solutions exist that
+modify the SQLite source code to give one kind of encryption or another, as
+documented in the 
+[LumoSQL Knowledgebase](https://lumosql.org/src/lumodoc/doc/tip/doc/lumo-relevant-knowledgebase.md#list-of-relevant-sql-checksumming-related-knowledge).
+
+The LumoSQL approach is completely different. LumoSQL recognises that the
+security and privacy requirements of the 21st century are very different to the
+primary use case of SQLite over more than two decades, and so implements a
+fairly complete security system, recognisable to anyone who has used one of the
+mainstream networked SQL databases.
+
+On the other hand, SQLite's strength is its simplicity and the things that come
+with that including speed, compact code and relative ease of security review.
+An example of how security models can become so complex they are impossible to verify is provided by Microsoft SQL Server, whose 
+[Chart of Database Access Permissions](https://raw.githubusercontent.com/Microsoft/sql-server-samples/master/samples/features/security/permissions-posters/Microsoft_SQL_Server_2017_and_Azure_SQL_Database_permissions_infographic.pdf) defies analysis. 
+Similar charts can be drawn up for Oracle, DB2 et al, with undoubted artistic merit. These databases need to solve very different problems to LumoSQL, and they must do it in a way that is compatible with decades-old security design. LumoSQL does not have these constraints.
+
+# Goals
+
+LumoSQL aims to deliver:
+
+* At-rest data encryption at the database, table and row level
+* Per-row integrity controls (eg checksums) stored in each row
+* Per-row encryption, self-contained within each row
+* Per-row RBAC, self-contained within each row
+
+LumoSQL will avoid:
+
+* Large amounts of security metadata
+* Mandating a key management system
+* Introducing new encryption technologies
+* A large or complex security model
+
+# Design Principles
+
+0. LumoSQL data will be secure when at rest. This is consistent with the embedded use case, when databases are often at rest and often copied without knowledge of the application.
+1. Security will be defined by the LumoSQL data, and travel with the data at all times.
+2. Anyone with a valid key can read the data according to the LumoSQL security specification, using any conformant software.
+3. Users may implement any (or no) key authority system. This is consistent with the way SQLite is used.
+4. LumoSQL will define a standard key management system for anyone wanting to use it.
+5. The fundamental unit for LumoSQL security is the encrypted row. Although database and tables can also be encrypted.
+
+## LumoSQL is a Hybrid Access Control System
+
+All SQL database security models implement [Discretionary Access Control](https://en.wikipedia.org/wiki/Discretionary_access_control). The traditional embedded use case for SQLite is already well-suited to implementing [Mandatory Access Control](https://en.wikipedia.org/wiki/Mandatory_access_control).
+
+Within Discretionary Access Control there are different models and tradeoffs.
+LumoSQL implements features from some of the most common approaches.
+
+``` pikchr indent toggle source-inline
+Frame: [
+B: box invis 
+line invis "LumoSQL" bold color purple from 0.5cm s of B.w to 0.5cm s of B.e
+C1: circle color black rad 2cm at 0.8cm n of B.c
+line invis "Role-Based" "Access Control" "(RBAC)" from 1cm n of C1.w to 1cm n of C1.e
+C2: circle color black rad 2cm at 1.5cm sw of B.c
+line invis "Any or No" "Key Authority" from 0.2cm s of C2.w to 0.2cm s of C2.c
+C3: circle color black rad 2cm at 1.5cm se of B.c
+line invis "At-rest" "Encryption" from C2.e to C3.e
+Title: line invis "Discretionary Access Control" "Systems" color green from 4.2cm above C2.w to 4.2cm above C2.e
+]
+Border: box color gray rad 1cm thin width Frame.width+1cm height Frame.height+1cm at Frame.center
+```
+# LumoSQL is a Minimal Access Control System
+
+LumoSQL implements the smallest possible security model that will satisfy the
+goals. Nevertheless there are some features that are not implemented by any
+other mainstream database. LumoSQL security aims to be verifiable.
+
+``` pikchr indent toggle source-inline
+B:  dot invis at (0,0)
+Title: box invis "LumoSQL Compared With Typical SQL Access Control" ljust color purple at B+(1cm,0.4cm)
+
+circle invis color green rad 0.4cm "✔" big big big bold at B+(0.6cm,-0.3cm)
+box invis "Object types: Yes, but only database, table and row" ljust fit
+
+circle invis color green rad 0.4cm "✔" big big big bold at 0.5cm below last circle
+box invis "At-rest encryption for all object types: Yes." ljust fit
+
+circle invis color green rad 0.4cm "✔" big big big bold at 0.5cm below last circle
+box invis "Simple defaults: Yes. For a new database, a user has all privileges by default, which can be selectively tightened" ljust fit
+
+circle invis color green rad 0.4cm "✔" big big big bold at 0.5cm below last circle
+box invis "RBAC: Yes. Read/Write access for each object, enforced by the object being encrypted" ljust fit
+
+circle invis color green rad 0.4cm "✔" big big big bold at 0.5cm below last circle
+box invis "Portability and compatibility: Yes. Encrypted LumoSQL rows can be imported into other databases and verified there, or even decrypted if they have the key" ljust fit
+
+circle invis color green rad 0.4cm "✔" big big big bold at 0.5cm below last circle
+box invis "Distributed and Decentralised Key Management: Yes. Users can choose to use the optional blockchain-based LumoSQL key management system" ljust fit
+
+circle invis color red rad 0.4cm "✘" big big big bold at 0.5cm below last circle
+box invis "Table Policies: No." ljust fit
+
+circle invis color red rad 0.4cm "✘" big big big bold at 0.5cm below last circle
+box invis "Column security and encryption: No." ljust fit
+
+circle invis color red rad 0.4cm "✘" big big big bold at 0.5cm below last circle
+box invis "Complex role definitions: No. A user is either a superuser or not, or in a group or not, and a group has read or write access, or not. That's it." ljust fit
+
+circle invis color red rad 0.4cm "✘" big big big bold at 0.5cm below last circle
+box invis "Inherit privileges: No." ljust fit
+
+circle invis color red rad 0.4cm "✘" big big big bold at 0.5cm below last circle
+box invis "Predefined key management: No. Users can implement any key management system they choose, in the usual SQLite philosophy" ljust fit
+
+circle invis color red rad 0.4cm "✘" big big big bold at 0.5cm below last circle
+box invis "Network security: No. LumoSQL is an embedded database and needs no network security code." ljust fit
+
+circle invis color red rad 0.4cm "✘" big big big bold at 0.5cm below last circle
+box invis "Transport security: No. Any plain-text transport may be used to move LumoSQL data that is encrypted at rest." ljust fit
+
+
+```
+
 LumoSQL RBAC Permissions System
 ===============================
 
@@ -21,7 +142,7 @@ are things like "read-only access" and "full read/write and edit" access, and
 "allowed to create new roles".
 
 A full RBAC implementation covering the many dozens of combinations of RBAC
-possibilities is beyond the scope of the current LumoSQL Phase II.
+possibilities is far outside the LumoSQL goals described above.
 
 
 Existing SQLite Permission Schemes
@@ -42,7 +163,7 @@ database, which works to some extent with SQLite user authentication.
 LumoSQL RBAC Goals and Constraints
 ----------------------------------
 
-LumoSQL aims to provide:
+LumoSQL RBAC aims to provide:
 
 * Compatibility with existing SQLite binaries, when using the SQLite native db
   format. If this means losing some more advanced features, that is acceptable
