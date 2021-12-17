@@ -13,7 +13,7 @@ IETF tools for RFC generation because we think that it should become an RFC.
 This is the only specification for Lumions, and is the reference for LumoSQL
 and other software we write that handle Lumions in various ways.
 
-At present (December 2021) this RFC is only the barest sketch outline.
+At present (December 2021) the [draft-shearer-desmet-calvelli-lumionsrfc-00.txt](./draft-shearer-desmet-calvelli-lumionsrfc-00.txt) is only a bare outline.
 
 # Toolchain
 
