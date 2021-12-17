@@ -249,9 +249,9 @@ The UUID is described in the section "Lumion UUID Format", and is always 256 bit
 
 The Metadata Block is laid out like this:
 
-  +-----------+--------------+-------------------------+----------------+
-  | Signature | Feature List | Payload Metadata Offset | Other Metadata |
-  +-----------+--------------+-------------------------+----------------+
+  +-----------+--------------+----------------------+----------------+
+  | Signature | Feature List | Payload Metadata Off | Other Metadata |
+  +-----------+--------------+----------------------+----------------+
 
 The Lumion Signature is a digital signature from one of those allowed in this RFC. See the section 
 "Lumion Ciphers, Signatures and Hashes".
@@ -261,7 +261,10 @@ The Lumion Feature list is a 32-bit bitmask with values as in the following tabl
 
 Payload Metadata Offset is a 64-bit integer.
 
-Other Metadata covers RBAC and other Metadata features, XXXXX.
+Other Metadata covers RBAC and other Metadata features:
+    * Next and Last pointers, in the case where the Lumion Version Count is non-zero. The pointers are Lumion UUIDs.
+    * List of valid Lumion Access Keys
+    * XXXXXX
 
 The Payload Metadata Block is laid out like this:
 
@@ -279,6 +282,9 @@ is a keyid listed in the Metadata Block. XXXXX
 # Lumion Data Formal Specification
 
 A Lumion has the following ABNF [@RFC5234] definition:
+
+(this is not valid Lumion ABNF, we're still at the high-level sketch stage. But
+it is quite atmospheric, don't you think?)
 
       SYSLOG-MSG      = HEADER SP STRUCTURED-DATA [SP MSG]
 
@@ -336,13 +342,35 @@ A Lumion has the following ABNF [@RFC5234] definition:
 
 # Lumion UUID Format
 
+This is a combination of a name-based namespace and a robust hash, similar to
+[@RFC4122]. RFC4122 UUIDs cannot be used because of the constrained
+environments many Lumion-using applications are deployed in.
+
 XXXXXX
 
-# Lumion Ciphers, Signatures and Hashes
+# List of Lumion Ciphers, Signatures and Hashes
 
 XXXXXX
 
 # Example Use Cases
+
+## Data Tracking and Portability
+
+XXXXXX
+
+## Time Travelling Data for Snapshotting
+
+This is about using the versioning information embedded within Lumions to come
+up with time series data. It might in fact be more about ordinal data, because
+wallclock time is not part of the Lumion definition in this RFC. 
+
+Each Lumion can have a "next" and "last" pointer, as well as a version number.
+The next and last are simply Lumion UUIDs.
+
+## Non-Fungible Token (NFT) Applications
+
+* Compatible with existing NFT registries
+* First-ever updatable NFTs
 
 XXXXXX
 

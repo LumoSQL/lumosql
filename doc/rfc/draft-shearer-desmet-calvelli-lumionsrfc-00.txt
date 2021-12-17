@@ -76,15 +76,18 @@ Table of Contents
    8.  Lumion Data Format  . . . . . . . . . . . . . . . . . . . . .   7
    9.  Lumion Data Formal Specification  . . . . . . . . . . . . . .   8
    10. Lumion UUID Format  . . . . . . . . . . . . . . . . . . . . .   9
-   11. Lumion Ciphers, Signatures and Hashes . . . . . . . . . . . .   9
+   11. List of Lumion Ciphers, Signatures and Hashes . . . . . . . .   9
    12. Example Use Cases . . . . . . . . . . . . . . . . . . . . . .   9
-   13. Performance Considerations  . . . . . . . . . . . . . . . . .   9
-   14. Security Considerations . . . . . . . . . . . . . . . . . . .   9
+     12.1.  Data Tracking and Portability  . . . . . . . . . . . . .  10
+     12.2.  Time Travelling Data for Snapshotting  . . . . . . . . .  10
+     12.3.  Non-Fungible Token (NFT) Applications  . . . . . . . . .  10
+   13. Performance Considerations  . . . . . . . . . . . . . . . . .  10
+   14. Security Considerations . . . . . . . . . . . . . . . . . . .  10
    15. Related Work  . . . . . . . . . . . . . . . . . . . . . . . .  10
    16. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  10
      16.1.  Content-type registration for 'application/lumion' . . .  10
    17. Informative References  . . . . . . . . . . . . . . . . . . .  11
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  11
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  12
 
 1.  Introduction
 
@@ -102,9 +105,6 @@ Table of Contents
    A Lumion has keys implemented as public/private key pairs, and there
    can be any (or no) key management authorities.  Lumion users can
    choose to implement any key management authority they choose.
-
-
-
 
 
 
@@ -373,10 +373,9 @@ Internet-Draft                 lumionsrfc                  December 2021
 
    The Metadata Block is laid out like this:
 
-   +-----------+--------------+-------------------------+---------------
-   -+ | Signature | Feature List | Payload Metadata Offset | Other
-   Metadata | +-----------+--------------+-------------------------+----
-   ------------+
+   +-----------+--------------+----------------------+----------------+ 
+   | Signature | Feature List | Payload Metadata Off | Other Metadata |
+   +-----------+--------------+----------------------+----------------+
 
    The Lumion Signature is a digital signature from one of those allowed
    in this RFC.  See the section "Lumion Ciphers, Signatures and
@@ -389,12 +388,16 @@ Internet-Draft                 lumionsrfc                  December 2021
 
 
 
+
 Shearer & De Smet         Expires 20 June 2022                  [Page 7]
 
 Internet-Draft                 lumionsrfc                  December 2021
 
 
-   Other Metadata covers RBAC and other Metadata features, XXXXX.
+   Other Metadata covers RBAC and other Metadata features: * Next and
+   Last pointers, in the case where the Lumion Version Count is non-
+   zero.  The pointers are Lumion UUIDs.  * List of valid Lumion Access
+   Keys * XXXXXX
 
    The Payload Metadata Block is laid out like this:
 
@@ -412,6 +415,9 @@ Internet-Draft                 lumionsrfc                  December 2021
 9.  Lumion Data Formal Specification
 
    A Lumion has the following ABNF [RFC5234] definition:
+
+   (this is not valid Lumion ABNF, we're still at the high-level sketch
+   stage.  But it is quite atmospheric, don't you think?)
 
      SYSLOG-MSG      = HEADER SP STRUCTURED-DATA [SP MSG]
 
@@ -436,18 +442,19 @@ Internet-Draft                 lumionsrfc                  December 2021
      PARTIAL-TIME    = TIME-HOUR ":" TIME-MINUTE ":" TIME-SECOND
                        [TIME-SECFRAC]
      TIME-HOUR       = 2DIGIT  ; 00-23
-     TIME-MINUTE     = 2DIGIT  ; 00-59
-     TIME-SECOND     = 2DIGIT  ; 00-59
-     TIME-SECFRAC    = "." 1*6DIGIT
-     TIME-OFFSET     = "Z" / TIME-NUMOFFSET
-     TIME-NUMOFFSET  = ("+" / "-") TIME-HOUR ":" TIME-MINUTE
-
 
 
 
 Shearer & De Smet         Expires 20 June 2022                  [Page 8]
 
 Internet-Draft                 lumionsrfc                  December 2021
+
+
+     TIME-MINUTE     = 2DIGIT  ; 00-59
+     TIME-SECOND     = 2DIGIT  ; 00-59
+     TIME-SECFRAC    = "." 1*6DIGIT
+     TIME-OFFSET     = "Z" / TIME-NUMOFFSET
+     TIME-NUMOFFSET  = ("+" / "-") TIME-HOUR ":" TIME-MINUTE
 
 
      STRUCTURED-DATA = NILVALUE / 1*SD-ELEMENT
@@ -476,13 +483,47 @@ Internet-Draft                 lumionsrfc                  December 2021
 
 10.  Lumion UUID Format
 
+   This is a combination of a name-based namespace and a robust hash,
+   similar to [RFC4122].  RFC4122 UUIDs cannot be used because of the
+   constrained environments many Lumion-using applications are deployed
+   in.
+
    XXXXXX
 
-11.  Lumion Ciphers, Signatures and Hashes
+11.  List of Lumion Ciphers, Signatures and Hashes
 
    XXXXXX
 
 12.  Example Use Cases
+
+
+
+
+
+
+Shearer & De Smet         Expires 20 June 2022                  [Page 9]
+
+Internet-Draft                 lumionsrfc                  December 2021
+
+
+12.1.  Data Tracking and Portability
+
+   XXXXXX
+
+12.2.  Time Travelling Data for Snapshotting
+
+   This is about using the versioning information embedded within
+   Lumions to come up with time series data.  It might in fact be more
+   about ordinal data, because wallclock time is not part of the Lumion
+   definition in this RFC.
+
+   Each Lumion can have a "next" and "last" pointer, as well as a
+   version number.  The next and last are simply Lumion UUIDs.
+
+12.3.  Non-Fungible Token (NFT) Applications
+
+   *  Compatible with existing NFT registries
+   *  First-ever updatable NFTs
 
    XXXXXX
 
@@ -496,15 +537,6 @@ Internet-Draft                 lumionsrfc                  December 2021
    of view, it is important to remember that Lumions by design cannot
    support anonymity.  Transparency and traceability is vital to the
    Lumion concept, which is why it has a UUID.
-
-
-
-
-
-Shearer & De Smet         Expires 20 June 2022                  [Page 9]
-
-Internet-Draft                 lumionsrfc                  December 2021
-
 
 15.  Related Work
 
@@ -521,6 +553,14 @@ Internet-Draft                 lumionsrfc                  December 2021
 
    To: ietf-types@iana.org Subject: Registration of MIME media type
    application/lumion
+
+
+
+
+Shearer & De Smet         Expires 20 June 2022                 [Page 10]
+
+Internet-Draft                 lumionsrfc                  December 2021
+
 
    MIME media type name: application
 
@@ -555,19 +595,28 @@ Internet-Draft                 lumionsrfc                  December 2021
 
    Author/Change controller: (none)
 
-
-
-Shearer & De Smet         Expires 20 June 2022                 [Page 10]
-
-Internet-Draft                 lumionsrfc                  December 2021
-
-
 17.  Informative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
               <https://www.rfc-editor.org/info/rfc2119>.
+
+   [RFC4122]  Leach, P., Mealling, M., and R. Salz, "A Universally
+              Unique IDentifier (UUID) URN Namespace", RFC 4122,
+              DOI 10.17487/RFC4122, July 2005,
+              <https://www.rfc-editor.org/info/rfc4122>.
+
+
+
+
+
+
+
+Shearer & De Smet         Expires 20 June 2022                 [Page 11]
+
+Internet-Draft                 lumionsrfc                  December 2021
+
 
    [RFC5234]  Crocker, D., Ed. and P. Overell, "Augmented BNF for Syntax
               Specifications: ABNF", STD 68, RFC 5234,
@@ -613,4 +662,11 @@ Authors' Addresses
 
 
 
-Shearer & De Smet         Expires 20 June 2022                 [Page 11]
+
+
+
+
+
+
+
+Shearer & De Smet         Expires 20 June 2022                 [Page 12]
