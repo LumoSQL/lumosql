@@ -81,11 +81,12 @@ Table of Contents
      12.1.  Data Tracking and Portability  . . . . . . . . . . . . .  10
      12.2.  Time Travelling Data for Snapshotting  . . . . . . . . .  10
      12.3.  Non-Fungible Token (NFT) Applications  . . . . . . . . .  10
+     12.4.  Online Backups . . . . . . . . . . . . . . . . . . . . .  10
    13. Performance Considerations  . . . . . . . . . . . . . . . . .  10
    14. Security Considerations . . . . . . . . . . . . . . . . . . .  10
    15. Related Work  . . . . . . . . . . . . . . . . . . . . . . . .  10
-   16. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  10
-     16.1.  Content-type registration for 'application/lumion' . . .  10
+   16. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  11
+     16.1.  Content-type registration for 'application/lumion' . . .  11
    17. Informative References  . . . . . . . . . . . . . . . . . . .  11
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  12
 
@@ -105,7 +106,6 @@ Table of Contents
    A Lumion has keys implemented as public/private key pairs, and there
    can be any (or no) key management authorities.  Lumion users can
    choose to implement any key management authority they choose.
-
 
 
 
@@ -527,6 +527,15 @@ Internet-Draft                 lumionsrfc                  December 2021
 
    XXXXXX
 
+12.4.  Online Backups
+
+   If we can assemble time-ordered lists of Lumions, then this is also a
+   way of doing backups.  Ad-hoc backups will be possible so long as the
+   smallest unit is a Lumion and only whole Lumions are transferred.
+   The UUID, versioning and ordinal information in a Lumion means that a
+   consistent backup can always be calculated assuming a reasonable
+   percentage of Lumions are present.
+
 13.  Performance Considerations
 
    XXXXXX
@@ -542,6 +551,17 @@ Internet-Draft                 lumionsrfc                  December 2021
 
    XXXXX
 
+
+
+
+
+
+
+Shearer & De Smet         Expires 20 June 2022                 [Page 10]
+
+Internet-Draft                 lumionsrfc                  December 2021
+
+
 16.  IANA Considerations
 
    This memo calls for IANA to register a new MIME content-type
@@ -553,14 +573,6 @@ Internet-Draft                 lumionsrfc                  December 2021
 
    To: ietf-types@iana.org Subject: Registration of MIME media type
    application/lumion
-
-
-
-
-Shearer & De Smet         Expires 20 June 2022                 [Page 10]
-
-Internet-Draft                 lumionsrfc                  December 2021
-
 
    MIME media type name: application
 
@@ -597,6 +609,15 @@ Internet-Draft                 lumionsrfc                  December 2021
 
 17.  Informative References
 
+
+
+
+
+Shearer & De Smet         Expires 20 June 2022                 [Page 11]
+
+Internet-Draft                 lumionsrfc                  December 2021
+
+
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
@@ -606,17 +627,6 @@ Internet-Draft                 lumionsrfc                  December 2021
               Unique IDentifier (UUID) URN Namespace", RFC 4122,
               DOI 10.17487/RFC4122, July 2005,
               <https://www.rfc-editor.org/info/rfc4122>.
-
-
-
-
-
-
-
-Shearer & De Smet         Expires 20 June 2022                 [Page 11]
-
-Internet-Draft                 lumionsrfc                  December 2021
-
 
    [RFC5234]  Crocker, D., Ed. and P. Overell, "Augmented BNF for Syntax
               Specifications: ABNF", STD 68, RFC 5234,
@@ -635,16 +645,6 @@ Authors' Addresses
    LumoSQL
 
    Email: me@rubdo.be
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -374,6 +374,15 @@ The next and last are simply Lumion UUIDs.
 
 XXXXXX
 
+## Online Backups
+
+If we can assemble time-ordered lists of Lumions, then this is also a
+way of doing backups. Ad-hoc backups will be possible so long as the
+smallest unit is a Lumion and only whole Lumions are transferred. The
+UUID, versioning and ordinal information in a Lumion means that a
+consistent backup can always be calculated assuming a reasonable
+percentage of Lumions are present.
+
 # Performance Considerations
 
 XXXXXX
