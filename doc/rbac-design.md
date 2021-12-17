@@ -56,7 +56,7 @@ LumoSQL will avoid:
 
 ## LumoSQL is a Hybrid Access Control System
 
-All SQL database security models implement [Discretionary Access Control](https://en.wikipedia.org/wiki/Discretionary_access_control). The traditional embedded use case for SQLite is already well-suited to implementing [Mandatory Access Control](https://en.wikipedia.org/wiki/Mandatory_access_control).
+All SQL database security models implement [Discretionary Access Control](https://en.wikipedia.org/wiki/Discretionary_access_control). The traditional embedded use case for SQLite is already well-suited to implementing [Mandatory Access Control](https://en.wikipedia.org/wiki/Mandatory_access_control) on end users, because the application has ultimate control. LumoSQL will not implement Mandatory Access Control.
 
 Within Discretionary Access Control there are different models and tradeoffs.
 LumoSQL implements features from some of the most common approaches.
@@ -127,8 +127,21 @@ box invis "Transport security: No. Any plain-text transport may be used to move 
 
 ```
 
-LumoSQL RBAC Permissions System
-===============================
+# LumoSQL Encrypts Three Kinds of Objects
+
+This diagram illustrates the way that any or all of the three layers of at-rest
+encryption can be active at once, and their different scopes. 
+
+``` pikchr indent toggle source-inline
+
+file "user"
+cylinder "Database"
+
+```
+
+
+
+# LumoSQL RBAC Permissions System
 
 [Role-based Access
 Control](https://en.wikipedia.org/wiki/Role-based_access_control) (RBAC) is the
@@ -145,8 +158,7 @@ A full RBAC implementation covering the many dozens of combinations of RBAC
 possibilities is far outside the LumoSQL goals described above.
 
 
-Existing SQLite Permission Schemes
-----------------------------------
+## Existing SQLite Permission Schemes
 
 SQLite has a [user authentication extension](https://www.sqlite.org/src/doc/trunk/ext/userauth/user-auth.txt)
 which provides some basic access control, and seems to be quite rarely used. If
@@ -160,8 +172,7 @@ Various proprietary products such as
 [SQLCipher](https://www.zetetic.net/sqlcipher/) can encrypt the entire SQLite
 database, which works to some extent with SQLite user authentication.
 
-LumoSQL RBAC Goals and Constraints
-----------------------------------
+# LumoSQL RBAC Goals and Constraints
 
 LumoSQL RBAC aims to provide:
 
@@ -225,9 +236,15 @@ embedded library it is guaranteed we can access the file. However the encrypted
 tables or rows will never be plain text without the key, even for a dump
 operation.
 
+# Interfaces to LumoSQL Security System
 
-Enabling and Disabling Row-level Permissions
---------------------------------------------
+The primary means of interacting with the security system is via the SQL commands.
+
+For interacting with database objects (that is, whole database encryption) the
+SQLite [Security Encryption Extension C API](https://www.sqlite.org/see/doc/trunk/www/readme.wiki) is used, with some
+of the key/rekey details modified for LumoSQL's different range of ciphers.
+
+## Enabling and Disabling Row-level Permissions
 
 Per-row access control is enabled by changing the definition as per the
 [Postgres ALTER TABLE command](https://www.postgresql.org/docs/14/sql-altertable.html). ALTER TABLE
@@ -248,8 +265,7 @@ internals of row-based security without impacting on backwards compatibility
 with other versions of LumoSQL.
 
 
-Roles
------
+## Roles
 
 Adapted from [roles in Postgres 14](https://www.postgresql.org/docs/14/user-manag.html).
 
@@ -266,8 +282,7 @@ for defining access privileges in a detailed way.
 Example: "CREATE ROLE admins SUPERUSER"
 
 
-Privileges
-----------
+## Privileges
 
 Adapted from [privileges in Postgres 14](https://www.postgresql.org/docs/14/ddl-priv.html).
 
@@ -278,7 +293,7 @@ Some privileges are assigned to roles and objects by default.
 The complete list of LumoSQL privileges is:
 
 * SELECT
-* UPDATE,
+* UPDATE
 * INSERT
 * DELETE
 * CREATE
@@ -294,9 +309,7 @@ schema objects other than DATABASE and TABLE (and therefore
 for rows within each table.) This may need to be changed in
 future versions of the LumoSQL per-row RBAC.
 
-
-Granting membership to a Role
------------------------------
+## Granting membership to a Role
 
 This is one of two very different uses of and meanings for the GRANT statement, and is
 adapted from [GRANT in Postgres 14](https://www.postgresql.org/docs/14/sql-grant.html). 
@@ -315,8 +328,7 @@ This means role svetlana is now a member of the role admins.
 REVOKE undoes GRANT.
 
 
-Granting permissions to an Object
----------------------------------
+## Granting permissions to an Object
 
 This is the second use for the GRANT statement, specific to database objects.
 
@@ -337,8 +349,10 @@ Examples: GRANT INSERT ON some_table TO nikita;
 REVOKE undoes GRANT. REVOKing table permissions does not revoke
 row permissions, or vice versa.
 
-Unresolved Questions
---------------------
+
+
+
+## Unresolved Questions
 
 * What does it mean when a binary encrypted row is dumped? From the [SQLite documentation](https://sqlite.org/cli.html):
 

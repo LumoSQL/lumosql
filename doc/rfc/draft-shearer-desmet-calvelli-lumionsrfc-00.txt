@@ -1,0 +1,392 @@
+
+
+
+
+Network Working Group                                         D. Shearer
+Internet-Draft                                                R. De Smet
+Intended status: Informational                                   LumoSQL
+Expires: 20 June 2022                                   17 December 2021
+
+
+      Lumions: Portable, Secure, Unique, Updatable Data Primitives
+              draft-shearer-desmet-calvelli-lumionsrfc-00
+
+Abstract
+
+   This memo defines Lumions, a new kind of secure, unique data
+   encapsulation primitive designed for reliable, fine-grained movements
+   of data between Internet-of-Things devices and multiple clouds.
+   Lumions are also compatible with decentralised, distributed key
+   management.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 20 June 2022.
+
+Copyright Notice
+
+   Copyright (c) 2021 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Simplified BSD License text
+   as described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Simplified BSD License.
+
+
+
+
+Shearer & De Smet         Expires 20 June 2022                  [Page 1]
+
+Internet-Draft                 lumionsrfc                  December 2021
+
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+     1.1.  Terminology . . . . . . . . . . . . . . . . . . . . . . .   2
+   2.  Definitions . . . . . . . . . . . . . . . . . . . . . . . . .   3
+   3.  Properties of Lumions . . . . . . . . . . . . . . . . . . . .   4
+   4.  Lumions and Key Management  . . . . . . . . . . . . . . . . .   4
+   5.  Goals and Constraints . . . . . . . . . . . . . . . . . . . .   4
+   6.  Lumion Data Definitions . . . . . . . . . . . . . . . . . . .   4
+   7.  Simple Emotional Representation . . . . . . . . . . . . . . .   5
+   8.  Use Cases . . . . . . . . . . . . . . . . . . . . . . . . . .   5
+   9.  Performance Considerations  . . . . . . . . . . . . . . . . .   5
+   10. Security Considerations . . . . . . . . . . . . . . . . . . .   5
+   11. Related Work  . . . . . . . . . . . . . . . . . . . . . . . .   6
+   12. IANA Considerations . . . . . . . . . . . . . . . . . . . . .   6
+     12.1.  Content-type registration for 'application/lumion' . . .   6
+   13. Informative References  . . . . . . . . . . . . . . . . . . .   7
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   7
+
+1.  Introduction
+
+   A Lumion is a one-dimensional array of data which is at minimum
+   encrypted, signed, checksummed, versioned, binary and universally
+   unique with discriminated access control, stored in network byte
+   order.
+
+   In addition a Lumion may optionally be encrypted with a public/
+   private key system such that it can be updated by anyone possessing
+   the correct key and conformant software.  There are many useful
+   properties possessed by a Lumion explained in this memo.
+
+   Situations where Lumion properties are helpful include internet-
+   connected devices such as mobile phones; transparency requirements
+   related to privacy; and data portability requirements between clouds.
+
+   A new media type "application/lumion" is defined as a helpful hint
+   for high-level applications.
+
+1.1.  Terminology
+
+   The keywords MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD,
+   SHOULD NOT, RECOMMENDED, MAY, and OPTIONAL, when they appear in this
+   document, are to be interpreted as described in [RFC2119].
+
+
+
+
+
+
+
+
+Shearer & De Smet         Expires 20 June 2022                  [Page 2]
+
+Internet-Draft                 lumionsrfc                  December 2021
+
+
+2.  Definitions
+
+   A Lumion Generator is software that can produce a Lumion for any
+   supplied raw data.  A Generator may be standalone or built into eg a
+   database.  A Lumion Generator must also be able to read Lumions, and
+   is a full implementation of this RFC.
+
+   A Lumion Reader is software that can access at least some data inside
+   a Lumion, provided it has a key to do so, where a key is required by
+   a particular Lumion.  A Lumion Reader implements some of the
+   verification and reading functionality in this RFC.
+
+   A Lumion Recogniser is very simple software, perhaps a function or a
+   script, that can detect the unique naming convention used by Lumions
+   as defined in this RFC, and extract the universally unique identifier
+   used by a particular Lumion.  A Recogniser can extract Lumions from
+   non-Lumion data, and search for a particular Lumion.  A Recogniser
+   will not be able to reliably determine whether any given Lumion is
+   valid or not.
+
+   A Lumion consists of:
+
+   *  payload data, an arbitary binary string of arbitary length less
+      than 2^64 bytes
+   *  payload metadata, such as a checksum specific to the payload
+   *  other metadata, such as a checksum for the lumion as a whole
+
+   Any of the three types of data may be in plain text, although they
+   usually will not be because much of the value of a Lumion is in its
+   encrypted properties.
+
+   Data in a Lumion may be automatically generated by one of these kinds
+   of processes:
+
+   *  cryptographic checksums
+   *  symmetric encryption
+   *  public key encryption
+   *  public key signing
+   *  one-way hashes appended to a name-based uniqueness algorithm
+
+   For each of these there are multiple possible ciphers and
+   implementation techniques.
+
+   Portability requires that data is stored in Network Byte Order.
+
+
+
+
+
+
+
+Shearer & De Smet         Expires 20 June 2022                  [Page 3]
+
+Internet-Draft                 lumionsrfc                  December 2021
+
+
+3.  Properties of Lumions
+
+   Non-repudiable.  The original key authority might be unreliable and
+   transient (because the phone got swallowed by a diprodoton) but a
+   cluster of rows can definitely be identified as having the same
+   original source.
+
+   Self-contained security: no external key authority or integrity
+   authority is needed.  Discriminated access control is provided solely
+   from the information within the Lumion.
+
+   Corruption can always be detected.
+
+   Totally portable across architectures, networks, storage systems
+   without losing or gaining any information.
+
+   Time-travelling.  This is because Lumions have a version number, so
+   they can be viewed as snapshots in time.  They can also be viewed as
+   time sequence data, if the Lumion Generator intended to produce that.
+
+   A Lumion can be operated on by any compliant software.
+
+4.  Lumions and Key Management
+
+   XXXX
+
+5.  Goals and Constraints
+
+6.  Lumion Data Definitions
+
+                        Kind     Length     Meaning
+                        ----     --------   -------
+                         25      Variable   Packet Mood
+
+   Figure: TCP Header Format
+
+   In more detail:
+
+          +--------+--------+--------+--------+
+          |00011001|00000100|00111010|00101001|
+          +--------+--------+--------+--------+
+           Kind=25  Length=4 ASCII :  ASCII )
+
+          +--------+--------+--------+--------+--------+
+          |00011001|00000101|00111110|00111010|01000000|
+          +--------+--------+--------+--------+--------+
+           Kind=25  Length=5 ASCII >  ACSII :  ASCII @
+
+
+
+
+Shearer & De Smet         Expires 20 June 2022                  [Page 4]
+
+Internet-Draft                 lumionsrfc                  December 2021
+
+
+7.  Simple Emotional Representation
+
+     ASCII                Mood
+     =====                ====
+     :)                   Happy
+     :(                   Sad
+     :D                   Amused
+     %(                   Confused
+     :o                   Bored
+     :O                   Surprised
+     :P                   Silly
+     :@                   Frustrated
+     >:@                  Angry
+     :|                   Apathetic
+     ;)                   Sneaky
+     >:)                  Evil
+
+   Proposed ASCII character encoding
+
+     Binary          Dec  Hex     Character
+     ========        ===  ===     =========
+     010 0101        37   25      %
+     010 1000        40   28      (
+     010 1001        41   29      )
+     011 1010        58   3A      :
+     011 1011        59   3B      ;
+     011 1110        62   3E      >
+     100 0000        64   40      @
+     100 0100        68   44      D
+     100 1111        79   4F      O
+     101 0000        80   50      P
+     110 1111        111  6F      o
+     111 1100        124  7C      |
+
+8.  Use Cases
+
+   XXXXXX
+
+9.  Performance Considerations
+
+   XXXXXX
+
+10.  Security Considerations
+
+   While a valid umion is entirely self-contained from a security point
+   of view, it is important to remember that Lumions by design cannot
+   support anonymity.  Transparency and traceability is vital to the
+   Lumion concept, which is why it has a UUID.
+
+
+
+Shearer & De Smet         Expires 20 June 2022                  [Page 5]
+
+Internet-Draft                 lumionsrfc                  December 2021
+
+
+11.  Related Work
+
+   XXXXX
+
+12.  IANA Considerations
+
+   This memo calls for IANA to register a new MIME content-type
+   application/pidf+xml, per [MIME].
+
+   The registration template for this is below.
+
+12.1.  Content-type registration for 'application/lumion'
+
+   To: ietf-types@iana.org Subject: Registration of MIME media type
+   application/lumion
+
+   MIME media type name: application
+
+   MIME subtype name: lumion
+
+   Required parameters: (none) Optional parameters: (none)
+
+   Encoding considerations: (none)
+
+   Security considerations:
+
+     This content type carries a payload with metadata, where the only
+     information that can be deduced relates to the Lumion envelope.
+     Everything else is encrypted. A Lumion thus is self-contained from
+     a security point of view.
+
+   Interoperability considerations: This content type provides a common
+   format for transporting data in a secure and privacy-compliant
+   manner.
+
+   Published specification: (none)
+
+   Applications which use this media type: Databases
+
+   Additional information: Magic number(s): XXXX File extension(s):
+   .lumion (optional)
+
+   Person & email address to contact for further information: Dan
+   Shearer EMail: dan@shearer.org
+
+   Intended usage: Globally, at scale
+
+   Author/Change controller: (none)
+
+
+
+Shearer & De Smet         Expires 20 June 2022                  [Page 6]
+
+Internet-Draft                 lumionsrfc                  December 2021
+
+
+13.  Informative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+Authors' Addresses
+
+   Dan Shearer
+   LumoSQL
+
+   Email: dan@shearer.org, dan@lumosql.org
+
+
+   Ruben De Smet
+   LumoSQL
+
+   Email: me@rubdo.be
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Shearer & De Smet         Expires 20 June 2022                  [Page 7]
