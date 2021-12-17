@@ -61,21 +61,30 @@ Internet-Draft                 lumionsrfc                  December 2021
 Table of Contents
 
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
-     1.1.  Terminology . . . . . . . . . . . . . . . . . . . . . . .   2
+     1.1.  Terminology . . . . . . . . . . . . . . . . . . . . . . .   3
    2.  Definitions . . . . . . . . . . . . . . . . . . . . . . . . .   3
-   3.  Properties of Lumions . . . . . . . . . . . . . . . . . . . .   4
-   4.  Lumions and Key Management  . . . . . . . . . . . . . . . . .   4
-   5.  Goals and Constraints . . . . . . . . . . . . . . . . . . . .   4
-   6.  Lumion Data Definitions . . . . . . . . . . . . . . . . . . .   4
-   7.  Simple Emotional Representation . . . . . . . . . . . . . . .   5
-   8.  Use Cases . . . . . . . . . . . . . . . . . . . . . . . . . .   5
-   9.  Performance Considerations  . . . . . . . . . . . . . . . . .   5
-   10. Security Considerations . . . . . . . . . . . . . . . . . . .   5
-   11. Related Work  . . . . . . . . . . . . . . . . . . . . . . . .   6
-   12. IANA Considerations . . . . . . . . . . . . . . . . . . . . .   6
-     12.1.  Content-type registration for 'application/lumion' . . .   6
-   13. Informative References  . . . . . . . . . . . . . . . . . . .   7
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   7
+   3.  Feature Levels  . . . . . . . . . . . . . . . . . . . . . . .   4
+     3.1.  Mandatory Minimum Requirements  . . . . . . . . . . . . .   4
+     3.2.  Optional: Key Authority . . . . . . . . . . . . . . . . .   4
+     3.3.  Optional: Versioning  . . . . . . . . . . . . . . . . . .   4
+     3.4.  Optional: Access Control  . . . . . . . . . . . . . . . .   5
+     3.5.  Optional: Checksums . . . . . . . . . . . . . . . . . . .   5
+   4.  Properties of Lumions . . . . . . . . . . . . . . . . . . . .   5
+   5.  Description of Lumions  . . . . . . . . . . . . . . . . . . .   6
+   6.  Lumions and Key Management  . . . . . . . . . . . . . . . . .   6
+   7.  Goals and Constraints . . . . . . . . . . . . . . . . . . . .   7
+   8.  Lumion Data Format  . . . . . . . . . . . . . . . . . . . . .   7
+   9.  Lumion Data Formal Specification  . . . . . . . . . . . . . .   8
+   10. Lumion UUID Format  . . . . . . . . . . . . . . . . . . . . .   9
+   11. Lumion Ciphers, Signatures and Hashes . . . . . . . . . . . .   9
+   12. Example Use Cases . . . . . . . . . . . . . . . . . . . . . .   9
+   13. Performance Considerations  . . . . . . . . . . . . . . . . .   9
+   14. Security Considerations . . . . . . . . . . . . . . . . . . .   9
+   15. Related Work  . . . . . . . . . . . . . . . . . . . . . . . .  10
+   16. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  10
+     16.1.  Content-type registration for 'application/lumion' . . .  10
+   17. Informative References  . . . . . . . . . . . . . . . . . . .  11
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  11
 
 1.  Introduction
 
@@ -86,8 +95,30 @@ Table of Contents
 
    In addition a Lumion may optionally be encrypted with a public/
    private key system such that it can be updated by anyone possessing
-   the correct key and conformant software.  There are many useful
-   properties possessed by a Lumion explained in this memo.
+   the correct key and conformant software.  This is Role-based Access
+   Control (RBAC.)  There are many useful properties possessed by a
+   Lumion explained in this memo.
+
+   A Lumion has keys implemented as public/private key pairs, and there
+   can be any (or no) key management authorities.  Lumion users can
+   choose to implement any key management authority they choose.
+
+
+
+
+
+
+
+Shearer & De Smet         Expires 20 June 2022                  [Page 2]
+
+Internet-Draft                 lumionsrfc                  December 2021
+
+
+   Distinct from any other key management scheme users may implement,
+   there is one specific key management authority scheme described in
+   this RFC which stores lists of Lumion keys in an application of a
+   public blockchain.  This gives Lumions the optional ability to have a
+   decentralised, globally distributed key authority.
 
    Situations where Lumion properties are helpful include internet-
    connected devices such as mobile phones; transparency requirements
@@ -102,31 +133,19 @@ Table of Contents
    SHOULD NOT, RECOMMENDED, MAY, and OPTIONAL, when they appear in this
    document, are to be interpreted as described in [RFC2119].
 
-
-
-
-
-
-
-
-Shearer & De Smet         Expires 20 June 2022                  [Page 2]
-
-Internet-Draft                 lumionsrfc                  December 2021
-
-
 2.  Definitions
 
-   A Lumion Generator is software that can produce a Lumion for any
-   supplied raw data.  A Generator may be standalone or built into eg a
-   database.  A Lumion Generator must also be able to read Lumions, and
-   is a full implementation of this RFC.
+   Lumion Generator: software that can produce a Lumion for any supplied
+   raw data.  A Generator may be standalone or built into eg a database.
+   A Lumion Generator must also be able to read Lumions, and is a full
+   implementation of this RFC.
 
-   A Lumion Reader is software that can access at least some data inside
+   Lumion Reader: is software that can access at least some data inside
    a Lumion, provided it has a key to do so, where a key is required by
    a particular Lumion.  A Lumion Reader implements some of the
    verification and reading functionality in this RFC.
 
-   A Lumion Recogniser is very simple software, perhaps a function or a
+   Lumion Recogniser: is very simple software, perhaps a function or a
    script, that can detect the unique naming convention used by Lumions
    as defined in this RFC, and extract the universally unique identifier
    used by a particular Lumion.  A Recogniser can extract Lumions from
@@ -134,16 +153,141 @@ Internet-Draft                 lumionsrfc                  December 2021
    will not be able to reliably determine whether any given Lumion is
    valid or not.
 
-   A Lumion consists of:
+   Payload Data: an arbitary binary string within a Lumion of arbitary
+   length less than 2^64 bytes
 
-   *  payload data, an arbitary binary string of arbitary length less
-      than 2^64 bytes
-   *  payload metadata, such as a checksum specific to the payload
-   *  other metadata, such as a checksum for the lumion as a whole
+   Payload Metadata: A checksum or version number specific to the
+   Payload Data
+
+   Metadata: all data to do with access control, checksums and version
+   numbers for the Lumion as a whole, the UUID and more.
+
+
+
+
+Shearer & De Smet         Expires 20 June 2022                  [Page 3]
+
+Internet-Draft                 lumionsrfc                  December 2021
+
+
+   Access Control: The RBAC system implemented for Lumions, where valid
+   users are anyone who has a valid key.  A valid key can only be used
+   to sign a Lumion if it is used for the correct purpose.  For example,
+   a read-only key cannot produce a valid signature for a Lumion after
+   writing to it.
+
+   Key Management Authority: a scheme selected by users to manage their
+   Lumion keys.  This could be any system at all, from a plain text file
+   on a server on the internet to a Kerberos server.  In the case of an
+   embedded database library, the key management authority will
+   typically be either individual app on the device (eg a banking app)
+   or the device's platform-wide key management authority (eg the
+   identity systems built into many versions of Android, and Apple
+   phones.)
+
+   Lumion Registry: One particular key management authority defined in
+   this RFC for storing Lumion keys in a public blockchain.
+
+3.  Feature Levels
+
+3.1.  Mandatory Minimum Requirements
+
+   A Lumion will always:
+
+   *  Have a standardised Lumion UUID
+   *  Be signed
+
+   We would not expect plain text Lumions to be common, but they are
+   valid.  A plain text Lumion with a signature is no different in
+   principle to a signed plain text MIME email.  So long as the
+   signature is valid we know that the data has not been changed.
+
+   There is no requirement for a key management authority, even on a
+   device, because it is also valid (and may sometimes be useful) for a
+   Lumion Generator to discard all knowledge of keys once it has
+   generated a Lumion.
+
+3.2.  Optional: Key Authority
+
+   There are multiple ways of implementing a Key Authority.  They are
+   all explained in the section "Lumion Key Management".
+
+3.3.  Optional: Versioning
+
+   Both payload and metadata can be versioned with 64-bit version
+   numbers.
+
+
+
+
+
+Shearer & De Smet         Expires 20 June 2022                  [Page 4]
+
+Internet-Draft                 lumionsrfc                  December 2021
+
+
+3.4.  Optional: Access Control
+
+   This is a simple version of Role-based Access Control, with a list of
+   valid keys stored in the Lumion Metadata.
+
+3.5.  Optional: Checksums
+
+   A signature is already a form of a checksum.  But in addition to the
+   overall Lumion checksum, a checksum is also used as part of the
+   Access Control system.
+
+4.  Properties of Lumions
+
+   Non-repudiable: The original key authority might be unreliable and
+   transient (because the phone got swallowed by a diprodoton) but a
+   cluster of rows can definitely be identified as having the same
+   original source.
+
+   Self-contained security: no external key authority or integrity
+   authority is needed.  Discriminated access control is provided solely
+   from the information within the Lumion.
+
+   Integrity: Corruption can always be detected.
+
+   Recognisable: A Lumion will always be recognisable as a Lumion from
+   its name-based UUID.
+
+   Identifiable: A Lumion will always be unique among Lumions due to the
+   one-way hash part of its UUID.
+
+   Portable: Can be copied across architectures, networks, storage
+   systems without losing or gaining any information.
+
+   Time-travelling: This is because Lumions have a version number, so
+   they can be viewed as snapshots in time.  They can also be viewed as
+   time sequence data, if the Lumion Generator intended to produce that.
+
+   Standardised: A Lumion can be operated on by any software that
+   complies with this RFC.
+
+   Secure: If there is no valid key available (because the original
+   Lumion Generator did not store the key correctly, or the key was
+   lost, etc) then a Lumion cannot be decrypted.
+
+   Globally distributed namespace: Just by having a Lumion UUID, that
+   means every Lumion is part of an ad hoc global storage system.
+
+
+
+
+
+Shearer & De Smet         Expires 20 June 2022                  [Page 5]
+
+Internet-Draft                 lumionsrfc                  December 2021
+
+
+5.  Description of Lumions
 
    Any of the three types of data may be in plain text, although they
    usually will not be because much of the value of a Lumion is in its
-   encrypted properties.
+   encrypted properties.  A plain text Lumion is still signed, and still
+   has a universally unique ID.
 
    Data in a Lumion may be automatically generated by one of these kinds
    of processes:
@@ -159,116 +303,194 @@ Internet-Draft                 lumionsrfc                  December 2021
 
    Portability requires that data is stored in Network Byte Order.
 
+6.  Lumions and Key Management
+
+   There are four different levels of scope that involve key management:
+
+   1.  The system within a Lumion, ie implementing access control so
+       that a validly-signed Lumoion remains validly signed even after
+       it has been updated by someone with a valid write key, and only
+       allows reads by someone with a valid read or read+write key.  All
+       of that is about how the Lumion is maintained as a data artefact.
+       These valid keys could have been generated by anyone anywhere,
+       and stored anywhere.  The Lumion neither knows nor cares.  But it
+       still has to do some degree of key management because it has list
+       of keys and their access rights inside it.
+
+   2.  How a Lumion Generator creates the Lumion in the first places and
+       the list of keys inside the Lumion.  There will also be the other
+       half of keys to be stored somewhere (presumably inside a LumoSQL
+       database, in a Lumion.)  That incldues symmetric keys, and
+       signatures.  So this too is key management.  New users, the
+       extent to which revocation is supported, etc.  I expect this will
+       be mostly internal to LumoSQL, driven by the SQL interface (?)
 
 
 
 
 
 
-Shearer & De Smet         Expires 20 June 2022                  [Page 3]
+
+
+
+Shearer & De Smet         Expires 20 June 2022                  [Page 6]
 
 Internet-Draft                 lumionsrfc                  December 2021
 
 
-3.  Properties of Lumions
+   3.  Key management via an Authority, any authority.  A LumoSQL user
+       is building an app, and might choose to make LDAP or Active
+       Directory or Kerberos the Authority, or an Oracle database, etc.
+       LumoSQL doesn't know or care, only that the keys are in the right
+       places at the right time.  Will this be done through the C API,
+       or SQL only?
 
-   Non-repudiable.  The original key authority might be unreliable and
-   transient (because the phone got swallowed by a diprodoton) but a
-   cluster of rows can definitely be identified as having the same
-   original source.
+   4.  Key management via the Lumion Registry, which is the only (and
+       totally optional) scheme that LumoSQL is configured to support.
+       This is the scheme I described where Lumions are stored in a
+       blockchain, specifically Ethereum, as an implementation of a
+       standard Ethereum smart contract.  This is where we could have
+       many billions of rows with their UUID registered and also the
+       users with access rights registered there too.  See the later
+       section headed "Lumion Registry".
 
-   Self-contained security: no external key authority or integrity
-   authority is needed.  Discriminated access control is provided solely
-   from the information within the Lumion.
-
-   Corruption can always be detected.
-
-   Totally portable across architectures, networks, storage systems
-   without losing or gaining any information.
-
-   Time-travelling.  This is because Lumions have a version number, so
-   they can be viewed as snapshots in time.  They can also be viewed as
-   time sequence data, if the Lumion Generator intended to produce that.
-
-   A Lumion can be operated on by any compliant software.
-
-4.  Lumions and Key Management
+7.  Goals and Constraints
 
    XXXX
 
-5.  Goals and Constraints
+8.  Lumion Data Format
 
-6.  Lumion Data Definitions
+   A Lumion is laid out like this:
 
-                        Kind     Length     Meaning
-                        ----     --------   -------
-                         25      Variable   Packet Mood
+   +--------+-----------------+------------------------+---------+ |
+   UUID | Metadata Block | Payload Metadata Block | Payload |
+   +--------+-----------------+------------------------+---------+
 
-   Figure: TCP Header Format
+   These fields are always present in a Lumion.
 
-   In more detail:
+   The UUID is described in the section "Lumion UUID Format", and is
+   always 256 bits wide.
 
-          +--------+--------+--------+--------+
-          |00011001|00000100|00111010|00101001|
-          +--------+--------+--------+--------+
-           Kind=25  Length=4 ASCII :  ASCII )
+   The Metadata Block is laid out like this:
 
-          +--------+--------+--------+--------+--------+
-          |00011001|00000101|00111110|00111010|01000000|
-          +--------+--------+--------+--------+--------+
-           Kind=25  Length=5 ASCII >  ACSII :  ASCII @
+   +-----------+--------------+-------------------------+---------------
+   -+ | Signature | Feature List | Payload Metadata Offset | Other
+   Metadata | +-----------+--------------+-------------------------+----
+   ------------+
+
+   The Lumion Signature is a digital signature from one of those allowed
+   in this RFC.  See the section "Lumion Ciphers, Signatures and
+   Hashes".
+
+   The Lumion Feature list is a 32-bit bitmask with values as in the
+   following table: XXXXXX
+
+   Payload Metadata Offset is a 64-bit integer.
 
 
 
-
-Shearer & De Smet         Expires 20 June 2022                  [Page 4]
+Shearer & De Smet         Expires 20 June 2022                  [Page 7]
 
 Internet-Draft                 lumionsrfc                  December 2021
 
 
-7.  Simple Emotional Representation
+   Other Metadata covers RBAC and other Metadata features, XXXXX.
 
-     ASCII                Mood
-     =====                ====
-     :)                   Happy
-     :(                   Sad
-     :D                   Amused
-     %(                   Confused
-     :o                   Bored
-     :O                   Surprised
-     :P                   Silly
-     :@                   Frustrated
-     >:@                  Angry
-     :|                   Apathetic
-     ;)                   Sneaky
-     >:)                  Evil
+   The Payload Metadata Block is laid out like this:
 
-   Proposed ASCII character encoding
+   +----------------+-----------------------+------------------------+ |
+   Payload Length | Payload Version Count | Other Payload Metadata |
+   +----------------+-----------------------+------------------------+
 
-     Binary          Dec  Hex     Character
-     ========        ===  ===     =========
-     010 0101        37   25      %
-     010 1000        40   28      (
-     010 1001        41   29      )
-     011 1010        58   3A      :
-     011 1011        59   3B      ;
-     011 1110        62   3E      >
-     100 0000        64   40      @
-     100 0100        68   44      D
-     100 1111        79   4F      O
-     101 0000        80   50      P
-     110 1111        111  6F      o
-     111 1100        124  7C      |
+   Payload Length is a 64-bit integer.
 
-8.  Use Cases
+   Payload Version Count is a 64-bit integer.
+
+   Other Payload Metadata relates to RBAC, such as Last Edited By, which
+   is a keyid listed in the Metadata Block.  XXXXX
+
+9.  Lumion Data Formal Specification
+
+   A Lumion has the following ABNF [RFC5234] definition:
+
+     SYSLOG-MSG      = HEADER SP STRUCTURED-DATA [SP MSG]
+
+     HEADER          = PRI VERSION SP TIMESTAMP SP HOSTNAME
+                       SP APP-NAME SP PROCID SP MSGID
+     PRI             = "<" PRIVAL ">"
+     PRIVAL          = 1*3DIGIT ; range 0 .. 191
+     VERSION         = NONZERO-DIGIT 0*2DIGIT
+     HOSTNAME        = NILVALUE / 1*255PRINTUSASCII
+
+     APP-NAME        = NILVALUE / 1*48PRINTUSASCII
+     PROCID          = NILVALUE / 1*128PRINTUSASCII
+     MSGID           = NILVALUE / 1*32PRINTUSASCII
+
+     TIMESTAMP       = NILVALUE / FULL-DATE "T" FULL-TIME
+     FULL-DATE       = DATE-FULLYEAR "-" DATE-MONTH "-" DATE-MDAY
+     DATE-FULLYEAR   = 4DIGIT
+     DATE-MONTH      = 2DIGIT  ; 01-12
+     DATE-MDAY       = 2DIGIT  ; 01-28, 01-29, 01-30, 01-31 based on
+                               ; month/year
+     FULL-TIME       = PARTIAL-TIME TIME-OFFSET
+     PARTIAL-TIME    = TIME-HOUR ":" TIME-MINUTE ":" TIME-SECOND
+                       [TIME-SECFRAC]
+     TIME-HOUR       = 2DIGIT  ; 00-23
+     TIME-MINUTE     = 2DIGIT  ; 00-59
+     TIME-SECOND     = 2DIGIT  ; 00-59
+     TIME-SECFRAC    = "." 1*6DIGIT
+     TIME-OFFSET     = "Z" / TIME-NUMOFFSET
+     TIME-NUMOFFSET  = ("+" / "-") TIME-HOUR ":" TIME-MINUTE
+
+
+
+
+Shearer & De Smet         Expires 20 June 2022                  [Page 8]
+
+Internet-Draft                 lumionsrfc                  December 2021
+
+
+     STRUCTURED-DATA = NILVALUE / 1*SD-ELEMENT
+     SD-ELEMENT      = "[" SD-ID *(SP SD-PARAM) "]"
+     SD-PARAM        = PARAM-NAME "=" %d34 PARAM-VALUE %d34
+     SD-ID           = SD-NAME
+     PARAM-NAME      = SD-NAME
+     PARAM-VALUE     = UTF-8-STRING ; characters '"', '\' and
+                                    ; ']' MUST be escaped.
+     SD-NAME         = 1*32PRINTUSASCII
+                       ; except '=', SP, ']', %d34 (")
+
+     MSG             = MSG-ANY / MSG-UTF8
+     MSG-ANY         = *OCTET ; not starting with BOM
+     MSG-UTF8        = BOM UTF-8-STRING
+     BOM             = %xEF.BB.BF
+
+     UTF-8-STRING    = *OCTET ; UTF-8 string as specified in RFC 3629
+
+     OCTET           = %d00-255
+     SP              = %d32
+     PRINTUSASCII    = %d33-126
+     NONZERO-DIGIT   = %d49-57
+     DIGIT           = %d48 / NONZERO-DIGIT
+     NILVALUE        = "-"
+
+10.  Lumion UUID Format
 
    XXXXXX
 
-9.  Performance Considerations
+11.  Lumion Ciphers, Signatures and Hashes
 
    XXXXXX
 
-10.  Security Considerations
+12.  Example Use Cases
+
+   XXXXXX
+
+13.  Performance Considerations
+
+   XXXXXX
+
+14.  Security Considerations
 
    While a valid umion is entirely self-contained from a security point
    of view, it is important to remember that Lumions by design cannot
@@ -277,23 +499,25 @@ Internet-Draft                 lumionsrfc                  December 2021
 
 
 
-Shearer & De Smet         Expires 20 June 2022                  [Page 5]
+
+
+Shearer & De Smet         Expires 20 June 2022                  [Page 9]
 
 Internet-Draft                 lumionsrfc                  December 2021
 
 
-11.  Related Work
+15.  Related Work
 
    XXXXX
 
-12.  IANA Considerations
+16.  IANA Considerations
 
    This memo calls for IANA to register a new MIME content-type
    application/pidf+xml, per [MIME].
 
    The registration template for this is below.
 
-12.1.  Content-type registration for 'application/lumion'
+16.1.  Content-type registration for 'application/lumion'
 
    To: ietf-types@iana.org Subject: Registration of MIME media type
    application/lumion
@@ -333,17 +557,22 @@ Internet-Draft                 lumionsrfc                  December 2021
 
 
 
-Shearer & De Smet         Expires 20 June 2022                  [Page 6]
+Shearer & De Smet         Expires 20 June 2022                 [Page 10]
 
 Internet-Draft                 lumionsrfc                  December 2021
 
 
-13.  Informative References
+17.  Informative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
               <https://www.rfc-editor.org/info/rfc2119>.
+
+   [RFC5234]  Crocker, D., Ed. and P. Overell, "Augmented BNF for Syntax
+              Specifications: ABNF", STD 68, RFC 5234,
+              DOI 10.17487/RFC5234, January 2008,
+              <https://www.rfc-editor.org/info/rfc5234>.
 
 Authors' Addresses
 
@@ -384,9 +613,4 @@ Authors' Addresses
 
 
 
-
-
-
-
-
-Shearer & De Smet         Expires 20 June 2022                  [Page 7]
+Shearer & De Smet         Expires 20 June 2022                 [Page 11]
