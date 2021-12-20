@@ -5,7 +5,7 @@
 Network Working Group                                         D. Shearer
 Internet-Draft                                                R. De Smet
 Intended status: Informational                                   LumoSQL
-Expires: 20 June 2022                                   17 December 2021
+Expires: 23 June 2022                                   20 December 2021
 
 
       Lumions: Portable, Secure, Unique, Updatable Data Primitives
@@ -34,7 +34,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 20 June 2022.
+   This Internet-Draft will expire on 23 June 2022.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Shearer & De Smet         Expires 20 June 2022                  [Page 1]
+Shearer & De Smet         Expires 23 June 2022                  [Page 1]
 
 Internet-Draft                 lumionsrfc                  December 2021
 
@@ -77,17 +77,17 @@ Table of Contents
    9.  Lumion Data Formal Specification  . . . . . . . . . . . . . .   8
    10. Lumion UUID Format  . . . . . . . . . . . . . . . . . . . . .   9
    11. List of Lumion Ciphers, Signatures and Hashes . . . . . . . .   9
-   12. Example Use Cases . . . . . . . . . . . . . . . . . . . . . .   9
+   12. Example Use Cases . . . . . . . . . . . . . . . . . . . . . .  10
      12.1.  Data Tracking and Portability  . . . . . . . . . . . . .  10
      12.2.  Time Travelling Data for Snapshotting  . . . . . . . . .  10
      12.3.  Non-Fungible Token (NFT) Applications  . . . . . . . . .  10
      12.4.  Online Backups . . . . . . . . . . . . . . . . . . . . .  10
    13. Performance Considerations  . . . . . . . . . . . . . . . . .  10
    14. Security Considerations . . . . . . . . . . . . . . . . . . .  10
-   15. Related Work  . . . . . . . . . . . . . . . . . . . . . . . .  10
+   15. Related Work  . . . . . . . . . . . . . . . . . . . . . . . .  11
    16. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  11
      16.1.  Content-type registration for 'application/lumion' . . .  11
-   17. Informative References  . . . . . . . . . . . . . . . . . . .  11
+   17. Informative References  . . . . . . . . . . . . . . . . . . .  12
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  12
 
 1.  Introduction
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Shearer & De Smet         Expires 20 June 2022                  [Page 2]
+Shearer & De Smet         Expires 23 June 2022                  [Page 2]
 
 Internet-Draft                 lumionsrfc                  December 2021
 
@@ -165,7 +165,7 @@ Internet-Draft                 lumionsrfc                  December 2021
 
 
 
-Shearer & De Smet         Expires 20 June 2022                  [Page 3]
+Shearer & De Smet         Expires 23 June 2022                  [Page 3]
 
 Internet-Draft                 lumionsrfc                  December 2021
 
@@ -221,7 +221,7 @@ Internet-Draft                 lumionsrfc                  December 2021
 
 
 
-Shearer & De Smet         Expires 20 June 2022                  [Page 4]
+Shearer & De Smet         Expires 23 June 2022                  [Page 4]
 
 Internet-Draft                 lumionsrfc                  December 2021
 
@@ -277,7 +277,7 @@ Internet-Draft                 lumionsrfc                  December 2021
 
 
 
-Shearer & De Smet         Expires 20 June 2022                  [Page 5]
+Shearer & De Smet         Expires 23 June 2022                  [Page 5]
 
 Internet-Draft                 lumionsrfc                  December 2021
 
@@ -333,7 +333,7 @@ Internet-Draft                 lumionsrfc                  December 2021
 
 
 
-Shearer & De Smet         Expires 20 June 2022                  [Page 6]
+Shearer & De Smet         Expires 23 June 2022                  [Page 6]
 
 Internet-Draft                 lumionsrfc                  December 2021
 
@@ -389,15 +389,19 @@ Internet-Draft                 lumionsrfc                  December 2021
 
 
 
-Shearer & De Smet         Expires 20 June 2022                  [Page 7]
+Shearer & De Smet         Expires 23 June 2022                  [Page 7]
 
 Internet-Draft                 lumionsrfc                  December 2021
 
 
-   Other Metadata covers RBAC and other Metadata features: * Next and
-   Last pointers, in the case where the Lumion Version Count is non-
-   zero.  The pointers are Lumion UUIDs.  * List of valid Lumion Access
-   Keys * XXXXXX
+   Other Metadata contains all RBAC metadata, and some non-RBAC
+   Metadata:
+
+* Left and Right pointers, in the case where the Lumion Version Count is
+  non-zero. The pointers are Lumion UUIDs, meaning that lists and
+  other structures can be implemented with Lumions.
+* List of valid Lumion Access Keys
+* XXXXXX
 
    The Payload Metadata Block is laid out like this:
 
@@ -438,18 +442,18 @@ Internet-Draft                 lumionsrfc                  December 2021
      DATE-MONTH      = 2DIGIT  ; 01-12
      DATE-MDAY       = 2DIGIT  ; 01-28, 01-29, 01-30, 01-31 based on
                                ; month/year
-     FULL-TIME       = PARTIAL-TIME TIME-OFFSET
-     PARTIAL-TIME    = TIME-HOUR ":" TIME-MINUTE ":" TIME-SECOND
-                       [TIME-SECFRAC]
-     TIME-HOUR       = 2DIGIT  ; 00-23
 
 
 
-Shearer & De Smet         Expires 20 June 2022                  [Page 8]
+Shearer & De Smet         Expires 23 June 2022                  [Page 8]
 
 Internet-Draft                 lumionsrfc                  December 2021
 
 
+     FULL-TIME       = PARTIAL-TIME TIME-OFFSET
+     PARTIAL-TIME    = TIME-HOUR ":" TIME-MINUTE ":" TIME-SECOND
+                       [TIME-SECFRAC]
+     TIME-HOUR       = 2DIGIT  ; 00-23
      TIME-MINUTE     = 2DIGIT  ; 00-59
      TIME-SECOND     = 2DIGIT  ; 00-59
      TIME-SECFRAC    = "." 1*6DIGIT
@@ -484,27 +488,29 @@ Internet-Draft                 lumionsrfc                  December 2021
 10.  Lumion UUID Format
 
    This is a combination of a name-based namespace and a robust hash,
-   similar to [RFC4122].  RFC4122 UUIDs cannot be used because of the
-   constrained environments many Lumion-using applications are deployed
-   in.
+   similar to type 5 UUIDs in [RFC4122].  RFC4122 UUIDs cannot be used
+   because of the constrained environments many Lumion-using
+   applications are deployed in and which therefore do not have
+   knowledge of namespaces.  In addition RFC4122 does not include any
+   hash more recent than SHA-1, which is now deprecated.
 
    XXXXXX
 
 11.  List of Lumion Ciphers, Signatures and Hashes
 
-   XXXXXX
-
-12.  Example Use Cases
 
 
 
-
-
-
-Shearer & De Smet         Expires 20 June 2022                  [Page 9]
+Shearer & De Smet         Expires 23 June 2022                  [Page 9]
 
 Internet-Draft                 lumionsrfc                  December 2021
 
+
+   *  SHA-3/SHA-256
+   *  BLAKE3
+   *  XXXXXX
+
+12.  Example Use Cases
 
 12.1.  Data Tracking and Portability
 
@@ -529,12 +535,12 @@ Internet-Draft                 lumionsrfc                  December 2021
 
 12.4.  Online Backups
 
-   If we can assemble time-ordered lists of Lumions, then this is also a
-   way of doing backups.  Ad-hoc backups will be possible so long as the
-   smallest unit is a Lumion and only whole Lumions are transferred.
-   The UUID, versioning and ordinal information in a Lumion means that a
-   consistent backup can always be calculated assuming a reasonable
-   percentage of Lumions are present.
+   A time-ordered lists of Lumions is also a form of backups.  Ad-hoc
+   backups will be possible so long as the smallest unit is a Lumion and
+   only whole Lumions are transferred.  The UUID, versioning and ordinal
+   information optionally contained in a Lumion means that a consistent
+   backup can always be calculated assuming a reasonable percentage of
+   Lumions are present.
 
 13.  Performance Considerations
 
@@ -542,25 +548,23 @@ Internet-Draft                 lumionsrfc                  December 2021
 
 14.  Security Considerations
 
-   While a valid umion is entirely self-contained from a security point
-   of view, it is important to remember that Lumions by design cannot
+   While a valid Lumion is entirely self-contained from a security point
+   of view, it is important to remember that Lumions are designed to NOT
    support anonymity.  Transparency and traceability is vital to the
    Lumion concept, which is why it has a UUID.
+
+
+
+
+
+Shearer & De Smet         Expires 23 June 2022                 [Page 10]
+
+Internet-Draft                 lumionsrfc                  December 2021
+
 
 15.  Related Work
 
    XXXXX
-
-
-
-
-
-
-
-Shearer & De Smet         Expires 20 June 2022                 [Page 10]
-
-Internet-Draft                 lumionsrfc                  December 2021
-
 
 16.  IANA Considerations
 
@@ -607,16 +611,14 @@ Internet-Draft                 lumionsrfc                  December 2021
 
    Author/Change controller: (none)
 
-17.  Informative References
 
 
-
-
-
-Shearer & De Smet         Expires 20 June 2022                 [Page 11]
+Shearer & De Smet         Expires 23 June 2022                 [Page 11]
 
 Internet-Draft                 lumionsrfc                  December 2021
 
+
+17.  Informative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -667,6 +669,4 @@ Authors' Addresses
 
 
 
-
-
-Shearer & De Smet         Expires 20 June 2022                 [Page 12]
+Shearer & De Smet         Expires 23 June 2022                 [Page 12]

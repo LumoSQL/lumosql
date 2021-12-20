@@ -261,8 +261,11 @@ The Lumion Feature list is a 32-bit bitmask with values as in the following tabl
 
 Payload Metadata Offset is a 64-bit integer.
 
-Other Metadata covers RBAC and other Metadata features:
-    * Next and Last pointers, in the case where the Lumion Version Count is non-zero. The pointers are Lumion UUIDs.
+Other Metadata contains all RBAC metadata, and some non-RBAC Metadata:
+
+    * Left and Right pointers, in the case where the Lumion Version Count is
+      non-zero. The pointers are Lumion UUIDs, meaning that lists and 
+      other structures can be implemented with Lumions.
     * List of valid Lumion Access Keys
     * XXXXXX
 
@@ -343,14 +346,18 @@ it is quite atmospheric, don't you think?)
 # Lumion UUID Format
 
 This is a combination of a name-based namespace and a robust hash, similar to
-[@RFC4122]. RFC4122 UUIDs cannot be used because of the constrained
-environments many Lumion-using applications are deployed in.
+type 5 UUIDs in [@RFC4122]. RFC4122 UUIDs cannot be used because of the
+constrained environments many Lumion-using applications are deployed in and
+which therefore do not have knowledge of namespaces. In addition RFC4122 does
+not include any hash more recent than SHA-1, which is now deprecated.
 
 XXXXXX
 
 # List of Lumion Ciphers, Signatures and Hashes
 
-XXXXXX
+* SHA-3/SHA-256
+* BLAKE3
+* XXXXXX
 
 # Example Use Cases
 
@@ -376,12 +383,12 @@ XXXXXX
 
 ## Online Backups
 
-If we can assemble time-ordered lists of Lumions, then this is also a
-way of doing backups. Ad-hoc backups will be possible so long as the
-smallest unit is a Lumion and only whole Lumions are transferred. The
-UUID, versioning and ordinal information in a Lumion means that a
-consistent backup can always be calculated assuming a reasonable
-percentage of Lumions are present.
+A time-ordered lists of Lumions is also a form of backups. Ad-hoc
+backups will be possible so long as the smallest unit is a Lumion and
+only whole Lumions are transferred. The UUID, versioning and ordinal
+information optionally contained in a Lumion means that a consistent
+backup can always be calculated assuming a reasonable percentage of
+Lumions are present.
 
 # Performance Considerations
 
@@ -389,9 +396,10 @@ XXXXXX
 
 # Security Considerations
 
-While a valid umion is entirely self-contained from a security point of view, it is 
-important to remember that Lumions by design cannot support anonymity. Transparency
-and traceability is vital to the Lumion concept, which is why it has a UUID. 
+While a valid Lumion is entirely self-contained from a security point of view,
+it is important to remember that Lumions are designed to NOT support anonymity.
+Transparency and traceability is vital to the Lumion concept, which is why it
+has a UUID. 
 
 # Related Work
 
