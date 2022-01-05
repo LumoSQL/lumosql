@@ -12,6 +12,9 @@ support LumoSQL, this time via the NGI Assure fund linked below.
 
 In LumoSQL Phase II, the team is focussing on:
 
+* [Lumions as a universal data transport](./rfc/README.md) as well as the
+  fundamental unit of private and secure data storage in LumoSQL.
+
 * Implementing a small [subset of the Postgresql 13 RBAC](./rbac-design.md)
   permissions model via
   the SQL statements CREATE ROLE/GRANT/REVOKE etc. An important addition to
