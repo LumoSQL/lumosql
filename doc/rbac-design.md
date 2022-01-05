@@ -6,6 +6,44 @@
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Dan Shearer, August 2020 -->
 
+LumoSQL Minimal At-Rest Discretionary Access Control System
+===========================================================
+
+
+Role
+Authority
+Privilege
+Subjects
+Objects
+
+How it compares
+===============
+
+* RBAC is not centrally administered by default ...
+* A minimal subset of DAC implemented ...
+* Privileges default to all for every user, because an embedded ...
+
+
+Nobody else does at-rest fine-grained control
+
+Not policies. Not columns. Not nested roles. Limited privileges, subjects and objects.
+
+Definitions
+===========
+
+
+A  role is a database entity that is used to group a combination of authorities 
+and/or privileges together so they can be simultaneously granted or revoked. 
+When roles are used, the assignment of authorities and privileges is greatly 
+simplified. For example, instead of granting the same set of authorities and 
+privileges to every individual in a particular job function, you can assign a set 
+of authorities and privileges to a role that represents the job and then grant 
+membership in that role to every user who performs that particular job. It is 
+important to note that only users with SECADM authority are allowed to 
+create roles (by executing the CREATE ROLE SQL statement)
+
+
+
 # The LumoSQL Security Design and Implementation
 
 SQLite is an embedded database, and traditionally there has been no need of
