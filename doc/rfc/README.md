@@ -28,12 +28,26 @@ At present (December 2021) the [draft-shearer-desmet-calvelli-lumionsrfc-00.txt]
 
 # Toolchain
 
-The [mmark IETF Markdown tool](https://github.com/mmarkdown/mmark) is a big
-help, and comes with example RFCs. 
+The Lumion RFC is maintained in Markdown, as specified for an processed by 
+the [mmark IETF Markdown tool](https://github.com/mmarkdown/mmark) tool.
+The only dependency is the tool xml2rfc.
 
-The quickest way to start is to copy the file draft-shearer-desmet-calvelli-lumionsrfc-00.md
-into the rfc directory in the mmark tree, and then type 'make'. That will produce a new .txt
-version.
+Short version instructions:
+
+* Install xml2rfc version >= 2.47
+* Install go
+* git clone https://github.com/mmarkdown/mmark ; cd mmark
+* go get && go build
+* ./mmark version      <-- test the binary
+* cd rfc ; make        <-- this should rebuild the .txt files for the sample RFCs
+
+Test the toolchain for the Lumion RFC:
+
+* copy the file draft-shearer-desmet-calvelli-lumionsrfc-00.md to mmark/rfc
+* make 
+
+If this generates draft-shearer-desmet-calvelli-lumionsrfc-00.txt then your
+toolchain is working, change paths etc to your taste.
 
 # Inspiration
 
