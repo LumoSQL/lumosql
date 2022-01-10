@@ -5,7 +5,7 @@
 Network Working Group                                         D. Shearer
 Internet-Draft                                                R. De Smet
 Intended status: Informational                                   LumoSQL
-Expires: 23 June 2022                                   20 December 2021
+Expires: 14 July 2022                                    10 January 2022
 
 
       Lumions: Portable, Secure, Unique, Updatable Data Primitives
@@ -34,11 +34,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 23 June 2022.
+   This Internet-Draft will expire on 14 July 2022.
 
 Copyright Notice
 
-   Copyright (c) 2021 IETF Trust and the persons identified as the
+   Copyright (c) 2022 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Shearer & De Smet         Expires 23 June 2022                  [Page 1]
+Shearer & De Smet         Expires 14 July 2022                  [Page 1]
 
-Internet-Draft                 lumionsrfc                  December 2021
+Internet-Draft                 lumionsrfc                   January 2022
 
 
 Table of Contents
@@ -66,7 +66,7 @@ Table of Contents
    3.  Feature Levels  . . . . . . . . . . . . . . . . . . . . . . .   4
      3.1.  Mandatory Minimum Requirements  . . . . . . . . . . . . .   4
      3.2.  Optional: Key Authority . . . . . . . . . . . . . . . . .   4
-     3.3.  Optional: Versioning  . . . . . . . . . . . . . . . . . .   4
+     3.3.  Optional: Versioning  . . . . . . . . . . . . . . . . . .   5
      3.4.  Optional: Access Control  . . . . . . . . . . . . . . . .   5
      3.5.  Optional: Checksums . . . . . . . . . . . . . . . . . . .   5
    4.  Properties of Lumions . . . . . . . . . . . . . . . . . . . .   5
@@ -92,27 +92,31 @@ Table of Contents
 
 1.  Introduction
 
-   A Lumion is a one-dimensional array of data which is at minimum
-   encrypted, signed, checksummed, versioned, binary and universally
-   unique with discriminated access control, stored in network byte
-   order.
+   A Lumion is a one-dimensional array of data signed with a public key
+   which MUST contain a checksum, a version number and a universally
+   unique
+   identifier.  A Lumion is binary data, stored in network byte order.
 
-   In addition a Lumion may optionally be encrypted with a public/
-   private key system such that it can be updated by anyone possessing
-   the correct key and conformant software.  This is Role-based Access
-   Control (RBAC.)  There are many useful properties possessed by a
-   Lumion explained in this memo.
+   In addition a Lumion MAY be encrypted with one or more schemes
+   defined in this standard which together implement various forms of
+   Role-based Access Control.  These schemes offer different levels of
+   access depending on the token supplied.  After being updated with a
+   valid write access, a Lumion will have an updated checksum, and the
+   updated signature will be valid in all situations where it was
+   previously valid.
+
+
+
+
+
+Shearer & De Smet         Expires 14 July 2022                  [Page 2]
+
+Internet-Draft                 lumionsrfc                   January 2022
+
 
    A Lumion has keys implemented as public/private key pairs, and there
    can be any (or no) key management authorities.  Lumion users can
    choose to implement any key management authority they choose.
-
-
-
-Shearer & De Smet         Expires 23 June 2022                  [Page 2]
-
-Internet-Draft                 lumionsrfc                  December 2021
-
 
    Distinct from any other key management scheme users may implement,
    there is one specific key management authority scheme described in
@@ -159,16 +163,15 @@ Internet-Draft                 lumionsrfc                  December 2021
    Payload Metadata: A checksum or version number specific to the
    Payload Data
 
+
+
+Shearer & De Smet         Expires 14 July 2022                  [Page 3]
+
+Internet-Draft                 lumionsrfc                   January 2022
+
+
    Metadata: all data to do with access control, checksums and version
    numbers for the Lumion as a whole, the UUID and more.
-
-
-
-
-Shearer & De Smet         Expires 23 June 2022                  [Page 3]
-
-Internet-Draft                 lumionsrfc                  December 2021
-
 
    Access Control: The RBAC system implemented for Lumions, where valid
    users are anyone who has a valid key.  A valid key can only be used
@@ -212,19 +215,21 @@ Internet-Draft                 lumionsrfc                  December 2021
    There are multiple ways of implementing a Key Authority.  They are
    all explained in the section "Lumion Key Management".
 
+
+
+
+
+
+
+Shearer & De Smet         Expires 14 July 2022                  [Page 4]
+
+Internet-Draft                 lumionsrfc                   January 2022
+
+
 3.3.  Optional: Versioning
 
    Both payload and metadata can be versioned with 64-bit version
    numbers.
-
-
-
-
-
-Shearer & De Smet         Expires 23 June 2022                  [Page 4]
-
-Internet-Draft                 lumionsrfc                  December 2021
-
 
 3.4.  Optional: Access Control
 
@@ -270,17 +275,15 @@ Internet-Draft                 lumionsrfc                  December 2021
    Lumion Generator did not store the key correctly, or the key was
    lost, etc) then a Lumion cannot be decrypted.
 
+
+
+Shearer & De Smet         Expires 14 July 2022                  [Page 5]
+
+Internet-Draft                 lumionsrfc                   January 2022
+
+
    Globally distributed namespace: Just by having a Lumion UUID, that
    means every Lumion is part of an ad hoc global storage system.
-
-
-
-
-
-Shearer & De Smet         Expires 23 June 2022                  [Page 5]
-
-Internet-Draft                 lumionsrfc                  December 2021
-
 
 5.  Description of Lumions
 
@@ -330,12 +333,9 @@ Internet-Draft                 lumionsrfc                  December 2021
 
 
 
-
-
-
-Shearer & De Smet         Expires 23 June 2022                  [Page 6]
+Shearer & De Smet         Expires 14 July 2022                  [Page 6]
 
-Internet-Draft                 lumionsrfc                  December 2021
+Internet-Draft                 lumionsrfc                   January 2022
 
 
    3.  Key management via an Authority, any authority.  A LumoSQL user
@@ -389,9 +389,9 @@ Internet-Draft                 lumionsrfc                  December 2021
 
 
 
-Shearer & De Smet         Expires 23 June 2022                  [Page 7]
+Shearer & De Smet         Expires 14 July 2022                  [Page 7]
 
-Internet-Draft                 lumionsrfc                  December 2021
+Internet-Draft                 lumionsrfc                   January 2022
 
 
    Other Metadata contains all RBAC metadata, and some non-RBAC
@@ -445,9 +445,9 @@ Internet-Draft                 lumionsrfc                  December 2021
 
 
 
-Shearer & De Smet         Expires 23 June 2022                  [Page 8]
+Shearer & De Smet         Expires 14 July 2022                  [Page 8]
 
-Internet-Draft                 lumionsrfc                  December 2021
+Internet-Draft                 lumionsrfc                   January 2022
 
 
      FULL-TIME       = PARTIAL-TIME TIME-OFFSET
@@ -501,9 +501,9 @@ Internet-Draft                 lumionsrfc                  December 2021
 
 
 
-Shearer & De Smet         Expires 23 June 2022                  [Page 9]
+Shearer & De Smet         Expires 14 July 2022                  [Page 9]
 
-Internet-Draft                 lumionsrfc                  December 2021
+Internet-Draft                 lumionsrfc                   January 2022
 
 
    *  SHA-3/SHA-256
@@ -557,9 +557,9 @@ Internet-Draft                 lumionsrfc                  December 2021
 
 
 
-Shearer & De Smet         Expires 23 June 2022                 [Page 10]
+Shearer & De Smet         Expires 14 July 2022                 [Page 10]
 
-Internet-Draft                 lumionsrfc                  December 2021
+Internet-Draft                 lumionsrfc                   January 2022
 
 
 15.  Related Work
@@ -613,9 +613,9 @@ Internet-Draft                 lumionsrfc                  December 2021
 
 
 
-Shearer & De Smet         Expires 23 June 2022                 [Page 11]
+Shearer & De Smet         Expires 14 July 2022                 [Page 11]
 
-Internet-Draft                 lumionsrfc                  December 2021
+Internet-Draft                 lumionsrfc                   January 2022
 
 
 17.  Informative References
@@ -669,4 +669,4 @@ Authors' Addresses
 
 
 
-Shearer & De Smet         Expires 23 June 2022                 [Page 12]
+Shearer & De Smet         Expires 14 July 2022                 [Page 12]
