@@ -44,14 +44,16 @@ multiple clouds. Lumions are also compatible with decentralised, distributed key
 
 # Introduction
 
-A Lumion is a one-dimensional array of data which is at minimum encrypted,
-signed, checksummed, versioned, binary and universally unique with
-discriminated access control, stored in network byte order.
+A Lumion is a one-dimensional array of data signed with a public key  
+which MUST contain a checksum, a version number and a universally unique  
+identifier. A Lumion is binary data, stored in network byte order.
 
-In addition a Lumion may optionally be encrypted with a public/private key
-system such that it can be updated by anyone possessing the correct key and
-conformant software. This is Role-based Access Control (RBAC.) There are many
-useful properties possessed by a Lumion explained in this memo.
+In addition a Lumion MAY be encrypted with one or more schemes defined in
+this standard which together implement various forms of Role-based Access Control.
+These schemes offer different levels of access depending on the token supplied. 
+After being updated with a valid write access, a Lumion will have an updated
+checksum, and the updated signature will be valid in all situations where it
+was previously valid.
 
 A Lumion has keys implemented as public/private key pairs, and there can be any
 (or no) key management authorities. Lumion users can choose to implement any
