@@ -16,14 +16,14 @@ an easier way to benchmark and measure SQLite, or if you are wanting features
 only available in other key-value storage engines, then you may find LumoSQL
 interesting.
 
-In LumoSQL 0.4 there are currently three LumoSQL backends:
+In [Phase II of LumoSQL](./doc/LumoSQL-PhaseII-Announce.md) we are building on 
+the existing optional per-row checksums to add per-row [Attribute-Based Encryption (ABE)](https://en.wikipedia.org/wiki/Attribute-based_encryption) and much more.
+
+In the existing LumoSQL 0.4 there are currently three LumoSQL backends:
 
 * the default SQLite Btree storage system
 * [LMDB](https://github.com/LMDB/lmdb)
 * [the Berkley Database](https://en.wikipedia.org/wiki/Berkeley_DB)
-
-in the [next phase of LumoSQL](./doc/LumoSQL-PhaseII-Announce.md) we are building on 
-the existing optional per-row checksums to add per-row RBAC encryption and more.
 
 LumoSQL has a build and benchmarking tool for comparing vanilla SQLite versions
 and configurations with each other, as well as comparing the performance of
