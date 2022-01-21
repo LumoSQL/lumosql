@@ -47,8 +47,6 @@ ACTION rubdos: Lumions: Document literature review items and initial design thou
 
 ACTION rubdos supported by Dan: Lumions: Consider using existing LumoSQL benchmarking suite to compare approaches in both LumoSQL and Glycos.
 
-ACTION Labhraich: check in Latex version of IEEE paper to LumoSQL Fossil, directly or via Dan proxy.
-
 <a name="documentation"></a>
 # Documentation
 
