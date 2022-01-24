@@ -14,9 +14,8 @@ agreed to do what actions.
 
 If you enter the #lumosql chat room on the [libera chat
 network](https://libera.chat Libera), you will see there is a logged-in user
-called "lumosql-meetbot". This is a bot, and while you can have a limited
-conversation with it, its main purpose is to hang around waiting until someone
-says "#startmeeting".
+called "lumosql-meetbot". This is a bot, and its purpose is to hang around waiting until someone
+says "#startmeeting" in the chat. From then on, it listens for more instructions preceded with "#".
 
 You can read all the details in the help page above, but in brief the commands we mostly need are:
 
@@ -38,9 +37,11 @@ You can read all the details in the help page above, but in brief the commands w
 There is also the ability to vote and other facilities. It's a great tool, thanks to
 [Kenneth J. Pronovici](https://github.com/pronovic) and others.
 
+You can address the bot directly and chat with it, including by the shortcut "@
+<text>". You'll find out about that in the online help.
+
 
 > <font size="6"> &#9757;&#127998; </font> The meeting logs are just HTML files, so if something *really* incorrect gets into the notes by accident we can edited them manually at need. But this should be very rare.
 
 >    Obviously, chat in #lumosql is covered by the [LumoSQL Code of Conduct](CODE-OF-CONDUCT.md), which says "be a decent person".
-
 
