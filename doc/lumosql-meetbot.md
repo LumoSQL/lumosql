@@ -38,10 +38,10 @@ There is also the ability to vote and other facilities. It's a great tool, thank
 [Kenneth J. Pronovici](https://github.com/pronovic) and others.
 
 You can address the bot directly and chat with it, including by the shortcut "@
-<text>". You'll find out about that in the online help.
+\<text\>". You'll find out about that in the online help.
 
 
-> <font size="6"> &#9757;&#127998; </font> The meeting logs are just HTML files, so if something *really* incorrect gets into the notes by accident we can edited them manually at need. But this should be very rare.
+> <font size="6"> &#9757;&#127998; </font> The meeting logs are just HTML files, so if something *really* incorrect gets into the notes by accident we can edit them manually. But this should be very rare.
 
 >    Obviously, chat in #lumosql is covered by the [LumoSQL Code of Conduct](CODE-OF-CONDUCT.md), which says "be a decent person".
 
