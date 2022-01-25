@@ -1,14 +1,15 @@
 # Automated Meeting Notes With lumosql-meetbot
 
-We can use [HcoopMettbot](https://hcoop-meetbot.readthedocs.io) to make irc meetings simpler and easier.
+We use [HcoopMeetbot](https://hcoop-meetbot.readthedocs.io) to make irc meetings simpler and easier.
 
-Only text that is tagged as part of meeting goes in the notes, so any other
-discussions can continue uninterrupted.
+Normal irc chat is ignored by the bot, but chat that tagged as part of meeting
+goes in the notes. Any user on the #lumosql channel can participate in a
+meeting, or call one.
 
-Meetings notes automatically appear in the [Meetbot log
-directory](https://lumosql.org/meetings) as soon as the meeting is finished.
-This is a way of remembering the important information immediately, and who has
-agreed to do what actions.
+Meetings notes automatically appear in the [Meetbot log directory](https://lumosql.org/meetings) as soon as 
+the meeting is finished.
+
+This Meetbot helps us remember the important information immediately, and the action items.
 
 # How to Use the Meetbot
 
@@ -23,8 +24,8 @@ You can read all the details in the help page above, but in brief the commands w
 #startmeeting       anyone can start a meeting
 #here               list yourself as an attendee
 #topic              here is a new topic
-#info                  bullet item under the topic
-#link                  this URL gets added to the topic
+#info               bullet item under the topic
+#link               this URL gets added to the topic
 #action <nick>      assign an action item to user <nick> eg "#action Björn to make the coffee"
 #accepted           log an agreement that we have made, eg "#accepted we are all going home now"
 #endmeeting         close the meeting, update the HTML files and both the formatted minutes and raw log magically appear in a few seconds
