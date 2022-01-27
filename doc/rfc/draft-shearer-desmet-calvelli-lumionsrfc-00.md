@@ -30,11 +30,11 @@ surname="De Smet"
 fullname="Ruben De Smet"
 organization = "LumoSQL"
   [author.address]
-  email = "me@rubdo.be"
+  email = "me@rubdos.be"
 
 %%%
 
-.# Abstract
+# Abstract
 
 This memo defines Lumions, a new kind of secure, unique data encapsulation primitive designed
 for reliable, fine-grained movements of data between Internet-of-Things devices and 
@@ -46,18 +46,21 @@ multiple clouds. Lumions are also compatible with decentralised, distributed key
 
 A Lumion is a one-dimensional array of data signed with a public key  
 which MUST contain a checksum, a version number and a universally unique  
-identifier. A Lumion is binary data, stored in network byte order.
+identifier. A Lumion is binary data and MUST be stored in network byte order.
 
 In addition a Lumion MAY be encrypted with one or more schemes defined in
 this standard which together implement various forms of Role-based Access Control.
 These schemes offer different levels of access depending on the token supplied. 
 After being updated with a valid write access, a Lumion will have an updated
-checksum, and the updated signature will be valid in all situations where it
-was previously valid.
+checksum. The updated signature will be valid in all situations where the 
+previous version of the signature was valid.
 
 A Lumion has keys implemented as public/private key pairs, and there can be any
-(or no) key management authorities. Lumion users can choose to implement any
-key management authority they choose. 
+(or no) key management authorities. The simplest case of a key management
+authority is where a program on a device creates a Lumion, making that program
+on that device the issuing authority. That program may subsequently be
+uninstalled, or the private key data it created be deleted or lost, making it a
+very transient key manaagement authority.
 
 Distinct from any other key management scheme users may implement, there is one
 specific key management authority scheme described in this RFC which stores
@@ -95,9 +98,9 @@ particular Lumion. A Recogniser will not be able to reliably determine whether
 any given Lumion is valid or not.
 
 Payload Data: an arbitary binary string within a Lumion of arbitary
-length less than 2^64 bytes
+length less than 2^64 bytes.
 
-Payload Metadata: A checksum or version number specific to the Payload Data
+Payload Metadata: A checksum or version number specific to the Payload Data.
 
 Metadata: all data to do with access control, checksums and version
 numbers for the Lumion as a whole, the UUID and more.
@@ -110,7 +113,7 @@ produce a valid signature for a Lumion after writing to it.
 Key Management Authority: a scheme selected by users to manage their Lumion
 keys. This could be any system at all, from a plain text file on a server on
 the internet to a Kerberos server. In the case of an embedded database library,
-the key management authority will typically be either individual app on the
+the key management authority will often be either an individual app on the
 device (eg a banking app) or the device's platform-wide key management authority (eg the 
 identity systems built into many versions of Android, and Apple phones.)
 
@@ -142,7 +145,8 @@ in the section "Lumion Key Management".
 
 ## Optional: Versioning
 
-Both payload and metadata can be versioned with 64-bit version numbers.
+Both payload and metadata can be versioned with 64-bit version numbers. These versions
+are internal versions, incremented each time the Lumion is updated and re-signed.
 
 ## Optional: Access Control
 
@@ -151,45 +155,63 @@ valid keys stored in the Lumion Metadata.
 
 ## Optional: Checksums
 
-A signature is already a form of a checksum. But in addition to the overall
+A signature is already a form of a checksum. But in addition to this overall
 Lumion checksum, a checksum is also used as part of the Access Control system.
 
 # Properties of Lumions
 
+Standardised: A Lumion can be operated on by any software that complies with this RFC.
+
+Integrity: Corruption can always be detected, at multiple levels (overall, or
+in the payload, or in the metadata).
+
+Uniquely Recognisable Among All Data: A Lumion will always be recognisable as a
+Lumion from its name-based UUID.
+
+Uniquely Identifiable Among All Lumions: A Lumion will always be unique among
+all Lumions due to the one-way hash part of its UUID.
+
+Secure: If there is no valid key available (because the original Lumion Generator did
+not store the key correctly, or the key was lost, etc) then a Lumion cannot be decrypted.
+
+Portable: Can be copied across architectures, networks, storage systems without
+losing or gaining any information.
+
 Non-repudiable: The original key authority might be unreliable and transient
-(because the phone got swallowed by a diprodoton) but a cluster of rows can
-definitely be identified as having the same original source.
+(ifor example, because the originating phone got swallowed by a diprodoton) but
+any Lumions generated on that phone and intended to have a common local
+authority will always be identifiable as having the same original source.
 
 Self-contained security: no external key authority or integrity authority is
 needed. Discriminated access control is provided solely from the information
 within the Lumion.
 
-Integrity: Corruption can always be detected.
-
-Recognisable: A Lumion will always be recognisable as a Lumion from its name-based UUID.
-
-Identifiable: A Lumion will always be unique among Lumions due to the one-way hash part of its UUID.
-
-Portable: Can be copied across architectures, networks, storage systems without
-losing or gaining any information. 
-
-Time-travelling: This is because Lumions have a version number, so they can be
-viewed as snapshots in time. They can also be viewed as time sequence data, if
-the Lumion Generator intended to produce that.
-
-Standardised: A Lumion can be operated on by any software that complies with this RFC.
-
-Secure: If there is no valid key available (because the original Lumion Generator did
-not store the key correctly, or the key was lost, etc) then a Lumion cannot be decrypted.
-
 Globally distributed namespace: Just by having a Lumion UUID, that means every
 Lumion is part of an ad hoc global storage system.
+
+Sequenced Internally: Since Lumions have an internal version number, anyone with 
+copies of all version of a Lumion can view them as a time-sequenced stream. (It is 
+possible for a Lumion to keep all previous versions of its payload within itself, 
+although whether this is scaleable or feasible is highly application-dependent.)
+
+Sequenced Externally: Lumions have fields of Left, Right, Below and Above sized
+to contain a Lumion UUID. These fields can be altered at any time, meaning that
+Lumions can optionally and frequently will form part of a tree structure such
+as a Merkle tree. This sequence data can be interpreted as time sequence data,
+if the Lumion Generator intended to produce that.
+
+Time Travelling: Sequences of either the internal or external versioning can be
+interpreted as snapshotted point-in-time state information. Such information
+can always be played back to reconstruct a view of the world at any point in
+time. Even where there are no timestamps, the relative versions can still be
+replayed in either direction.
 
 # Description of Lumions
 
 Any of the three types of data may be in plain text, although they usually will
-not be because much of the value of a Lumion is in its encrypted properties. A plain
-text Lumion is still signed, and still has a universally unique ID.
+not be plain text because much of the value of a Lumion is in its encrypted
+properties. A plain text Lumion is still signed, and still has a universally
+unique ID.
 
 Data in a Lumion may be automatically generated by one of these kinds of processes:
 
@@ -235,7 +257,7 @@ There are four different levels of scope that involve key management:
 
 # Goals and Constraints
 
-XXXX
+XXXX THIS SECTION DOES NOT EXIST YET XXXX
 
 # Lumion Data Format
 
@@ -259,17 +281,18 @@ The Lumion Signature is a digital signature from one of those allowed in this RF
 "Lumion Ciphers, Signatures and Hashes".
 
 The Lumion Feature list is a 32-bit bitmask with values as in the following table:
-    XXXXXX
+
+    XXXXX MORE GOES HERE XXXXX
 
 Payload Metadata Offset is a 64-bit integer.
 
 Other Metadata contains all RBAC metadata, and some non-RBAC Metadata:
 
-    * Left and Right pointers, in the case where the Lumion Version Count is
-      non-zero. The pointers are Lumion UUIDs, meaning that lists and 
-      other structures can be implemented with Lumions.
+    * Left, Right, Below and Above pointers. These pointers are Lumion UUIDs,
+      meaning that trees, lists and other structures can be implemented with
+      Lumions. At least one of these fields MUST be non-zero if the External Lumion Version Count is non-zero.
     * List of valid Lumion Access Keys
-    * XXXXXX
+    * XXXXX MORE GOES HERE XXXXX
 
 The Payload Metadata Block is laid out like this:
 
@@ -353,35 +376,38 @@ constrained environments many Lumion-using applications are deployed in and
 which therefore do not have knowledge of namespaces. In addition RFC4122 does
 not include any hash more recent than SHA-1, which is now deprecated.
 
-XXXXXX
+XXXXX MORE GOES HERE XXXXX
 
 # List of Lumion Ciphers, Signatures and Hashes
 
 * SHA-3/SHA-256
 * BLAKE3
-* XXXXXX
+* Curve 25519
+* XXXXX MORE CIPHERS HERE XXXXX
+
 
 # Example Use Cases
 
 ## Data Tracking and Portability
 
-XXXXXX
+XXXXX EXPLAIN HERE - THIS IS AN EASY AND OBVIOUS ONE XXXXX
 
 ## Time Travelling Data for Snapshotting
 
-This is about using the versioning information embedded within Lumions to come
-up with time series data. It might in fact be more about ordinal data, because
-wallclock time is not part of the Lumion definition in this RFC. 
+This is about using the versioning information embedded within Lumions (either
+internal or external) to come up with time series data. It might in fact be
+more about ordinal data, because wallclock time is not part of the Lumion
+definition in this RFC. A 
 
-Each Lumion can have a "next" and "last" pointer, as well as a version number.
-The next and last are simply Lumion UUIDs.
+Each Lumion MUST have pointers called Left, Right, Below, Above, as well as an
+external or internal version number.
 
 ## Non-Fungible Token (NFT) Applications
 
 * Compatible with existing NFT registries
 * First-ever updatable NFTs
 
-XXXXXX
+XXXXX MORE GOES HERE XXXXX
 
 ## Online Backups
 
