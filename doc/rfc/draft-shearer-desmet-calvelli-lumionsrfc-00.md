@@ -13,7 +13,7 @@ name = "Internet-Draft"
 value = "draft-shearer-desmet-calvelli-lumionsrfc-00"
 stream = "IETF"
 
-date = 2021-12-17T00:00:00Z
+date = 2022-01-29T00:00:00Z
 
 [[author]]
 initials="D."
@@ -31,6 +31,15 @@ fullname="Ruben De Smet"
 organization = "LumoSQL"
   [author.address]
   email = "me@rubdos.be"
+
+[[author]]
+initials="C."
+surname="Calvelli"
+fullname="Claudio Calvelli"
+organization = "LumoSQL"
+  [author.address]
+  email = "webmaster@lumosql.org"
+
 
 %%%
 
