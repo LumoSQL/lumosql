@@ -1,5 +1,5 @@
 %%%
-title = "Lumions: Portable, Secure, Unique, Updatable Data Primitives"
+title = "Lumions: Portable, Private, Secure, Unique, Updatable Data Primitives"
 abbrev = "lumionsrfc"
 updates = []
 ipr= "trust200902"
@@ -36,9 +36,13 @@ organization = "LumoSQL"
 
 # Abstract
 
-This memo defines Lumions, a new kind of secure, unique data encapsulation primitive designed
-for reliable, fine-grained movements of data between Internet-of-Things devices and 
-multiple clouds. Lumions are also compatible with decentralised, distributed key management.
+This memo defines Lumions, a new kind of secure, unique data encapsulation
+primitive designed for reliable, fine-grained storage and movements of arbitary
+data between arbitary storage mechanisms and across arbitary networks. Lumions
+are also compatible with decentralised, distributed key management. To
+illustrate the main use case, Lumions would not be needed if JSON had
+sophisticated privacy and encryption features, with a single unique JSON
+namespace and a standard way of referring to other JSON objects.
 
 {mainmatter}
 

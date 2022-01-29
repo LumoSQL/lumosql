@@ -43,7 +43,7 @@ Short version instructions:
 * Install go
 * git clone https://github.com/mmarkdown/mmark ; cd mmark
 * go get && go build
-* ./mmark version      <-- test the binary
+* ./mmark -version     <-- test the binary
 * cd rfc ; make        <-- this should rebuild the .txt files for the sample RFCs
 
 Test the toolchain for the Lumion RFC:
