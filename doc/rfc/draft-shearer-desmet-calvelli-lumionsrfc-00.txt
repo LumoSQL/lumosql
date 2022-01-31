@@ -2,7 +2,7 @@
 
 
 
-Network Working Group                                         D. Shearer
+Lumions Working Group                                         D. Shearer
 Internet-Draft                                                R. De Smet
 Intended status: Informational                               C. Calvelli
 Expires: 4 August 2022                                           LumoSQL
@@ -78,7 +78,7 @@ Table of Contents
    6.  Lumions and Key Management  . . . . . . . . . . . . . . . . .   7
    7.  Goals and Constraints . . . . . . . . . . . . . . . . . . . .   8
    8.  Lumion Data Format  . . . . . . . . . . . . . . . . . . . . .   8
-   9.  Lumion Data Formal Specification  . . . . . . . . . . . . . .   9
+   9.  Lumion Data Formal ABNF Specification . . . . . . . . . . . .   9
    10. Lumion UUID Format  . . . . . . . . . . . . . . . . . . . . .  10
    11. List of Lumion Ciphers, Signatures and Hashes . . . . . . . .  10
    12. Example Use Cases . . . . . . . . . . . . . . . . . . . . . .  10
@@ -402,9 +402,9 @@ Internet-Draft                 lumionsrfc                   January 2022
 
    A Lumion is laid out like this:
 
-   +--------+-----------------+----------------------+---------+ |
-   UUID | Metadata Block | Payload Metad.  Block | Payload |
-   +--------+-----------------+----------------------+---------+
+      +--------+-----------------+------------------------+---------+
+      |  UUID  | Metadata Block  | Payload Metadata Block | Payload |
+      +--------+-----------------+------------------------+---------+
 
    These fields are always present in a Lumion.
 
@@ -413,9 +413,9 @@ Internet-Draft                 lumionsrfc                   January 2022
 
    The Metadata Block is laid out like this:
 
-   +-----------+----------+--------------------+--------------+ |
-   Signature | Features | Payload Metad.  Off | Other Metad. |
-   +-----------+----------+--------------------+--------------+
+      +-----------+----------+-------------------------+--------------+
+      | Signature | Features | Payload Metadata Offset | Other Metad. |
+      +-----------+----------+-------------------------+--------------+
 
    The Lumion Signature is a digital signature from one of those allowed
    in this RFC.  See the section "Lumion Ciphers, Signatures and
@@ -450,9 +450,9 @@ Shearer, et al.           Expires 4 August 2022                 [Page 8]
 Internet-Draft                 lumionsrfc                   January 2022
 
 
-   +----------------+---------------------+----------------------+ |
-   Payload Length | Payload Vers.  Count | Other Payload Metad. |
-   +----------------+---------------------+----------------------+
+      +----------------+---------------------+------------------------+
+      | Payload Length | Payload Vers. Count | Other Payload Metadata |
+      +----------------+---------------------+------------------------+
 
    Payload Length is a 64-bit integer.
 
@@ -461,7 +461,7 @@ Internet-Draft                 lumionsrfc                   January 2022
    Other Payload Metadata relates to RBAC, such as Last Edited By, which
    is a keyid listed in the Metadata Block.  XXXXX
 
-9.  Lumion Data Formal Specification
+9.  Lumion Data Formal ABNF Specification
 
    A Lumion has the following ABNF [RFC5234] definition:
 

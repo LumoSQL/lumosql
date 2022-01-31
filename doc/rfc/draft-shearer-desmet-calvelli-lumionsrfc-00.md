@@ -4,7 +4,7 @@ abbrev = "lumionsrfc"
 updates = []
 ipr= "trust200902"
 area = "Internet"
-workgroup = ""
+workgroup = "Lumions Working Group"
 keyword = ["Data Format", "UUID", "Cryptography"]
 
 [seriesInfo]
@@ -13,7 +13,10 @@ name = "Internet-Draft"
 value = "draft-shearer-desmet-calvelli-lumionsrfc-00"
 stream = "IETF"
 
-date = 2022-01-29T00:00:00Z
+date = 2022-01-31T00:00:00Z
+
+[pi]
+toc = "yes"
 
 [[author]]
 initials="D."
@@ -55,7 +58,7 @@ namespace and a standard way of referring to other JSON objects.
 
 {mainmatter}
 
-# Introduction
+# Introduction {#introduction}
 
 A Lumion is a one-dimensional array of data signed with a public key
 which MUST contain a checksum, a version number and a universally unique
@@ -93,7 +96,7 @@ The keywords **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **S
 **SHOULD NOT**, **RECOMMENDED**, **MAY**, and **OPTIONAL**, when they appear in this document, are
  to be interpreted as described in [@RFC2119].
 
-# Definitions
+# Definitions {#definitions}
 
 Lumion Generator: software that can produce a Lumion for any supplied raw
 data. A Generator may be standalone or built into eg a database. A Lumion Generator
@@ -133,7 +136,7 @@ identity systems built into many versions of Android, and Apple phones.)
 Lumion Registry: One particular key management authority defined in this RFC
 for storing Lumion keys in a public blockchain.
 
-# Feature Levels
+# Feature Levels {#featurelevels}
 
 ## Mandatory Minimum Requirements
 
@@ -224,7 +227,7 @@ can always be played back to reconstruct a view of the world at any point in
 time. Even where there are no timestamps, the relative versions can still be
 replayed in either direction.
 
-# Description of Lumions
+# Description of Lumions {#description}
 
 Any of the three types of data may be in plain text, although they usually will
 not be plain text because much of the value of a Lumion is in its encrypted
@@ -243,7 +246,7 @@ For each of these there are multiple possible ciphers and implementation techniq
 
 Portability requires that data is stored in Network Byte Order.
 
-# Lumions and Key Management
+# Lumions and Key Management {#keymanagement}
 
 There are four different levels of scope that involve key management:
 
@@ -273,17 +276,19 @@ There are four different levels of scope that involve key management:
    smart contract. This is where we could have many billions of rows with their UUID registered
    and also the users with access rights registered there too. See the later section headed "Lumion Registry".
 
-# Goals and Constraints
+# Goals and Constraints {#goalsconstraints}
 
 XXXX THIS SECTION DOES NOT EXIST YET XXXX
 
-# Lumion Data Format
+# Lumion Data Format {#dataformat}
 
 A Lumion is laid out like this:
 
-+--------+-----------------+----------------------+---------+
-|  UUID  | Metadata Block  | Payload Metad. Block | Payload |
-+--------+-----------------+----------------------+---------+
+~~~ ascii-art
+   +--------+-----------------+------------------------+---------+
+   |  UUID  | Metadata Block  | Payload Metadata Block | Payload |
+   +--------+-----------------+------------------------+---------+
+~~~
 
 These fields are always present in a Lumion.
 
@@ -291,9 +296,11 @@ The UUID is described in the section "Lumion UUID Format", and is always 256 bit
 
 The Metadata Block is laid out like this:
 
-+-----------+----------+--------------------+--------------+
-| Signature | Features | Payload Metad. Off | Other Metad. |
-+-----------+----------+--------------------+--------------+
+~~~ ascii-art
+   +-----------+----------+-------------------------+--------------+
+   | Signature | Features | Payload Metadata Offset | Other Metad. |
+   +-----------+----------+-------------------------+--------------+
+~~~
 
 The Lumion Signature is a digital signature from one of those allowed in this RFC. See the section 
 "Lumion Ciphers, Signatures and Hashes".
@@ -315,9 +322,11 @@ Other Metadata contains all RBAC metadata, and some non-RBAC Metadata:
 
 The Payload Metadata Block is laid out like this:
 
-+----------------+---------------------+----------------------+
-| Payload Length | Payload Vers. Count | Other Payload Metad. |
-+----------------+---------------------+----------------------+
+~~~ ascii-art
+   +----------------+---------------------+------------------------+
+   | Payload Length | Payload Vers. Count | Other Payload Metadata |
+   +----------------+---------------------+------------------------+
+~~~
 
 Payload Length is a 64-bit integer.
 
@@ -326,7 +335,7 @@ Payload Version Count is a 64-bit integer.
 Other Payload Metadata relates to RBAC, such as Last Edited By, which
 is a keyid listed in the Metadata Block. XXXXX
 
-# Lumion Data Formal Specification
+# Lumion Data Formal ABNF Specification {#abnfspecification}
 
 A Lumion has the following ABNF [@RFC5234] definition:
 
@@ -387,7 +396,7 @@ stage. But it is quite atmospheric, don't you think? A bit like mood music.)
       DIGIT           = %d48 / NONZERO-DIGIT
       NILVALUE        = "-"
 
-# Lumion UUID Format
+# Lumion UUID Format {#uuidformat}
 
 This is a combination of a name-based namespace and a robust hash, similar to
 type 5 UUIDs in [@RFC4122]. 
@@ -400,7 +409,7 @@ which is now deprecated.
 
 XXXXX MORE GOES HERE XXXXX
 
-# List of Lumion Ciphers, Signatures and Hashes
+# List of Lumion Ciphers, Signatures and Hashes {#ciphers-sigs-hashes}
 
 * SHA-3/SHA-256
 * BLAKE3
@@ -408,7 +417,7 @@ XXXXX MORE GOES HERE XXXXX
 * XXXXX MORE CIPHERS HERE XXXXX
 
 
-# Example Use Cases
+# Example Use Cases {#exampleusecases}
 
 ## Data Tracking and Portability
 
@@ -440,11 +449,11 @@ information optionally contained in a Lumion means that a consistent
 backup can always be calculated assuming a reasonable percentage of
 Lumions are present.
 
-# Performance Considerations
+# Performance Considerations {#performance}
 
 XXXXXX
 
-# Security Considerations
+# Security Considerations {#security}
 
 While a valid Lumion is entirely self-contained from a security point of view,
 it is important to remember that Lumions do NOT provide any guarantee of anonymity.
@@ -454,11 +463,11 @@ the Lumion Generator only ever produces a single Lumion before being deleted per
 Transparency and traceability is vital to the Lumion concept, which is why it
 has a UUID. For normal usage the UUID prevents Lumions providing anonymity.
 
-# Related Work
+# Related Work {#relatedwork}
 
 XXXXX
 
-# IANA Considerations
+# IANA Considerations {#ianaconsiderations}
 
 This memo calls for IANA to register a new MIME content-type application/pidf+xml, per [MIME].
 
