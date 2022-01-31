@@ -1,7 +1,5 @@
-<!-- Copyright 2020 The LumoSQL Authors, see LICENSES/MIT -->
-
 <!-- SPDX-License-Identifier: MIT -->
-<!-- SPDX-FileCopyrightText: 2021 The LumoSQL Authors -->
+<!-- SPDX-FileCopyrightText: 2022 The LumoSQL Authors, see LICENSES/MIT -->
 <!-- SPDX-ArtifactOfProjectName: LumoSQL -->
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Dan Shearer, December 2021 -->
@@ -28,19 +26,21 @@ At present (December 2021) the [draft-shearer-desmet-calvelli-lumionsrfc-00.txt]
 
 # Toolchain
 
-The Lumion RFC is maintained in Markdown, as specified for an processed by 
-the [mmark IETF Markdown tool](https://github.com/mmarkdown/mmark) tool.
-The only dependency is the tool xml2rfc. The version of xml2rfc in Debian Buster is too old.
-The version in NetBSD 9.2 is right up to date.
+The Lumion RFC is maintained in Markdown, as specified for and processed by the
+[mmark IETF Markdown tool](https://github.com/mmarkdown/mmark) tool, which
+tracks the RFC file format specification v3, as per the draft RFC 7991.
 
-The RFC file format specification used by Lumions is v2, as per RFC 7749. We
-will not move to v3 until the specification in the new RFC 7991 is completed.
+The only mmark dependency is the python tool xml2rfc. Always use the [xml2rfc version number used by Pypi](https://pypi.org/project/xml2rfc/) even if you do not use "pip install", because that is what [mmark defines as "latest version"](https://github.com/mmarkdown/mmark/issues/172#issuecomment-1025528296).
 
-Short version instructions:
+The Pipy xml2rfc approximately tracks the [official IETF
+repo](https://svn.ietf.org/svn/tools/xml2rfc/trunk xml2rfc) which is maintained
+by the [comprehensive IETF project](https://xml2rfc.tools.ietf.org/). This
+project is formalising a 50 year-old file format with great care.
 
-* Install xml2rfc version >= 2.47 . This is a hard minimum verison number. We will probably move to a minimum of
-  version 3.0 soon. Note this is the version of the tool, not the file format specification.
-* Install go
+To create the Lumoion RFC from the markdown:
+
+* "pip install xml2rfc", or use some other installation method that yields a version >= Pypi. Older operating systems will not give a good version via "pip", so either learn about pip or change OS version.
+* Install the Go language (often called "golang" in package repositories)
 * git clone https://github.com/mmarkdown/mmark ; cd mmark
 * go get && go build
 * ./mmark -version     <-- test the binary
@@ -52,30 +52,10 @@ Test the toolchain for the Lumion RFC:
 * make 
 
 If this generates draft-shearer-desmet-calvelli-lumionsrfc-00.txt then your
-toolchain is working, change paths etc to your taste.
+toolchain is working. Change paths etc to your taste.
 
 # Inspiration
 
 The [Syslog Specification in RFC 5424](https://datatracker.ietf.org/doc/html/rfc5424) is one reasonably close
 RFC for comparing and contrast.
-
-# Longer notes on xml2rfc
-
-The xml2rfc project is part of a [large and slow IETF
-project](https://xml2rfc.tools.ietf.org/). This page has a forms interface to
-xml2rfc which may help if you're really stuck.
-
-You probably want to avoid getting too involved in this toolchain, it's not
-quite a case of "make install" and off you Go. However if your OS needs
-special twiddling, or the packged version is too old, and you don't want to
-just install a VM with a newer OS, then here are some hints:
-
-* "pip install xml2rfc" will probably just give you whatever version your OS installed already.
-  But this is what is happening behind the scenes, and you need to think about whether you
-  will run a local userspace version, or replace this version in the systemwide python libraries,
-  potentially introducing dependency problems.
-* Current source from "svn checkout https://svn.ietf.org/svn/tools/xml2rfc/trunk xml2rfc". Do install
-  Subversion, just for the nostalgia.
-* Just build the "cli" target for text output, that will save you worrying about GUI and PDF libraries
-  and their dependencies.
 

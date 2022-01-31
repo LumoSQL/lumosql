@@ -43,7 +43,7 @@ organization = "LumoSQL"
 
 %%%
 
-# Abstract
+.# Abstract
 
 This memo defines Lumions, a new kind of secure, unique data encapsulation
 primitive designed for reliable, fine-grained storage and movements of arbitary
@@ -57,8 +57,8 @@ namespace and a standard way of referring to other JSON objects.
 
 # Introduction
 
-A Lumion is a one-dimensional array of data signed with a public key  
-which MUST contain a checksum, a version number and a universally unique  
+A Lumion is a one-dimensional array of data signed with a public key
+which MUST contain a checksum, a version number and a universally unique
 identifier. A Lumion is binary data and MUST be stored in network byte order.
 
 In addition a Lumion MAY be encrypted with one or more schemes defined in
@@ -207,11 +207,16 @@ copies of all version of a Lumion can view them as a time-sequenced stream. (It 
 possible for a Lumion to keep all previous versions of its payload within itself, 
 although whether this is scaleable or feasible is highly application-dependent.)
 
-Sequenced Externally: Lumions have fields of Left, Right, Below and Above sized
-to contain a Lumion UUID. These fields can be altered at any time, meaning that
-Lumions can optionally and frequently will form part of a tree structure such
-as a Merkle tree. This sequence data can be interpreted as time sequence data,
-if the Lumion Generator intended to produce that.
+Sequenced Externally: Lumions have fields of Left, Right, Below and Above,
+sized to contain a Lumion UUID. The contents of these fields can be updated at
+any time, meaning that Lumions can optionally and frequently will form part of
+a logical structure such as a Merkle tree, thus creating a sequence that can be
+navigated forward/back/up/down, depending on the structure. This sequence data
+can also be interpreted as time sequence data, if the Lumion Generator intended
+to produce that. Timestamps are not required to be assigned by the Lumion
+Generator for time sequence data, because if a sequence of Lumions is ordered
+then a Lumion Reader can interpret that according to any temporal origin and
+offset it chooses.
 
 Time Travelling: Sequences of either the internal or external versioning can be
 interpreted as snapshotted point-in-time state information. Such information
@@ -276,9 +281,9 @@ XXXX THIS SECTION DOES NOT EXIST YET XXXX
 
 A Lumion is laid out like this:
 
-  +--------+-----------------+------------------------+---------+
-  |  UUID  | Metadata Block  | Payload Metadata Block | Payload |
-  +--------+-----------------+------------------------+---------+
++--------+-----------------+----------------------+---------+
+|  UUID  | Metadata Block  | Payload Metad. Block | Payload |
++--------+-----------------+----------------------+---------+
 
 These fields are always present in a Lumion.
 
@@ -286,9 +291,9 @@ The UUID is described in the section "Lumion UUID Format", and is always 256 bit
 
 The Metadata Block is laid out like this:
 
-  +-----------+--------------+----------------------+----------------+
-  | Signature | Feature List | Payload Metadata Off | Other Metadata |
-  +-----------+--------------+----------------------+----------------+
++-----------+----------+--------------------+--------------+
+| Signature | Features | Payload Metad. Off | Other Metad. |
++-----------+----------+--------------------+--------------+
 
 The Lumion Signature is a digital signature from one of those allowed in this RFC. See the section 
 "Lumion Ciphers, Signatures and Hashes".
@@ -301,17 +306,18 @@ Payload Metadata Offset is a 64-bit integer.
 
 Other Metadata contains all RBAC metadata, and some non-RBAC Metadata:
 
-    * Left, Right, Below and Above pointers. These pointers are Lumion UUIDs,
-      meaning that trees, lists and other structures can be implemented with
-      Lumions. At least one of these fields MUST be non-zero if the External Lumion Version Count is non-zero.
-    * List of valid Lumion Access Keys
-    * XXXXX MORE GOES HERE XXXXX
+* Left, Right, Below and Above pointers. These pointers are Lumion
+  UUIDs, meaning that trees, lists and other structures can be
+  implemented with Lumions. At least one of these fields MUST be
+  non-zero if the External Lumion Version Count is non-zero.
+* List of valid Lumion Access Keys
+* XXXXX MORE GOES HERE XXXXX
 
 The Payload Metadata Block is laid out like this:
 
-  +----------------+-----------------------+------------------------+
-  | Payload Length | Payload Version Count | Other Payload Metadata | 
-  +----------------+-----------------------+------------------------+
++----------------+---------------------+----------------------+
+| Payload Length | Payload Vers. Count | Other Payload Metad. |
++----------------+---------------------+----------------------+
 
 Payload Length is a 64-bit integer.
 
@@ -324,8 +330,8 @@ is a keyid listed in the Metadata Block. XXXXX
 
 A Lumion has the following ABNF [@RFC5234] definition:
 
-(this is not valid Lumion ABNF, we're still at the high-level sketch stage. But
-it is quite atmospheric, don't you think?)
+(this is NOT valid Lumion ABNF because we're still at the high-level sketch
+stage. But it is quite atmospheric, don't you think? A bit like mood music.)
 
       SYSLOG-MSG      = HEADER SP STRUCTURED-DATA [SP MSG]
 
@@ -384,10 +390,13 @@ it is quite atmospheric, don't you think?)
 # Lumion UUID Format
 
 This is a combination of a name-based namespace and a robust hash, similar to
-type 5 UUIDs in [@RFC4122]. RFC4122 UUIDs cannot be used because of the
-constrained environments many Lumion-using applications are deployed in and
-which therefore do not have knowledge of namespaces. In addition RFC4122 does
-not include any hash more recent than SHA-1, which is now deprecated.
+type 5 UUIDs in [@RFC4122]. 
+
+RFC4122 UUIDs MUST NOT be used because of the constrained environments many
+Lumion-using applications are deployed in and which therefore do not have
+knowledge of namespaces that look like DNS or which imply a network even
+exists. In addition RFC4122 does not include any hash more recent than SHA-1,
+which is now deprecated.
 
 XXXXX MORE GOES HERE XXXXX
 
@@ -438,9 +447,12 @@ XXXXXX
 # Security Considerations
 
 While a valid Lumion is entirely self-contained from a security point of view,
-it is important to remember that Lumions are designed to NOT support anonymity.
+it is important to remember that Lumions do NOT provide any guarantee of anonymity.
+Lumions MAY be used for this purpose despite the presence of a UUID if
+the Lumion Generator is implemented in a very particular way (for example,
+the Lumion Generator only ever produces a single Lumion before being deleted permanently.)
 Transparency and traceability is vital to the Lumion concept, which is why it
-has a UUID. 
+has a UUID. For normal usage the UUID prevents Lumions providing anonymity.
 
 # Related Work
 
@@ -452,7 +464,7 @@ This memo calls for IANA to register a new MIME content-type application/pidf+xm
 
 The registration template for this is below. 
 
-##  Content-type registration for 'application/lumion'
+##  Content-type registration for 'apoplication/lumion'
 
    To: ietf-types@iana.org
    Subject: Registration of MIME media type application/lumion
@@ -499,10 +511,3 @@ The registration template for this is below.
 
 {backmatter}
 
-<reference anchor='DSM-IV' target='http://www.psychiatryonline.com/resourceTOC.aspx?resourceID=1'>
-  <front>
-   <title>Diagnostic and Statistical Manual of Mental Disorders (DSM)</title>
-   <author></author>
-   <date></date>
-  </front>
-</reference>
