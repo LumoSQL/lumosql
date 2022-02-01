@@ -13,6 +13,12 @@ be a single global standard for all data storage, and that there was no such
 standard already. The security and privacy requirements of the 21st century
 demand something like this, so we created it.
 
+From the draft RFC:
+
+>> _To illustrate the main use case, Lumions would not be needed if JSON had
+sophisticated privacy and encryption features, with a single unique JSON
+namespace and a standard way of referring to other JSON objects._
+
 This is a collaboration involving the [LumoSQL team](https://lumosql.org/), the
 [Department of Electronics and Informatics](http://www.etrovub.be/) of the
 [Vrije Universiteit Brussel](https://www.vub.be/) and others.
