@@ -45,7 +45,7 @@ The Lumion RFC is maintained in Markdown, as specified for and processed by the
 tracks the RFC file format specification v3, as per the
 [draft RFC 7991](https://datatracker.ietf.org/doc/html/rfc7991).
 
-The only mmark dependency is the python tool xml2rfc. Always use the [xml2rfc version number used by Pypi](https://pypi.org/project/xml2rfc/) even if you do not use "pip install", because that is what [mmark defines as "latest version"](https://github.com/mmarkdown/mmark/issues/172#issuecomment-1025528296).
+The only mmark dependency is the python tool xml2rfc. Always use the [xml2rfc version number used by Pypi](https://pypi.org/project/xml2rfc/) even if you do not use "pip install", because that is what [mmark defines as "latest version"](https://mmark.miek.nl/post/faq/#what-version-of-xml2rfc-is-supported).
 
 The Pipy version of xml2rfc approximately tracks the [official IETF
 repo](https://svn.ietf.org/svn/tools/xml2rfc/trunk xml2rfc) which is maintained
