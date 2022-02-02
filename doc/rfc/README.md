@@ -6,14 +6,18 @@
 
 # About Lumions
 
-The privacy and security features of LumoSQL are based on the concept of a
-portable binary blob that is encrypted and signed, and optionally has within it
-different levels of access to the data, ie RBAC. We soon realised this should
-be a single global standard for all data storage, and that there was no such
-standard already. The security and privacy requirements of the 21st century
+The privacy and security features of [LumoSQL](https://lumosql.org/src/lumosql)
+are based on each row in a database being a portable binary blob
+that is encrypted and signed.  We added the optional facility for each blob to
+have within it different levels of access to the data, in what is often called
+RBAC/Role-based Access Control, or [Attribute-based Access Control](https://en.wikipedia.org/wiki/Attribute-based_access_control).
+
+We soon realised this our specification for a database row should be a single
+global standard for transport and storage of any data, and that there was no
+existing standard. The security and privacy requirements of the 21st century
 demand something like this, so we created it.
 
-From the draft RFC:
+From our nascent draft RFC:
 
 >> _To illustrate the main use case, Lumions would not be needed if JSON had
 sophisticated privacy and encryption features, with a single unique JSON
@@ -21,7 +25,8 @@ namespace and a standard way of referring to other JSON objects._
 
 This is a collaboration involving the [LumoSQL team](https://lumosql.org/), the
 [Department of Electronics and Informatics](http://www.etrovub.be/) of the
-[Vrije Universiteit Brussel](https://www.vub.be/) and others.
+[Vrije Universiteit Brussel](https://www.vub.be/) and others. The VUB is providing the 
+mathematical heavy lifting for the concept of securely updating binary blobs.
 
 # Lumion RFC Specification
 

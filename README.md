@@ -9,12 +9,12 @@
 # LumoSQL
 
 [LumoSQL](lumosql.org) is a modification (not a fork) of the
-[SQLite](https://sqlite.org) embedded data storage library. LumoSQL adds
-performance, security and privacy features, partly by adding multiple backend
-storage systems.  If you are an SQLite user familiar with C development wanting
-an easier way to benchmark and measure SQLite, or if you are wanting features
-only available in other key-value storage engines, then you may find LumoSQL
-interesting.
+[SQLite](https://sqlite.org) embedded data storage library, the [most-deployed software](https://sqlite.org/mostdeployed.html).
+LumoSQL adds performance, security and privacy features, partly by adding
+multiple backend storage systems.  If you are an SQLite user familiar with C
+development wanting an easier way to benchmark and measure SQLite, or if you
+are wanting features only available in other key-value storage engines, then
+you may find LumoSQL interesting.
 
 In [Phase II of LumoSQL](./doc/LumoSQL-PhaseII-Announce.md) we are building on 
 the existing optional per-row checksums to add per-row [Attribute-Based Encryption (ABE)](https://en.wikipedia.org/wiki/Attribute-based_encryption) and much more.
