@@ -1315,9 +1315,15 @@ int sqlite3BtreeDropTable(Btree *p, int iTable, int *piMoved) {
 ** integer value pointed to by pnChange is incremented by the number of
 ** entries in the table.
 */
+#if SQLITE_VERSION_NUMBER < 3037000
 int sqlite3BtreeClearTable(Btree *p, int iTable, int *pnChange) {
+  int entries = 0;
+#else
+int sqlite3BtreeClearTable(Btree *p, int iTable, i64 *pnChange) {
+  i64 entries = 0;
+#endif
   MDB_dbi dbi;
-  int rc = get_table(p, iTable, get_table_nocmp, &dbi), entries = 0;
+  int rc = get_table(p, iTable, get_table_nocmp, &dbi);
   LUMO_LOG("sqlite3BtreeClearTable: get_table=%d\n", rc);
   if (rc) return error_map(rc);
   if (pnChange) {
@@ -1613,6 +1619,132 @@ int restoreCursor(BtCursor *pCur, int reposition) {
   return SQLITE_OK;
 }
 
+/* Move the cursor so that it points to an entry in a table (a.k.a INTKEY)
+** table near the key intKey.   Return a success code.
+**
+** If an exact match is not found, then the cursor is always
+** left pointing at a leaf page which would hold the entry if it
+** were present.  The cursor might point to an entry that comes
+** before or after the key.
+**
+** An integer is written into *pRes which is the result of
+** comparing the key with the entry to which the cursor is 
+** pointing.  The meaning of the integer written into
+** *pRes is as follows:
+**
+**     *pRes<0      The cursor is left pointing at an entry that
+**                  is smaller than intKey or if the table is empty
+**                  and the cursor is therefore left point to nothing.
+**
+**     *pRes==0     The cursor is left pointing at an entry that
+**                  exactly matches intKey.
+**
+**     *pRes>0      The cursor is left pointing at an entry that
+**                  is larger than intKey.
+*/
+int sqlite3BtreeTableMoveto(
+  BtCursor *pCur,          /* The cursor to be moved */
+  i64 intKey,              /* The table key */
+  int biasRight,           /* If true, bias the search to the high end */
+  int *pRes                /* Write search results here */
+){
+  unsigned char b64[8];
+  MDB_val key[2], data;
+  u64 keyVal = intKey;
+  int rc;
+  rc = restoreCursor(pCur, 0);
+  if (rc != SQLITE_OK) return rc;
+  pCur->atEof = 0;
+  put8(key, b64, keyVal);
+  data.mv_size = 0;
+  data.mv_data = "";
+  rc = mdb_cursor_get(pCur->cursor, key, &data, MDB_SET_RANGE);
+  if (rc == 0) {
+    /* see if the match is exact */
+    *pRes = keyVal != get8(key);
+    LUMO_LOG("sqlite3BtreeTableMoveto idx=%lld bias=%d => found %lld (%d)\n",
+	     (long long)keyVal, biasRight, (long long)get8(key), *pRes);
+    return SQLITE_OK;
+  }
+  if (rc != MDB_NOTFOUND) {
+    LUMO_LOG("sqlite3BtreeTableMoveto idx=%d bias=%d => failed (MDB_SET_RANGE) %d\n",
+	     (int)intKey, biasRight, rc);
+    return error_map(rc);
+  }
+  LUMO_LOG("sqlite3BtreeTableMoveto idx=%d bias=%d => not found\n",
+	   (int)intKey, biasRight);
+  /* we'll pretend the cursor is on the first item */
+  mdb_cursor_get(pCur->cursor, key, &data, MDB_FIRST);
+  *pRes = -1;
+  LUMO_LOG("sqlite3BtreeTableMoveto idx=%d bias=%d => empty, returning first\n",
+	   (int)intKey, biasRight);
+  return SQLITE_OK;
+}
+
+/* Move the cursor so that it points to an entry in an index table
+** near the key pIdxKey.   Return a success code.
+**
+** If an exact match is not found, then the cursor is always
+** left pointing at a leaf page which would hold the entry if it
+** were present.  The cursor might point to an entry that comes
+** before or after the key.
+**
+** An integer is written into *pRes which is the result of
+** comparing the key with the entry to which the cursor is 
+** pointing.  The meaning of the integer written into
+** *pRes is as follows:
+**
+**     *pRes<0      The cursor is left pointing at an entry that
+**                  is smaller than pIdxKey or if the table is empty
+**                  and the cursor is therefore left point to nothing.
+**
+**     *pRes==0     The cursor is left pointing at an entry that
+**                  exactly matches pIdxKey.
+**
+**     *pRes>0      The cursor is left pointing at an entry that
+**                  is larger than pIdxKey.
+**
+** The pIdxKey->eqSeen field is set to 1 if there
+** exists an entry in the table that exactly matches pIdxKey.  
+*/
+int sqlite3BtreeIndexMoveto(
+  BtCursor *pCur,          /* The cursor to be moved */
+  UnpackedRecord *pIdxKey, /* Unpacked index key */
+  int *pRes                /* Write search results here */
+){
+  unsigned char b64[8];
+  MDB_val key[2], data;
+  int rc;
+  rc = restoreCursor(pCur, 0);
+  if (rc != SQLITE_OK) return rc;
+  pCur->atEof = 0;
+  key[0].mv_size = 1;
+  key[0].mv_data = "";
+  key[1].mv_data = pIdxKey;
+  data.mv_size = 0;
+  data.mv_data = "";
+  rc = mdb_cursor_get(pCur->cursor, key, &data, MDB_SET_RANGE);
+  if (rc == 0) {
+    /* see if the match is exact */
+    *pRes = sqlite3VdbeRecordCompare(key[0].mv_size, key[0].mv_data, pIdxKey) != 0;
+    LUMO_LOG("sqlite3BtreeIndexMoveto bias=%d => found (%d)\n", biasRight, *pRes);
+    return SQLITE_OK;
+  }
+  if (rc != MDB_NOTFOUND) {
+    LUMO_LOG("sqlite3BtreeIndexMoveto idx=%d bias=%d => failed (MDB_SET_RANGE) %d\n",
+	     (int)intKey, biasRight, rc);
+    return error_map(rc);
+  }
+  LUMO_LOG("sqlite3BtreeIndexMoveto idx=%d bias=%d => not found\n",
+	   (int)intKey, biasRight);
+  /* we'll pretend the cursor is on the first item */
+  mdb_cursor_get(pCur->cursor, key, &data, MDB_FIRST);
+  *pRes = -1;
+  LUMO_LOG("sqlite3BtreeIndexMoveto idx=%d bias=%d => empty, returning first\n",
+	   (int)intKey, biasRight);
+  return SQLITE_OK;
+}
+
 /* Move the cursor so that it points to an entry near the key 
 ** specified by pIdxKey or intKey.   Return a success code.
 **
@@ -1650,50 +1782,10 @@ int sqlite3BtreeMovetoUnpacked(
   int biasRight,           /* If true, bias the search to the high end */
   int *pRes                /* Write search results here */
 ){
-  unsigned char b64[8];
-  MDB_val key[2], data;
-  u64 keyVal = intKey;
-  int rc;
-  rc = restoreCursor(pCur, 0);
-  if (rc != SQLITE_OK) return rc;
-  pCur->atEof = 0;
-  if (pIdxKey) {
-    /* Move in an index or a WITHOUT ROWID table */
-    key[0].mv_size = 1;
-    key[0].mv_data = "";
-    key[1].mv_data = pIdxKey;
-  } else {
-    /* move in a WITH ROWID table */
-    put8(key, b64, keyVal);
-  }
-  data.mv_size = 0;
-  data.mv_data = "";
-  rc = mdb_cursor_get(pCur->cursor, key, &data, MDB_SET_RANGE);
-  if (rc == 0) {
-    /* see if the match is exact */
-    if (pIdxKey) {
-      *pRes = sqlite3VdbeRecordCompare(key[0].mv_size, key[0].mv_data, pIdxKey) != 0;
-      LUMO_LOG("sqlite3BtreeMovetoUnpacked bias=%d => found (%d)\n", biasRight, *pRes);
-    } else {
-      *pRes = keyVal != get8(key);
-      LUMO_LOG("sqlite3BtreeMovetoUnpacked idx=%lld bias=%d => found %lld (%d)\n",
-	       (long long)keyVal, biasRight, (long long)get8(key), *pRes);
-    }
-    return SQLITE_OK;
-  }
-  if (rc != MDB_NOTFOUND) {
-    LUMO_LOG("sqlite3BtreeMovetoUnpacked idx=%d bias=%d => failed (MDB_SET_RANGE) %d\n",
-	     (int)intKey, biasRight, rc);
-    return error_map(rc);
-  }
-  LUMO_LOG("sqlite3BtreeMovetoUnpacked idx=%d bias=%d => not found\n",
-	   (int)intKey, biasRight);
-  /* we'll pretend the cursor is on the first item */
-  mdb_cursor_get(pCur->cursor, key, &data, MDB_FIRST);
-  *pRes = -1;
-  LUMO_LOG("sqlite3BtreeMovetoUnpacked idx=%d bias=%d => empty, returning first\n",
-	   (int)intKey, biasRight);
-  return SQLITE_OK;
+  if (pIdxKey)
+    return sqlite3BtreeIndexMoveto(pCur, pIdxKey, pRes);
+  else
+    return sqlite3BtreeTableMoveto(pCur, intKey, biasRight, pRes);
 }
 
 int sqlite3BtreeCursorHasMoved(BtCursor *pCur) {
