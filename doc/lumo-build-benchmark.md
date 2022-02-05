@@ -92,6 +92,7 @@ name, and then cause them to be actioned. Every selection by the user will have
 multiple dependency actions.
 
 To ensure repeatability of tests, each test will include the following information:
+
 * the version of the "not-forking" configuration used
 * the version of sqlite3 used (in one special case building third-party backend code
 which provides its own patched version of sqlite3, this will be empty and the
