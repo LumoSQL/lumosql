@@ -671,8 +671,6 @@ if {$operation ne "database"} {
     } else {
 	# parse list of benchmarks
 	set target_list [split $target_string]
-	# make sure we also have an unmodified sqlite3 for the benchmark database
-	lappend target_list [lindex [split $other_values(SQLITE_VERSIONS)] 0]
 	for {set tptr 0} {$tptr < [llength $target_list]} {incr tptr} {
 	    set benchmark [lindex $target_list $tptr]
 	    if {$benchmark eq ""} { continue }
