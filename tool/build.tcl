@@ -674,7 +674,6 @@ if {$operation ne "database"} {
 	for {set tptr 0} {$tptr < [llength $target_list]} {incr tptr} {
 	    set benchmark [lindex $target_list $tptr]
 	    if {$benchmark eq ""} { continue }
-	    set benchmark_this [expr $tptr < ([llength $target_list] - 1)]
 	    set tdata [split $benchmark "+"]
 	    set sv [lindex $tdata 0]
 	    set bv [lindex $tdata 1]
@@ -740,11 +739,9 @@ if {$operation ne "database"} {
 		set b "$sv+$bv$build_opts"
 	    }
 	    if {[lsearch -exact $benchmark_list $t] < 0} {
-		if {$benchmark_this} {
-		    lappend benchmark_list $t
-		    lappend benchmark_to_build $b
-		    lappend benchmark_option_list $benchmark_ol
-		}
+		lappend benchmark_list $t
+		lappend benchmark_to_build $b
+		lappend benchmark_option_list $benchmark_ol
 		if {[lsearch -exact $build_list $b] < 0} {
 		    lappend build_list $b
 		    lappend build_option_list $build_ol
