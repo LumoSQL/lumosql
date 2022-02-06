@@ -1,5 +1,6 @@
 # SQLite3 versions we use by default, one per line
 # the first version listed is also used to update the benchmark results database
 
-3.37.2
+latest
+3.36.0
 

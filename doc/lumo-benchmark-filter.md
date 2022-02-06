@@ -217,6 +217,8 @@ If more than one selection option is provided, the tool will select runs which m
 * `-version` `V` - select runs which used the specified version of sqlite3; this differ from `-target` as the `-version` option can select any backend, while `-target` selects on the full specification of version of sqlite3, backend, options
 * `-backend` `B` - select runs which used the specified backend (any version)
 * `-backend` `B-V` - select runs which used version `V` of backend `B`
+* `-no-backend` - select runs which used an unmodified sqlite (any version, unless `-version` is also secified).
+The `-backend` and `-no-backend` options can be combined, and they include anything which matches, so `-backend` `lmdb` `-no-backend` means "select anything with an unmodified sqlite OR the LMDB backend" (but not for example the BDB backend)
 * `-failed` - select runs which have failed tests
 * `-interrupted` - select runs in which some tests were interrupted by a signal
 * `-completed` - select runs in which all tests completed successfully and the run itself recorded an end time
@@ -234,6 +236,7 @@ unless specified otherwise
 * `-fields` `FIELD[,FIELD]...` - change the fields printed by `-list`, default is
 `RUN_ID,TARGET,DATE,TIME,DURATION`; see below for the possible values
 * `-summary`  - display a summary of each test in each selected run; this only works if the selected runs have the same tests; cannot be combined with `-details`; this is the default if there are some selection options
+* `-quick` - similar to summary, but omits the initial test description and just shows the columns of timings: the column headers show the sqlite/backend combination
 * `-details`  - display full details for each test in each selected run including all the information in the database; cannot be combined with `-summary`
 * `-export` `FILE`  - write the selected runs to `FILE` in a text format, useful for example to send the run information by email
 * `-copy` `DATABASE`  - copies all information about the selected runs to `DATABASE`;

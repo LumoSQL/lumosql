@@ -51,6 +51,9 @@ $(TEST_DATABASE_NAME):
 what:
 	$(TCL) tool/build.tcl what not-fork.d $(BUILD_OPTIONS)
 
+targets:
+	$(TCL) tool/build.tcl targets not-fork.d $(BUILD_OPTIONS)
+
 Makefile.options: not-fork.d/*/benchmark tool/build.tcl
 	$(TCL) tool/build.tcl options not-fork.d $@
 

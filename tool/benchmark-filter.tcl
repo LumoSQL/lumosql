@@ -94,14 +94,17 @@ proc display_help {} {
 	puts stderr "     -average           average across all runs, per dimension      NOT IMPLEMENTED YET           "
 	puts stderr "     -list              select list output (default if no filters selected)                       "
 	puts stderr "     -fields            list of fields to return with -list         ARCH,OS,TARGET,DURATION       "
+	puts stderr "     -quick             show sqlite+backend name as column headers for timings                    "
 	puts stderr "     -summary           describe each column before returning all timings                         "
 	puts stderr "     -details           return every field and row                                                "
 	puts stderr "     -export            plain text dump of entire benchmark db                                    "
 	puts stderr "     -copy              append selected run(s) to database          runs.sqlite                   "
 	puts stderr "     -option                                                                                      "
 	puts stderr "     -target                                                                                      "
-	puts stderr "     -version                                                                                     "
-	puts stderr "     -backend                                                                                     "
+	puts stderr "     -version           select runs with this sqlite version        3.37.0                        "
+	puts stderr "     -backend           select runs with the specified backend      lmdb                          "
+	puts stderr "                                                                    lmdb-0.9.29                   "
+	puts stderr "     -no-backend        select runs with an unmodified sqlite                                     "
 	puts stderr "     -missing                                                                                     "
 	puts stderr "     -failed                                                                                      "
 	puts stderr "     -completed         only return completed runs                                                "
@@ -137,11 +140,14 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
 	set out_default 0
     } elseif {$o eq "-fields"} {
 	optlist list_fields "list of fields" ","
-    } elseif {$o eq "-summary"} {
+    } elseif {$o eq "-quick"} {
 	set out_summary 1
 	set out_default 0
-    } elseif {$o eq "-details"} {
+    } elseif {$o eq "-summary"} {
 	set out_summary 2
+	set out_default 0
+    } elseif {$o eq "-details"} {
+	set out_summary 3
 	set out_default 0
     } elseif {$o eq "-export"} {
 	optarg {^} "file name"
@@ -173,6 +179,9 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
     } elseif {$o eq "-backend"} {
 	optarg {^\w+(-.+)?$} "backend name and optional version"
 	lappend only_backends $o
+	set has_selection 1
+    } elseif {$o eq "-no-backend"} {
+	lappend only_backends ""
 	set has_selection 1
     } elseif {$o eq "-missing"} {
 	optarg {^\w+$} "keyword"
@@ -464,7 +473,11 @@ if ($only_invalid) {
 	set or "where"
 	for {set i 0} {$i < [llength $only_backends]} {incr i} {
 	    set val [lindex $only_backends $i]
-	    if {[regexp {^\w+-} $val]} {
+	    if {$val eq ""} {
+		# Uhm, select any run_id where there is no key 'backend',
+		# is there a better query for it?
+		puts $sql "$or (run_id in (select run_id from run_data where run_id not in (select run_id from run_data where key = 'backend')))"
+	    } elseif {[regexp {^\w+-} $val]} {
 		puts $sql "$or (key = 'backend' and value = '$val')"
 	    } else {
 		puts $sql "$or (key = 'backend-name' and value = '$val')"
@@ -735,7 +748,7 @@ proc field_width {key min} {
 
 if {$out_default} {
     if {$has_selection} {
-	set out_summary 1
+	set out_summary 2
     } else {
 	set out_list 1
     }
@@ -881,10 +894,11 @@ if {$out_summary} {
     add_run_key "title"
     add_run_key "target"
     add_run_key "sqlite-name"
+    add_run_key "sqlite-version"
     add_test_op "duration" "real-time" "sum(value)"
+    add_run_key "backend-name"
+    add_run_key "backend-version"
     if {$out_summary > 1} {
-	add_run_key "backend-name"
-	add_run_key "backend-version"
 	add_test_op "n-tests" "test-name" "count(*)"
 	set xspace "    "
     } else {
@@ -892,14 +906,19 @@ if {$out_summary} {
     }
     set hdr ""
     set adj ""
-    set dash "---"
+    set dash "--"
+    set tgt1 ""
+    set tgt2 ""
+    set tgt3 ""
     set times [list]
     set status [list]
     for {set i 0} {$i < [llength $runlist]} {incr i} {
 	set run_id [lindex $runlist $i]
 	if {[llength $runlist] > 1} {
 	    set cn [expr {$i + 1}]
-	    if {$out_summary < 2} { puts "Column $cn" }
+	    if {$out_summary > 1 && $out_summary < 3} {
+		puts "Column $cn"
+	    }
 	    append hdr [format "%11d " $cn]
 	    append adj $dash
 	    set dash "------"
@@ -907,23 +926,37 @@ if {$out_summary} {
 	    set hdr "$xspace       TIME "
 	}
 	set d [dict get $rundict $run_id]
-	puts "${xspace}Benchmark: [dict get $d "title"]"
-	puts "$xspace   Target: [dict get $d "target"]"
 	if {$out_summary > 1} {
-	    puts "$xspace       ID: $run_id"
-	    if {[dict exists $d "backend-name"]} {
-		set v [dict get $d "backend-name"]
-		if {[dict exists $d "backend-version"]} {
-		    append v "-[dict get $d "backend-version"]"
+	    puts "${xspace}Benchmark: [dict get $d "title"]"
+	    puts "$xspace   Target: [dict get $d "target"]"
+	    if {$out_summary > 2} {
+		puts "$xspace       ID: $run_id"
+		if {[dict exists $d "backend-name"]} {
+		    set v [dict get $d "backend-name"]
+		    if {[dict exists $d "backend-version"]} {
+			append v "-[dict get $d "backend-version"]"
+		    }
+		    puts "$xspace  Backend: $v"
 		}
-		puts "$xspace  Backend: $v"
+	    }
+	    puts "$xspace          ([dict get $d "sqlite-name"])"
+	    puts "$xspace   Ran at: [clock format [dict get $d "when-run"] -format "%Y-%m-%d %H:%M:%S"]"
+	    puts [format "$xspace Duration: %.3f" [dict get $d "duration"]]
+	} else {
+	    append tgt1 [format "%11s " [dict get $d "sqlite-version"]]
+	    if {[dict exists $d "backend-name"]} {
+		append tgt2 [format "%11s " [dict get $d "backend-name"]]
+	    } else {
+		append tgt2 "            "
+	    }
+	    if {[dict exists $d "backend-version"]} {
+		append tgt3 [format "%11s " [dict get $d "backend-version"]]
+	    } else {
+		append tgt3 "            "
 	    }
 	}
-	puts "$xspace          ([dict get $d "sqlite-name"])"
-	puts "$xspace   Ran at: [clock format [dict get $d "when-run"] -format "%Y-%m-%d %H:%M:%S"]"
-	puts [format "$xspace Duration: %.3f" [dict get $d "duration"]]
 	set nnames [get_test_key $run_id "test-name"]
-	if {$out_summary > 1} {
+	if {$out_summary > 2} {
 	    # print more information about this run
 	    set rd [get_run_data $run_id]
 	    set options "      Options:"
@@ -1010,11 +1043,18 @@ if {$out_summary} {
 	    lappend times $ttimes
 	    lappend status $tstatus
 	}
-	puts ""
+	# XXX puts ""
     }
-    if {$out_summary < 2} {
-	if {[llength $runlist] > 1} { puts "${adj}-TIME$adj" }
-	puts "${hdr}TEST NAME"
+    if {$out_summary < 3} {
+	if {$out_summary > 1} {
+	    if {[llength $runlist] > 1} { puts "-$adj TIME $adj" }
+	    puts "${hdr}TEST NAME"
+	} else {
+	    puts "${tgt1}(sqlite version)"
+	    puts "${tgt2}(backend name)"
+	    puts "${tgt3}(backend version)"
+	    puts "-$adj TIME $adj TEST NAME"
+	}
 	for {set t 0} {$t < [llength $tnames]} {incr t} {
 	    set r ""
 	    for {set i 0} {$i < [llength $runlist]} {incr i} {
@@ -1028,6 +1068,14 @@ if {$out_summary} {
 	    }
 	    puts "$r[format "%4d %s" [expr {$t + 1}] [lindex $tnames $t]]"
 	}
+	puts "-------$adj$adj"
+	set r ""
+	for {set i 0} {$i < [llength $runlist]} {incr i} {
+	    set run_id [lindex $runlist $i]
+	    set d [dict get $rundict $run_id]
+	    append r [format "%11.3f " [dict get $d "duration"]]
+	}
+	puts "${r}(total benchmark run time)"
 	puts ""
     }
 }

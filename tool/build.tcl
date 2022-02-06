@@ -32,6 +32,12 @@
 # ARGUMENTS: BUILD_OPTIONS
 #            show what targets/options have been selected based on command-line
 
+# OPERATION: targets
+# ARGUMENTS: BUILD_OPTIONS
+#            same as "what", but the list of targets are all in one line,
+#            for easier copy-paste when trying to run the exact same list
+#            in multiple places
+
 # OPERATION: build
 # ARGUMENTS: BUILD_DIR BUILD_OPTIONS
 #            build LumoSQL, if necessary
@@ -79,7 +85,7 @@ if {$operation eq "options"} {
     set build_dir [lindex $argv 2]
     set database_name [lindex $argv 3]
     set argp 4
-} elseif {$operation eq "what"} {
+} elseif {$operation eq "what" || $operation eq "targets"} {
     set argp 2
 } elseif {$operation eq "build"} {
     if {[llength $argv] < 3} {
@@ -111,29 +117,35 @@ if {! [file isdirectory $notfork_dir]} {
 proc read_versions {ver_file backend vname dname} {
     set rf [open $ver_file r]
     upvar $vname vlist
-    if {$dname ne ""} { upvar $dname dver }
+    if {$dname ne ""} { upvar $dname deflist }
     foreach ln [split [read $rf] \n] {
 	regsub {^\s+} $ln "" ln
 	regsub {\s+$} $ln "" ln
 	if {$ln eq ""} { continue }
 	if {[regexp {^#} $ln]} { continue }
 	if {$backend eq ""} {
-	    set target $ln
-	} elseif { [regexp {^=\s*(.*)$} $ln skip dver] } {
+	    set target [list $ln]
+	} elseif { [regexp {^=\s*(.*)$} $ln skip v] } {
+	    lappend deflist $v
 	    continue
 	} else {
 	    set lx [split $ln "+"]
-	    if {$lx < 2} {
-		set sqlite3_version $dver
+	    if {[llength $lx] < 2} {
+		set sqlite3_versions $deflist
 		set backend_version $ln
 	    } else {
-		set sqlite3_version [lindex $lx 0]
+		set sqlite3_versions [list [lindex $lx 0]]
 		set backend_version [lindex $lx 1]
 	    }
-	    set target "$sqlite3_version+$backend-$backend_version"
+	    set target [list]
+	    foreach v $sqlite3_versions {
+		lappend target "$v+$backend-$backend_version"
+	    }
 	}
-	if {[lsearch -exact $vlist $target] < 0} {
-	    lappend vlist $target
+	foreach t $target {
+	    if {[lsearch -exact $vlist $t] < 0} {
+		lappend vlist $t
+	    }
 	}
     }
     close $rf
@@ -248,14 +260,13 @@ proc read_options {opt_dir} {
 }
 
 set backends [list]
-set sqlite3_versions [list]
 array set options { }
+set sqlite3_versions [list]
 read_versions [file join $notfork_dir sqlite3 benchmark versions] "" sqlite3_versions ""
 if {[llength $sqlite3_versions] < 1} {
     puts stderr "No SQLite versions specified?"
     exit 1
 }
-set sqlite3_for_db [lindex $sqlite3_versions 0]
 
 read_options [file join $notfork_dir sqlite3 benchmark]
 
@@ -270,7 +281,7 @@ array set other_values [list \
 	NOTFORK_COMMAND  "not-fork" \
 	NOTFORK_ONLINE   0 \
 	NOTFORK_UPDATE   0 \
-	SQLITE_VERSIONS  $sqlite3_for_db \
+	SQLITE_VERSIONS  [join $sqlite3_versions] \
 	USE_SQLITE       "yes" \
 ]
 set options_list [lsort [array names other_values]]
@@ -282,11 +293,11 @@ foreach backend_dir [glob -nocomplain -directory $notfork_dir *] {
 	if {$backend eq "sqlite3"} { continue }
 	set BACKEND [string toupper $backend]
 	set versions [list]
-	set default_version ""
+	set default_versions [list]
 	set ok 0
 	set ver_file [file join $backend_dir benchmark versions]
 	if {[file exists $ver_file]} {
-	    read_versions $ver_file $backend versions default_version
+	    read_versions $ver_file $backend versions default_versions
 	    set ok 1
 	}
 	set stand_file [file join $backend_dir benchmark standalone]
@@ -300,23 +311,26 @@ foreach backend_dir [glob -nocomplain -directory $notfork_dir *] {
 	}
 	read_options [file join $backend_dir benchmark]
 	lappend backends $backend
-	lappend backends [list $BACKEND $versions $default_version]
+	lappend backends [list $BACKEND $versions $default_versions]
 	set bv [list]
 	set bs [list]
 	foreach v $versions {
 	    if {[regexp {^\+.*?-(.*)$} $v skip sv]} {
-		lappend bs $sv
+		if {[lsearch -exact $bs $sv] < 0} {
+		    lappend bs $sv
+		}
 	    } elseif {[regexp {^(.*?)\+.*?-(.*$)$} $v skip sv xv]} {
-		if {$sv eq $default_version} {
+		if {[lsearch -exact $default_versions $sv] < 0} {
+		    set xv $v
+		}
+		if {[lsearch -exact $bv $xv] < 0} {
 		    lappend bv $xv
-		} else {
-		    lappend bv $v
 		}
 	    }
 	}
 	array set other_values [list \
 	    USE_$BACKEND          yes \
-	    SQLITE_FOR_$BACKEND   $default_version \
+	    SQLITE_FOR_$BACKEND   [join $default_versions] \
 	    ${BACKEND}_VERSIONS   [join $bv] \
 	    ${BACKEND}_STANDALONE [join $bs] \
 	]
@@ -357,8 +371,14 @@ if {$prn} {
 # parse command line to get a list of options
 
 array set option_values { }
+set default_options [list]
 foreach {option od} [array get options] {
-    array set option_values [list $option [lindex $od 2]]
+    set value [lindex $od 2]
+    array set option_values [list $option $value]
+    if {[lindex $od 0]} {
+	lappend default_options $option
+	lappend default_options $value
+    }
 }
 
 for {set anum $argp} {$anum < [llength $argv]} {incr anum} {
@@ -456,192 +476,112 @@ proc notfork_command {target args} {
     return $args
 }
 
+# not quite the same version sort as not-fork, but it'll do for now,
+# it works for sqlite3 and LMDB anyway; a future not-fork will have
+# options to list all version until/after a given one and we'll
+# use these when they become available
+proc version_makesort {ver} {
+    set rl [list]
+    foreach vc [split $ver "."] {
+	if {[regexp {^(\d+)(.*)$} $vc skip number rest]} {
+	    set vc [format "%010d%s" $number $rest]
+	}
+	lappend rl $vc
+    }
+    set res [join $rl "."]
+    return $res
+}
+
+proc versions_list {result backend names slist} {
+    upvar $result R
+    set R [list]
+    foreach name [split $names] {
+	if {$name eq ""} { continue }
+	if {$slist ne ""} {
+	    if {[regexp {^(.+)\+(.+)$} $name skip sv name]} {
+		# recursion: see recursion
+		versions_list S sqlite3 $sv ""
+	    } else {
+		set S $slist
+	    }
+	} else {
+	    set S [list ""]
+	}
+	set all 0
+	set minver ""
+	set maxver ""
+	set remove 0
+	if {[string index $name 0] eq "-"} {
+	    set remove 1
+	    set name [string range $name 1 end]
+	}
+	if {$name eq "all"} {
+	    set all 1
+	} elseif {[string index $name end] eq "+"} {
+	    set all 1
+	    set minver [version_makesort [string range $name 0 end-1]]
+	} elseif {[regexp {^(.*)-} $name skip ver]} {
+	    set all 1
+	    set maxver [version_makesort [string range $name 0 end-1]]
+	}
+	if {$all || $name eq "latest"} {
+	    # if a clone needs to happen that may result in standard output
+	    # which we don't want; so we call not-fork twice
+	    eval exec [notfork_command $backend -q]
+	    set nfvers [split [eval exec [notfork_command $backend --list-versions]]]
+	    if {[llength $nfvers] < 1} { continue }
+	    if {$all} {
+		set bvers [list]
+		foreach nv $nfvers {
+		    if {$minver ne "" || $maxver ne ""} {
+			set ev [version_makesort $nv]
+			if {$ev < $minver} { continue }
+			if {$maxver ne "" && $ev > $maxver} { continue }
+		    }
+		    lappend bvers $nv
+		}
+	    } else {
+		set bvers [lrange $nfvers end end]
+	    }
+	} else {
+	    set bvers [list $name]
+	}
+	foreach bv $bvers {
+	    foreach sv $S {
+		if {$sv eq ""} {
+		    set tgt $bv
+		} else {
+		    set tgt "$sv+$backend-$bv"
+		}
+		set pos [lsearch -exact $R $tgt]
+		if {$pos < 0 && ! $remove} {
+		    lappend R $tgt
+		} elseif {$pos >= 0 && $remove} {
+		    set R [lreplace $R $pos $pos]
+		}
+	    }
+	}
+    }
+}
+
+versions_list s3vers sqlite3 $other_values(SQLITE_VERSIONS) ""
+set sqlite3_for_db [lindex $s3vers 0]
 set target_string $other_values(TARGETS)
 set benchmark_list [list]
-set build_list [list]
-set build_option_list [list]
+set build_list [list $sqlite3_for_db]
+set build_option_list [list $default_options]
 set benchmark_to_build [list]
 set benchmark_option_list [list]
-if {$target_string eq ""} {
-    # generate a new list of benchmarks from all the other options
-    set benchmark_opts ""
-    set benchmark_plus ""
-    set benchmark_ol [list]
-    set build_opts ""
-    set build_plus ""
-    set build_ol [list]
-    foreach {option value} [lsort -stride 2 [array get option_values]] {
-	set od $options($option)
-	lappend benchmark_ol $option
-	lappend benchmark_ol $value
-	if {$value ne [lindex $od 2]} {
-	    append benchmark_opts "+[string tolower $option]-$value"
-	    set benchmark_plus "+"
-	}
-	if {[lindex $od 0]} {
-	    lappend build_ol $option
-	    lappend build_ol $value
-	    if {$value ne [lindex $od 2]} {
-		append build_opts "+[string tolower $option]-$value"
-		set build_plus "+"
-	    }
-	}
-    }
-    proc add_target_no {target add_bench} {
-	global benchmark_list
-	global benchmark_opts
-	global benchmark_plus
-	global benchmark_option_list
-	global benchmark_ol
-	global benchmark_to_build
-	global build_list
-	global build_opts
-	global build_plus
-	global build_option_list
-	global build_ol
-	set b "$target$build_plus$build_opts"
-	if {$add_bench} {
-	    set t "$target$benchmark_plus$benchmark_opts"
-	    if {[lsearch -exact $benchmark_list $t] < 0} {
-		lappend benchmark_list $t
-		lappend benchmark_to_build $b
-		lappend benchmark_option_list $benchmark_ol
-	    }
-	}
-	if {[lsearch -exact $build_list $b] < 0} {
-	    lappend build_list $b
-	    lappend build_option_list $build_ol
-	}
-    }
-    proc add_target_yes {target} {
-	global benchmark_list
-	global benchmark_opts
-	global benchmark_option_list
-	global benchmark_ol
-	global benchmark_to_build
-	global build_list
-	global build_opts
-	global build_option_list
-	global build_ol
-	set t "$target$benchmark_opts"
-	if {[lsearch -exact $benchmark_list $t] < 0} {
-	    lappend benchmark_list $t
-	    set b "$target$build_opts"
-	    lappend benchmark_to_build $b
-	    lappend benchmark_option_list $benchmark_ol
-	    if {[lsearch -exact $build_list $b] < 0} {
-		lappend build_list $b
-		lappend build_option_list $build_ol
-	    }
-	}
-    }
-    if {$other_values(USE_SQLITE) eq "yes"} {
-	foreach sv [split $other_values(SQLITE_VERSIONS)] {
-	    if {$sv ne ""} {
-		add_target_no $sv 1
-		if {$operation eq "database"} { break }
-	    }
-	}
-    } else {
-	# build the first version listed, to update the database,
-	# but do not run the corresponding benchmark
-	add_target_no [lindex [split $other_values(SQLITE_VERSIONS)] 0] 0
-    }
-    if {$operation ne "database"} {
-	foreach {backend spec} $backends {
-	    set BACKEND [lindex $spec 0]
-	    if {$other_values(USE_$BACKEND) eq "yes"} {
-		set dver $other_values(SQLITE_FOR_$BACKEND)
-		set bver $other_values(${BACKEND}_VERSIONS)
-		if {$bver eq "all"} {
-		    # if a clone needs to happen that may result in
-		    # standard output which we don't want; so we call
-		    # not-fork twice
-		    eval exec [notfork_command $backend -q]
-		    set bver [eval exec [notfork_command $backend --list-versions]]
-		}
-		foreach v [split $bver] {
-		    if {[regexp {^(.*?)\+(.*)$} $v skip sv bv]} {
-			add_target_no $sv 1
-			add_target_yes "$sv+$backend-$bv"
-		    } elseif {$v ne ""} {
-			add_target_no $dver 1
-			add_target_yes "$dver+$backend-$v"
-		    }
-		}
-		set bver $other_values(${BACKEND}_STANDALONE)
-		if {$bver eq "all"} {
-		    # if a clone needs to happen that may result in
-		    # standard output which we don't want; so we call
-		    # not-fork twice
-		    eval exec [notfork_command $backend -q]
-		    set bver [eval exec [notfork_command $backend --list-versions]]
-		}
-		foreach v [split $bver] {
-		    if {[regexp {^(.*?)=(.*)$} $v skip bv sv]} {
-			add_target_no $sv 1
-			add_target_yes "+$backend-$bv"
-		    } elseif {$v ne ""} {
-			add_target_yes "+$backend-$v"
-		    }
-		}
-	    }
-	}
-    }
-} else {
-    # parse list of benchmarks
-    if {$operation eq "database"} {
-	puts stderr "Cannot specify explicit targets with \"database\""
-	exit 1
-    }
-    set target_list [split $target_string]
-    # make sure we also have an unmodified sqlite3 for the benchmark database
-    lappend target_list [lindex [split $other_values(SQLITE_VERSIONS)] 0]
-    for {set tptr 0} {$tptr < [llength $target_list]} {incr tptr} {
-	set benchmark [lindex $target_list $tptr]
-	if {$benchmark eq ""} { continue }
-	set benchmark_this [expr $tptr < ([llength $target_list] - 1)]
-	set tdata [split $benchmark "+"]
-	set sv [lindex $tdata 0]
-	set bv [lindex $tdata 1]
-	# get a new option array and update it from the targt string
-	array set opt_arr [array get option_values]
-	foreach optstring [lrange $tdata 2 end] {
-	    if {! [regexp {^(\w+)-(.*)$} $optstring skip option value]} {
-		puts stderr "Invalid option $optstring"
-		exit 1
-	    }
-	    if {[llength [array names options -exact [string toupper $option]]] == 0} {
-		puts stderr "Invalid option name: $option"
-		exit 1
-	    }
-	    set od $options([string toupper $option])
-	    if {[llength $od] < 2} {
-		puts stderr "Invalid option name: $option"
-		exit 1
-	    }
-	    if {$value eq [lindex $od 2]} { continue }
-	    if {! [regexp "^(?:[lindex $od 1])$" $value]} {
-		puts stderr "Invalid value for $option: $value"
-		exit 1
-	    }
-	    foreach {e1 e2} [lindex $od 3] {
-		if {$value eq $e1} {
-		    set value $e2
-		}
-	    }
-	    if {$value eq [lindex $od 2]} { continue }
-	    set option [string toupper $option]
-	    array set opt_arr [list $option $value]
-	}
-	# now construct a new normalised target string
+if {$operation ne "database"} {
+    if {$target_string eq ""} {
+	# generate a new list of benchmarks from all the other options
 	set benchmark_opts ""
 	set benchmark_plus ""
 	set benchmark_ol [list]
 	set build_opts ""
 	set build_plus ""
 	set build_ol [list]
-	foreach {option value} [lsort -stride 2 [array get opt_arr]] {
+	foreach {option value} [lsort -stride 2 [array get option_values]] {
 	    set od $options($option)
 	    lappend benchmark_ol $option
 	    lappend benchmark_ol $value
@@ -658,22 +598,159 @@ if {$target_string eq ""} {
 		}
 	    }
 	}
-	if {$bv eq ""} {
-	    set t "$sv$benchmark_plus$benchmark_opts"
-	    set b "$sv$build_plus$build_opts"
-	} else {
-	    set t "$sv+$bv$benchmark_opts"
-	    set b "$sv+$bv$build_opts"
-	}
-	if {[lsearch -exact $benchmark_list $t] < 0} {
-	    if {$benchmark_this} {
-		lappend benchmark_list $t
-		lappend benchmark_to_build $b
-		lappend benchmark_option_list $benchmark_ol
+	proc add_target_no {target add_bench} {
+	    global benchmark_list
+	    global benchmark_opts
+	    global benchmark_plus
+	    global benchmark_option_list
+	    global benchmark_ol
+	    global benchmark_to_build
+	    global build_list
+	    global build_opts
+	    global build_plus
+	    global build_option_list
+	    global build_ol
+	    set b "$target$build_plus$build_opts"
+	    if {$add_bench} {
+		set t "$target$benchmark_plus$benchmark_opts"
+		if {[lsearch -exact $benchmark_list $t] < 0} {
+		    lappend benchmark_list $t
+		    lappend benchmark_to_build $b
+		    lappend benchmark_option_list $benchmark_ol
+		}
 	    }
 	    if {[lsearch -exact $build_list $b] < 0} {
 		lappend build_list $b
 		lappend build_option_list $build_ol
+	    }
+	}
+	proc add_target_yes {target} {
+	    global benchmark_list
+	    global benchmark_opts
+	    global benchmark_option_list
+	    global benchmark_ol
+	    global benchmark_to_build
+	    global build_list
+	    global build_opts
+	    global build_option_list
+	    global build_ol
+	    set t "$target$benchmark_opts"
+	    if {[lsearch -exact $benchmark_list $t] < 0} {
+		lappend benchmark_list $t
+		set b "$target$build_opts"
+		lappend benchmark_to_build $b
+		lappend benchmark_option_list $benchmark_ol
+		if {[lsearch -exact $build_list $b] < 0} {
+		    lappend build_list $b
+		    lappend build_option_list $build_ol
+		}
+	    }
+	}
+	foreach {backend spec} $backends {
+	    set BACKEND [lindex $spec 0]
+	    if {$other_values(USE_$BACKEND) eq "yes"} {
+		versions_list dvers sqlite3 $other_values(SQLITE_FOR_$BACKEND) ""
+		versions_list bvers $backend $other_values(${BACKEND}_VERSIONS) $dvers
+		foreach bver $bvers {
+		    if {[regexp {^(.*?)\+(.*)$} $bver skip sv bv]} {
+			add_target_no $sv 1
+			add_target_yes $bver
+		    }
+		}
+		versions_list svers $backend $other_values(${BACKEND}_STANDALONE) ""
+		foreach sver $svers {
+		    if {[regexp {^(.*?)=(.*)$} $sver skip bv sv]} {
+			add_target_no $sv 1
+			add_target_yes "+$backend-$bv"
+		    } else {
+			add_target_yes "+$backend-$v"
+		    }
+		}
+	    }
+	}
+    } else {
+	# parse list of benchmarks
+	set target_list [split $target_string]
+	# make sure we also have an unmodified sqlite3 for the benchmark database
+	lappend target_list [lindex [split $other_values(SQLITE_VERSIONS)] 0]
+	for {set tptr 0} {$tptr < [llength $target_list]} {incr tptr} {
+	    set benchmark [lindex $target_list $tptr]
+	    if {$benchmark eq ""} { continue }
+	    set benchmark_this [expr $tptr < ([llength $target_list] - 1)]
+	    set tdata [split $benchmark "+"]
+	    set sv [lindex $tdata 0]
+	    set bv [lindex $tdata 1]
+	    # get a new option array and update it from the targt string
+	    array set opt_arr [array get option_values]
+	    foreach optstring [lrange $tdata 2 end] {
+		if {! [regexp {^(\w+)-(.*)$} $optstring skip option value]} {
+		    puts stderr "Invalid option $optstring"
+		    exit 1
+		}
+		if {[llength [array names options -exact [string toupper $option]]] == 0} {
+		    puts stderr "Invalid option name: $option"
+		    exit 1
+		}
+		set od $options([string toupper $option])
+		if {[llength $od] < 2} {
+		    puts stderr "Invalid option name: $option"
+		    exit 1
+		}
+		if {$value eq [lindex $od 2]} { continue }
+		if {! [regexp "^(?:[lindex $od 1])$" $value]} {
+		    puts stderr "Invalid value for $option: $value"
+		    exit 1
+		}
+		foreach {e1 e2} [lindex $od 3] {
+		    if {$value eq $e1} {
+			set value $e2
+		    }
+		}
+		if {$value eq [lindex $od 2]} { continue }
+		set option [string toupper $option]
+		array set opt_arr [list $option $value]
+	    }
+	    # now construct a new normalised target string
+	    set benchmark_opts ""
+	    set benchmark_plus ""
+	    set benchmark_ol [list]
+	    set build_opts ""
+	    set build_plus ""
+	    set build_ol [list]
+	    foreach {option value} [lsort -stride 2 [array get opt_arr]] {
+		set od $options($option)
+		lappend benchmark_ol $option
+		lappend benchmark_ol $value
+		if {$value ne [lindex $od 2]} {
+		    append benchmark_opts "+[string tolower $option]-$value"
+		    set benchmark_plus "+"
+		}
+		if {[lindex $od 0]} {
+		    lappend build_ol $option
+		    lappend build_ol $value
+		    if {$value ne [lindex $od 2]} {
+			append build_opts "+[string tolower $option]-$value"
+			set build_plus "+"
+		    }
+		}
+	    }
+	    if {$bv eq ""} {
+		set t "$sv$benchmark_plus$benchmark_opts"
+		set b "$sv$build_plus$build_opts"
+	    } else {
+		set t "$sv+$bv$benchmark_opts"
+		set b "$sv+$bv$build_opts"
+	    }
+	    if {[lsearch -exact $benchmark_list $t] < 0} {
+		if {$benchmark_this} {
+		    lappend benchmark_list $t
+		    lappend benchmark_to_build $b
+		    lappend benchmark_option_list $benchmark_ol
+		}
+		if {[lsearch -exact $build_list $b] < 0} {
+		    lappend build_list $b
+		    lappend build_option_list $build_ol
+		}
 	    }
 	}
     }
@@ -681,7 +758,7 @@ if {$target_string eq ""} {
 
 # if they asked "what" we're nearly done
 
-if {$operation eq "what"} {
+if {$operation eq "what" || $operation eq "targets"} {
     foreach option $options_list {
 	set value $other_values($option)
 	puts "$option=$value"
@@ -690,12 +767,20 @@ if {$operation eq "what"} {
 	puts "OPTION_$option=$value"
     }
     puts "BUILDS="
-    foreach build $build_list {
-	puts "    $build"
+    if {$operation eq "what"} {
+	foreach build $build_list {
+	    puts "    $build"
+	}
+    } else {
+	puts "    [join $build_list]"
     }
     puts "TARGETS="
-    foreach benchmark $benchmark_list {
-	puts "    $benchmark"
+    if {$operation eq "what"} {
+	foreach benchmark $benchmark_list {
+	    puts "    $benchmark"
+	}
+    } else {
+	puts "    [join $benchmark_list]"
     }
     exit 0
 }
@@ -785,9 +870,9 @@ for {set bnum 0} {$bnum < [llength $build_list]} {incr bnum} {
 	    if {$skip_rebuild} {continue}
 	}
 	file delete -force $dest_dir
-	puts "*** Reuilding $build (sources changed)"
+	puts "*** Reuilding $build (sources changed) [expr {$bnum + 1}]/[llength $build_list]"
     } else {
-	puts "*** Building $build"
+	puts "*** Building $build [expr {$bnum + 1}]/[llength $build_list]"
     }
     if {$sqlite3_version ne ""} {
 	puts "    SQLITE3_VERSION = $sqlite3_version"
@@ -1041,7 +1126,7 @@ set test_result [list]
 for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
     set benchmark [lindex $benchmark_list $bnum]
     set benchmark_optlist [lindex $benchmark_option_list $bnum]
-    puts "*** Running $operation $benchmark"
+    puts "*** Running $operation $benchmark [expr {$bnum + 1}]/[llength $benchmark_list]"
     set build [lindex $benchmark_to_build $bnum]
     set tl [split $build "+"]
     set sqlite3_version [lindex $tl 0]

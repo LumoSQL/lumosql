@@ -131,6 +131,12 @@ Executive summary:
 	# ARGUMENTS: BUILD_OPTIONS
 	#            show what targets/options have been selected based on command-line
 
+	# OPERATION: targets
+	# ARGUMENTS: BUILD_OPTIONS
+	#            same as "what", but the list of targets are all in one line,
+	#            for easier copy-paste when trying to run the exact same list
+	#            in multiple places
+
 	# OPERATION: build
 	# ARGUMENTS: BUILD_DIR BUILD_OPTIONS
 	#            build LumoSQL, if necessary
@@ -159,6 +165,8 @@ version of sqlite3 to use with this backend; and `SQLITE_VERSION+BACKEND_VERSION
 specifies the two versions explicitely for a particular build; a line containing
 just a version number will use the default specified with `=VERSION`; the
 file `not-fork.d/lmdb/benchmarking/versions` contains some examples.
+The special version `latest` corresponds to the latest version number
+known to the not-forking tool (usually, the latest available).
 
 * `standalone` - for backends which contain their own sqlite3 sources,
 possibly modified, this file specifies to build/benchmark these rather
@@ -259,7 +267,7 @@ a list of targets, using the (previously documented) variables `USE_backend`,
 of the default; the first version in the list will also be used to update
 the benchmark result database (if a backend is built, the corresponding
 unmodified version of sqlite is also added to this list, so the benchmark
-can compare them)
+can compare them); see below for the exact syntax of the list
 * `USE_SQLITE=yes` - build and benchmark an unmodified sqlite3: this is the
 default
 * `USE_SQLITE=no` - do not build/benchmark an unmodified sqlite3; however the
@@ -267,27 +275,69 @@ version which will be used to store the benchmark results in a database will
 always be built if necessary
 * `USE_backend=yes` - include `backend` in the build/benchmark; this is the default
 * `USE_backend=no` - do not include `backend` in the build/benchmark
-* `SQLITE_FOR_backend=version` - version of sqlite3 to use when building a
-backend if the backend version does not specify one
-* `backend_VERSIONS=list` - replace the default list of versions to build; these
-can be a single version, the backend version, or two versions separated by a "+",
-the sqlite3 version and the backend version, respectively; the unmodified
-sqlite3 will also be added to the benchmark, for comparison; if `list` is just
-the word `all`, then all known versions are benchmarked
+* `SQLITE_FOR_backend=list` - versions of sqlite3 to use when building a
+backend if the backend version does not specify one; see below for the
+exact syntax of the list
+* `backend_VERSIONS=list` - replace the default list of versions to build; each
+element of the list can be a version number as for other lists, and each element
+of the resulting list will be combined with all versions specified by
+`SQLITE_FOR_backend`; however a special element containing two version numbers
+separated by a "+" is handled by expanding both versions separately; experimenting
+with `make what` is probably the best way to figure out how this works for
+anything but the simplest case (e.g. `latest+latest` will combine the latest
+version of sqlite with the latest version of the backend)
 * `backend_STANDALONE=list` - if a backend includes its own version of sqlite3,
-then build that instead of linking against an official one; the version can be
-a single version, or two versions separated by `=`, which will be the backend
-version and the version of sqlite3 it will build, respectively; the sqlite3
-version is not used by the build process as it expects the backend to do what is
-necessary, however if known it will be added to the benchmarks for comparison;
-if `list` is just the word `all`, then all known versions are benchmarked
+then build that instead of linking against an official one; the list of versions
+can be specified in the same way as other lists, to produce simple version
+numbers; additionally an element can specify a single version of the backend
+and a single version of sqlite3, in this order and separated by `=`: this
+documents which version of sqlite3 is included in that version of the backend,
+and will result in the unmodified sqlite3 being added to the benchmark for
+comparison: the benchmark system will make no other use of this sqlite version
+number, as the backend is expected to do what is necessary to build with it
 * `DATABASE_NAME=filename` - where to store benchmark results, default is
 `benchmarks.sqlite`
 * `BENCHMARK_RUNS=number` - how many times to repeat each benchmark, default 1.
 
-Alternatively, `TARGETS` can be specified to override all the makefile mechanism
-and build/benchmark a specific combination of options only, as explained in
-the next section.
+Options which take a list of versions expect a space-separated list (this
+will need to be quoted from the shell); each element can be one of the
+following:
+
+* version number (e.g. `3.37.2`): this number will be added as-is
+* `all`: all known versions which aren't already in the list will be added
+* `latest`: the latest known version
+* `-version` (e.g. `-3.35.0`): remove this from the list if it's there
+* `-latest`: remove the latest version from the list if it's there
+* `version+` (e.g. `3.34.0+`): the specified version and all the ones
+which follow it
+* `version-` (e.g. `3.17.0-`): the specified version and all the ones
+which precede it
+
+For example, the following sqlite version list:
+
+```
+all -3.35.0- -latest
+```
+
+corresponds, at the time of writing to the list:
+
+```
+3.35.1 3.35.2 3.35.3 3.35.4 3.35.5 3.36.0 3.37.0 3.37.1
+```
+
+that is, all versions except the ones until 3.35.0 included, and also
+excluding the latest (3.37.2 at the time of writing); this could also
+be specified equivalently as:
+
+```
+3.35.1+ -latest
+```
+
+Instead of specifying `USE_backend=yes/no` and various lists of versions,
+it's possible to specify an explicit list of targets to build or benchmark;
+this list can be used, for example, to run the same set at different times,
+when `all` and `latest` may have different meanings. This is done by using
+the option `TARGETS` and is explained in the next section.
 
 Some options are provided to control the use of the not-forking tool:
 
@@ -333,8 +383,63 @@ this decision, the options are encoded in the target name using the syntax:
 the options are always listed in lexycographic order, and default options are
 omitted, so that if two string differ then the options differ.  This is an
 internal representation, however it appears in the "target" field of the benchmark
-database, and can be specified directly to make to repeat just a particular
-benchmark without specifying all the options separately.
+database, in the output of `make what` and `make targets`, and can be specified
+directly to make to repeat just a particular benchmark without specifying all
+the options separately.
+
+The syntax is:
+
+```
+make build TARGETS='target1 target2 ...'
+make benchmark TARGETS='target1 target2 ...'
+make test TARGETS='target1 target2 ...'
+```
+
+As mentioned, the list of targets can be obtained in several ways; possibly
+the easiest is `make targets` which will provide a single line for easy
+copy and paste, for example:
+
+```
+$ make targets USE_BDB=no USE_SQLITE=no LMDB_VERSIONS=0.9.28+ SQLITE_FOR_LMDB=3.37.1+
+BENCHMARK_RUNS=1
+COPY_DATABASES=
+COPY_SQL=
+CPU_COMMENT=
+DB_DIR=
+DISK_COMMENT=
+MAKE_COMMAND=make
+NOTFORK_COMMAND=not-fork
+NOTFORK_ONLINE=0
+NOTFORK_UPDATE=0
+SQLITE_VERSIONS=latest 3.36.0
+USE_SQLITE=no
+USE_BDB=no
+SQLITE_FOR_BDB=
+BDB_VERSIONS=
+BDB_STANDALONE=18.1.32=3.18.2
+USE_LMDB=yes
+SQLITE_FOR_LMDB=3.37.1+
+LMDB_VERSIONS=0.9.28+
+LMDB_STANDALONE=
+OPTION_DATASIZE=1
+OPTION_DEBUG=off
+OPTION_LMDB_DEBUG=off
+OPTION_LMDB_FIXED_ROWID=off
+OPTION_LMDB_TRANSACTION=optimistic
+OPTION_ROWSUM=off
+OPTION_ROWSUM_ALGORITHM=sha3_256
+OPTION_SQLITE3_JOURNAL=default
+BUILDS=
+    3.37.2 3.37.1 3.37.1+lmdb-0.9.28 3.37.2+lmdb-0.9.28 3.37.1+lmdb-0.9.29 3.37.2+lmdb-0.9.29
+TARGETS=
+    3.37.1 3.37.1+lmdb-0.9.28 3.37.2 3.37.2+lmdb-0.9.28 3.37.1+lmdb-0.9.29 3.37.2+lmdb-0.9.29
+```
+
+so to run exactly the same benchmark one can say:
+
+```
+make benchmark TARGETS='3.37.1 3.37.1+lmdb-0.9.28 3.37.2 3.37.2+lmdb-0.9.28 3.37.1+lmdb-0.9.29 3.37.2+lmdb-0.9.29'
+```
 
 ## Specifying build options to the build and benchmark tools
 
@@ -384,6 +489,9 @@ as well as the values of any options; `ARGUMENTS` is just the build options,
 like `build`, but without the destination directory; the output will show
 the effect of applying these options without building or running anything.
 
+* `targets` - similar to `what`, however the list of targets is all in
+one line for easier copy and paste.
+
 Note that apart from the slightly different syntax, build/benchmark/test options
 are specified in the same way as standard `Makefile` arguments.
 
@@ -392,7 +500,7 @@ and one version of BDB with its own sqlite3:
 
 ```
 tclsh tool/build.tcl build not-fork.d /tmp/objects \
-      SQLITE3_VERSION='3.14.15 3.33.0' \
+      SQLITE_VERSIONS='3.14.15 3.33.0' \
       USE_LMDB=yes LMDB_VERSIONS='0.9.9 0.9.27' SQLITE_FOR_LMDB=3.8.0 \
       USE_BDB=yes BDB_STANDALONE='18.1.32'
 ```
@@ -408,7 +516,7 @@ To add option `debug=on` to the build:
 
 ```
 tclsh tool/build.tcl build not-fork.d /tmp/objects myresults.sqlite \
-      SQLITE3_VERSION='3.14.15 3.33.0' \
+      SQLITE_VERSIONS='3.14.15 3.33.0' \
       USE_LMDB=yes LMDB_VERSIONS='0.9.9 0.9.27' SQLITE_FOR_LMDB=3.8.0 \
       USE_BDB=yes BDB_STANDALONE='18.1.32' \
       -DEBUG=on
