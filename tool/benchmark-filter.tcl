@@ -846,6 +846,13 @@ if {$out_list} {
 	    set width -[field_width "cpu-comment" [string length $field]]
 	    lappend fmt "%${width}s"
 	    lappend op {[dict get $d "cpu-comment" ]}
+	} elseif {$field eq "DISK_WRITE_TIME" || $field eq "DISK_TIME"} {
+	    # disk-read-time seems to be the time it takes to get data
+	    # off the disk cache and is not particularly useful; but
+	    # disk-write-time does have a useful value
+	    add_run_key "disk-write-time"
+	    lappend fmt "%9.3f"
+	    lappend op {[dict get $d "disk-write-time" ]}
 	} elseif {$field eq "CPU_TYPE" || $field eq "ARCH"} {
 	    add_run_key "cpu-type"
 	    set width -[field_width "cpu-type" [string length $field]]
