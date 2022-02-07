@@ -898,6 +898,8 @@ if {$out_summary} {
     add_test_op "duration" "real-time" "sum(value)"
     add_run_key "backend-name"
     add_run_key "backend-version"
+    add_run_key "disk-read-time"
+    add_run_key "disk-write-time"
     if {$out_summary > 1} {
 	add_test_op "n-tests" "test-name" "count(*)"
 	set xspace "    "
@@ -942,6 +944,19 @@ if {$out_summary} {
 	    puts "$xspace          ([dict get $d "sqlite-name"])"
 	    puts "$xspace   Ran at: [clock format [dict get $d "when-run"] -format "%Y-%m-%d %H:%M:%S"]"
 	    puts [format "$xspace Duration: %.3f" [dict get $d "duration"]]
+	    if {[dict exists $d "disk-read-time"] || [dict exists $d "disk-write-time"]} {
+		set dt ""
+		set sp ""
+		if {[dict exists $d "disk-read-time"]} {
+		    append dt [format "%sread: %.3f" $sp [dict get $d "disk-read-time"]]
+		    set sp "; "
+		}
+		if {[dict exists $d "disk-write-time"]} {
+		    append dt [format "%swrite: %.3f" $sp [dict get $d "disk-write-time"]]
+		    set sp "; "
+		}
+		puts "${xspace}Disk time: $dt"
+	    }
 	} else {
 	    append tgt1 [format "%11s " [dict get $d "sqlite-version"]]
 	    if {[dict exists $d "backend-name"]} {

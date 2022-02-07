@@ -832,8 +832,41 @@ puts $wd $build_dir
 puts $wd $sqlite3_for_db
 close $wd
 
+set lock_dir [file join $build_dir .build_lock]
+file mkdir $lock_dir
+set num_builds [llength $build_list]
+set build_todo [list]
 for {set bnum 0} {$bnum < [llength $build_list]} {incr bnum} {
-    set build [lindex $build_list $bnum]
+    lappend build_todo [expr {$bnum + 1}]
+    lappend build_todo [lindex $build_list $bnum]
+}
+
+set num_skipped 0
+while {[llength $build_todo] > 0} {
+    set bnum [lindex $build_todo 0]
+    set build [lindex $build_todo 1]
+    set build_todo [lrange $build_todo 2 end]
+    # we need a lockfile outside the actual build directory - because we
+    # may need to acquire the lock before creating it
+    set lock_file [file join $lock_dir $build]
+    set lock_id [open $lock_file a]
+    # in theory, if the directory already exists we may be able to decide
+    # not to rebuild anyway, but this is simpler code at the cost of
+    # a few nanoseconds in case of collision
+    if {! [flock -write -nowait $lock_id]} {
+	if {[llength $build_todo] > $num_skipped} {
+	    puts "*** Skipping locked $build $bnum/$num_builds"
+	    close $lock_id
+	    lappend build_todo $bnum
+	    lappend build_todo $build
+	    incr num_skipped
+	    continue
+	}
+	# we skipped everything since last build, wait on this lock
+	puts "*** Waiting for lock on $build"
+	flock -write $lock_id
+    }
+    set num_skipped 0
     set dest_dir [file join $build_dir $build]
     set build_optlist [lindex $build_option_list $bnum]
     set tl [split $build "+"]
@@ -862,12 +895,16 @@ for {set bnum 0} {$bnum < [llength $build_list]} {incr bnum} {
 	    if {$skip_rebuild && $backend_version ne ""} {
 		set skip_rebuild [check_mtime $backend_name]
 	    }
-	    if {$skip_rebuild} {continue}
+	    if {$skip_rebuild} {
+		funlock $lock_id
+		close $lock_id
+		continue
+	    }
 	}
 	file delete -force $dest_dir
-	puts "*** Reuilding $build (sources changed) [expr {$bnum + 1}]/[llength $build_list]"
+	puts "*** Rebuilding $build (sources changed) $bnum/$num_builds"
     } else {
-	puts "*** Building $build [expr {$bnum + 1}]/[llength $build_list]"
+	puts "*** Building $build $bnum/$num_builds"
     }
     if {$sqlite3_version ne ""} {
 	puts "    SQLITE3_VERSION = $sqlite3_version"
@@ -975,6 +1012,8 @@ for {set bnum 0} {$bnum < [llength $build_list]} {incr bnum} {
     set td [open $ts_file w]
     puts $td $build_time
     close $td
+    funlock $lock_id
+    close $lock_id
 }
 
 if {$operation eq "build"} { exit 0 }
@@ -1194,6 +1233,31 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 	    close $fd
 	}
     }
+    # before we start... measure the time taken to write and read the disk in $temp_db_dir
+    if {$operation eq "benchmark"} {
+	file mkdir $temp_db_dir
+	set block_data [string range [string repeat "0123456789abcde" 1024] 1 end]
+	set delay 1000
+	exec sync; after $delay;
+	set before [clock microseconds]
+	set wrfile [open $temp_db_name w]
+	for {set block 0} {$block < 16384} {incr block} {
+	    puts $wrfile $block_data
+	}
+	sync $wrfile
+	close $wrfile
+	set delay 1000
+	exec sync; after $delay;
+	set disk_write_time [expr {([clock microseconds] - $before) / 1000000.0}]
+	set before [clock microseconds]
+	set rdfile [open $temp_db_name r]
+	read $rdfile
+	close $rdfile
+	set disk_read_time [expr {([clock microseconds] - $before) / 1000000.0}]
+	file delete $temp_db_name
+	puts [format "    DISK_READ_TIME = %.3f" $disk_read_time]
+	puts [format "    DISK_WRITE_TIME = %.3f" $disk_write_time]
+    }
     for {set r 1} {$r <= $repeat} {incr r} {
 	if {$repeat > 1} {
 	    puts "    *** Run $r / $repeat"
@@ -1233,6 +1297,12 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 		"backend-version"  $backend_version \
 		"backend"          $backend_name-$backend_version \
 		"backend-id"       $backend_commit_id \
+	    ]
+	}
+	if {$operation eq "benchmark"} {
+	    update_run $run_id [list \
+		"disk-read-time"  $disk_read_time \
+		"disk-write-time" $disk_write_time \
 	    ]
 	}
 	set tests_ok 0
