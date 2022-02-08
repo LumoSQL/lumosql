@@ -868,7 +868,7 @@ while {[llength $build_todo] > 0} {
     }
     set num_skipped 0
     set dest_dir [file join $build_dir $build]
-    set build_optlist [lindex $build_option_list $bnum]
+    set build_optlist [lindex $build_option_list [expr $bnum - 1]]
     set tl [split $build "+"]
     set sqlite3_version [lindex $tl 0]
     if {[llength $tl] < 2} {
