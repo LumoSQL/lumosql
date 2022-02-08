@@ -17,6 +17,14 @@
 
 TCL ?= tclsh
 
+# provide defaults for DISK_COMMENT and CPU_COMMENT if we know how to
+CPU_COMMENT ?= $(shell $(TCL) tool/hardware-detect.tcl)
+ifeq ($(DB_DIR),)
+DISK_COMMENT ?= $(shell $(TCL) tool/hardware-detect.tcl '$(BUILD_DIR)')
+else
+DISK_COMMENT ?= $(shell $(TCL) tool/hardware-detect.tcl '$(DB_DIR)')
+endif
+
 # now include build options etc - this file will be generated from the
 # not-fork.d directory
 include Makefile.options
