@@ -101,6 +101,13 @@ if {[llength $argv] == 0} {
     # if we know other ways to do this, we can add them here
 } elseif {[llength $argv] == 1} {
     set path [lindex $argv 0]
+    # the path may not have been created yet - but some parent must exist,
+    # if nothing else the mount point, so look for that
+    while {! [file exists $path]} {
+	set npath [file dirname $path]
+	if {$npath eq $path} {break}
+	set path $npath
+    }
     # figure out the mount point
     catch {
 	set df [exec df -P $path]
