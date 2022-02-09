@@ -1235,7 +1235,7 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
     puts "    SQLITE_ID = $sqlite3_commit_id"
     puts "    SQLITE_NAME = $sqlite3_name"
     if {$backend_name ne ""} {
-	puts "    BACKEND_ID = $backend_commit_id ($backend_id)"
+	puts "    BACKEND_ID = $backend_commit_id"
     }
     array unset benchmark_options
     array set benchmark_options $benchmark_optlist
