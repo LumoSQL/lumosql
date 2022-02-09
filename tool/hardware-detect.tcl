@@ -13,15 +13,16 @@
 # with no arguments, provide defaults for CPU_COMMENT
 # with 1 argument, provide defaults for DISK_COMMENT
 
-proc scsi_name {dev ls} {
+proc scsi_name {dev ls type} {
+    if {$type ne ""} {
+	set type " ($type)"
+    }
     foreach s [split $ls \n] {
 	if {[regexp {/([^\s/]+)\s*$} $s skip sd] && $sd eq $dev} {
-	    set type "disk/SSD"
-	    if {[regexp {^nvme} $dev]} { set type "NVME SSD" }
 	    regsub {^\[[^\[\]]+\]\s+\S+\s+} $s {} s
 	    regsub {\s+/\S+\s*$} $s {} s
-	    set r "$type $s"
-	    regsub -all {\s\s+} $r " " r
+	    set r "$s$type"
+	    regsub -all {\s+} $r " " r
 	    puts $r
 	    exit 0
 	}
@@ -29,9 +30,17 @@ proc scsi_name {dev ls} {
 }
 
 proc device_name {dev} {
+    # for some devices we can provide a generic name
+    set type ""
+    if {[regexp {^nvme} $dev]} { set type "NVME SSD" }
+    if {[regexp {^mmcblk} $dev]} { set type "MMC/SD" }
     # see if lsscsi lists it
     catch {
-	scsi_name $dev [exec lsscsi]
+	scsi_name $dev [exec lsscsi] $type
+    }
+    # if we do have a generic name, output it
+    if {$type ne ""} {
+	puts $type
 	exit 0
     }
     # anything else we can try?
@@ -42,11 +51,9 @@ proc find_device {dev} {
     catch {
 	if {[regexp {\n(\S+)\s[^\n]*\n*$} [exec lsblk -s --raw $dev] skip phdev]} {
 	    device_name $phdev
-	    exit 0
 	}
     }
     # add here more ways to figure out what something may be
-    # and if nothing found
 }
 
 proc parse_df {df} {
@@ -73,7 +80,6 @@ proc parse_df {df} {
 		    # a real local device... but what it may be?
 		    if {[regexp {^(\S+)\s} $l skip d]} {
 			find_device $d
-			exit 0
 		    }
 		    # unknown
 		    exit 0
@@ -112,12 +118,10 @@ if {[llength $argv] == 0} {
     catch {
 	set df [exec df -P $path]
 	parse_df $df
-	exit 0
     }
     catch {
 	set df [exec df $path]
 	parse_df $df
-	exit 0
     }
     # if we know other ways to do this, we can add them here
 } else {
