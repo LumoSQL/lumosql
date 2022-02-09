@@ -825,20 +825,17 @@ proc search_dir {subdir exclude} {
 			    set f [open $fn r]
 			    set d1 [read $f]
 			    close $f
-puts "$fn: $dmtime ($mtime)"
 			    set f [open [file join $notfork_copy $subdir $bn] r]
 			    set d2 [read $f]
 			    close $f
 			    if {$d1 eq $d2} {
 				if {$skip_rebuild < $dmtime} {
-puts "$fn: skip_rebuild $skip_rebuild -> $dmtime"
 				    set skip_rebuild $dmtime
 				}
 				set clear_rebuild 0
 			    }
 			}
 			if {$clear_rebuild} {
-puts "$fn: rebuild"
 			    set skip_rebuild 0
 			    return
 			}
