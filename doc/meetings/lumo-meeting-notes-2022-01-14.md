@@ -1,5 +1,10 @@
 # LumoSQL "Happy New Year" Team Meeting
 
+NOTE: Team meetings after this date use the [HCoop
+Meetbot](https://github.com/pronovic/hcoop-meetbot) and notes are available [on
+the LumoSQL meetings page](https://lumosql.org/meetings) as soon as they end.
+There is a pointer on the meeting page to this meeting in the LumoSQL Fossil repository.
+
 **Dan Shearer, dan@lumosql.org**
 
 **19th January 2022**
@@ -71,10 +76,10 @@ Björn and Dan seem to have solved most of the big blockers.
 
 (✅ DONE) ACTION Björn: Review Leantime implementation and advise Dan about what has to change. Design workflow, especially for creative aspects.
 
-ACTION Dan: Change irc channel to point at https://lumosql.org/src/lumosql/doc/tip/doc/LumoSQL-PhaseII-Announce.md
+(✅ DONE) ACTION Dan: Change irc channel to point at https://lumosql.org/src/lumosql/doc/tip/doc/LumoSQL-PhaseII-Announce.md
 
-ACTION Dan: implement meeting bot https://hcoop-meetbot.readthedocs.io/en/stable/ for next meeting to assist Björn in producing minutes.
+(✅ DONE) ACTION Dan: implement meeting bot https://hcoop-meetbot.readthedocs.io/en/stable/ for next meeting to assist Björn in producing minutes.
 
-ACTION Björn: Work through LumoSQL contacts in Management Wiki with Dan. We have some technical skills that would be helpful to have, and some organisations are clearly working in this area already.
+ACTION Björn: Work through LumoSQL contacts in Management Wiki with Dan. There are some technical skills that would be helpful to have, and some organisations are clearly working in this area already.
 
-ACTION Björn: Work out if it is even feasible to have the in-person funded LumoSQL sprint we had planned! (Fix pandemic first?)
+(✅ DONE) ACTION Björn: Work out if it is even feasible to have the in-person funded LumoSQL sprint we had planned! (Fix pandemic first?)
