@@ -276,6 +276,7 @@ array set other_values [list \
 	COPY_SQL         "" \
 	CPU_COMMENT      "" \
 	DB_DIR           "" \
+	DEBUG_BUILD      0 \
 	DISK_COMMENT     "" \
 	MAKE_COMMAND     "make" \
 	NOTFORK_COMMAND  "not-fork" \
@@ -801,30 +802,55 @@ proc run_build {dir prog} {
     popd
 }
 
-proc search_dir {rootdir exclude} {
+proc search_dir {subdir exclude} {
     global dest_dir
     global mtime
-    if {! [file isdirectory $rootdir]} { return 1 }
-    foreach fn [glob -directory $rootdir -nocomplain *] {
-	set bn [lindex [file split $fn] end]
-	if {[lsearch -exact $exclude $bn] < 0} {
-	    if {[file isdirectory $fn]} {
-		if {! [search_dir $fn [list]]} {
-		    return 0
+    global skip_rebuild
+    global notfork_dir
+    global notfork_copy
+    set rootdir [file join $notfork_dir $subdir]
+    if {[file isdirectory $rootdir]} {
+	foreach fn [glob -directory $rootdir -nocomplain *] {
+	    set bn [lindex [file split $fn] end]
+	    if {[lsearch -exact $exclude $bn] < 0} {
+		set subfile [file join $subdir $bn]
+		if {[file isdirectory $fn]} {
+		    search_dir $subfile [list]
+		    if {! $skip_rebuild} {return}
+		} else {
+		    set dmtime [file mtime $fn]
+		    if {$mtime < $dmtime} {
+			set clear_rebuild 1
+			catch {
+			    set f [open $fn r]
+			    set d1 [read $f]
+			    close $f
+puts "$fn: $dmtime ($mtime)"
+			    set f [open [file join $notfork_copy $subdir $bn] r]
+			    set d2 [read $f]
+			    close $f
+			    if {$d1 eq $d2} {
+				if {$skip_rebuild < $dmtime} {
+puts "$fn: skip_rebuild $skip_rebuild -> $dmtime"
+				    set skip_rebuild $dmtime
+				}
+				set clear_rebuild 0
+			    }
+			}
+			if {$clear_rebuild} {
+puts "$fn: rebuild"
+			    set skip_rebuild 0
+			    return
+			}
+		    }
 		}
-	    } else {
-		file stat $fn buildstat
-		set dmtime $buildstat(mtime)
-		if {$mtime < $dmtime} { return 0 }
 	    }
 	}
     }
-    return 1;
 }
 
 proc check_mtime {subdir} {
-    global notfork_dir
-    return [search_dir [file join $notfork_dir $subdir] [list benchmark]]
+    search_dir $subdir [list benchmark]
 }
 
 set wd [open .build.info w]
@@ -878,30 +904,39 @@ while {[llength $build_todo] > 0} {
 	set backend_name ""
 	set backend_version ""
     }
+    set notfork_copy [file join $dest_dir notfork_copy]
     set ts_file [file join $dest_dir build_time]
     if {[file isdirectory $dest_dir]} {
 	# check if the build is at least as recent as our files
 	if {[file exists $ts_file]} {
-	    set skip_rebuild 1
 	    set rd [open $ts_file]
 	    set mtime [read -nonewline $rd]
 	    close $rd
-	    if {! [regexp {^\d+$} $mtime]} {
+	    if {[regexp {^\d+$} $mtime]} {
+		set skip_rebuild $mtime
+	    } else {
 		set skip_rebuild 0
 	    }
-	    if {$skip_rebuild && $sqlite3_version ne ""} {
-		set skip_rebuild [check_mtime sqlite3]
-	    }
-	    if {$skip_rebuild && $backend_version ne ""} {
-		set skip_rebuild [check_mtime $backend_name]
+	    if {$skip_rebuild} {
+		if {$sqlite3_version ne ""} {
+		    check_mtime sqlite3
+		}
+		if {$backend_version ne ""} {
+		    check_mtime $backend_name
+		}
 	    }
 	    if {$skip_rebuild} {
+		if {$skip_rebuild > $mtime} {
+		    set f [open $ts_file w]
+		    puts $f $skip_rebuild
+		    close $f
+		}
 		funlock $lock_id
 		close $lock_id
 		continue
 	    }
 	}
-	file delete -force $dest_dir
+	if {! $other_values(DEBUG_BUILD)} { file delete -force $dest_dir }
 	puts "*** Rebuilding $build (sources changed) $bnum/$num_builds"
     } else {
 	puts "*** Building $build $bnum/$num_builds"
@@ -919,11 +954,13 @@ while {[llength $build_todo] > 0} {
 	array set env [list "OPTION_$option" $value]
 	array set build_options [list $option $value]
     }
+    if {$other_values(DEBUG_BUILD)} { continue }
     file mkdir $dest_dir
     # get the "build time" from the filesystem's own clock by...
     file stat $dest_dir build_stat
     set build_time $build_stat(mtime)
     set sources [file join $dest_dir sources]
+    file copy $notfork_dir $notfork_copy
     set lumo_dir [file join $dest_dir lumo]
     file mkdir $lumo_dir
     set sqlite3_commit_id ""
@@ -937,11 +974,9 @@ while {[llength $build_todo] > 0} {
     } else {
 	set sqlite3_info [list]
     }
-    set backend_commit_id ""
     if {$backend_version ne ""} {
 	puts "    *** Getting sources: $backend_name $backend_version"
-	set backend_id " $backend_name $backend_version"
-	if {$backend_commit_id ne ""} { append backend_id " $backend_commit_id" }
+	set backend_id "$backend_name $backend_version"
 	set pid [eval exec [notfork_command $backend_name -o $sources -v $backend_version] &]
 	set ws [wait $pid]
 	if {[lindex $ws 1] ne "EXIT"} { return -code error }
@@ -950,6 +985,7 @@ while {[llength $build_todo] > 0} {
     } else {
 	set backend_info [list]
 	set backend_id ""
+	set backend_commit_id ""
     }
     array set env [list \
 	BACKEND_ID $backend_id \
@@ -1008,7 +1044,7 @@ while {[llength $build_todo] > 0} {
     puts $fd "exec gdb '$libs/sqlite3' \"\$@\""
     close $fd
     catch { chmod a+rx $exe }
-    # file delete -force $sources
+    file delete -force $sources
     set td [open $ts_file w]
     puts $td $build_time
     close $td
@@ -1048,10 +1084,12 @@ if {[file exists $database_name]} {
 } else {
     puts "Creating database $database_name"
     flush stdout
-    set sqlfd [open "| $sqlite3_for_db $database_name" w]
-    puts $sqlfd $run_schema
-    puts $sqlfd $test_schema
-    close $sqlfd
+    if {! $other_values(DEBUG_BUILD)} {
+	set sqlfd [open "| $sqlite3_for_db $database_name" w]
+	puts $sqlfd $run_schema
+	puts $sqlfd $test_schema
+	close $sqlfd
+    }
 }
 
 if {$operation ne "benchmark" && $operation ne "test"} { exit 0 }
@@ -1062,9 +1100,11 @@ if {$operation eq "test"} {
     set repeat 1
 } else {
     set repeat $other_values(BENCHMARK_RUNS)
-    set wd [open .benchdb.info w]
-    puts $wd $database_name
-    close $wd
+    if {! $other_values(DEBUG_BUILD)} {
+	set wd [open .benchdb.info w]
+	puts $wd $database_name
+	close $wd
+    }
 }
 
 proc update_run {run_id data} {
@@ -1183,7 +1223,7 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
     }
     puts "    TITLE = $title"
     set dest_dir [file join $build_dir $build]
-    if {! [file isdirectory $dest_dir]} {
+    if {! [file isdirectory $dest_dir] && ! $other_values(DEBUG_BUILD)} {
 	puts stderr "Build system error: target $build was not built?"
 	exit 1
     }
@@ -1195,13 +1235,14 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
     puts "    SQLITE_ID = $sqlite3_commit_id"
     puts "    SQLITE_NAME = $sqlite3_name"
     if {$backend_name ne ""} {
-	puts "    BACKEND_ID = $backend_commit_id"
+	puts "    BACKEND_ID = $backend_commit_id ($backend_id)"
     }
     array unset benchmark_options
     array set benchmark_options $benchmark_optlist
     foreach {option value} $benchmark_optlist {
 	puts "    $option = $value"
     }
+    if {$other_values(DEBUG_BUILD)} {continue}
     if {$repeat < 1} {
 	set repeat 1
 	set space "    "

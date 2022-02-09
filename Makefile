@@ -12,6 +12,9 @@
 #
 # Documented at https://lumosql.org/src/lumosql/doc/tip/doc/lumo-build-benchmark.md
 
+# default target will build SQLITE_VERSIONS and all the other TARGETS
+all: build
+
 # if there is a Makefile.local we use it to get defaults
 -include Makefile.local
 
@@ -35,9 +38,6 @@ BUILD_DIR ?= build
 # database name
 DATABASE_NAME ?= benchmarks.sqlite
 TEST_DATABASE_NAME ?= tests.sqlite
-
-# default target will build SQLITE_VERSIONS and all the other TARGETS
-all: build
 
 build: Makefile.options
 	$(TCL) tool/build.tcl build not-fork.d $(BUILD_DIR) $(BUILD_OPTIONS)
