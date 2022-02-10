@@ -42,7 +42,7 @@ while true; do
     rm -rf fetch-work
 
     export CPU_COMMENT=$(awk -F': ' '/model name/{print $2; exit}' /proc/cpuinfo)
-    export DATABASE_NAME=/mnt/results/lumosql-$JOB-$(date +%Y-%m-%d).sqlite
+    export DATABASE_NAME=/mnt/results/$JOB-$(date +%Y-%m-%d).sqlite
     echo writing to $DATABASE_NAME
 
     make benchmark >> "$DATABASE_NAME.stdout" 2>> "$DATABASE_NAME.stderr" &
