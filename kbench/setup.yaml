@@ -1,0 +1,271 @@
+---
+### Cache directory for source code (~/.cache/LumoSQL)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: lumosql-cache
+spec:
+  storageClassName: cephfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 15Gi
+---
+### Results volume
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: lumosql-results
+spec:
+  storageClassName: cephfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+---
+### Nginx config
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nginx-config
+data:
+  results.conf: |-
+    server {
+      location / {
+        alias /usr/share/nginx/html/;
+        autoindex on;
+      }
+    }
+---
+### Nginx itself
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lumosql-benchmarks-httpd
+  labels:
+    app: lumosql-benchmarks-httpd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lumosql-benchmarks-httpd
+  template:
+    metadata:
+      labels:
+        app: lumosql-benchmarks-httpd
+    spec:
+      containers:
+      - name: web
+        image: nginx
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/nginx/conf.d/
+        - name: results
+          mountPath: /usr/share/nginx/html/results
+          subPath: results
+          readOnly: true
+      volumes:
+        - name: config-volume
+          configMap:
+            name: nginx-config
+        - name: results
+          persistentVolumeClaim:
+            claimName: lumosql-results
+---
+#####
+### ClusterIP and Ingress for httpd
+apiVersion: v1
+kind: Service
+metadata:
+  name: lumosql-benchmarks-httpd-clusterip
+spec:
+  selector:
+    app: lumosql-benchmarks-httpd
+  ports:
+  - name: lumosql
+    protocol: TCP
+    port: 80
+---
+#####
+### Work server
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lumosql-swq
+  labels:
+    app: lumosql-swq
+spec:
+  replicas: 1
+  strategy:
+    # TODO: swq is in-memory only for now.
+    type: Recreate
+  selector:
+    matchLabels:
+      app: lumosql-swq
+  template:
+    metadata:
+      labels:
+        app: lumosql-swq
+    spec:
+      containers:
+      - name: svc
+        image: registry.gitlab.com/rubdos/swq:main
+        imagePullPolicy: Always
+        env:
+        - name: RUST_LOG
+          value: info
+        - name: SWQ_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: swq-token
+              key: token
+        command:
+        - /usr/local/bin/swq
+        ports:
+        - name: web
+          containerPort: 8080
+      restartPolicy: Always
+---
+#####
+### ClusterIP and Ingress for httpd
+apiVersion: v1
+kind: Service
+metadata:
+  name: lumosql-swq
+spec:
+  selector:
+    app: lumosql-swq
+  ports:
+  - name: lumosql-swq
+    protocol: TCP
+    port: 8080
+---
+#####
+### Benchmark service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lumosql-benchmark-service
+  labels:
+    app: lumosql-benchmark-service
+spec:
+  # replicas: 1
+  selector:
+    matchLabels:
+      app: lumosql-benchmark-service
+  template:
+    metadata:
+      labels:
+        app: lumosql-benchmark-service
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: lumosql-benchmark-service
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: svc
+        resources:
+          limits:
+            cpu: 4000m
+            memory: 8Gi
+          requests:
+            cpu: 1000m
+            memory: 4Gi
+        image: rubdos/lumosql-bench-svc
+        imagePullPolicy: Always
+        env:
+        - name: DB_DIR
+          value: /mnt/benchmarks
+        - name: SWQ_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: swq-token
+              key: token
+        command:
+        - /usr/local/bin/work-loop.sh
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/usr/bin/kill", "-SIGINT", "1"]
+        volumeMounts:
+        - mountPath: /mnt/results
+          name: results
+          subPath: results
+        - mountPath: /root/.cache/LumoSQL
+          name: cache
+        - mountPath: /mnt/benchmarks
+          name: benchmark-tmpfs
+      volumes:
+      - name: benchmark-tmpfs
+        emptyDir:
+          medium: Memory
+      - name: cache
+        persistentVolumeClaim:
+          claimName: lumosql-cache
+      - name: results
+        persistentVolumeClaim:
+          claimName: lumosql-results
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: lumosql-benchmarks-httpd
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cloudflare-production
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx-public
+  rules:
+  - host: lumosql.opencloudedge.be
+    http:
+      paths:
+      - backend:
+          service:
+            name: lumosql-benchmarks-httpd-clusterip
+            port:
+              name: lumosql
+        path: /results
+        pathType: Prefix
+      - backend:
+          service:
+            name: lumosql-swq
+            port:
+              name: lumosql-swq
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - lumosql.opencloudedge.be
+    secretName: lumosql-public-tls
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: lumosql-benchmark-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: lumosql-benchmark-service
+  targetCPUUtilizationPercentage: 30
+  minReplicas: 1
+  maxReplicas: 6
+  # behavior:
+  #   scaleDown:
+  #     selectPolicy: Disabled
