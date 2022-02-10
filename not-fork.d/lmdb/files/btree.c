@@ -23,6 +23,7 @@
 /* see comments in removeTempDb() and sqlite3BtreeOpen() about using
 ** functions from dirent.h instead of a vfs call */
 #include <dirent.h>
+#include <limits.h>
 #include "lmdb.h"
 
 /* maximum length of a filename we consider opening */
@@ -692,14 +693,29 @@ int sqlite3BtreeOpen(
   rc = mdb_env_create(&p->env);
   if (rc) goto error;
   envClose = 1;
-  if (sizeof(size_t) < 8 || isTempDb)
-    mdb_env_set_mapsize(p->env, 1024 * 1024 * 1024);
+  /* we want the mmap() to be as big as possible, so we never run out of
+   * space, but on the other hand not so big that we run out of memory
+   * addresses; so we make it dependent on SSIZE_MAX; if that's not enough
+   * you'll have to use a processor with more address bits, sorry...
+   * we don't have a way to know the virtual address space of the processor
+   * so we stop at 16TiB for this version */
+#define _terabyte (1024ULL * 1024ULL * 1024ULL * 1024ULL)
+#if SSIZE_MAX < (64ULL * _terabyte)
+  if (isTempDb)
+    mdb_env_set_mapsize(p->env, (size_t)1024 * (size_t)1024 * (size_t)32);
   else
-    mdb_env_set_mapsize(p->env, 1024ULL * 1044 * 1024 * 1024);
+    mdb_env_set_mapsize(p->env, (size_t)SSIZE_MAX / 8);
+#else
+  if (isTempDb)
+    mdb_env_set_mapsize(p->env, (size_t)1024 * (size_t)1024 * (size_t)1024);
+  else
+    mdb_env_set_mapsize(p->env, (size_t)_terabyte * 16);
+#endif
+#undef _terabyte
   mdb_env_set_maxreaders(p->env, 254);
   mdb_env_set_maxdbs(p->env, isTempDb ? 64 : 1024);
   rc = mdb_env_open(p->env, dirPathName, mdbFlags, SQLITE_DEFAULT_FILE_PERMISSIONS);
-  LUMO_LOG("sqlite3BtreeOpen: mdb_env_open rc=%d\n", rc);
+  LUMO_LOG("sqlite3BtreeOpen: mdb_env_open (env %p) rc=%d\n", p->env, rc);
   if (rc) goto error;
   /* if we are opening read/write, make sure that the main btree and
   ** the one where we store the metadata are present; if opening readonly
@@ -738,7 +754,10 @@ int sqlite3BtreeOpen(
   return SQLITE_OK;
 error:
   if (txn) mdb_txn_abort(txn);
-  if (envClose) mdb_env_close(p->env);
+  if (envClose) {
+    LUMO_LOG("closing env %p\n", p->env);
+    mdb_env_close(p->env);
+  }
   if (isTempDb || isMemdb)
     removeTempDb(dirPathName);
   if (p) sqlite3_free(p);
@@ -750,7 +769,7 @@ error:
 ** Close an open database and invalidate all cursors.
 */
 int sqlite3BtreeClose(Btree *p) {
-  LUMO_LOG("sqlite3BtreeClose %s\n", p->path);
+  LUMO_LOG("sqlite3BtreeClose %s (env %p)\n", p->path, p->env);
   if (p->svp) {
     LUMO_LOG("  aborting txn %p\n", p->svp->txn);
     closeAllSavepoints(p, -1, 0, SQLITE_INTERNAL);
@@ -1727,21 +1746,18 @@ int sqlite3BtreeIndexMoveto(
   if (rc == 0) {
     /* see if the match is exact */
     *pRes = sqlite3VdbeRecordCompare(key[0].mv_size, key[0].mv_data, pIdxKey) != 0;
-    LUMO_LOG("sqlite3BtreeIndexMoveto bias=%d => found (%d)\n", biasRight, *pRes);
+    LUMO_LOG("sqlite3BtreeIndexMoveto => found (%d)\n", *pRes);
     return SQLITE_OK;
   }
   if (rc != MDB_NOTFOUND) {
-    LUMO_LOG("sqlite3BtreeIndexMoveto idx=%d bias=%d => failed (MDB_SET_RANGE) %d\n",
-	     (int)intKey, biasRight, rc);
+    LUMO_LOG("sqlite3BtreeIndexMoveto => failed (MDB_SET_RANGE) %d\n", rc);
     return error_map(rc);
   }
-  LUMO_LOG("sqlite3BtreeIndexMoveto idx=%d bias=%d => not found\n",
-	   (int)intKey, biasRight);
+  LUMO_LOG("sqlite3BtreeIndexMoveto => not found\n");
   /* we'll pretend the cursor is on the first item */
   mdb_cursor_get(pCur->cursor, key, &data, MDB_FIRST);
   *pRes = -1;
-  LUMO_LOG("sqlite3BtreeIndexMoveto idx=%d bias=%d => empty, returning first\n",
-	   (int)intKey, biasRight);
+  LUMO_LOG("sqlite3BtreeIndexMoveto => empty, returning first\n");
   return SQLITE_OK;
 }
 

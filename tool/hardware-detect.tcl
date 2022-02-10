@@ -95,14 +95,34 @@ array set env [list PATH "$env(PATH):/sbin:/usr/sbin"]
 if {[llength $argv] == 0} {
     catch {
 	set f [open "/proc/cpuinfo" r]
+	set cpu ""
+	set hw ""
+	set model ""
 	foreach l [split [read $f] \n] {
-	    if {[regexp {^model\s+name\s+:\s+(.*)$} $l skip cpu]} {
-		close $f
-		puts $cpu
-		exit 0
-	    }
+	    regexp -nocase {^model\s+name\s*:\s+(\S.*)$} $l skip cpu
+	    regexp -nocase {^model\s*:\s+([^\s\d].*)$} $l skip model
+	    regexp -nocase {^hardware\s*:\s+(\S.*)$} $l skip hw
 	}
 	close $f
+	if {"$hw$cpu" ne ""} {
+	    if {$hw eq ""} {
+		set name $cpu
+	    } elseif {$cpu eq ""} {
+		set name $hw
+	    } else {
+		set name "$cpu: $hw"
+	    }
+	    if {$model eq ""} {
+		puts $name
+	    } else {
+		puts "$name ($model)"
+	    }
+	    exit 0
+	}
+	if {$model ne ""} {
+	    puts $model
+	    exit 0
+	}
     }
     # if we know other ways to do this, we can add them here
 } elseif {[llength $argv] == 1} {
