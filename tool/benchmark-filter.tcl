@@ -62,6 +62,7 @@ proc optarg {re what} {
 
 proc optlist {var what {delim ""}} {
     global a
+    global o
     global argv
     incr a
     set done 0
