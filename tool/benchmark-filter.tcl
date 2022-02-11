@@ -25,6 +25,7 @@ set out_copy ""
 set out_stats 0
 set out_delete 0
 set out_default 1
+set out_column 0
 
 set limit 20
 set average 0
@@ -55,7 +56,7 @@ proc optarg {re what} {
     set oo $o
     set o [lindex $argv $a]
     if {! [regexp $re $o]} {
-	puts stderr "Invalid argument for $o: $o"
+	puts stderr "Invalid argument for $oo: $o"
 	exit 1
     }
 }
@@ -150,6 +151,13 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
     } elseif {$o eq "-details"} {
 	set out_summary 3
 	set out_default 0
+    } elseif {$o eq "-column"} {
+	optarg {^(test|benchmark|target)$} "what goes into columns"
+	if {$o eq "target"} {
+	    set out_column 0
+	} else {
+	    set out_column 1
+	}
     } elseif {$o eq "-export"} {
 	optarg {^} "file name"
 	lappend out_export $o
@@ -898,6 +906,93 @@ proc find {l key} {
     return [lindex [lindex $l $i] 1]
 }
 
+if {$out_summary > 0 && $out_summary < 3} {
+    # check all tests are equal
+    for {set i 0} {$i < [llength $runlist]} {incr i} {
+	set run_id [lindex $runlist $i]
+	set nnames [get_test_key $run_id "test-name"]
+	if {$i > 0} {
+	    if {! [list_eq $nnames $tnames]} {
+		puts stderr "Runs $run_id and [lindex $runlist 0] have different tests"
+		if {$database_orig ne ""} {file delete $database}
+		exit 1
+	    }
+	} else {
+	    set tnames $nnames
+	}
+    }
+}
+
+if {$out_column && $out_summary && $out_summary < 3} {
+    add_run_key "target"
+    add_test_op "duration" "real-time" "sum(value)"
+    # determine length of all columns
+    set maxlen [list]
+    for {set t 0} {$t <= [llength $tnames]} {incr t} {
+	lappend maxlen [string length $t]
+    }
+    for {set i 0} {$i < [llength $runlist]} {incr i} {
+	set run_id [lindex $runlist $i]
+	set ttimes [get_test_key $run_id "real-time"]
+	set tstatus [get_test_key $run_id "status"]
+	for {set t 0} {$t < [llength $tnames]} {incr t} {
+	    set d [lindex $ttimes $t]
+	    set s [lindex $tstatus $t]
+	    if {$s eq "OK" || $s eq ""} {
+		set s [format "%.3f" $d]
+	    }
+	    if {[string length $s] > [lindex $maxlen $t]} {
+		lset maxlen $t [string length $s]
+	    }
+	}
+	set t [llength $tnames]
+	set s [format "%.3f" [dict get [dict get $rundict $run_id] "duration"]]
+	if {[string length $s] > [lindex $maxlen $t]} {
+	    lset maxlen $t [string length $s]
+	}
+    }
+    # use maxlen to determine column formats, and also
+    # print headings (note that we don't do anything special
+    # for -quick here, although this could change)
+    set tfmt [list]
+    set efmt [list]
+    set header ""
+    for {set t 0; set c 1} {$t < [llength $maxlen]} {incr t; incr c} {
+	lappend tfmt "%[lindex $maxlen $t].3f "
+	lappend efmt "%[lindex $maxlen $t]s "
+	append header [format "%[lindex $maxlen $t]d " $c]
+	if {$t < [llength $tnames]} {
+	    puts "Column $c: [lindex $tnames $t]"
+	}
+    }
+    puts "Column [llength $maxlen]: Total run duration"
+    puts ""
+    puts "${header}Target"
+    for {set i 0} {$i < [llength $runlist]} {incr i} {
+	set run_id [lindex $runlist $i]
+	set d [dict get $rundict $run_id]
+	set ttimes [get_test_key $run_id "real-time"]
+	set tstatus [get_test_key $run_id "status"]
+	set line ""
+	for {set t 0} {$t < [llength $tnames]} {incr t} {
+	    set n [lindex $ttimes $t]
+	    set s [lindex $tstatus $t]
+	    if {$s eq "OK" || $s eq ""} {
+		append line [format [lindex $tfmt $t] $n]
+	    } else {
+		append line [format [lindex $efmt $t] $s]
+	    }
+	}
+	append line [format [lindex $tfmt [llength $tnames]] [dict get $d "duration"]]
+	puts "$line[dict get $d {target}]"
+    }
+    if {$excess} {
+	puts ""
+	puts "FIlter returned more than $limit runs, list has been truncated"
+    }
+    exit
+}
+
 if {$out_summary} {
     add_run_key "title"
     add_run_key "target"
@@ -926,7 +1021,7 @@ if {$out_summary} {
 	set run_id [lindex $runlist $i]
 	if {[llength $runlist] > 1} {
 	    set cn [expr {$i + 1}]
-	    if {$out_summary > 1 && $out_summary < 3} {
+	    if {$out_summary == 2} {
 		puts "Column $cn"
 	    }
 	    append hdr [format "%11d " $cn]
@@ -1051,22 +1146,13 @@ if {$out_summary} {
 		}
 		incr tc
 	    }
+	    puts ""
 	} else {
-	    if {$i > 0} {
-		if {! [list_eq $nnames $tnames]} {
-		    puts stderr "Runs $run_id and [lindex $runlist 0] have different tests"
-		    if {$database_orig ne ""} {file delete $database}
-		    exit 1
-		}
-	    } else {
-		set tnames $nnames
-	    }
 	    set ttimes [get_test_key $run_id "real-time"]
 	    set tstatus [get_test_key $run_id "status"]
 	    lappend times $ttimes
 	    lappend status $tstatus
 	}
-	# XXX puts ""
     }
     if {$out_summary < 3} {
 	if {$out_summary > 1} {

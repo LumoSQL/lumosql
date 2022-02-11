@@ -194,6 +194,28 @@ Benchmark: sqlite 3.8.3.1 with lmdb 0.9.27
       0.031       0.031       0.030   14 DROP TABLE
 ```
 
+When there are a lot of runs selected, this output can get unreadable as
+it will be wider than any terminal.  This default (show one target per
+column) can be changed by adding `-column benchmark` meaning "show one
+benchmark per column" (here we omit most columns for illustration):
+
+```
+tclsh tool/benchmark-filter.tcl -version 3.8.3.1 -datasize 1 -column benchmark
+Column 1: 2000 INSERTs
+Column 2: 50000 INSERTs in a transaction
+Column 3: 100 SELECTs without an index
+...
+Column 14: DROP TABLE
+
+    1      2     3 ...    14 Target
+0.054 28.599 0.534 ... 0.031 3.8.3.1+lmdb-0.9.9+datasize-2
+0.053 28.873 0.536 ... 0.031 3.8.3.1+lmdb-0.9.16+datasize-2
+0.053 28.673 0.543 ... 0.030 3.8.3.1+lmdb-0.9.27+datasize-2
+```
+
+While this output is still quite wide, it will fit most displays, and does
+not grow with the number of runs selected
+
 # Full set of options <a name="full-set-of-options"></a>
 
 The tool accepts a large set of options:
@@ -238,6 +260,9 @@ unless specified otherwise
 * `-summary`  - display a summary of each test in each selected run; this only works if the selected runs have the same tests; cannot be combined with `-details`; this is the default if there are some selection options
 * `-quick` - similar to summary, but omits the initial test description and just shows the columns of timings: the column headers show the sqlite/backend combination
 * `-details`  - display full details for each test in each selected run including all the information in the database; cannot be combined with `-summary`
+* `-column` `WHAT` - what to show in columns, where `WHAT` is one of:
+`test`, `benchmark` or `target` (`test` and `benchmark` are considered
+equivalent for this option); applies only to `-summary` and `-quick`
 * `-export` `FILE`  - write the selected runs to `FILE` in a text format, useful for example to send the run information by email
 * `-copy` `DATABASE`  - copies all information about the selected runs to `DATABASE`;
 if the database already exists, it must have the same schema and must not already
