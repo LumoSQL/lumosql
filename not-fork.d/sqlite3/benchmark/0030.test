@@ -1,4 +1,4 @@
-set d100 [expr $options(DATASIZE) * 100]
+set d100 [expr $options(DATASIZE_R) * 100]
 
 set name "$d100 SELECTs without an index"
 
@@ -8,7 +8,7 @@ for {set i 0} {$i<$d100} {incr i} {
     append sql "SELECT count(*), avg(b) FROM t2 WHERE b>=$lwr AND b<$upr;\n"
 }
 
-if {$d100 == 100} {
+if {$options(DATASIZE_R) == 1 && $options(DATASIZE_W) == 1} {
     lappend results \
 	{^41\|486\.365} \
 	{^40\|598\.5} \

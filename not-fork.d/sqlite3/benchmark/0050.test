@@ -1,4 +1,4 @@
-set d5000 [expr $options(DATASIZE) * 5000]
+set d5000 [expr $options(DATASIZE_R) * 5000]
 
 set name "$d5000 SELECTs with an index"
 
@@ -8,7 +8,7 @@ for {set i 0} {$i<$d5000} {incr i} {
     append sql "SELECT count(*), avg(b) FROM t2 WHERE b>=$lwr AND b<$upr;\n"
 }
 
-if {$d5000 == 5000} {
+if {$options(DATASIZE_R) == 1 && $options(DATASIZE_W) == 1} {
     lappend results \
         {^5\|39\.0} \
         {^4\|148\.5} \

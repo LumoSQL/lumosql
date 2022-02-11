@@ -8,9 +8,12 @@
 # this option does not affect the build process - runtime only
 build = no
 
-# takes positive numeric values
-positive
+# takes 1 or 2 numeric values
+syntax = [1-9]\d*(?:,[1-9]\d*)?
 
 # default value if not specified
 default = 1
+
+# if two values are equal, we just want the one
+requiv = (\d+),\1 \1
 

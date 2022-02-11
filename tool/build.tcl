@@ -207,6 +207,7 @@ proc read_options {opt_dir} {
 	set syntax {.*}
 	set defval ""
 	array unset equiv
+	set requiv [list]
 	foreach ln [split [read $rf] \n] {
 	    regsub {^\s+} $ln "" ln
 	    regsub {\s+$} $ln "" ln
@@ -248,6 +249,14 @@ proc read_options {opt_dir} {
 		for {set eqnum 1} {$eqnum < [llength $lx]} {incr eqnum} {
 		    array set equiv [list [lindex $lx $eqnum] $rn]
 		}
+	    } elseif {$key eq "requiv"} {
+		regsub -all {\s+} $value " " value
+		set lx [split $value " "]
+		if {[llength $lx] != 2} {
+		    puts stderr "Invalid requiv, it needs 2 values"
+		    exit 1
+		}
+		lappend requiv [lindex $lx 0] [lindex $lx 1]
 	    } else {
 		puts stderr "$opt_file: invalid key $key"
 		exit 1
@@ -255,7 +264,7 @@ proc read_options {opt_dir} {
 	}
 	close $rf
 	set el [array get equiv]
-	array set options [list $option [list $build $syntax $defval $el]]
+	array set options [list $option [list $build $syntax $defval $el $requiv]]
     }
 }
 
@@ -398,6 +407,9 @@ for {set anum $argp} {$anum < [llength $argv]} {incr anum} {
 	    if {$value eq $e1} {
 		set value $e2
 	    }
+	}
+	foreach {re s} [lindex $od 4] {
+	    regsub "^(?:$re)$" $value $s value
 	}
 	array set option_values [list $option $value]
     } elseif {[regexp {^(\w+)=(.*)$} [lindex $argv $anum] skip option value]} {
@@ -704,6 +716,9 @@ if {$operation ne "database"} {
 			set value $e2
 		    }
 		}
+		foreach {re s} [lindex $od 4] {
+		    regsub "^(?:$re)$" $value $s value
+		}
 		if {$value eq [lindex $od 2]} { continue }
 		set option [string toupper $option]
 		array set opt_arr [list $option $value]
@@ -880,9 +895,11 @@ while {[llength $build_todo] > 0} {
 	if {[llength $build_todo] > $num_skipped} {
 	    puts "*** Skipping locked $build $bnum/$num_builds"
 	    close $lock_id
-	    lappend build_todo $bnum
-	    lappend build_todo $build
-	    incr num_skipped
+	    if {! $other_values(DEBUG_BUILD)} {
+		lappend build_todo $bnum
+		lappend build_todo $build
+		incr num_skipped
+	    }
 	    continue
 	}
 	# we skipped everything since last build, wait on this lock
@@ -1225,14 +1242,16 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 	exit 1
     }
     set lumo_dir [file join $dest_dir lumo]
-    set sqlite3_commit_id [read_data $lumo_dir "sqlite3_commit_id"]
-    set backend_commit_id [read_data $lumo_dir "backend_commit_id"]
     set sqlite3_to_test [file join $dest_dir sqlite3]
-    set sqlite3_name [exec $sqlite3_to_test -version]
-    puts "    SQLITE_ID = $sqlite3_commit_id"
-    puts "    SQLITE_NAME = $sqlite3_name"
-    if {$backend_name ne ""} {
-	puts "    BACKEND_ID = $backend_commit_id"
+    if {! $other_values(DEBUG_BUILD)} {
+	set sqlite3_name [exec $sqlite3_to_test -version]
+	set sqlite3_commit_id [read_data $lumo_dir "sqlite3_commit_id"]
+	set backend_commit_id [read_data $lumo_dir "backend_commit_id"]
+	puts "    SQLITE_ID = $sqlite3_commit_id"
+	puts "    SQLITE_NAME = $sqlite3_name"
+	if {$backend_name ne ""} {
+	    puts "    BACKEND_ID = $backend_commit_id"
+	}
     }
     array unset benchmark_options
     array set benchmark_options $benchmark_optlist
@@ -1240,6 +1259,12 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 	puts "    $option = $value"
     }
     if {$other_values(DEBUG_BUILD)} {continue}
+    if {[regexp {^(\d+),(\d+)$} $benchmark_options(DATASIZE) skip rs ws]} {
+	array set benchmark_options [list DATASIZE_R $rs DATASIZE_W $ws]
+    } else {
+	set s $benchmark_options(DATASIZE)
+	array set benchmark_options [list DATASIZE_R $s DATASIZE_W $s]
+    }
     if {$repeat < 1} {
 	set repeat 1
 	set space "    "

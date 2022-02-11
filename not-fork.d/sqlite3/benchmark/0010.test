@@ -1,4 +1,4 @@
-set d1000 [expr $options(DATASIZE) * 1000]
+set d1000 [expr $options(DATASIZE_W) * 1000]
 set name "$d1000 INSERTs"
 
 for {set i 1} {$i<=$d1000} {incr i} {

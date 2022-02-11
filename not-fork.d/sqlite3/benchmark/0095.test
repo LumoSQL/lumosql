@@ -1,5 +1,5 @@
-set d26000 [expr $options(DATASIZE) * 26000]
-set d51000 [expr $options(DATASIZE) * 51000]
+set d26000 [expr $options(DATASIZE_W) * 26000]
+set d51000 [expr $options(DATASIZE_W) * 51000]
 
 set name "Row count with an index"
 

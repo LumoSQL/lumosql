@@ -1,4 +1,4 @@
-set d25000 [expr $options(DATASIZE) * 25000]
+set d25000 [expr $options(DATASIZE_W) * 25000]
 
 set name "$d25000 text UPDATEs with an index"
 

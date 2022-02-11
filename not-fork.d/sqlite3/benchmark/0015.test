@@ -1,4 +1,4 @@
-set d100 [expr $options(DATASIZE) * 100]
+set d100 [expr $options(DATASIZE_W) * 100]
 set name "$d100 UPDATEs without an index, upgrading a read-only transaction"
 
 append sql "BEGIN;\n"

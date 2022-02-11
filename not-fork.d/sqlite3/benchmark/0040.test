@@ -1,4 +1,4 @@
-set d100 [expr $options(DATASIZE) * 100]
+set d100 [expr $options(DATASIZE_R) * 100]
 
 set name "$d100 SELECTs on a string comparison"
 
@@ -6,7 +6,7 @@ for {set i 1} {$i<=$d100} {incr i} {
     append sql "SELECT count(*), avg(b) FROM t2 WHERE c LIKE '%[number_name $i]%';\n"
 }
 
-if {$d100 == 100} {
+if {$options(DATASIZE_R) == 1 && $options(DATASIZE_W) == 1} {
     lappend results \
 	{^15859\|238012\.06} \
 	{^8538\|251259\.42} \
