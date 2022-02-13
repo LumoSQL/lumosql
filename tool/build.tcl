@@ -988,6 +988,7 @@ while {[llength $build_todo] > 0} {
     } else {
 	set sqlite3_info [list]
     }
+    set backend_commit_id ""
     if {$backend_version ne ""} {
 	puts "    *** Getting sources: $backend_name $backend_version"
 	set backend_id "$backend_name $backend_version"
@@ -999,7 +1000,6 @@ while {[llength $build_todo] > 0} {
     } else {
 	set backend_info [list]
 	set backend_id ""
-	set backend_commit_id ""
     }
     array set env [list \
 	BACKEND_ID $backend_id \
