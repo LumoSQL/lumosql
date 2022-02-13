@@ -18,6 +18,7 @@ set sqlite3 ""
 
 set out_list 0
 set list_fields [list]
+set list_tests [list]
 set out_summary 0
 set out_add [list]
 set out_export [list]
@@ -26,6 +27,7 @@ set out_stats 0
 set out_delete 0
 set out_default 1
 set out_column 0
+set ignore_numbers 0
 
 set limit 20
 set average 0
@@ -42,6 +44,8 @@ set only_targets [list]
 set only_versions [list]
 set only_backends [list]
 set only_option [list]
+set only_cpu [list]
+set only_disk [list]
 set has_selection 0
 
 proc optarg {re what} {
@@ -142,6 +146,8 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
 	set out_default 0
     } elseif {$o eq "-fields"} {
 	optlist list_fields "list of fields" ","
+    } elseif {$o eq "-tests" || $o eq "-benchmarks"} {
+	optlist list_tests "list of tests/benchmarks" ","
     } elseif {$o eq "-quick"} {
 	set out_summary 1
 	set out_default 0
@@ -158,6 +164,8 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
 	} else {
 	    set out_column 1
 	}
+    } elseif {$o eq "-ignore-numbers"} {
+	set ignore_numbers 1
     } elseif {$o eq "-export"} {
 	optarg {^} "file name"
 	lappend out_export $o
@@ -184,6 +192,14 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
     } elseif {$o eq "-version"} {
 	optarg {^} "version specification"
 	lappend only_versions $o
+	set has_selection 1
+    } elseif {$o eq "-cpu" || $o eq "-cpu-comment"} {
+	optarg {^} "cpu comment pattern"
+	lappend only_cpu $o
+	set has_selection 1
+    } elseif {$o eq "-disk" || $o eq "-disk-comment"} {
+	optarg {^} "disk comment pattern"
+	lappend only_disk $o
 	set has_selection 1
     } elseif {$o eq "-backend"} {
 	optarg {^\w+(-.+)?$} "backend name and optional version"
@@ -433,6 +449,34 @@ if ($only_invalid) {
 	    set or "or"
 	}
 	puts $sql ")"
+    }
+
+    if {[llength $only_cpu] > 0} {
+	# restrict search to things with a matching cpu-comment
+	puts $sql "and run_id in ("
+	puts $sql "select run_id from run_data"
+	puts $sql "where key = 'cpu-comment'"
+	puts $sql "and ("
+	set or ""
+	foreach dcom $only_cpu {
+	    puts $sql "${or}value like '$dcom'"
+	    set or " or "
+	}
+	puts $sql "))"
+    }
+
+    if {[llength $only_disk] > 0} {
+	# restrict search to things with a matching disk-comment
+	puts $sql "and run_id in ("
+	puts $sql "select run_id from run_data"
+	puts $sql "where key = 'disk-comment'"
+	puts $sql "and ("
+	set or ""
+	foreach dcom $only_disk {
+	    puts $sql "${or}value like '$dcom'"
+	    set or " or "
+	}
+	puts $sql "))"
     }
 
     if {[llength $only_missing] > 0} {
@@ -910,7 +954,14 @@ if {$out_summary > 0 && $out_summary < 3} {
     # check all tests are equal
     for {set i 0} {$i < [llength $runlist]} {incr i} {
 	set run_id [lindex $runlist $i]
-	set nnames [get_test_key $run_id "test-name"]
+	if {$ignore_numbers} {
+	    set nnames [list]
+	    foreach tname [get_test_key $run_id "test-name"] {
+		lappend nnames [regsub -all {\d+} $tname "#"]
+	    }
+	} else {
+	    set nnames [get_test_key $run_id "test-name"]
+	}
 	if {$i > 0} {
 	    if {! [list_eq $nnames $tnames]} {
 		puts stderr "Runs $run_id and [lindex $runlist 0] have different tests"
@@ -919,6 +970,20 @@ if {$out_summary > 0 && $out_summary < 3} {
 	    }
 	} else {
 	    set tnames $nnames
+	}
+    }
+    set has_totals 1
+    if {[llength $list_tests] > 0} {
+	set show_tests [list]
+	for {set c 1} {$c <= [llength $tnames]} {incr c} {
+	    if {[lsearch -exact $list_tests $c] < 0} {
+		lappend show_tests 0
+	    } else {
+		lappend show_tests 1
+	    }
+	}
+	if {[lsearch -nocase -glob $list_tests "t*"] < 0} {
+	    set has_totals 0
 	}
     }
 }
@@ -936,6 +1001,9 @@ if {$out_column && $out_summary && $out_summary < 3} {
 	set ttimes [get_test_key $run_id "real-time"]
 	set tstatus [get_test_key $run_id "status"]
 	for {set t 0} {$t < [llength $tnames]} {incr t} {
+	    if {[llength $list_tests] > 0 && ! [lindex $show_tests $t]} {
+		continue;
+	    }
 	    set d [lindex $ttimes $t]
 	    set s [lindex $tstatus $t]
 	    if {$s eq "OK" || $s eq ""} {
@@ -957,15 +1025,22 @@ if {$out_column && $out_summary && $out_summary < 3} {
     set tfmt [list]
     set efmt [list]
     set header ""
-    for {set t 0; set c 1} {$t < [llength $maxlen]} {incr t; incr c} {
+    for {set t 0; set c 1} {$t < [llength $tnames]} {incr t; incr c} {
 	lappend tfmt "%[lindex $maxlen $t].3f "
 	lappend efmt "%[lindex $maxlen $t]s "
+	if {[llength $list_tests] > 0 && ! [lindex $show_tests $t]} {
+	    continue;
+	}
 	append header [format "%[lindex $maxlen $t]d " $c]
 	if {$t < [llength $tnames]} {
 	    puts "Column $c: [lindex $tnames $t]"
 	}
     }
-    puts "Column [llength $maxlen]: Total run duration"
+    if {$has_totals} {
+	puts "Column T: Total run duration"
+	append header [format "%[lindex $maxlen end]s " "T"]
+	set fmt_totals "%[lindex $maxlen end].3f "
+    }
     puts ""
     puts "${header}Target"
     for {set i 0} {$i < [llength $runlist]} {incr i} {
@@ -975,6 +1050,9 @@ if {$out_column && $out_summary && $out_summary < 3} {
 	set tstatus [get_test_key $run_id "status"]
 	set line ""
 	for {set t 0} {$t < [llength $tnames]} {incr t} {
+	    if {[llength $list_tests] > 0 && ! [lindex $show_tests $t]} {
+		continue;
+	    }
 	    set n [lindex $ttimes $t]
 	    set s [lindex $tstatus $t]
 	    if {$s eq "OK" || $s eq ""} {
@@ -983,12 +1061,15 @@ if {$out_column && $out_summary && $out_summary < 3} {
 		append line [format [lindex $efmt $t] $s]
 	    }
 	}
-	append line [format [lindex $tfmt [llength $tnames]] [dict get $d "duration"]]
+	if {$has_totals} {
+	    append line [format $fmt_totals [dict get $d "duration"]]
+	}
 	puts "$line[dict get $d {target}]"
     }
     if {$excess} {
 	puts ""
 	puts "FIlter returned more than $limit runs, list has been truncated"
+	puts "Use: -limit NUMBER to change the limit, or: -limit 0 to show all"
     }
     exit
 }
@@ -1028,7 +1109,7 @@ if {$out_summary} {
 	    append adj $dash
 	    set dash "------"
 	} else {
-	    set hdr "$xspace       TIME "
+	    set hdr "$xspace   TIME "
 	}
 	set d [dict get $rundict $run_id]
 	if {$out_summary > 1} {
@@ -1146,12 +1227,14 @@ if {$out_summary} {
 		}
 		incr tc
 	    }
-	    puts ""
 	} else {
 	    set ttimes [get_test_key $run_id "real-time"]
 	    set tstatus [get_test_key $run_id "status"]
 	    lappend times $ttimes
 	    lappend status $tstatus
+	}
+	if {$out_summary > 1} {
+	    puts ""
 	}
     }
     if {$out_summary < 3} {
@@ -1164,7 +1247,10 @@ if {$out_summary} {
 	    puts "${tgt3}(backend version)"
 	    puts "-$adj TIME $adj TEST NAME"
 	}
-	for {set t 0} {$t < [llength $tnames]} {incr t} {
+	for {set t 0; set c 1} {$t < [llength $tnames]} {incr t; incr c} {
+	    if {[llength $list_tests] > 0 && ! [lindex $show_tests $t]} {
+		continue;
+	    }
 	    set r ""
 	    for {set i 0} {$i < [llength $runlist]} {incr i} {
 		set d [lindex [lindex $times $i] $t]
@@ -1175,16 +1261,18 @@ if {$out_summary} {
 		    append r [format "%11.11s " $s]
 		}
 	    }
-	    puts "$r[format "%4d %s" [expr {$t + 1}] [lindex $tnames $t]]"
+	    puts "$r[format "%4d %s" $c [lindex $tnames $t]]"
 	}
-	puts "-------$adj$adj"
-	set r ""
-	for {set i 0} {$i < [llength $runlist]} {incr i} {
-	    set run_id [lindex $runlist $i]
-	    set d [dict get $rundict $run_id]
-	    append r [format "%11.3f " [dict get $d "duration"]]
+	if ($has_totals) {
+	    puts [string repeat "-" [string length $hdr]]
+	    set r ""
+	    for {set i 0} {$i < [llength $runlist]} {incr i} {
+		set run_id [lindex $runlist $i]
+		set d [dict get $rundict $run_id]
+		append r [format "%11.3f " [dict get $d "duration"]]
+	    }
+	    puts "${r}(total benchmark run time)"
 	}
-	puts "${r}(total benchmark run time)"
 	puts ""
     }
 }
@@ -1275,6 +1363,7 @@ if {$out_delete} {
 
 if {$excess} {
     puts "FIlter returned more than $limit runs, list has been truncated"
+    puts "Use: -limit NUMBER to change the limit, or: -limit 0 to show all"
 }
 
 if {$database_orig ne ""} {file delete $database}
