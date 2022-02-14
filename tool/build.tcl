@@ -280,6 +280,7 @@ if {[llength $sqlite3_versions] < 1} {
 read_options [file join $notfork_dir sqlite3 benchmark]
 
 array set other_values [list \
+	ALWAYS_REBUILD   0 \
 	BENCHMARK_RUNS   1 \
 	COPY_DATABASES   "" \
 	COPY_SQL         "" \
@@ -922,7 +923,7 @@ while {[llength $build_todo] > 0} {
     set ts_file [file join $dest_dir build_time]
     if {[file isdirectory $dest_dir]} {
 	# check if the build is at least as recent as our files
-	if {[file exists $ts_file]} {
+	if {[file exists $ts_file] && ! $other_values(ALWAYS_REBUILD)} {
 	    set rd [open $ts_file]
 	    set mtime [read -nonewline $rd]
 	    close $rd
@@ -947,6 +948,9 @@ while {[llength $build_todo] > 0} {
 		}
 		funlock $lock_id
 		close $lock_id
+		if {$other_values(DEBUG_BUILD)} {
+		    puts "*** Skipping up-to-date $build $bnum/$num_builds"
+		}
 		continue
 	    }
 	}
@@ -978,6 +982,7 @@ while {[llength $build_todo] > 0} {
     set lumo_dir [file join $dest_dir lumo]
     file mkdir $lumo_dir
     set sqlite3_commit_id ""
+    set sqlite3_commit_timestamp ""
     if {$sqlite3_version ne ""} {
 	puts "    *** Getting sources: sqlite3 $sqlite3_version"
 	set pid [eval exec [notfork_command sqlite3 -o $sources -v $sqlite3_version] &]
@@ -985,10 +990,12 @@ while {[llength $build_todo] > 0} {
 	if {[lindex $ws 1] ne "EXIT"} { return -code error }
 	set sqlite3_info [eval exec [notfork_command sqlite3 -q -v $sqlite3_version]]
 	regexp {***:(?n)^commit_id\s*=\s*(\S.*)$} $sqlite3_info skip sqlite3_commit_id
+	regexp {***:(?n)^commit_timestamp\s*=\s*(\S.*)$} $sqlite3_info skip sqlite3_commit_timestamp
     } else {
 	set sqlite3_info [list]
     }
     set backend_commit_id ""
+    set backend_commit_timestamp ""
     if {$backend_version ne ""} {
 	puts "    *** Getting sources: $backend_name $backend_version"
 	set backend_id "$backend_name $backend_version"
@@ -997,6 +1004,7 @@ while {[llength $build_todo] > 0} {
 	if {[lindex $ws 1] ne "EXIT"} { return -code error }
 	set backend_info [eval exec [notfork_command $backend_name -q -v $backend_version]]
 	regexp {***:(?n)^commit_id\s*=\s*(\S.*)$} $backend_info skip backend_commit_id
+	regexp {***:(?n)^commit_timestamp\s*=\s*(\S.*)$} $backend_info skip backend_commit_timestamp
     } else {
 	set backend_info [list]
 	set backend_id ""
@@ -1004,12 +1012,14 @@ while {[llength $build_todo] > 0} {
     array set env [list \
 	BACKEND_ID $backend_id \
 	BACKEND_COMMIT_ID $backend_commit_id \
+	BACKEND_COMMIT_TIMESTAMP $backend_commit_timestamp \
 	LUMO_BACKEND_NAME $backend_name \
 	LUMO_BACKEND_VERSION $backend_version \
 	LUMO_BUILD $dest_dir \
 	LUMO_SOURCES $sources \
 	MAKEFLAGS "" \
 	SQLITE3_COMMIT_ID $sqlite3_commit_id \
+	SQLITE3_COMMIT_TIMESTAMP $sqlite3_commit_timestamp \
 	SQLITE3_VERSION $sqlite3_version \
     ]
     if {$backend_version ne ""} {
@@ -1025,9 +1035,11 @@ while {[llength $build_todo] > 0} {
     # if we got here without error, the thing is built
     write_data $lumo_dir "sqlite3_info" $sqlite3_info
     write_data $lumo_dir "sqlite3_commit_id" $sqlite3_commit_id
+    write_data $lumo_dir "sqlite3_commit_timestamp" $sqlite3_commit_timestamp
     write_data $lumo_dir "sqlite3_version" $sqlite3_version
     write_data $lumo_dir "backend_info" $backend_info
     write_data $lumo_dir "backend_commit_id" $backend_commit_id
+    write_data $lumo_dir "backend_commit_timestamp" $backend_commit_timestamp
     write_data $lumo_dir "backend_name" $backend_name
     write_data $lumo_dir "backend_version" $backend_version
     set exe [file join $dest_dir sqlite3]
@@ -1202,10 +1214,13 @@ proc number_name {n} {
 }
 
 set notforking_id "NOT KNOWN"
+set notforking_date "NOT KNOWN"
 pushd $notfork_dir
 catch {
     set notforking_tmp [exec fossil info]
-    regexp {***:(?n)^checkout\s*:\s*(\S+)} $notforking_tmp skip notforking_id
+    regexp {***:(?n)^checkout\s*:\s*(\S+)\s+(\S+)\s+(\S+)} \
+	    $notforking_tmp skip notforking_id ndate ntime
+    set notforking_date "$ndate $ntime"
 }
 popd
 
@@ -1246,11 +1261,15 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
     if {! $other_values(DEBUG_BUILD)} {
 	set sqlite3_name [exec $sqlite3_to_test -version]
 	set sqlite3_commit_id [read_data $lumo_dir "sqlite3_commit_id"]
+	set sqlite3_commit_timestamp [read_data $lumo_dir "sqlite3_commit_timestamp"]
 	set backend_commit_id [read_data $lumo_dir "backend_commit_id"]
+	set backend_commit_timestamp [read_data $lumo_dir "backend_commit_timestamp"]
 	puts "    SQLITE_ID = $sqlite3_commit_id"
+	puts "    SQLITE_TIMESTAMP = $sqlite3_commit_timestamp"
 	puts "    SQLITE_NAME = $sqlite3_name"
 	if {$backend_name ne ""} {
 	    puts "    BACKEND_ID = $backend_commit_id"
+	    puts "    BACKEND_TIMESTAMP = $backend_commit_timestamp"
 	}
     }
     array unset benchmark_options
@@ -1339,9 +1358,11 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 	    "when-run"        $when_run \
 	    "sqlite-version"  $sqlite3_version \
 	    "sqlite-id"       $sqlite3_commit_id \
+	    "sqlite-date"     $sqlite3_commit_timestamp \
 	    "target"          $benchmark \
 	    "title"           $title \
 	    "sqlite-name"     $sqlite3_name \
+	    "notforking-date" $notforking_date \
 	    "notforking-id"   $notforking_id \
 	    "disk-comment"    $other_values(DISK_COMMENT) \
 	    "cpu-comment"     $other_values(CPU_COMMENT) \
@@ -1360,6 +1381,7 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 		"backend-version"  $backend_version \
 		"backend"          $backend_name-$backend_version \
 		"backend-id"       $backend_commit_id \
+		"backend-date"     $backend_commit_timestamp \
 	    ]
 	}
 	if {$operation eq "benchmark"} {
