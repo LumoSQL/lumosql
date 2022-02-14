@@ -927,31 +927,33 @@ while {[llength $build_todo] > 0} {
 	    set rd [open $ts_file]
 	    set mtime [read -nonewline $rd]
 	    close $rd
-	    if {[regexp {^\d+$} $mtime]} {
-		set skip_rebuild $mtime
-	    } else {
-		set skip_rebuild 0
-	    }
-	    if {$skip_rebuild} {
-		if {$sqlite3_version ne ""} {
-		    check_mtime sqlite3
+	    set skip_rebuild 0
+	    # force rebuild if timestamp files are missing
+	    if {[file exists [file join $dest_dir lumo sqlite3_commit_timestamp]]} {
+		if {[regexp {^\d+$} $mtime]} {
+		    set skip_rebuild $mtime
 		}
-		if {$backend_version ne ""} {
-		    check_mtime $backend_name
+		if {$skip_rebuild} {
+		    if {$sqlite3_version ne ""} {
+			check_mtime sqlite3
+		    }
+		    if {$backend_version ne ""} {
+			check_mtime $backend_name
+		    }
 		}
-	    }
-	    if {$skip_rebuild} {
-		if {$skip_rebuild > $mtime} {
-		    set f [open $ts_file w]
-		    puts $f $skip_rebuild
-		    close $f
+		if {$skip_rebuild} {
+		    if {$skip_rebuild > $mtime} {
+			set f [open $ts_file w]
+			puts $f $skip_rebuild
+			close $f
+		    }
+		    funlock $lock_id
+		    close $lock_id
+		    if {$other_values(DEBUG_BUILD)} {
+			puts "*** Skipping up-to-date $build $bnum/$num_builds"
+		    }
+		    continue
 		}
-		funlock $lock_id
-		close $lock_id
-		if {$other_values(DEBUG_BUILD)} {
-		    puts "*** Skipping up-to-date $build $bnum/$num_builds"
-		}
-		continue
 	    }
 	}
 	if {! $other_values(DEBUG_BUILD)} { file delete -force $dest_dir }
