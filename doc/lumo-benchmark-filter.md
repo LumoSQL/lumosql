@@ -359,7 +359,8 @@ The tool accepts a large set of options:
 
 If more than one selection option is provided, the tool will select runs which match all the criteria; however if the same option is repeated, it selects any which match: so for example `-version N` `-version X` `-backend B` selects all runs with backend `B` which also used saqlite version `N` or `X`.
 
-* `RUN_ID`  - specifying a run ID (which appears as a long hexadecimal string) means that only that run will be processed; if this option is repeated, it select all the runs listed
+* `RUN_ID`  - specifying a run ID (which appears as a long hexadecimal string) means that only that run will be processed; if this option is repeated, it select all the runs listed; the option can be
+abbreviated to fewer digits, and the program will look up the full ID
 * `-option` `NAME-VALUE` - select runs which used the named option and value in the target
 * `-missing` `NAME` - select runs which do not have option `NAME` recorded in the database as a target option
 * `-datasize` `N` - select runs which used the `datasize` option with value `N`; this is an abbreviation for `option` `datasize-N`; like the `datasize` option, `N` could also be two numbers separated by comma
@@ -425,6 +426,8 @@ columns are displayed:
 
 * `RUN_ID` or `ID`: the run identifier, a long hexadecimal string which identifies
 the run uniquely
+* `RUN_ID:abbrev` or `ID:abbrev`: same as `RUN_ID`, but abbreviated to `abbrev`
+hexadecimal digits (minimum 8)
 * `TARGET`: the encoded target, for example `3.36.0` or `3.36.0+lmdb-0.9.29`;
 using this with the build tool allows to repeat the benchmark with exactly the
 same options

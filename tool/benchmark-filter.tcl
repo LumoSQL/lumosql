@@ -174,7 +174,7 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
 	optarg {^} "file name"
 	set out_copy $o
 	set out_default 0
-    } elseif {[regexp {^[[:xdigit:]]{64}$} $o]} {
+    } elseif {[regexp {^[[:xdigit:]]{8,64}$} $o]} {
 	lappend only_ids $o
 	set has_selection 1
     } elseif {$o eq "-datasize"} {
@@ -430,9 +430,15 @@ if ($only_invalid) {
 
     if {[llength $only_ids] > 0} {
 	# restrict search to these IDs
-	puts $sql "and run_id in ('[lindex $only_ids 0]'"
-	for {set i 1} {$i < [llength $only_ids]} {incr i} {
-	    puts $sql ", '[lindex $only_ids $i]'"
+	set or "and ("
+	for {set i 0} {$i < [llength $only_ids]} {incr i} {
+	    set val [lindex $only_ids $i]
+	    if {[string length $val] < 64} {
+		puts $sql "$or run_id like '$val%'"
+	    } else {
+		puts $sql "$or run_id = '$val'"
+	    }
+	    set or "or"
 	}
 	puts $sql ")"
 	# TODO run the sql so far and check that all the IDs are valid
@@ -838,6 +844,12 @@ if {$out_list} {
 	if {$field eq "RUN_ID" || $field eq "ID"} {
 	    set width -64
 	    lappend fmt "%-64s"
+	    lappend op {$run_id}
+	} elseif {[regexp {^((?:RUN_)?ID):(\d+)} $field skip field prefix]} {
+	    if {$prefix < 8} {set prefix 8}
+	    if {$prefix > 64} {set prefix 64}
+	    set width -$prefix
+	    lappend fmt "%-$prefix.${prefix}s"
 	    lappend op {$run_id}
 	} elseif {[lsearch -exact $flist $field] >= 0} {
 	    set lf [string map {_ -} [string tolower $field]]
