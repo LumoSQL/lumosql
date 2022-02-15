@@ -359,6 +359,8 @@ and the cached copy of the repository is older than the version required.
 * `NOTFORK_ONLINE=number` (default: 0): if nonzero, it will pass `--online`
 to the not-forking tool; this could be necessary if the defaults have been
 set to `--offline` and the operation cannot be completed with cached data.
+* `CACHE_DIR=path` (default: `$HOME/.cache/LumoSQL/not-fork`), the directory
+where not-forking will cache its downloads
 
 To help debugging, some options provide a mechanism to copy intermediate
 files, as well as the SQL statement used:
@@ -772,7 +774,7 @@ less useful
 
 So, assuming you've set up:
 
-* a shared cache volume in ~/.cache/LumoSQL (5GB)
+* a shared cache volume in /mnt/cache (5GB)
 * a shared results volume in /mnt/results (5GB)
 * a local, non-shared, volume to run the benchmarks in /mnt/benchmarks (5GB)
 * a shared volume for the builds in /mnt/build (25GB, possibly more depending
@@ -785,6 +787,7 @@ do not commit this file!) with:
 
 ```
 BUILD_DIR = /mnt/build
+CACHE_DIR = /mnt/cache
 DB_DIR = /mnt/benchmarks
 DATABASE_NAME := /mnt/results/lumosql-$(shell hostname)-$(shell date +%Y-%m-%d).sqlite
 ```

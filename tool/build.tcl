@@ -282,6 +282,7 @@ read_options [file join $notfork_dir sqlite3 benchmark]
 array set other_values [list \
 	ALWAYS_REBUILD   0 \
 	BENCHMARK_RUNS   1 \
+	CACHE_DIR        "" \
 	COPY_DATABASES   "" \
 	COPY_SQL         "" \
 	CPU_COMMENT      "" \
@@ -481,6 +482,9 @@ proc notfork_command {target args} {
     }
     if {$other_values(NOTFORK_ONLINE)} {
 	lappend rargs "--online"
+    }
+    if {$other_values(CACHE_DIR) ne ""} {
+	lappend rargs $other_values(CACHE_DIR) "--cache"
     }
     lappend rargs "$notfork_minimum:$notfork_maximum" --use-version
     lappend rargs $notfork_name
