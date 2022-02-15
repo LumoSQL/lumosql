@@ -1,7 +1,7 @@
 <!-- Copyright 2020 The LumoSQL Authors, see LICENSES/MIT -->
 
 <!-- SPDX-License-Identifier: MIT -->
-<!-- SPDX-FileCopyrightText: 2020 The LumoSQL Authors -->
+<!-- SPDX-FileCopyrightText: 2022 The LumoSQL Authors -->
 <!-- SPDX-ArtifactOfProjectName: LumoSQL -->
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Claudio Calvelli, December 2020 -->
@@ -752,3 +752,43 @@ foreach fn [glob liblmybackend.*] {
 }
 ```
 
+# Sharing the Build/Bench Environment
+
+It is often useful to run multiple benchmarking sessions at once on a cluster.
+Some but not all components of LumoSQL can be shared. The sharing status is as
+follows:
+
+* sharing cache directory is fine if locking works
+* sharing build directory is fine if locking works
+* sharing results directory is fine as long as each node uses an unique
+file name when writing to it
+* sharing lumosql repository is fine as long as the results database has
+a unique file name (and/or is moved somewhere else instead of using the
+default location).
+* sharing directory where to run benchmarks is to be avoided at all costs;
+in fact it is best if it is a local disk or a ramdisk, as network drives
+would include random latency variation which will make the timing results
+less useful
+
+So, assuming you've set up:
+
+* a shared cache volume in ~/.cache/LumoSQL (5GB)
+* a shared results volume in /mnt/results (5GB)
+* a local, non-shared, volume to run the benchmarks in /mnt/benchmarks (5GB)
+* a shared volume for the builds in /mnt/build (25GB, possibly more depending
+on how many targets will be built)
+* and maybe a shared volume containing the repository itself, for simplicity
+of keeping things up to date on all nodes
+
+You can create a file Makefile.local in the repository directory (please
+do not commit this file!) with:
+
+BUILD_DIR = /mnt/build
+DB_DIR = /mnt/benchmarks
+DATABASE_NAME = /mnt/results/lumosql-$(shell hostname)-$(shell date +%Y-%m-%d).sqlite
+
+Then these options will be automatically added to each run.  You may want to
+change the DATABASE_NAME with a filename which makes sense, as long as it
+is unique even when things are running at the same time.
+
+A specific example of a shared cluster is the [Kubernetes example files](../kbench/README.md)
