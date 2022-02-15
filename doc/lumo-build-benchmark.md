@@ -783,12 +783,33 @@ of keeping things up to date on all nodes
 You can create a file Makefile.local in the repository directory (please
 do not commit this file!) with:
 
+```
 BUILD_DIR = /mnt/build
 DB_DIR = /mnt/benchmarks
-DATABASE_NAME = /mnt/results/lumosql-$(shell hostname)-$(shell date +%Y-%m-%d).sqlite
+DATABASE_NAME := /mnt/results/lumosql-$(shell hostname)-$(shell date +%Y-%m-%d).sqlite
+```
 
 Then these options will be automatically added to each run.  You may want to
-change the DATABASE_NAME with a filename which makes sense, as long as it
+change the `DATABASE_NAME` with a filename which makes sense, as long as it
 is unique even when things are running at the same time.
+
+It is also possible to use the `not-fork` command directly from a clone if
+the fossil repository, rather than installing it; and that clone could be
+in a shared volume; a simple shell script needs to call it with the right
+options; if for example the repository is at `/mnt/repositories/not-forking`,
+the script could contain:
+
+```
+#!/bin/sh
+repo=/mnt/repositories/not-forking
+perl -I"$repo/lib" "$repo/bin/not-fork" "$@"
+```
+
+If the script is not in `$PATH`, or if it has a name other than `not-fork`,
+add a line like the following to `Makefile.local`:
+
+```
+NOTFORK_COMMAND = /path/to/not-fork-script
+```
 
 A specific example of a shared cluster is the [Kubernetes example files](../kbench/README.md)
