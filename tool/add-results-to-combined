@@ -1,0 +1,26 @@
+#!/bin/sh
+
+if [ $# -lt 3 ]
+then
+    echo "Usage: `basename "$0"` benchmark-filter.tcl COMBINED_DB INPUT_DB..." >&2
+    exit 1
+fi
+
+bf="$1"; shift
+out="$1"; shift
+
+for name
+do
+    if [ -f "$out" ]
+    then
+	has_id="`sqlite3 -readonly "$name" \
+		 "select run_id from run_data limit 1"`"
+	[ -z "$has_id" ] && continue
+	present="`sqlite3 -readonly "$out" \
+		  "select count(*) from run_data where run_id = '$has_id'"`"
+	[ $present -eq 0 ] || continue
+    fi
+    printf '%4d  %s\n' `tclsh "$bf" -db "$name" -count` "$name"
+    tclsh "$bf" -db "$name" -limit 0 -copy "$out" || exit 1
+done
+
