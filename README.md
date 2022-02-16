@@ -206,7 +206,7 @@ git [from Buster backports](https://backports.debian.org/Instructions/).
 ## Quickstart: Using the Build and Benchmark System
 
 This is a very brief quickstart, for full detail see the
-[Build and Benchmark System documentation](doc/lumo-build-benchmark.md). 
+[Build and Benchmark System documentation](./doc/lumo-build-benchmark.md). 
 
 Now you have the dependencies installed, clone the LumoSQL repository using
 `fossil clone https://lumosql.org/src/lumosql` , which will create a new subdirectory called `lumosql` and
