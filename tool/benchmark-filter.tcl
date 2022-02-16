@@ -10,6 +10,13 @@
 # see documentation for full details of usage
 
 ###############################################################################
+
+# Don't want to enforce a dependency on Tclx, but it is nice to have
+if { ! [catch {package require Tclx 8.0}] }  {
+    # eg if the user exits a "more" pipe early then do not crash
+    signal trap SIGPIPE {exit 1}  
+}
+
 # initialise and parse options
 
 set database ""
@@ -47,6 +54,7 @@ set only_option [list]
 set only_cpu [list]
 set only_disk [list]
 set has_selection 0
+
 
 proc optarg {re what} {
     global o
