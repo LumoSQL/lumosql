@@ -102,7 +102,8 @@ proc optlist {var what {delim ""}} {
 proc display_help {} {
 	puts stderr "                                                                                                  "
 	puts stderr "     -db, -database     LumoSQL benchmark file                      /tmp/benchmark-data.sqlite    "
-	puts stderr "     -import            read/convert files produced by -export      bench1 bench2  "
+	puts stderr "     -count             return total number of runs                                               "
+	puts stderr "     -import            read/convert files produced by -export      bench1 bench2                 "
 	puts stderr "     -sqlite            path to a valid SQLite3 binary              ~/tmp/path/to/sqlite3         "
 	puts stderr "     -limit             maximum number of SQL rows to return        50                            "
 	puts stderr "     -average           average across all runs, per dimension      NOT IMPLEMENTED YET           "
