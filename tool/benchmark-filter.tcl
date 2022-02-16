@@ -1247,7 +1247,7 @@ if {$out_summary} {
 		puts "   End at: [clock format $end_run -format "%Y-%m-%d %H:%M:%S"]"
 	    }
 	    # now show details of all tests
-	    for {set tn 1; set tc 0} {$tc < $n_tests} {incr tn} {
+	    for {set tn 1; set tc 0} {$tc < $n_tests} {incr tc; incr tn} {
 		set tdata [get_test_data $run_id $tn]
 		if {[llength $tdata] == 0} { continue }
 		puts [format "%9s: %s" "Test $tn" [lindex $nnames [expr {$tn - 1}]]]
@@ -1385,12 +1385,39 @@ if {[llength $out_add] > 0} {
 
 if {$out_copy ne ""} {
     # copy all runs to $out_copy, creating the tables if the file does not exist
-    if {! [file exists $out_copy]} {
+    set qout_copy [regsub -all {'} $out_copy {''}]
+    set qdatabase [regsub -all {'} $database {''}]
+    if {[file exists $out_copy]} {
+	set sql [file tempfile sql_file]
+	puts $sql "ATTACH '$qout_copy' as NEW;"
+	puts $sql "SELECT run_id FROM NEW.run_data WHERE run_id IN ("
+	for {set i 0} {$i < [llength $runlist]} {incr i} {
+	    if {$i} { puts $sql "," }
+	    puts $sql "'[lindex $runlist $i]'"
+	}
+	puts $sql ") GROUP BY run_id limit 21;"
+	flush $sql
+	set fd [open "| $sqlite3 $database < $sql_file" r]
+	set listed 0
+	while {[gets $fd ri] >= 0} {
+	    if {! $listed} {
+		puts "The following run ID(s) are already present in $out_copy:"
+	    }
+	    incr listed
+	    if {$listed > 20} {
+		puts "... (more IDs omitted)"
+	    } else {
+		puts $ri
+	    }
+	}
+	close $fd
+	close $sql
+	file delete $sql_file
+	if {$listed} { exit 1}
+    } else {
 	make_database $out_copy
     }
     set sql [file tempfile sql_file]
-    set qout_copy [regsub -all {'} $out_copy {''}]
-    set qdatabase [regsub -all {'} $database {''}]
     puts $sql "ATTACH '$qout_copy' as NEW;"
     puts $sql "ATTACH '$qdatabase' as OLD;"
     for {set i 0} {$i < [llength $runlist]} {incr i} {
