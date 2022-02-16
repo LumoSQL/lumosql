@@ -1097,7 +1097,7 @@ set run_schema {
 	key VARCHAR(256),
 	value TEXT
     );
-    CREATE INDEX run_data_index ON run_data (run_id, key);
+    CREATE UNIQUE INDEX run_data_index ON run_data (run_id, key);
 }
 
 set test_schema {
@@ -1107,8 +1107,8 @@ set test_schema {
 	key VARCHAR(256),
 	value TEXT
     );
-    CREATE INDEX test_data_index_1 ON test_data (run_id, test_number, key);
-    CREATE INDEX test_data_index_2 ON test_data (run_id, key, test_number);
+    CREATE UNIQUE INDEX test_data_index_1 ON test_data (run_id, test_number, key);
+    CREATE UNIQUE INDEX test_data_index_2 ON test_data (run_id, key, test_number);
 }
 
 if {[file exists $database_name]} {

@@ -325,7 +325,7 @@ proc make_database {name} {
 	    key VARCHAR(256),
 	    value TEXT
 	);
-	CREATE INDEX run_data_index ON run_data (run_id, key);
+	CREATE UNIQUE INDEX run_data_index ON run_data (run_id, key);
     }
     set test_schema {
 	CREATE TABLE test_data (
@@ -334,8 +334,8 @@ proc make_database {name} {
 	    key VARCHAR(256),
 	    value TEXT
 	);
-	CREATE INDEX test_data_index_1 ON test_data (run_id, test_number, key);
-	CREATE INDEX test_data_index_2 ON test_data (run_id, key, test_number);
+	CREATE UNIQUE INDEX test_data_index_1 ON test_data (run_id, test_number, key);
+	CREATE UNIQUE INDEX test_data_index_2 ON test_data (run_id, key, test_number);
     }
     global sqlite3
     set sqlfd [open "| $sqlite3 $name" w]
@@ -966,6 +966,11 @@ if {$out_list} {
 	    set width -[field_width "os-type" [string length $field]]
 	    lappend fmt "%${width}s"
 	    lappend op {[dict get $d "os-type" ]}
+	} elseif {$field eq "N_TESTS"} {
+	    set width 7
+	    lappend fmt "%7d"
+	    add_test_op "n-tests" "test-name" "count(*)"
+	    lappend op {[dict get $d "n-tests" ]}
 	} else {
 	    puts stderr "Invalid field: $field"
 	    if {$database_orig ne ""} {file delete $database}

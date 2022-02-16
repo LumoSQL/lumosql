@@ -454,6 +454,8 @@ storage medium used for the databases during the benchmark, or "-" if not provid
 note that the benchmark system will try to detect the storage device
 if the user did not provide a ciomment; this doesn't always succeed, so
 the column can still show as "-"
+* `N_TESTS`: the number of tests in the run, currently 17 for benchmarks;
+however future versions of LumoSQL may define more tests
 
 ## extra actions
 
