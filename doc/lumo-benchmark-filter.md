@@ -398,6 +398,7 @@ unless specified otherwise
 `RUN_ID,TARGET,DATE,TIME,DURATION`; see below for the possible values
 * `-summary`  - display a summary of each test in each selected run; this only works if the selected runs have the same tests; cannot be combined with `-details`; this is the default if there are some selection options
 * `-quick` - similar to summary, but omits the initial test description and just shows the columns of timings: the column headers show the sqlite/backend combination
+* `-count` - only shows the number of results matching filters
 * `-details`  - display full details for each test in each selected run including all the information in the database; cannot be combined with `-summary`
 * `-column` `WHAT` - what to show in columns, where `WHAT` is one of:
 `test`, `benchmark` or `target` (`test` and `benchmark` are considered

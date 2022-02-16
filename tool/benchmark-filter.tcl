@@ -156,6 +156,9 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
 	optlist list_fields "list of fields" ","
     } elseif {$o eq "-tests" || $o eq "-benchmarks"} {
 	optlist list_tests "list of tests/benchmarks" ","
+    } elseif {$o eq "-count"} {
+	set out_summary -1
+	set out_default 0
     } elseif {$o eq "-quick"} {
 	set out_summary 1
 	set out_default 0
@@ -417,24 +420,38 @@ if ($only_invalid) {
     # this selects run IDs which are not valid in run_data: the only sensible
     # action for it is -delete and it makes no sense to combine it with any
     # of the other selections
-    puts $sql "select run_id, 0"
+    if {$out_summary < 0} {
+	puts $sql "select count(*)"
+    } else {
+	puts $sql "select run_id, 0"
+    }
     puts $sql "from test_data"
     puts $sql "where run_id not in"
     puts $sql "(select run_id from run_data)"
-    puts $sql "union"
     # and also runs where there is the wrong number of backend keys
-    puts $sql "select run_id, A"
+    if {$out_summary < 0} {
+	puts $sql ";"
+	puts $sql "select count(*)"
+    } else {
+	puts $sql "union"
+	puts $sql "select run_id, A"
+    }
     puts $sql "from"
     puts $sql "(select run_id, count(*) A"
     puts $sql "from run_data"
     puts $sql "where"
     puts $sql "key = 'backend' or key like 'backend-%'"
     puts $sql "group by run_id)"
-    puts $sql "where A != 0 and A != 4"
+    puts $sql "where A != 0 and A != 4 and A != 5"
     # TODO we could also count the tests and see that they match tests-ok, fail, intr
     # TODO any other thing we consider invalid?
 } else {
-    puts $sql "select run_id, value from run_data where key='when-run'"
+    if {$out_summary < 0} {
+	puts $sql "select count(*)"
+    } else {
+	puts $sql "select run_id, value"
+    }
+    puts $sql "from run_data where key='when-run'"
 
     if {[llength $only_ids] > 0} {
 	# restrict search to these IDs
@@ -601,13 +618,25 @@ if ($only_invalid) {
     }
 
     puts $sql "order by value desc";
-    if {$limit > 0} { puts $sql "limit [expr {$limit + 1}]" }
+    if {$limit > 0 && $out_summary >= 0} {
+	puts $sql "limit [expr {$limit + 1}]"
+    }
     puts $sql ";"
 }
 
 flush $sql
 
 set fd [open "| $sqlite3 $database < $sql_file" r]
+
+if {$out_summary < 0} {
+    set count 0
+    while {[gets $fd rv] >= 0} { incr count $rv }
+    puts $count
+    close $sql
+    file delete $sql_file
+    exit 0
+}
+
 set rundict [dict create]
 set runlist [list]
 set excess 0
