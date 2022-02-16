@@ -1426,11 +1426,13 @@ if {$out_copy ne ""} {
     set sql [file tempfile sql_file]
     puts $sql "ATTACH '$qout_copy' as NEW;"
     puts $sql "ATTACH '$qdatabase' as OLD;"
+    puts $sql "BEGIN;"
     for {set i 0} {$i < [llength $runlist]} {incr i} {
 	set run_id [lindex $runlist $i]
 	puts $sql "INSERT INTO NEW.run_data select * FROM OLD.run_data WHERE run_id='$run_id';"
 	puts $sql "INSERT INTO NEW.test_data select * FROM OLD.test_data WHERE run_id='$run_id';"
     }
+    puts $sql "COMMIT;"
     flush $sql
     exec $sqlite3 < $sql_file
     close $sql
