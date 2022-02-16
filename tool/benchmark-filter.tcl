@@ -190,7 +190,7 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
 	lappend only_ids $o
 	set has_selection 1
     } elseif {$o eq "-datasize"} {
-	optarg {^\d+$} "number"
+	optarg {^\d+(?:,\d+)$} "number"
 	lappend only_option "datasize-$o"
 	set has_selection 1
     } elseif {$o eq "-option"} {
@@ -545,7 +545,7 @@ if ($only_invalid) {
 	set or "where"
 	for {set i 0} {$i < [llength $only_versions]} {incr i} {
 	    set val [lindex $only_versions $i]
-	    puts $sql "$or (key = 'sqlite-version' and value = '$val')"
+	    puts $sql "$or ((key = 'sqlite-version' and value = '$val') or (key = 'sqlite-name' and value like '$val %'))"
 	    set or "or"
 	}
 	puts $sql ")"
