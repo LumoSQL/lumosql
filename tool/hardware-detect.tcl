@@ -53,7 +53,7 @@ proc find_device {dev} {
 	    device_name $phdev
 	}
     }
-    if {$tcl_platform(os) eq "Linux" && [regexp {/vd[a-z]\d} $dev]} {
+    if {$::tcl_platform(os) eq "Linux" && [regexp {/vd[a-z]\d} $dev]} {
 	puts "Virtio Block Device"
 	exit 0
     }
