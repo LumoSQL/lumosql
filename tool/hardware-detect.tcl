@@ -47,11 +47,15 @@ proc device_name {dev} {
 }
 
 proc find_device {dev} {
-    # if lsblk can find it...
+    # if lsblk can find it... (Probably Linux only)
     catch {
 	if {[regexp {\n(\S+)\s[^\n]*\n*$} [exec lsblk -s --raw $dev] skip phdev]} {
 	    device_name $phdev
 	}
+    }
+    if {$tcl_platform(os) eq "Linux" && [regexp {/vd[a-z]\d} $dev]} {
+	puts "Virtio Block Device"
+	exit 0
     }
     # add here more ways to figure out what something may be
 }
@@ -67,12 +71,19 @@ proc parse_df {df} {
 		if {[regexp {\son\s+(\S+)\s} $l skip m] && $mp eq $m} {
 		    if {[regexp {\stype\s+(\S+)} $l skip t]} {
 			# add any other type of disks which are in fact a ramdisk
-			if {$t eq "tmpfs"} {
+			if {$t eq "tmpfs" || $t eq "mfs"} {
 			    puts ramdisk
 			    exit 0
 			}
 			# add any other type of network file system
-			if {$t eq "nfs" || [regexp {^nfs} $t] || $t eq "coda"} {
+			if {$t eq "nfs" || \
+			    [regexp {^nfs} $t] || \
+			    $t eq "ceph" || \
+			    $t eq "afs" || \
+			    $t eq "cifs" || \
+			    $t eq "smbfs" || \
+			    $t eq "coda"} \
+			{
 			    puts "network file system"
 			    exit 0
 			}
@@ -93,6 +104,24 @@ proc parse_df {df} {
 # some places don't have sbin in PATH but we may need things from there
 array set env [list PATH "$env(PATH):/sbin:/usr/sbin"]
 if {[llength $argv] == 0} {
+    if {$tcl_platform(os) eq "FreeBSD"} {
+	catch {
+	    set cpu [exec sysctl -n hw.model]
+	    puts [string trim $cpu]
+	    exit 0
+	}
+    }
+    if {$tcl_platform(os) eq "NetBSD"} {
+	catch {
+	    set cpu [exec sysctl -n machdep.cpu_brand]
+	    puts [string trim $cpu]
+	    exit 0
+	}
+    }
+    # Linux has /proc/cpuinfo, NetBSD also has it if the kernel is
+    # built with option COMPAT_LINUX; FreeBSD may have it in
+    # /compat/linux - so if we got here without an answer, we
+    # try them both
     catch {
 	set f ""
 	foreach ci [list "/proc/cpuinfo" "/compat/linux/proc/cpuinfo"] {
@@ -101,46 +130,38 @@ if {[llength $argv] == 0} {
 		break
 	    }
 	}
-	# we may get here with $f not pointing to a file, and the read
-	# will then fail; that's OK it means we cannot get this information
-	set cpu ""
-	set hw ""
-	set model ""
-	foreach l [split [read $f] \n] {
-	    regexp -nocase {^model\s+name\s*:\s+(\S.*)$} $l skip cpu
-	    regexp -nocase {^model\s*:\s+([^\s\d].*)$} $l skip model
-	    regexp -nocase {^hardware\s*:\s+(\S.*)$} $l skip hw
-	}
-	close $f
-	if {"$hw$cpu" ne ""} {
-	    if {$hw eq ""} {
-		set name $cpu
-	    } elseif {$cpu eq ""} {
-		set name $hw
-	    } else {
-		set name "$cpu: $hw"
+	if {$f ne ""} {
+	    set cpu ""
+	    set hw ""
+	    set model ""
+	    foreach l [split [read $f] \n] {
+		regexp -nocase {^model\s+name\s*:\s+(\S.*)$} $l skip cpu
+		regexp -nocase {^model\s*:\s+([^\s\d].*)$} $l skip model
+		regexp -nocase {^hardware\s*:\s+(\S.*)$} $l skip hw
 	    }
-	    if {$model eq ""} {
-		puts $name
-	    } else {
-		puts "$name ($model)"
+	    close $f
+	    if {"$hw$cpu" ne ""} {
+		if {$hw eq ""} {
+		    set name $cpu
+		} elseif {$cpu eq ""} {
+		    set name $hw
+		} else {
+		    set name "$cpu: $hw"
+		}
+		if {$model eq ""} {
+		    puts $name
+		} else {
+		    puts "$name ($model)"
+		}
+		exit 0
 	    }
-	    exit 0
-	}
-	if {$model ne ""} {
-	    puts $model
-	    exit 0
+	    if {$model ne ""} {
+		puts $model
+		exit 0
+	    }
 	}
     }
-    # FreeBSD has sysctl hw.model; NetBSD also has it, but it only return things
-    # like "Intel 686-class" (even on amd64/X86_64) so we use that only if
-    # /proc/cpuinfo failed
-    catch {
-	set cpu [exec sysctl -n hw.model]
-	puts [string trim $cpu]
-	exit 0
-    }
-    # if we know other ways to do this, we can add them here
+    # if we find out other ways to do this, we add them here
 } elseif {[llength $argv] == 1} {
     set path [lindex $argv 0]
     # the path may not have been created yet - but some parent must exist,
@@ -159,7 +180,7 @@ if {[llength $argv] == 0} {
 	set df [exec df $path]
 	parse_df $df
     }
-    # if we know other ways to do this, we can add them here
+    # if we find out other ways to do this, we add them here
 } else {
     puts stderr "Usage: hardware-detect.tcl       => hint for CPU_COMMENT"
     puts stderr "Usage: hardware-detect.tcl PATH  => hint for DISK_COMMENT"
