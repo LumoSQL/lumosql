@@ -18,7 +18,21 @@ all: build
 # if there is a Makefile.local we use it to get defaults
 -include Makefile.local
 
-TCL ?= tclsh
+# if we start checking for more versions, this will need to go into a
+# separate script!
+ifeq ($(TCL),)
+ifneq ($(shell which tclsh),)
+TCL := tclsh
+else
+ifneq ($(shell which tclsh8.7),)
+TCL := tclsh8.7
+else
+ifneq ($(shell which tclsh8.6),)
+TCL := tclsh8.6
+endif
+endif
+endif
+endif
 
 # provide defaults for DISK_COMMENT and CPU_COMMENT if we know how to
 CPU_COMMENT ?= $(shell $(TCL) tool/hardware-detect.tcl)

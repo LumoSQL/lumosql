@@ -455,9 +455,9 @@ if {[catch {
 # not-fork 1.0 may introduce incompatible changes and we don't want that, so
 # we ask it to confirm that it can find a version older than that
 set notfork_maximum "0.999"
-# and we'll need 0.4.2 to take advantage of the new methods it introduced
+# and we'll need 0.5 to take advantage of the new methods it introduced
 # (append and fragment_patch)
-set notfork_minimum "0.4.2"
+set notfork_minimum "0.5"
 # see if it knows how to find a suitable version
 exec $notfork_name --quiet --find-version "$notfork_minimum:$notfork_maximum"
 
@@ -494,22 +494,6 @@ proc notfork_command {target args} {
     return $args
 }
 
-# not quite the same version sort as not-fork, but it'll do for now,
-# it works for sqlite3 and LMDB anyway; a future not-fork will have
-# options to list all version until/after a given one and we'll
-# use these when they become available
-proc version_makesort {ver} {
-    set rl [list]
-    foreach vc [split $ver "."] {
-	if {[regexp {^(\d+)(.*)$} $vc skip number rest]} {
-	    set vc [format "%010d%s" $number $rest]
-	}
-	lappend rl $vc
-    }
-    set res [join $rl "."]
-    return $res
-}
-
 proc versions_list {result backend names slist} {
     upvar $result R
     set R [list]
@@ -537,29 +521,19 @@ proc versions_list {result backend names slist} {
 	    set all 1
 	} elseif {[string index $name end] eq "+"} {
 	    set all 1
-	    set minver [version_makesort [string range $name 0 end-1]]
+	    set minver [string range $name 0 end-1]
 	} elseif {[regexp {^(.*)-} $name skip ver]} {
 	    set all 1
-	    set maxver [version_makesort [string range $name 0 end-1]]
+	    set maxver [string range $name 0 end-1]
 	}
 	if {$all || $name eq "latest"} {
 	    # if a clone needs to happen that may result in standard output
 	    # which we don't want; so we call not-fork twice
 	    eval exec [notfork_command $backend -q]
-	    set nfvers [split [eval exec [notfork_command $backend --list-versions]]]
-	    if {[llength $nfvers] < 1} { continue }
-	    if {$all} {
-		set bvers [list]
-		foreach nv $nfvers {
-		    if {$minver ne "" || $maxver ne ""} {
-			set ev [version_makesort $nv]
-			if {$ev < $minver} { continue }
-			if {$maxver ne "" && $ev > $maxver} { continue }
-		    }
-		    lappend bvers $nv
-		}
-	    } else {
-		set bvers [lrange $nfvers end end]
+	    set bvers [split [eval exec [notfork_command $backend --version-range "$minver:$maxver"]]]
+	    if {[llength $bvers] < 1} { continue }
+	    if {! $all} {
+		set bvers [lrange $bvers end end]
 	    }
 	} else {
 	    set bvers [list $name]

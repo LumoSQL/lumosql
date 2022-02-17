@@ -94,7 +94,15 @@ proc parse_df {df} {
 array set env [list PATH "$env(PATH):/sbin:/usr/sbin"]
 if {[llength $argv] == 0} {
     catch {
-	set f [open "/proc/cpuinfo" r]
+	set f ""
+	foreach ci [list "/proc/cpuinfo" "/compat/linux/proc/cpuinfo"] {
+	    catch {
+		set f [open $ci r]
+		break
+	    }
+	}
+	# we may get here with $f not pointing to a file, and the read
+	# will then fail; that's OK it means we cannot get this information
 	set cpu ""
 	set hw ""
 	set model ""
@@ -123,6 +131,14 @@ if {[llength $argv] == 0} {
 	    puts $model
 	    exit 0
 	}
+    }
+    # FreeBSD has sysctl hw.model; NetBSD also has it, but it only return things
+    # like "Intel 686-class" (even on amd64/X86_64) so we use that only if
+    # /proc/cpuinfo failed
+    catch {
+	set cpu [exec sysctl -n hw.model]
+	puts [string trim $cpu]
+	exit 0
     }
     # if we know other ways to do this, we can add them here
 } elseif {[llength $argv] == 1} {

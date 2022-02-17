@@ -7,10 +7,24 @@
 global build_options
 global make_command
 
+# if we don't say anything, LMDB assumes gcc
+set cc ""
+foreach compiler [list gcc clang cc] {
+    catch {
+	set v [exec $compiler --version]
+	set cc $compiler
+	break
+    }
+}
+if {$cc eq ""} {
+    puts stderr "Cannot find a C compiler to use"
+    exit 1
+}
+
 if {$build_options(DEBUG) eq "on"} {
-    system $make_command CPPFLAGS=-DMDB_DEBUG
+    system $make_command CPPFLAGS=-DMDB_DEBUG CC=$cc
 } else {
-    system $make_command
+    system $make_command CC=$cc
 }
 
 # now move files of interest to lumo/build
