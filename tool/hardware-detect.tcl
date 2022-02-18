@@ -47,19 +47,56 @@ proc device_name {dev} {
 }
 
 proc find_device {dev} {
+
+    set OS $::tcl_platform(os) 
+
     # if lsblk can find it... (Probably Linux only)
     catch {
 	if {[regexp {\n(\S+)\s[^\n]*\n*$} [exec lsblk -s --raw $dev] skip phdev]} {
 	    device_name $phdev
+	    # do something with this. NOP at present.
 	}
     }
 
+    set vendorid ""
+    switch $OS {
+
+	Linux {
+    	    set devname [lindex [ split $dev "/"] 2]
+	    set devtype [string range $devname 0 1]
+	    set devletter  [string range $devname 2 2]
+	    switch $devtype {
+		vd {
+	    	    set f [open "/sys/block/$devtype$devletter/device/vendor" r]
+		    set vendorid [string trim [read $f]]
+		}
+		sd {
+		    set f [open "/sys/block/$devtype$devletter/device/model" r]
+		    set vendorid [string trim [read $f]]
+		}
+	    }
+	}
+
+	FreeBSD {
+	}
+
+	NetBSD {
+	}
+
+        default {
+	    # Unknown OS
+	    # Should we exit or return?
+	}
+    } 
+
+    # We are here because we didn't detect a standard physical device.
     # Virtio devices appear on virtual machines running on many host and guest
     # combinations, and their only correct name is a text representation of a
     # hexadecimal number.
     #
-    # Get the latest Virtio specification with git clone
-    # git://git.kernel.org/pub/scm/virt/kvm/mst/virtio-text.git
+    # Get the latest Virtio specification with: 
+    #     git clone git://git.kernel.org/pub/scm/virt/kvm/mst/virtio-text.git
+    #     sh makehtml.sh
     #
     # Section 4.1.2 PCI Device Discovery says: 
     #   
@@ -70,18 +107,19 @@ proc find_device {dev} {
     #   ID, as indicated in section 5. Additionally, devices MAY utilize a
     #   Transitional PCI Device ID range, 0x1000 to 0x103F depending on the
     #   device type."
-
-    if {$::tcl_platform(os) eq "Linux"} {
-	    set f [open "/sys/block/vda/device/vendor" r]
-	    set vendorid [string trim [read $f]]
-    }
-    # Add the specific procfs/sysfs for BSDs, Windows etc here
-
-    # Now see if $vendorid fits the Virtio standard, regardless of OS
+    #
+    # Now see if $vendorid fits the Virtio standard, regardless of OS.
+    
     if {$vendorid eq "0x1af4"} {
 	# add the full range of Virtio device IDs here as per the spec above
 	puts "Virtio Block Device"
 	exit 0
+    }
+
+    # It isn't Virtio, so return whatever the OS gave us
+    if {$vendorid ne ""} {
+	    puts $vendorid
+	    exit 0
     }
 
     # add here more ways to figure out what something may be
