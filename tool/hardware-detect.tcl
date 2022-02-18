@@ -53,10 +53,37 @@ proc find_device {dev} {
 	    device_name $phdev
 	}
     }
-    if {$::tcl_platform(os) eq "Linux" && [regexp {/vd[a-z]\d} $dev]} {
+
+    # Virtio devices appear on virtual machines running on many host and guest
+    # combinations, and their only correct name is a text representation of a
+    # hexadecimal number.
+    #
+    # Get the latest Virtio specification with git clone
+    # git://git.kernel.org/pub/scm/virt/kvm/mst/virtio-text.git
+    #
+    # Section 4.1.2 PCI Device Discovery says: 
+    #   
+    #   "Any PCI device with PCI Vendor ID 0x1AF4, and PCI Device ID 0x1000
+    #   through 0x107F inclusive is a virtio device. The actual value within
+    #   this range indicates which virtio device is supported by the device. 
+    #   The PCI Device ID is calculated by adding 0x1040 to the Virtio Device
+    #   ID, as indicated in section 5. Additionally, devices MAY utilize a
+    #   Transitional PCI Device ID range, 0x1000 to 0x103F depending on the
+    #   device type."
+
+    if {$::tcl_platform(os) eq "Linux"} {
+	    set f [open "/sys/block/vda/device/vendor" r]
+	    set vendorid [string trim [read $f]]
+    }
+    # Add the specific procfs/sysfs for BSDs, Windows etc here
+
+    # Now see if $vendorid fits the Virtio standard, regardless of OS
+    if {$vendorid eq "0x1af4"} {
+	# add the full range of Virtio device IDs here as per the spec above
 	puts "Virtio Block Device"
 	exit 0
     }
+
     # add here more ways to figure out what something may be
 }
 
