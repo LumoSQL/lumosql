@@ -19,29 +19,26 @@ says "#startmeeting" in the chat. From then on, it listens for more instructions
 
 You can read all the details in the help page above. These are the commands we need for LumoSQL meetings:
 
-* **#startmeeting**            Anyone can start a meeting, and is then the chair until #endmeeting is issued.
+* **#startmeeting**            Anyone can start a meeting, and is then the chair until **#endmeeting** is issued.
 * **#meetingname \<descriptive name\>**             Important! The chair should specify this, because it gets extracted as the comment in the [table of meetings](https://lumosql.org/meetings).
 * **#here**                    List yourself as an attendee. Everyone should do this at the beginning because it looks neater in the notes.
 * **#topic**                   Start a new topic, that is a section heading in the meeting notes.
   * **#info \<text\>**           Add a bullet item under the current topic heading.
   * **#link \<link\> \<text\>**    The supplied URL gets added under the current topic heading as a clickable HREF link.
-  * **#action \<nick\> \<text\>**  Assign an action item to user <nick> eg "#action Björn to make the coffee".
-  * **#accepted \<text\>**       Log an agreement we have made, eg "#accepted we are all going home now".
-  * **#motion \<text\>**         The chair can propose any motion for voting, eg "#motion Vanilla icecream is best".
-  * **#vote +1 / -1**          Anyone can vote +1 or -1.
+  * **#action \<nick\> \<text\>**  Assign an action item to user \<nick\> eg *#action bk712 to make the coffee*. Always use the irc nickame instead of a human-like name such as "Björn", because otherwise the Meetbot won't assign the actions properly at the end.
+  * **#accepted \<text\>**       Log an agreement we have made, eg *#accepted we are all going home now*.
+  * **#motion \<text\>**         The chair can propose any motion for voting, eg *#motion Vanilla icecream is best*.
+  * **#vote +1 / -1**          Anyone can vote +1 or -1. The meetbot will allow people to vote multiple times, to correct a mistaken vote.
+  * **#help \<text\>           Add a request for people to volunteer for a task in the notes. If you are looking for Meetbot help, then see **#commands** below.
   * **#close**                 The chair closes the vote, and the meetbot summarises the results.
-* **#endmeeting**              Close the meeting. The formatted minutes and raw log magically appear in a few seconds.
+* **#endmeeting**              End the meeting. The formatted minutes and raw log magically appear in a few seconds.
+* **#commands**          get a list of all the valid commands, and be reminded of the URL of the help page.
 
-#commands           get a list of all the valid commands, and be reminded of the URL of the help page.
+It's a great tool, thanks to [Kenneth J. Pronovici](https://github.com/pronovic) and others.
 
-There is also the ability to vote and other facilities. It's a great tool, thanks to
-[Kenneth J. Pronovici](https://github.com/pronovic) and others.
-
-You can address the bot directly and chat with it, including by the shortcut "@
-\<text\>". You'll find out about that in the online help.
-
+You can address the bot directly and chat with it, including by the shortcut "@ \<text\>". You'll find out about that in the online help.
 
 > <font size="6"> &#9757;&#127998; </font> The meeting logs are just HTML files, so if something *really* incorrect gets into the notes by accident we can edit them manually. But this should be very rare.
 
->    Obviously, chat in #lumosql is covered by the [LumoSQL Code of Conduct](CODE-OF-CONDUCT.md), which says "be a decent person".
+>    Obviously, chat in #lumosql is covered by the [LumoSQL Code of Conduct](../CODE-OF-CONDUCT.md), which says "be a decent person".
 
