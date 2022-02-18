@@ -6,7 +6,7 @@
 # Copyright 2022 The LumoSQL Authors
 #
 # SPDX-License-Identifier: MIT
-# SPDX-FileCopyrightText: 2020 The LumoSQL Authors
+# SPDX-FileCopyrightText: 2022 The LumoSQL Authors
 
 ###############################################################################
 
@@ -57,6 +57,10 @@ proc find_device {dev} {
 	    # do something with this. NOP at present.
 	}
     }
+
+    # If we are here then we did not find utilities such as lsblk, lsscsi etc.
+    # This means the best we can do (if anything) is provide the Vendor Id
+    # instead of a more useful generic name indicating the media type, eg SSD.
 
     set vendorid ""
     switch $OS {
