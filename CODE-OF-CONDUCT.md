@@ -8,25 +8,24 @@
 
 # LumoSQL Code of Conduct
 
-Version 1.4 – Updated 9th Jan, 2021
+Version 1.5 – Updated 18th February, 2022
 
 **This file exists because the LumoSQL Project needed it, less than one year
-after starting in 2019. We take it seriously. Now we have the 2020/2021 pandemic and
-this file can be viewed as mandating kindness... most people are feeling a bit fragile.**
+after starting in 2019. We take it seriously. We take the view that this file is
+about mandating kindness. We are in a global pandemic when kindness is needed more
+than ever.
 
-The LumoSQL Project welcomes contributions from everyone who shares
+The LumoSQL Project welcomes contributions from anyone who shares
 [the LumoSQL Project Goals](https://lumosql.org/src/lumodoc/doc/trunk/doc/lumo-project-aims.md)
-This document outlines both expected and prohibited behavior.
+This document outlines both expected and prohibited behaviour.
 
 # Short Summary
 
-LumoSQL participants are required to be respectful and direct with each other.
-We will not tolerate bullying, racism, sexism or constant domineering
-behaviour.  No personal attacks, stay focussed on what we are trying to
-achieve. The foregoing three sentences sum up everything we really want to
-say, all the rest of this document is supporting detail.
+The rest of this document is detail to support these three points:
 
-[lumoaims]:https://lumosql.org/src/lumodoc/doc/trunk/doc/lumo-project-aims.md
+* LumoSQL participants are to be respectful and direct with each other.
+* We will not tolerate bullying, racism, sexism or constant domineering behaviour.
+* No personal attacks, and generally stay focussed on what we are trying to achieve. 
 
 # Who Should Feel Safe?
 
@@ -50,14 +49,14 @@ Everyone, regardless of diversity dimensions including:
 
 # What is Expected?
 
-The following behaviors are expected of all LumoSQL community participants:
+The following behaviours are expected of all LumoSQL community participants:
 
 ## Be Respectful
 
 Value each other’s ideas, styles and viewpoints. Disagreement is no excuse for
-poor manners. Be open to different possibilities and to being wrong. Take
+bad manners. Be open to different possibilities and to being wrong. Take
 responsibility, so if someone says they have been harmed through your words or
-actions, listen carefully, apologize sincerely, and correct the behaviour.
+actions, listen carefully, apologise sincerely, and correct the behaviour.
 
 ## Be Direct but Professional
 
@@ -83,10 +82,9 @@ titles (including pronouns). Respect people’s right to privacy and
 confidentiality. Be open to learning from and educating others as well as
 educating yourself.
 
-# Behavior That Will Not Be Tolerated
+# Behaviour That Will Not Be Tolerated
 
-The following behaviours are unacceptable, as should have been totally obvious
-already:
+The following behaviours are unacceptable, as should be obvious in any case:
 
 ## Violence and Threats of Violence Are Not Acceptable
 
@@ -101,20 +99,20 @@ acceptable.
 
 This includes deliberately referring to someone by a gender that they do not
 identify with, or questioning an individual’s gender identity. If you’re unsure
-if a word is derogatory, don’t use it.  When asked to stop, stop the behaviour
-in question.
+if a word is derogatory, don’t use it.  When asked to stop, stop the behaviour.
 
 ## Unwelcome Sexual Attention or Physical Contact Is Not Acceptable
 
-This section is here because it has been proven to be needed. It is not some formality.
-If you doubt this is needed, you have lead a very sheltered and/or privileged life.
+This section is here because it has been proven to be needed where LumoSQL has
+been present. It is not some formality.  If you don't think it is needed, you have
+not been paying attention.
 
 Unwelcome sexual attention online or offline, or unwelcome physical contact is
-not acceptable. This includes sexualized comments, jokes or imagery as well as
+not acceptable. This includes sexualised comments, jokes or imagery as well as
 inappropriate touching, groping, or sexual advances.  This also includes
 physically blocking or intimidating another person. Physical contact or
 simulated physical contact (potentially including emojis) without affirmative
-consent is not acceptable. 
+consent is not acceptable.
 
 # Consequences of Unacceptable Behaviour
 
@@ -150,7 +148,9 @@ these guidelines.
 If you feel you have been unfairly accused of violating these guidelines,
 please follow the same reporting process.
 
-*Heavily Adapted and Compressed from the surprisingly large and seemingly repetitive version 3.1 of the 
+This document is (c) 2022 The LumoSQL Authors, under the [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/) license.
+
+*Heavily Adapted and Compressed from the surprisingly large version 3.1 of the 
 [Mozilla Participation Guidelines](https://www.mozilla.org/en-US/about/governance/policies/participation/)
-and released under the 
-[Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/) license.*
+which Mozilla released under the Creative Commons Attribution-ShareAlike 4.0 International. We thank Mozilla for their work.
+
