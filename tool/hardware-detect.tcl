@@ -30,7 +30,7 @@ proc device_name_linux {dev devname} {
 	    set f [open "/sys/block/$basedev/device/vendor" r]
 	    set vendorid [string trim [read $f]]
 	    close $f
-	    if {$vendorid ne ""} { return vendorid }
+	    if {$vendorid ne ""} { return $vendorid }
 	}
 	{^nvme\d+n\d+} {
 	    set basedev [lindex $v 0]
