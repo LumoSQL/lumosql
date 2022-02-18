@@ -1,7 +1,8 @@
 #!/usr/bin/tclsh
 
 # try to detect defaults for DISK_COMMENT and CPU_COMMENT; this is inherently
-# non-portable, so if we cannot do it we don't give an error
+# non-portable, so if we cannot do it we don't give an error, just produce
+# empty output
 
 # Copyright 2022 The LumoSQL Authors
 #
@@ -13,120 +14,138 @@
 # with no arguments, provide defaults for CPU_COMMENT
 # with 1 argument, provide defaults for DISK_COMMENT
 
-proc scsi_name {dev ls type} {
-    if {$type ne ""} {
-	set type " ($type)"
-    }
-    foreach s [split $ls \n] {
-	if {[regexp {/([^\s/]+)\s*$} $s skip sd] && $sd eq $dev} {
-	    regsub {^\[[^\[\]]+\]\s+\S+\s+} $s {} s
-	    regsub {\s+/\S+\s*$} $s {} s
-	    set r "$s$type"
-	    regsub -all {\s+} $r " " r
-	    puts $r
-	    exit 0
+proc device_name_linux {dev devname} {
+    # first see if lsblk is installed and can find it; if not we just use
+    # the device "df" gave us, which means we won't know how to map LVM
+    # volumes to real devices
+    catch {
+	if {[regexp {\n(\S+)\s[^\n]*\n*$} [exec lsblk -s --raw $dev] skip devname]} {
+	    # continue with rest of detecting; now $devname is the physical
+	    # device name
 	}
     }
+    switch -regexp -matchvar v $devname {
+	{^(vd[a-z])\d*$} {
+	    set basedev [lindex $v 1]
+	    set f [open "/sys/block/$basedev/device/vendor" r]
+	    set vendorid [string trim [read $f]]
+	    close $f
+	    if {$vendorid ne ""} { return vendorid }
+	}
+	{^nvme\d+n\d+} {
+	    set basedev [lindex $v 0]
+	    set f [open "/sys/block/$basedev/device/model" r]
+	    set model [string trim [read $f]]
+	    close $f
+	    if {$model ne ""} { return "$model (NVME SSD)" }
+	}
+	{^(sd[a-z])\d*$} {
+	    set basedev [lindex $v 1]
+	    set f [open "/sys/block/$basedev/device/model" r]
+	    set model [string trim [read $f]]
+	    close $f
+	    set vendor ""
+	    catch {
+		set f [open "/sys/block/$basedev/device/vendor" r]
+		set vendor [string trim [read $f]]
+		close $f
+		if {$vendor eq "ATA"} { set vendor "" }
+	    }
+	    if {$model ne ""} {
+		if {$vendor ne ""} {
+		    return "$vendor $model"
+		} else {
+		    return $model
+		}
+	    } elseif {$vendor ne ""} {
+		return $vendor
+	    }
+	}
+	{^mmcblk\d+} {
+	    set basedev [lindex $v 0]
+	    set f [open "/sys/block/$basedev/device/name" r]
+	    set name [string trim [read $f]]
+	    close $f
+	    if {$name ne ""} { return "$name (SD/MMC card)" }
+	}
+	# TODO other device name patterns
+    }
+    # not known or not understood -- anything else we can try?
+    return ""
 }
 
-proc device_name {dev} {
-    # for some devices we can provide a generic name
-    set type ""
-    if {[regexp {^nvme} $dev]} { set type "NVME SSD" }
-    if {[regexp {^mmcblk} $dev]} { set type "MMC/SD" }
-    # see if lsscsi lists it
+proc device_name_freebsd {dev devname} {
     catch {
-	scsi_name $dev [exec lsscsi] $type
+	# we may have a name like /dev/gpt/... try to translate it to a real device
+	# not doing anything like XML parsing, just finding the bits we need
+	set xml [exec sysctl -n kern.geom.confxml]
+	set idx0 0
+	while {[regexp -indices -start $idx0 {<geom(.*?)</geom>} $xml m0]} {
+	    set idx0 [lindex $m0 1]
+	    set prov [string range $xml [lindex $m0 0] $idx0]
+	    set idx1 0
+	    set name ""
+	    set found 0
+	    while {[regexp -indices -start $idx1 {<name>([^<>]+)</name>} $prov m1 n]} {
+		set idx1 [lindex $m1 1]
+		set dn [string range $prov [lindex $n 0] [lindex $n 1]]
+		if {$devname eq $dn} {
+		    set found 1
+		} else {
+		    set name $dn
+		}
+	    }
+	    if {$found && $name ne ""} {
+		set devname $name
+		break
+	    }
+	}
     }
-    # if we do have a generic name, output it
-    if {$type ne ""} {
-	puts $type
-	exit 0
+    switch -regexp -matchvar v $devname {
+	{^vtbd(\d+)} {
+	    set devnum [lindex $v 1]
+	    set v [exec sysctl -n "dev.vtblk.$devnum.%pnpinfo"]
+	    regexp {vendor=0x([[:xdigit:]]+)} $v skip vendorid
+	    regsub {^0*} $vendorid "0x" vendorid
+	    return $vendorid
+	}
+	# TODO other device name patterns
     }
-    # anything else we can try?
+    # not known or not understood -- anything else we can try?
+    return ""
 }
 
 proc find_device {dev} {
+    set devname $dev
+    regsub {^/dev/} $devname {} devname
 
-    set OS $::tcl_platform(os) 
-
-    # if lsblk can find it... (Probably Linux only)
-    catch {
-	if {[regexp {\n(\S+)\s[^\n]*\n*$} [exec lsblk -s --raw $dev] skip phdev]} {
-	    device_name $phdev
-	    # do something with this. NOP at present.
-	}
+    # if we know how to do things for this OS... if not just return
+    switch $::tcl_platform(os) {
+	Linux   { set name [device_name_linux   $dev $devname] }
+	FreeBSD { set name [device_name_freebsd $dev $devname] }
+	default { return }
     }
 
-    # If we are here then we did not find utilities such as lsblk, lsscsi etc.
-    # This means the best we can do (if anything) is provide the Vendor Id
-    # instead of a more useful generic name indicating the media type, eg SSD.
-
-    set vendorid ""
-    switch $OS {
-
-	Linux {
-    	    set devname [lindex [ split $dev "/"] 2]
-	    set devtype [string range $devname 0 1]
-	    set devletter  [string range $devname 2 2]
-	    switch $devtype {
-		vd {
-	    	    set f [open "/sys/block/$devtype$devletter/device/vendor" r]
-		    set vendorid [string trim [read $f]]
-		}
-		sd {
-		    set f [open "/sys/block/$devtype$devletter/device/model" r]
-		    set vendorid [string trim [read $f]]
-		}
-	    }
-	}
-
-	FreeBSD {
-	}
-
-	NetBSD {
-	}
-
-        default {
-	    # Unknown OS
-	    # Should we exit or return?
-	}
-    } 
-
-    # We are here because we didn't detect a standard physical device.
-    # Virtio devices appear on virtual machines running on many host and guest
-    # combinations, and their only correct name is a text representation of a
-    # hexadecimal number.
-    #
-    # Get the latest Virtio specification with: 
-    #     git clone git://git.kernel.org/pub/scm/virt/kvm/mst/virtio-text.git
-    #     sh makehtml.sh
-    #
-    # Section 4.1.2 PCI Device Discovery says: 
-    #   
-    #   "Any PCI device with PCI Vendor ID 0x1AF4, and PCI Device ID 0x1000
-    #   through 0x107F inclusive is a virtio device. The actual value within
-    #   this range indicates which virtio device is supported by the device. 
-    #   The PCI Device ID is calculated by adding 0x1040 to the Virtio Device
-    #   ID, as indicated in section 5. Additionally, devices MAY utilize a
-    #   Transitional PCI Device ID range, 0x1000 to 0x103F depending on the
-    #   device type."
-    #
-    # Now see if $vendorid fits the Virtio standard, regardless of OS.
-    
-    if {$vendorid eq "0x1af4"} {
-	# add the full range of Virtio device IDs here as per the spec above
+    if {$name eq ""} { return }
+    if {$name eq "0x1af4" } {
+	# Get the latest Virtio specification with: 
+	#     git clone git://git.kernel.org/pub/scm/virt/kvm/mst/virtio-text.git
+	#     sh makehtml.sh
+	#
+	# Section 4.1.2 PCI Device Discovery says: 
+	#   
+	#   "Any PCI device with PCI Vendor ID 0x1AF4, and PCI Device ID 0x1000
+	#   through 0x107F inclusive is a virtio device. The actual value within
+	#   this range indicates which virtio device is supported by the device. 
+	#   The PCI Device ID is calculated by adding 0x1040 to the Virtio Device
+	#   ID, as indicated in section 5. Additionally, devices MAY utilize a
+	#   Transitional PCI Device ID range, 0x1000 to 0x103F depending on the
+	#   device type."
 	puts "Virtio Block Device"
-	exit 0
+    } else {
+	puts $name
     }
-
-    # It isn't Virtio, so return whatever the OS gave us
-    if {$vendorid ne ""} {
-	    puts $vendorid
-	    exit 0
-    }
-
-    # add here more ways to figure out what something may be
+    exit 0
 }
 
 proc parse_df {df} {
@@ -170,64 +189,62 @@ proc parse_df {df} {
     }
 }
 
+proc try_sysctl {key} {
+    catch {
+	set cpu [exec sysctl -n $key]
+	puts [string trim $cpu]
+	exit 0
+    }
+}
+
+proc try_cpuinfo {path} {
+    catch {
+	set f [open $path r]
+	set cpu ""
+	set hw ""
+	set model ""
+	foreach l [split [read $f] \n] {
+	    regexp -nocase {^model\s+name\s*:\s+(\S.*)$} $l skip cpu
+	    regexp -nocase {^model\s*:\s+([^\s\d].*)$} $l skip model
+	    regexp -nocase {^hardware\s*:\s+(\S.*)$} $l skip hw
+	}
+	close $f
+	if {"$hw$cpu" ne ""} {
+	    if {$hw eq ""} {
+		set name $cpu
+	    } elseif {$cpu eq ""} {
+		set name $hw
+	    } else {
+		set name "$cpu: $hw"
+	    }
+	    if {$model eq ""} {
+		puts $name
+	    } else {
+		puts "$name ($model)"
+	    }
+	    exit 0
+	}
+	if {$model ne ""} {
+	    puts $model
+	    exit 0
+	}
+    }
+}
+
 # some places don't have sbin in PATH but we may need things from there
 array set env [list PATH "$env(PATH):/sbin:/usr/sbin"]
 if {[llength $argv] == 0} {
-    if {$tcl_platform(os) eq "FreeBSD"} {
-	catch {
-	    set cpu [exec sysctl -n hw.model]
-	    puts [string trim $cpu]
-	    exit 0
+    switch $tcl_platform(os) {
+	Linux {
+	    try_cpuinfo "/proc/cpuinfo"
 	}
-    }
-    if {$tcl_platform(os) eq "NetBSD"} {
-	catch {
-	    set cpu [exec sysctl -n machdep.cpu_brand]
-	    puts [string trim $cpu]
-	    exit 0
+	FreeBSD {
+	    try_sysctl "hw.model"
+	    try_cpuinfo "/compat/linux/proc/cpuinfo"
 	}
-    }
-    # Linux has /proc/cpuinfo, NetBSD also has it if the kernel is
-    # built with option COMPAT_LINUX; FreeBSD may have it in
-    # /compat/linux - so if we got here without an answer, we
-    # try them both
-    catch {
-	set f ""
-	foreach ci [list "/proc/cpuinfo" "/compat/linux/proc/cpuinfo"] {
-	    catch {
-		set f [open $ci r]
-		break
-	    }
-	}
-	if {$f ne ""} {
-	    set cpu ""
-	    set hw ""
-	    set model ""
-	    foreach l [split [read $f] \n] {
-		regexp -nocase {^model\s+name\s*:\s+(\S.*)$} $l skip cpu
-		regexp -nocase {^model\s*:\s+([^\s\d].*)$} $l skip model
-		regexp -nocase {^hardware\s*:\s+(\S.*)$} $l skip hw
-	    }
-	    close $f
-	    if {"$hw$cpu" ne ""} {
-		if {$hw eq ""} {
-		    set name $cpu
-		} elseif {$cpu eq ""} {
-		    set name $hw
-		} else {
-		    set name "$cpu: $hw"
-		}
-		if {$model eq ""} {
-		    puts $name
-		} else {
-		    puts "$name ($model)"
-		}
-		exit 0
-	    }
-	    if {$model ne ""} {
-		puts $model
-		exit 0
-	    }
+	NetBSD {
+	    try_sysctl "machdep.cpu_brand"
+	    try_cpuinfo "/proc/cpuinfo"
 	}
     }
     # if we find out other ways to do this, we add them here
