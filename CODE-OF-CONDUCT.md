@@ -148,9 +148,11 @@ these guidelines.
 If you feel you have been unfairly accused of violating these guidelines,
 please follow the same reporting process.
 
+<hr>
+
 This document is (c) 2022 The LumoSQL Authors, under the [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/) license.
 
 *Heavily Adapted and Compressed from the surprisingly large version 3.1 of the 
 [Mozilla Participation Guidelines](https://www.mozilla.org/en-US/about/governance/policies/participation/)
-which Mozilla released under the Creative Commons Attribution-ShareAlike 4.0 International. We thank Mozilla for their work.
+which Mozilla released under the Creative Commons Attribution-ShareAlike 4.0 International. We thank Mozilla for their work.*
 
