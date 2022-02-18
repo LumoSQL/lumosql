@@ -203,10 +203,14 @@ proc try_cpuinfo {path} {
 	set cpu ""
 	set hw ""
 	set model ""
+	set vendor ""
+	set machine ""
 	foreach l [split [read $f] \n] {
 	    regexp -nocase {^model\s+name\s*:\s+(\S.*)$} $l skip cpu
 	    regexp -nocase {^model\s*:\s+([^\s\d].*)$} $l skip model
 	    regexp -nocase {^hardware\s*:\s+(\S.*)$} $l skip hw
+	    regexp -nocase {^vendor_id\s*:\s+(\S.*)$} $l skip vendor
+	    regexp -nocase {^machine\s*:\s+(\S.*)$} $l skip machine
 	}
 	close $f
 	if {"$hw$cpu" ne ""} {
@@ -226,6 +230,14 @@ proc try_cpuinfo {path} {
 	}
 	if {$model ne ""} {
 	    puts $model
+	    exit 0
+	}
+	if {$vendor ne ""} {
+	    if {$machine ne ""} {
+		puts "$vendor $machine"
+	    } else {
+		puts $vendor
+	    }
 	    exit 0
 	}
     }
