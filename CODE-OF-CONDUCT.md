@@ -1,7 +1,7 @@
-<!-- Copyright 2020 The LumoSQL Authors, see LICENSES/MIT -->
+<!-- Copyright 2022 The LumoSQL Authors, see LICENSES/MIT -->
 
-<!-- SPDX-License-Identifier: MIT -->
-<!-- SPDX-FileCopyrightText: 2020 The LumoSQL Authors -->
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: 2022 The LumoSQL Authors -->
 <!-- SPDX-ArtifactOfProjectName: LumoSQL -->
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Dan Shearer, December 2019 -->
@@ -13,7 +13,7 @@ Version 1.5 – Updated 18th February, 2022
 **This file exists because the LumoSQL Project needed it, less than one year
 after starting in 2019. We take it seriously. We take the view that this file is
 about mandating kindness. We are in a global pandemic when kindness is needed more
-than ever.
+than ever.**
 
 The LumoSQL Project welcomes contributions from anyone who shares
 [the LumoSQL Project Goals](https://lumosql.org/src/lumodoc/doc/trunk/doc/lumo-project-aims.md)
