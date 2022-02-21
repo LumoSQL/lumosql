@@ -522,7 +522,7 @@ proc versions_list {result backend names slist} {
 	} elseif {[string index $name end] eq "+"} {
 	    set all 1
 	    set minver [string range $name 0 end-1]
-	} elseif {[regexp {^(.*)-} $name skip ver]} {
+	} elseif {[regexp {^(.*)-$} $name skip ver]} {
 	    set all 1
 	    set maxver [string range $name 0 end-1]
 	}
@@ -965,10 +965,15 @@ while {[llength $build_todo] > 0} {
     set sqlite3_commit_timestamp ""
     if {$sqlite3_version ne ""} {
 	puts "    *** Getting sources: sqlite3 $sqlite3_version"
-	set pid [eval exec [notfork_command sqlite3 -o $sources -v $sqlite3_version] &]
+	if {[string range $sqlite3_version 0 6] eq "commit-"} {
+	    set vcopt "-c[string range $sqlite3_version 7 end]"
+	} else {
+	    set vcopt "-v$sqlite3_version"
+	}
+	set pid [eval exec [notfork_command sqlite3 -o $sources $vcopt] &]
 	set ws [wait $pid]
 	if {[lindex $ws 1] ne "EXIT"} { return -code error }
-	set sqlite3_info [eval exec [notfork_command sqlite3 -q -v $sqlite3_version]]
+	set sqlite3_info [eval exec [notfork_command sqlite3 -q $vcopt]]
 	regexp {***:(?n)^commit_id\s*=\s*(\S.*)$} $sqlite3_info skip sqlite3_commit_id
 	regexp {***:(?n)^commit_timestamp\s*=\s*(\S.*)$} $sqlite3_info skip sqlite3_commit_timestamp
     } else {
@@ -979,10 +984,15 @@ while {[llength $build_todo] > 0} {
     if {$backend_version ne ""} {
 	puts "    *** Getting sources: $backend_name $backend_version"
 	set backend_id "$backend_name $backend_version"
-	set pid [eval exec [notfork_command $backend_name -o $sources -v $backend_version] &]
+	if {[string range $backend_version 0 6] eq "commit-"} {
+	    set vcopt "-c[string range $backend_version 7 end]"
+	} else {
+	    set vcopt "-v$backend_version"
+	}
+	set pid [eval exec [notfork_command $backend_name -o $sources $vcopt] &]
 	set ws [wait $pid]
 	if {[lindex $ws 1] ne "EXIT"} { return -code error }
-	set backend_info [eval exec [notfork_command $backend_name -q -v $backend_version]]
+	set backend_info [eval exec [notfork_command $backend_name -q $vcopt]]
 	regexp {***:(?n)^commit_id\s*=\s*(\S.*)$} $backend_info skip backend_commit_id
 	regexp {***:(?n)^commit_timestamp\s*=\s*(\S.*)$} $backend_info skip backend_commit_timestamp
     } else {

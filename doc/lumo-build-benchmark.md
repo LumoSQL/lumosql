@@ -321,6 +321,9 @@ following:
 which follow it
 * `version-` (e.g. `3.17.0-`): the specified version and all the ones
 which precede it
+* commit-`id` (e.g. `commit-9c4e21abdca664d6b7bcf0043fe9ec05ef8b2949`):
+the specified commit ID according to the version control system, which
+does not need to be a formal release
 
 For example, the following sqlite version list:
 
