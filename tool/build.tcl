@@ -42,6 +42,11 @@
 # ARGUMENTS: BUILD_DIR BUILD_OPTIONS
 #            build LumoSQL, if necessary
 
+# OPERATION: cleanup
+# ARGUMENTS: BUILD_DIR BUILD_OPTIONS
+#            check cached builds, and deletes anything which is no longer
+#            up-to-date (would be rebuilt anyway)
+
 # OPERATION: benchmark
 # ARGUMENTS: BUILD_DIR DATABASE_NAME BUILD_OPTIONS
 #            run benchmarks (run all tests marked for benchmarking and save timings)
@@ -87,9 +92,9 @@ if {$operation eq "options"} {
     set argp 4
 } elseif {$operation eq "what" || $operation eq "targets"} {
     set argp 2
-} elseif {$operation eq "build"} {
+} elseif {$operation eq "build" || $operation eq "cleanup"} {
     if {[llength $argv] < 3} {
-	puts stderr "Usage: build.tcl build NOTFORK_CONFIG BUILD_DIR BUILD_OPTIONS..."
+	puts stderr "Usage: build.tcl $operation NOTFORK_CONFIG BUILD_DIR BUILD_OPTIONS..."
 	exit 1
     }
     set build_dir [lindex $argv 2]
@@ -556,6 +561,8 @@ proc versions_list {result backend names slist} {
     }
 }
 
+set build_dir [file normalize $build_dir]
+
 versions_list s3vers sqlite3 $other_values(SQLITE_VERSIONS) ""
 set sqlite3_for_db [lindex $s3vers 0]
 set target_string $other_values(TARGETS)
@@ -565,7 +572,7 @@ set build_option_list [list $default_options]
 set benchmark_to_build [list]
 set benchmark_option_list [list]
 if {$operation ne "database"} {
-    if {$target_string eq ""} {
+    if {$target_string eq "" && $operation ne "cleanup"} {
 	# generate a new list of benchmarks from all the other options
 	set benchmark_opts ""
 	set benchmark_plus ""
@@ -661,8 +668,18 @@ if {$operation ne "database"} {
 	    }
 	}
     } else {
-	# parse list of benchmarks
-	set target_list [split $target_string]
+	if {$operation eq "cleanup"} {
+	    # targets to check are existing builds
+	    set target_list [list]
+	    set build_list [list]
+	    foreach fn [glob -directory $build_dir -nocomplain *] {
+		lappend target_list [lindex [file split $fn] end]
+	    }
+	    if {[llength $target_list] == 0} { exit 0 }
+	} else {
+	    # parse list of benchmarks
+	    set target_list [split $target_string]
+	}
 	for {set tptr 0} {$tptr < [llength $target_list]} {incr tptr} {
 	    set benchmark [lindex $target_list $tptr]
 	    if {$benchmark eq ""} { continue }
@@ -785,8 +802,6 @@ proc write_data {dir name data} {
     close $fp
 }
 
-set build_dir [file normalize $build_dir]
-
 proc run_build {dir prog} {
     set fd [open $prog r]
     set data [read $fd]
@@ -858,6 +873,14 @@ for {set bnum 0} {$bnum < [llength $build_list]} {incr bnum} {
     lappend build_todo [lindex $build_list $bnum]
 }
 
+if {$operation eq "cleanup"} {
+    set skipping "Keeping"
+    set rebuilding "Cleaning up"
+} else {
+    set skipping "Skipping"
+    set rebuilding "Rebuilding"
+}
+
 set num_skipped 0
 while {[llength $build_todo] > 0} {
     set bnum [lindex $build_todo 0]
@@ -874,7 +897,7 @@ while {[llength $build_todo] > 0} {
 	if {[llength $build_todo] > $num_skipped} {
 	    puts "*** Skipping locked $build $bnum/$num_builds"
 	    close $lock_id
-	    if {! $other_values(DEBUG_BUILD)} {
+	    if {! $other_values(DEBUG_BUILD) && $operation ne "cleanup"} {
 		lappend build_todo $bnum
 		lappend build_todo $build
 		incr num_skipped
@@ -928,14 +951,25 @@ while {[llength $build_todo] > 0} {
 		    funlock $lock_id
 		    close $lock_id
 		    if {$other_values(DEBUG_BUILD)} {
-			puts "*** Skipping up-to-date $build $bnum/$num_builds"
+			puts "*** $skipping up-to-date $build $bnum/$num_builds"
 		    }
 		    continue
 		}
 	    }
 	}
 	if {! $other_values(DEBUG_BUILD)} { file delete -force $dest_dir }
-	puts "*** Rebuilding $build (sources changed) $bnum/$num_builds"
+	puts "*** $rebuilding $build (sources changed) $bnum/$num_builds"
+	if {$operation eq "cleanup"} {
+	    funlock $lock_id
+	    close $lock_id
+	    # we leave the lock file, it's zero-length and if we delete it now
+	    # there is a risk that another process is now waiting on the lock
+	    # to start a rebuild, it continues with a lock on a deleted file,
+	    # and then a third process creates a new lock file and starts the
+	    # same rebuild concurrently; there may be a clever way to delete
+	    # it without causing race condition but we don't know what that is
+	    continue
+	}
     } else {
 	puts "*** Building $build $bnum/$num_builds"
     }
@@ -1068,7 +1102,7 @@ while {[llength $build_todo] > 0} {
     close $lock_id
 }
 
-if {$operation eq "build"} { exit 0 }
+if {$operation eq "build" || $operation eq "cleanup"} { exit 0 }
 
 set sqlite3_for_db [file join $build_dir $sqlite3_for_db sqlite3]
 

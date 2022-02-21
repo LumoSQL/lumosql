@@ -56,6 +56,9 @@ TEST_DATABASE_NAME ?= tests.sqlite
 build: Makefile.options
 	$(TCL) tool/build.tcl build not-fork.d $(BUILD_DIR) $(BUILD_OPTIONS)
 
+cleanup: Makefile.options
+	$(TCL) tool/build.tcl cleanup not-fork.d $(BUILD_DIR) $(BUILD_OPTIONS)
+
 benchmark: Makefile.options $(DATABASE_NAME)
 	$(TCL) tool/build.tcl benchmark not-fork.d $(BUILD_DIR) $(DATABASE_NAME) $(BUILD_OPTIONS)
 

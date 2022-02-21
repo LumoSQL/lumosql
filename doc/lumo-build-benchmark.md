@@ -141,6 +141,11 @@ Executive summary:
 	# ARGUMENTS: BUILD_DIR BUILD_OPTIONS
 	#            build LumoSQL, if necessary
 
+	# OPERATION: cleanup
+	# ARGUMENTS: BUILD_DIR BUILD_OPTIONS
+	#            check cached builds, and deletes anything which is no longer
+	#            up-to-date (would be rebuilt anyway)
+
 	# OPERATION: benchmark
 	# ARGUMENTS: BUILD_DIR DATABASE_NAME BUILD_OPTIONS
 	#            run benchmarks (run all tests marked for benchmarking and save timings)
