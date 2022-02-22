@@ -1,7 +1,7 @@
 # automatically generated file for not-forking fragment_patch
 
 method = fragment_patch
-version >= 3.30
+version >= 3.35
 
 -----
 src/pragma.c
@@ -27,20 +27,20 @@ src/pragma.c
 +      /* set the algorithm */
 +      int i;
 +      /* if it's an alias, see what's the real algorithm */
-+      for (i = 0; i < LUMO_ROWSUM_N_ALIAS; i++) {
++      for (i = 0; i < lumo_rowsum_n_alias; i++) {
 +	if (strcmp(zRight, lumo_rowsum_alias[i].name) == 0) {
 +	  lumo_rowsum_algorithm = lumo_rowsum_alias[i].same_as;
 +	  /* if they disabled creation of rowsums, but the check is
 +	  ** set to "always" the next update will fail, so set it
 +	  ** to "yes" */
-+	  if (lumo_rowsum_algorithm >= LUMO_ROWSUM_N_ALGORITHMS &&
++	  if (lumo_rowsum_algorithm >= lumo_rowsum_n_algorithms &&
 +	      lumo_extension_check_rowsum > 1)
 +	    lumo_extension_check_rowsum = 1;
 +	  return SQLITE_OK;
 +	}
 +      }
 +      /* otherwise, see if it's an algorithm name */
-+      for (i = 0; i < LUMO_ROWSUM_N_ALGORITHMS; i++) {
++      for (i = 0; i < lumo_rowsum_n_algorithms; i++) {
 +	if (strcmp(zRight, lumo_rowsum_algorithms[i].name) == 0) {
 +	  lumo_rowsum_algorithm = i;
 +	  return SQLITE_OK;
@@ -52,7 +52,7 @@ src/pragma.c
 +    } else {
 +      /* get the name of the algorithm */
 +      const char * zAlg;
-+      if (lumo_rowsum_algorithm < LUMO_ROWSUM_N_ALGORITHMS) {
++      if (lumo_rowsum_algorithm < lumo_rowsum_n_algorithms) {
 +	*zResult = lumo_rowsum_algorithms[lumo_rowsum_algorithm].name;
 +      } else {
 +	*zResult = "none";
@@ -122,12 +122,13 @@ src/pragma.c
 src/vdbe.c
 start
 /(?^:^((?:static\s+)?(?:void|int)\s+\S+)\b)/
-@@ -21,6 +21,20 @@
+@@ -21,6 +21,21 @@
  #include "sqliteInt.h"
  #include "vdbeInt.h"
  
 +#ifdef LUMO_EXTENSIONS
 +#include "lumo-vdbeInt.h"
++#include "lumo-vdbeAdd.c"
 +
 +#ifdef LUMO_ROWSUM
 +/* default value when creating a new table */
@@ -156,7 +157,7 @@ start
  
    assert( pOp->p1>=0 && pOp->p1<p->nCursor );
    pC = p->apCsr[pOp->p1];
-@@ -62,6 +65,12 @@
+@@ -63,6 +66,12 @@
        if( pC->payloadSize > (u32)db->aLimit[SQLITE_LIMIT_LENGTH] ){
          goto too_big;
        }
@@ -169,7 +170,7 @@ start
      }
      pC->cacheStatus = p->cacheCtr;
      pC->iHdrOffset = getVarint32(pC->aRow, aOffset[0]);
-@@ -163,6 +172,99 @@
+@@ -164,6 +173,99 @@
          }
        }
  
@@ -208,7 +209,7 @@ start
 +#ifdef LUMO_ROWSUM
 +	      if (xtype == LUMO_ROWSUM_TYPE && lumo_extension_check_rowsum) {
 +		rowsum_found = 1;
-+		if (xsubtype < LUMO_ROWSUM_N_ALGORITHMS) {
++		if (xsubtype < lumo_rowsum_n_algorithms) {
 +		  if (xlen == lumo_rowsum_algorithms[xsubtype].length){
 +		    /* this looks like a rowsum, check the row against it */
 +		    if (xlen != 0) {
@@ -291,105 +292,78 @@ start
 ---
 /(?^:^\s*case\s+OP_(.*?[^:])\s*:)/ Insert
 /(?^:^\s*case\s+OP_(.*?[^:])\s*:)/
-@@ -6,6 +6,11 @@
+@@ -6,6 +6,9 @@
    const char *zDb;  /* database name - used by the update hook */
    Table *pTab;      /* Table structure - used by update and pre-update hooks */
    BtreePayload x;   /* Payload to be inserted */
 +#ifdef LUMO_EXTENSIONS
-+  int iLumoExt;     /* are we adding LumoSQL extensions? */
 +  unsigned char * zLumoExt = NULL; /* memory allocated to add the Lumo extensions */
-+  Mem pLumoExt;     /* MEM cell holding new Lumo data */
 +#endif
  
    pData = &aMem[pOp->p2];
    assert( pOp->p1>=0 && pOp->p1<p->nCursor );
-@@ -50,6 +55,77 @@
-   if( pOp->p5 & OPFLAG_ISNOOP ) break;
- #endif
- 
+@@ -62,10 +65,24 @@
+     x.nZero = 0;
+   }
+   x.pKey = 0;
 +#ifdef LUMO_EXTENSIONS
-+  /* see if we'll be adding any extensions */
-+  iLumoExt = 0;
-+#ifdef LUMO_ROWSUM
-+  if (lumo_rowsum_algorithm < LUMO_ROWSUM_N_ALGORITHMS) {
-+    int xLen;
-+    /* add space for the rowsum */
-+    xLen = lumo_rowsum_algorithms[lumo_rowsum_algorithm].length;
-+    iLumoExt += sqlite3VarintLen(LUMO_ROWSUM_TYPE);
-+    iLumoExt += sqlite3VarintLen(lumo_rowsum_algorithm);
-+    iLumoExt += sqlite3VarintLen(xLen);
-+    iLumoExt += xLen;
++  if (! (pOp->p5 & OPFLAG_PREFORMAT)) {
++    sqlite3_int64 nData;
++    rc = lumoExtensionAdd(db, 0, x.pData, x.nData, x.nZero, &zLumoExt, &nData);
++    if (rc) goto abort_due_to_error;
++    if (zLumoExt) {
++      x.pData = zLumoExt;
++      x.nData = nData;
++    }
 +  }
 +#endif
-+  if (iLumoExt > 0) {
-+    unsigned char * zHdr, * zNew;
-+    int oldHdr, oldLen, newHdr, newLen, serial_type;
-+    unsigned int nData, nSum;
-+    /* add space for the initial "Lumo" and the end type */
-+    iLumoExt += 4 + sqlite3VarintLen(LUMO_END_TYPE);
-+    serial_type = iLumoExt*2+12;
-+    zHdr = pData->z;
-+    oldLen = getVarint32(zHdr, oldHdr);
-+    newHdr = oldHdr + sqlite3VarintLen(serial_type);
-+    newLen = sqlite3VarintLen(newHdr);
-+    if (newLen > oldLen) {
-+      newHdr += newLen - oldLen;
-+      if (newLen < sqlite3VarintLen(newHdr)) newHdr++;
-+    }
-+    /* calculate new data payload size, and also what portion of the
-+    ** data we may use in rowsums */
-+    nSum = pData->n + newHdr - oldHdr;
-+    nData = nSum + iLumoExt;
-+    /* allocate some memory to write a new record */
-+    zNew = sqlite3DbMallocZero(db, nData);
-+    if (! zNew) goto no_mem;
-+    zLumoExt = zNew;
-+    /* now write the new header */
-+    zNew += putVarint32(zNew, newHdr);
-+    zHdr += oldLen;
-+    memcpy(zNew, zHdr, oldHdr - oldLen);
-+    zHdr += oldHdr - oldLen;
-+    zNew += oldHdr - oldLen;
-+    zNew += putVarint32(zNew, serial_type);
-+    /* and the new data */
-+    memcpy(zNew, zHdr, pData->n - oldHdr);
-+    zNew += pData->n - oldHdr;
-+    memcpy(zNew, LUMO_EXTENSION_MAGIC, 4);
-+    zNew += 4;
-+#ifdef LUMO_ROWSUM
-+    if (lumo_rowsum_algorithm < LUMO_ROWSUM_N_ALGORITHMS) {
-+      int iSumLen;
-+      iSumLen = lumo_rowsum_algorithms[lumo_rowsum_algorithm].length;
-+      zNew += putVarint32(zNew, LUMO_ROWSUM_TYPE);
-+      zNew += putVarint32(zNew, lumo_rowsum_algorithm);
-+      zNew += putVarint32(zNew, iSumLen);
-+      if (iSumLen > 0){
-+	lumo_rowsum_algorithms[lumo_rowsum_algorithm].generate(zNew, zLumoExt, nSum);
-+	zNew += iSumLen;
-+      }
-+    }
-+#endif
-+    zNew += putVarint32(zNew, LUMO_END_TYPE);
-+    /* make the rest of the opcode use the new record */
-+    pLumoExt = *pData;
-+    pLumoExt.n = nData;
-+    pLumoExt.z = zLumoExt;
-+    pData = &pLumoExt;
-+  }
-+#endif
-+
-   if( pOp->p5 & OPFLAG_NCHANGE ) p->nChange++;
-   if( pOp->p5 & OPFLAG_LASTROWID ) db->lastRowid = x.nKey;
-   assert( (pData->flags & (MEM_Blob|MEM_Str))!=0 || pData->n==0 );
-@@ -68,6 +144,9 @@
+   rc = sqlite3BtreeInsert(pC->uc.pCursor, &x,
+       (pOp->p5 & (OPFLAG_APPEND|OPFLAG_SAVEPOSITION|OPFLAG_PREFORMAT)), 
+       seekResult
    );
-   pC->deferredMoveto = 0;
-   pC->cacheStatus = CACHE_STALE;
 +#ifdef LUMO_EXTENSIONS
 +  if (zLumoExt) sqlite3DbFree(db, zLumoExt);
 +#endif
+   pC->deferredMoveto = 0;
+   pC->cacheStatus = CACHE_STALE;
  
-   /* Invoke the update-hook if required. */
-   if( rc ) goto abort_due_to_error;
+---
+/(?^:^\s*case\s+OP_(.*?[^:])\s*:)/ IdxInsert
+/(?^:^\s*case\s+OP_(.*?[^:])\s*:)/
+@@ -1,6 +1,10 @@
+ case OP_IdxInsert: {        /* in2 */
+   VdbeCursor *pC;
+   BtreePayload x;
++#ifdef LUMO_EXTENSIONS
++  unsigned char * zLumoExt = NULL; /* memory allocated to add the Lumo extensions */
++  sqlite3_int64 nData;
++#endif
+ 
+   assert( pOp->p1>=0 && pOp->p1<p->nCursor );
+   pC = p->apCsr[pOp->p1];
+@@ -18,10 +22,23 @@
+   x.pKey = pIn2->z;
+   x.aMem = aMem + pOp->p3;
+   x.nMem = (u16)pOp->p4.i;
++#if 0 /* this doesn't work yet */
++#ifdef LUMO_EXTENSIONS
++  rc = lumoExtensionAdd(db, 1, x.pKey, x.nKey, 0, &zLumoExt, &nData);
++  if (rc) goto abort_due_to_error;
++  if (zLumoExt) {
++    x.pKey = zLumoExt;
++    x.nKey = nData;
++  }
++#endif
++#endif
+   rc = sqlite3BtreeInsert(pC->uc.pCursor, &x,
+        (pOp->p5 & (OPFLAG_APPEND|OPFLAG_SAVEPOSITION|OPFLAG_PREFORMAT)), 
+       ((pOp->p5 & OPFLAG_USESEEKRESULT) ? pC->seekResult : 0)
+       );
++#ifdef LUMO_EXTENSIONS
++  if (zLumoExt) sqlite3DbFree(db, zLumoExt);
++#endif
+   assert( pC->deferredMoveto==0 );
+   pC->cacheStatus = CACHE_STALE;
+   if( rc) goto abort_due_to_error;
 ---
 -----

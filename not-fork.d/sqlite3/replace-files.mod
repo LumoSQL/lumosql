@@ -6,6 +6,7 @@ method = replace
 .lumosql/lumo.build                    =  files/lumo.build
 .lumosql/lumo-backend-defs.h           =  files/lumo-backend-defs.h
 src/lumo-sha3.c                        =  files/lumo-sha3.c
+src/lumo-vdbeAdd.c                     =  files/lumo-vdbeAdd.c
 src/lumo-vdbeInt.h                     =  files/lumo-vdbeInt.h
 src/blake3.h                           =  files/blake3/blake3.h
 src/blake3_impl.h                      =  files/blake3/blake3_impl.h
