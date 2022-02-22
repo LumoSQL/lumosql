@@ -294,6 +294,7 @@ array set other_values [list \
 	DB_DIR           "" \
 	DEBUG_BUILD      0 \
 	DISK_COMMENT     "" \
+	KEEP_SOURCES     0 \
 	MAKE_COMMAND     "make" \
 	NOTFORK_COMMAND  "not-fork" \
 	NOTFORK_ONLINE   0 \
@@ -561,10 +562,12 @@ proc versions_list {result backend names slist} {
     }
 }
 
-set build_dir [file normalize $build_dir]
+if {$operation ne "what"} {
+    set build_dir [file normalize $build_dir]
+}
 
-versions_list s3vers sqlite3 $other_values(SQLITE_VERSIONS) ""
-set sqlite3_for_db [lindex $s3vers 0]
+versions_list sqlite3_for_db sqlite3 latest ""
+set sqlite3_for_db [lindex $sqlite3_for_db 0]
 set target_string $other_values(TARGETS)
 set benchmark_list [list]
 set build_list [list $sqlite3_for_db]
@@ -643,6 +646,12 @@ if {$operation ne "database"} {
 		    lappend build_list $b
 		    lappend build_option_list $build_ol
 		}
+	    }
+	}
+	if {$other_values(USE_SQLITE) eq "yes"} {
+	    versions_list svers sqlite3 $other_values(SQLITE_VERSIONS) ""
+	    foreach sv $svers {
+		add_target_no $sv 1
 	    }
 	}
 	foreach {backend spec} $backends {
@@ -1094,7 +1103,7 @@ while {[llength $build_todo] > 0} {
     puts $fd "exec gdb '$libs/sqlite3' \"\$@\""
     close $fd
     catch { chmod a+rx $exe }
-    file delete -force $sources
+    if {! $other_values(KEEP_SOURCES)} { file delete -force $sources }
     set td [open $ts_file w]
     puts $td $build_time
     close $td
