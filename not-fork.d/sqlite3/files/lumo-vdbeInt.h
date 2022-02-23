@@ -52,5 +52,13 @@ void lumoExtension(int, const unsigned char *, unsigned int, unsigned int,
 int lumoExtensionAdd(sqlite3 *, int, const unsigned char *, sqlite3_int64,
 		     sqlite3_int64, unsigned char **, sqlite3_int64 *);
 
+/* see if a Lumo column is present */
+int lumoExtensionPresent(int, u32, u32, u64, u32, const unsigned char *,
+			 u32, u64, u64 *, u64 *);
+
+/* handle data in a Lumo column, if it is really a Lumo column; return 0
+** if not handled (not a Lumo column), 1 if OK, -1 if error */
+int lumoExtensionHandle(int, const unsigned char *, u64, u64, VdbeCursor *);
+
 #endif /* _LUMO_VDBEINT_ */
 #endif /* LUMO_EXTENSIONS */

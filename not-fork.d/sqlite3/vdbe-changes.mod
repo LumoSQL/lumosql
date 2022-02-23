@@ -5,6 +5,20 @@ version >= 3.35
 
 -----
 src/pragma.c
+start
+/(?^:^((?:static\s+)?(?:void|int)\s+\S+)\b)/
+@@ -13,6 +13,10 @@
+ */
+ #include "sqliteInt.h"
+ 
++#ifdef LUMO_EXTENSIONS
++#include "lumo-vdbeInt.h"
++#endif
++
+ #if !defined(SQLITE_ENABLE_LOCKING_STYLE)
+ #  if defined(__APPLE__)
+ #    define SQLITE_ENABLE_LOCKING_STYLE 1
+---
 /(?^:^((?:static\s+)?(?:void|int)\s+\S+)\b)/ static\x20int\x20integrityCheckResultRow(Vdbe
 /(?^:^\*\*\s+(Process\s+a\s+pragma\b))/
 @@ -7,4 +7,74 @@
@@ -152,136 +166,73 @@ start
    u32 t;             /* A type code from the record header */
    Mem *pReg;         /* PseudoTable input register */
 +#ifdef LUMO_EXTENSIONS
-+  int iLumoExt = 0;  /* are we looking for a LumoSQL extension? */
++  int check_lumo;    /* will we be checking for Lumo data? */
 +#endif
  
    assert( pOp->p1>=0 && pOp->p1<p->nCursor );
    pC = p->apCsr[pOp->p1];
-@@ -63,6 +66,12 @@
-       if( pC->payloadSize > (u32)db->aLimit[SQLITE_LIMIT_LENGTH] ){
-         goto too_big;
-       }
-+#ifdef LUMO_EXTENSIONS
-+      /* see if there's a Lumo extension column at the end */
-+      if (pC->isTable) {
-+	iLumoExt = 1;
-+      }
-+#endif
-     }
-     pC->cacheStatus = p->cacheCtr;
-     pC->iHdrOffset = getVarint32(pC->aRow, aOffset[0]);
-@@ -164,6 +173,99 @@
-         }
-       }
+@@ -36,6 +39,10 @@
+   assert( pC->eCurType!=CURTYPE_PSEUDO || pC->nullRow );
+   assert( pC->eCurType!=CURTYPE_SORTER );
  
 +#ifdef LUMO_EXTENSIONS
-+      if (iLumoExt){
-+	/* see if the last column is a LumoSQL extension */
-+	const unsigned char * zH = zHdr;
-+	u64 lumoOffset = aOffset[i], nextOffset = aOffset[i];
-+	int lumoType = pC->aType[i];
-+#ifdef LUMO_ROWSUM
-+	int rowsum_found = 0;
-+#endif
-+	while (zH < zEndHdr) {
-+	  lumoOffset = nextOffset;
-+	  zH += getVarint32(zH, lumoType);
-+	  nextOffset += sqlite3VdbeSerialTypeLen(lumoType);
-+	}
-+	/* there was an extra hidden column, we need to check if it's
-+	** ours and process it if so; in any case we then need to repeat
-+	** the opcode to get the correct column; our column must be at
-+	** least 8 bytes to be useful so we check that t >= 12+8*2 or 28 */
-+	if (lumoType>=28 && (lumoType%2)==0){
-+	  zH = zData + lumoOffset;
-+	  if (memcmp(zH, LUMO_EXTENSION_MAGIC, 4)==0){
-+	    const unsigned char * zEnd = zH + (lumoType/2);
-+	    zH += 4;
-+	    while (zH < zEnd) {
-+	      unsigned int xtype, xsubtype, xlen;
-+	      zH += getVarint32(zH, xtype);
-+	      if (xtype == LUMO_END_TYPE) break;
-+	      if (zH >= zEnd) goto op_column_corrupt;
-+	      zH += getVarint32(zH, xsubtype);
-+	      if (zH >= zEnd) goto op_column_corrupt;
-+	      zH += getVarint32(zH, xlen);
-+	      if (&zH[xlen] > zEnd) goto op_column_corrupt;
-+#ifdef LUMO_ROWSUM
-+	      if (xtype == LUMO_ROWSUM_TYPE && lumo_extension_check_rowsum) {
-+		rowsum_found = 1;
-+		if (xsubtype < lumo_rowsum_n_algorithms) {
-+		  if (xlen == lumo_rowsum_algorithms[xsubtype].length){
-+		    /* this looks like a rowsum, check the row against it */
-+		    if (xlen != 0) {
-+		      unsigned char rowsum[xlen];
-+		      if( pC->szRow>=lumoOffset ){
-+			/* the whole row fits in the page, so that's the easy case */
-+			lumo_rowsum_algorithms[xsubtype].generate(rowsum, pC->aRow, lumoOffset);
-+		      } else {
-+			/* checksum the part of the row which does fit then do the rest */
-+			char ctx[lumo_rowsum_algorithms[xsubtype].mem];
-+			Mem cdata;
-+			int left = lumoOffset - pC->szRow;
-+			lumo_rowsum_algorithms[xsubtype].init(ctx);
-+			lumo_rowsum_algorithms[xsubtype].update(ctx, pC->aRow, pC->szRow);
-+			memset(&cdata, 0, sizeof(cdata));
-+			cdata.szMalloc = 0;
-+			cdata.flags = MEM_Null;
-+			if( sqlite3VdbeMemGrow(&cdata, left, 0) ) goto no_mem;
-+			rc = sqlite3VdbeMemFromBtree(pC->uc.pCursor, pC->szRow, left, &cdata);
-+			if( rc!=SQLITE_OK ) {
-+			  sqlite3VdbeMemRelease(&cdata);
-+			  goto abort_due_to_error;
-+			}
-+			lumo_rowsum_algorithms[xsubtype].update(ctx, cdata.z, left);
-+			sqlite3VdbeMemRelease(&cdata);
-+			lumo_rowsum_algorithms[xsubtype].final(ctx, rowsum);
-+		      }
-+		      /* we calculated a rowsum for this row, does it match the one
-+		      ** stored in the database? */
-+		      if (memcmp(rowsum, zH, xlen) != 0)
-+			goto op_column_corrupt;
-+		    }
-+		  } else {
-+		    /* we know this algorithm, and the length of the stored rowsum
-+		    ** differs from the expected; this won't do */
-+		  goto op_column_corrupt;
-+		  }
-+		} else {
-+		  /* we don't know this algorithm; we ignore this rowsum, but
-+		  ** FIXME we may decide that it's an error if "need_rowsum"
-+		  ** is set; or we may move the "rowsum_found = 1" inside the
-+		  ** "true" branch of the if, in case there's more than one
-+		  ** rowsum and then it'll be OK as long as we know at least
-+		  ** one of the algorithms */
-+		}
-+	      }
-+#endif
-+	      zH += xlen;
-+	    }
-+	  }
-+	}
-+#ifdef LUMO_ROWSUM
-+	if (lumo_extension_check_rowsum > 1 && !rowsum_found) goto op_column_corrupt;
-+#endif
-+      }
++  check_lumo = 0;
 +#endif
 +
-       pC->nHdrParsed = i;
-       pC->iHdrOffset = (u32)(zHdr - zData);
-       if( pC->aRow==0 ) sqlite3VdbeMemRelease(&sMem);
+   if( pC->cacheStatus!=p->cacheCtr ){                /*OPTIMIZATION-IF-FALSE*/
+     if( pC->nullRow ){
+       if( pC->eCurType==CURTYPE_PSEUDO ){
+@@ -68,6 +75,9 @@
+     pC->iHdrOffset = getVarint32(pC->aRow, aOffset[0]);
+     pC->nHdrParsed = 0;
+ 
++#ifdef LUMO_EXTENSIONS
++    check_lumo = 1;
++#endif
+ 
+     if( pC->szRow<aOffset[0] ){      /*OPTIMIZATION-IF-FALSE*/
+       /* pC->aRow does not have to hold the entire row, but it does at least
+@@ -183,6 +193,26 @@
+       }
+       goto op_column_out;
+     }
++#ifdef LUMO_EXTENSIONS
++    if (check_lumo) {
++      u64 nStart, nLen;
++      int ok = 0;
++      /* see if a Lumo column is present */
++      if (lumoExtensionPresent(!pC->isTable, (u32)pC->nHdrParsed, (u32)pC->iHdrOffset,
++			       (u64)aOffset[pC->nHdrParsed], (u32)pC->nField, zData,
++			       (u32)aOffset[0], (u64)pC->payloadSize, &nStart, &nLen)) {
++	/* a Lumo column is present at nStart for a length of nLen */
++	const unsigned char *zRow;
++	zRow = &zData[nStart]; // XXX make sure we have the data in memory and have zRow point at it
++	ok = lumoExtensionHandle(!pC->isTable, zRow, nStart, nLen, pC);
++	if (ok < 0) goto op_column_corrupt;
++      }
++      if (!ok) {
++	// XXX handle case of missing Lumo column, if important
++      }
++    }
++#endif
++
+   }else{
+     t = pC->aType[p2];
+   }
 ---
 /(?^:^\s*case\s+OP_(.*?[^:])\s*:)/ MakeRecord
 /(?^:^\s*case\s+OP_(.*?[^:])\s*:)/
-@@ -64,6 +64,7 @@
+@@ -64,6 +64,9 @@
      }while( zAffinity[0] );
    }
  
 +#ifndef LUMO_EXTENSIONS
++  /* we cannot trim NULLs otherwise OP_Column will find our extra
++  ** columns where it would have found a NULL... */
  #ifdef SQLITE_ENABLE_NULL_TRIM
    /* NULLs can be safely trimmed from the end of the record, as long as
    ** as the schema format is 2 or more and none of the omitted columns
-@@ -77,6 +78,7 @@
+@@ -77,6 +80,7 @@
      }
    }
  #endif
@@ -307,7 +258,7 @@ start
    }
    x.pKey = 0;
 +#ifdef LUMO_EXTENSIONS
-+  if (! (pOp->p5 & OPFLAG_PREFORMAT)) {
++  if (! (pOp->p5 & OPFLAG_PREFORMAT) && ! pC->isEphemeral) {
 +    sqlite3_int64 nData;
 +    rc = lumoExtensionAdd(db, 0, x.pData, x.nData, x.nZero, &zLumoExt, &nData);
 +    if (rc) goto abort_due_to_error;
@@ -341,11 +292,10 @@ start
  
    assert( pOp->p1>=0 && pOp->p1<p->nCursor );
    pC = p->apCsr[pOp->p1];
-@@ -18,10 +22,23 @@
+@@ -18,10 +22,21 @@
    x.pKey = pIn2->z;
    x.aMem = aMem + pOp->p3;
    x.nMem = (u16)pOp->p4.i;
-+#if 0 /* this doesn't work yet */
 +#ifdef LUMO_EXTENSIONS
 +  rc = lumoExtensionAdd(db, 1, x.pKey, x.nKey, 0, &zLumoExt, &nData);
 +  if (rc) goto abort_due_to_error;
@@ -353,7 +303,6 @@ start
 +    x.pKey = zLumoExt;
 +    x.nKey = nData;
 +  }
-+#endif
 +#endif
    rc = sqlite3BtreeInsert(pC->uc.pCursor, &x,
         (pOp->p5 & (OPFLAG_APPEND|OPFLAG_SAVEPOSITION|OPFLAG_PREFORMAT)), 
