@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# add missing disk/cpu comments to older benchmark databases
+
+# Copyright 2022 The LumoSQL Authors
+#
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2020 The LumoSQL Authors
+
+# Usage: add-missing-comments cpu|disk 'COMMENT' DATABASE [DATABASE]...
+
+if [ $# -lt 3 ]
+then
+    echo "Usage: $(basename "$0") benchmark-filter.tcl 'CPU COMMENT' 'DISK COMMENT' DB [DB]..." >&2
+    exit 1
+fi
+
+bf=( "$1" ); shift
+cpu="$1"; shift
+disk="$1"; shift
+
+if [ ".$cpu$disk" = . ]
+then
+    echo "Please specify at least one comment" >&2
+    exit 1
+fi
+
+[ ".$cpu" = . ] || bf+=( -add "cpu-comment=$cpu" )
+[ ".$disk" = . ] || bf+=( -add "disk-comment=$disk" )
+
+for name
+do
+    copy="zZ${name%.*}.without-disk-cpu"
+    echo "$name"
+    cp -i "$name" "$copy" || exit 1
+    tclsh "${bf[@]}" -limit 0 -db "$name" || exit 1
+done
+
