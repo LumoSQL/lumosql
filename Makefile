@@ -29,6 +29,8 @@ TCL := tclsh8.7
 else
 ifneq ($(shell which tclsh8.6),)
 TCL := tclsh8.6
+else
+$(error Could not find tclsh)
 endif
 endif
 endif
