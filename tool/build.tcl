@@ -562,7 +562,7 @@ proc versions_list {result backend names slist} {
     }
 }
 
-if {$operation ne "what"} {
+if {$operation ne "what" && $operation ne "targets"} {
     set build_dir [file normalize $build_dir]
 }
 
