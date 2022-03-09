@@ -30,13 +30,14 @@ mathematical heavy lifting for the concept of securely updating binary blobs.
 
 # Lumion RFC Specification
 
-This directory contains the Lumion specification. We are maintaining it using
+This directory contains the early Lumion specification. We are maintaining it using
 IETF tools for RFC generation because we think it should become an RFC.  This
 RFC draft is the only specification for Lumions, and is the reference for
 LumoSQL and other software we write that handle Lumions in various ways.
 
 The draft RFC [draft-shearer-desmet-calvelli-lumionsrfc-00.txt](draft-shearer-desmet-calvelli-lumionsrfc-00.txt) is 
-taking shape.
+taking shape. We have many references to add and other knowledge we have gained
+through implementation. This is going to be a long journey but we have started.
 
 We maintain the text in the markdown file
 [draft-shearer-desmet-calvelli-lumionsrfc-00.md](draft-shearer-desmet-calvelli-lumionsrfc-00.md),
