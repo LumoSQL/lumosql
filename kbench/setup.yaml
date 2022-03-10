@@ -118,6 +118,9 @@ spec:
     metadata:
       labels:
         app: lumosql-swq
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
     spec:
       containers:
       - name: svc
@@ -190,6 +193,10 @@ spec:
         image: rubdos/lumosql-bench-svc
         imagePullPolicy: Always
         env:
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
         - name: DB_DIR
           value: /mnt/benchmarks
         - name: SWQ_TOKEN
@@ -202,7 +209,7 @@ spec:
         lifecycle:
           preStop:
             exec:
-              command: ["/usr/bin/kill", "-SIGINT", "1"]
+              command: ["/usr/bin/kill", "-SIGUSR1", "1"]
         volumeMounts:
         - mountPath: /mnt/results
           name: results

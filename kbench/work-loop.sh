@@ -7,13 +7,14 @@ function resubmit() {
     if [ -e "Makefile.local" ]; then
         echo "Ayy matey, I was still working.  I'll resubmit my job ($JOB) to the server!"
         curl -vLJO -X PUT -H "Authorization: Bearer $SWQ_TOKEN" lumosql.opencloudedge.be/job/$JOB --data-binary @/lumosql/Makefile.local
+        mv $DATABASE_NAME $DATABASE_NAME
     else
         echo "I wasn't working anymore, quitting clean"
     fi
     exit
 }
 
-trap resubmit SIGINT SIGTERM
+trap resubmit SIGUSR1
 
 while true; do
     # Get new work
@@ -37,6 +38,8 @@ while true; do
         fi
     done
     popd
+    # Update repo
+    fossil update
     # Move work to new place
     mv fetch-work/* Makefile.local
     rm -rf fetch-work

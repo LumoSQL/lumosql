@@ -1,7 +1,8 @@
 FROM fedora:latest
 
 RUN dnf install -y \
-        git make gcc ncurses-devel readline-devel glibc-devel autoconf tcl-devel tclx-devel openssl-devel fossil wget perl-ExtUtils-MakeMaker perl-Digest-SHA perl-FindBin perl-Text-Glob patch lsscsi
+        git make gcc ncurses-devel readline-devel glibc-devel autoconf tcl-devel tclx-devel openssl-devel fossil wget perl-ExtUtils-MakeMaker perl-Digest-SHA perl-FindBin perl-Text-Glob patch lsscsi \
+        diffutils which hostname
 
 RUN wget -O- https://lumosql.org/src/not-forking/tarball/trunk/Not-forking-trunk.tar.gz | tar -zxf - && \
         cd Not-forking-trunk && \
