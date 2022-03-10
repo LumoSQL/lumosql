@@ -7,7 +7,7 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2020 The LumoSQL Authors
 
-# Usage: add-missing-comments cpu|disk 'COMMENT' DATABASE [DATABASE]...
+# Usage: add-missing-comments 'CPU COMMENT' 'DISK COMMENT' DATABASE [DATABASE]...
 
 if [ $# -lt 3 ]
 then

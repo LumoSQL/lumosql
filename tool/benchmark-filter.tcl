@@ -1379,6 +1379,8 @@ if {[llength $out_add] > 0} {
 	set run_id [lindex $runlist $i]
 	for {set j 0} {$j < [llength $out_add]} {incr j} {
 	    regexp {^([-\w]+)=(.*)$} [lindex $out_add $j] -> opt val
+	    puts $sql "delete from run_data where"
+	    puts $sql "run_id = '$run_id' and key = '$opt' and value = '';"
 	    puts $sql "insert into run_data (run_id, key, value)"
 	    puts $sql "values ('$run_id', '$opt', '$val');"
 	}
