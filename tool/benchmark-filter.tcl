@@ -1280,7 +1280,6 @@ if {$out_summary} {
 			puts [format "       %9s: %s" $key $value]
 		    }
 		}
-		incr tc
 	    }
 	} else {
 	    set ttimes [get_test_key $run_id "real-time"]
