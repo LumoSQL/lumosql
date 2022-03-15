@@ -1,0 +1,20 @@
+# "discard_output" runtime option
+
+# this option controls whether the benchmark discards the output from
+# sqlite (default no for compatibility with benchmarks ran before
+# the option was added).
+
+# some tests (as opposed to benchmarks) can't work with this set to "yes",
+# because they need to check that the output is as expected; however for
+# large datasizes the output may become bigger than what TCL can store
+# so these can only run with this option enabled
+
+# this option does not affect the build process
+build = no
+
+# a boolean
+boolean
+
+# default value if not specified
+default = off
+

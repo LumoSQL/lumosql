@@ -1494,7 +1494,11 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 		set oct [times]
 		set owt [clock microseconds]
 		if {[catch {
-		    set output [exec $sqlite3_to_test $temp_db_name < $temp_sql_file]
+		    if {$benchmark_options(DISCARD_OUTPUT) eq "off"} {
+			set output [exec $sqlite3_to_test $temp_db_name < $temp_sql_file]
+		    } else {
+			exec $sqlite3_to_test $temp_db_name < $temp_sql_file > /dev/null
+		    }
 		} res opt]} {
 		    set nwt [clock microseconds]
 		    set nct [times]
@@ -1511,7 +1515,7 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 		    set nwt [clock microseconds]
 		    set nct [times]
 		    set status "OK"
-		    if {[llength $results] > 0} {
+		    if {$benchmark_options(DISCARD_OUTPUT) eq "off" && [llength $results] > 0} {
 			set ol [split $output \n]
 			if {[llength $results] > [llength $ol]} {
 			    set status "NRESULTS"
@@ -1544,6 +1548,11 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 		    "system-cpu-time"  $st \
 		    "status"           $status \
 		]
+		if {$benchmark_options(DISCARD_OUTPUT) eq "off"} {
+		    update_test $run_id $test_number [list \
+			"output-size"      [string length $output] \
+		    ]
+		}
 		set total_time [expr $total_time + $wt]
 		puts [format "%s%8s %9.3f %3d %s" $space $status $wt $test_number $test_name]
 	    }
