@@ -413,6 +413,10 @@ normally used to make the output narrower when using `-column` `test`
 * `-ignore-numbers` - replace all numbers in test names with "#"; this
 allows the `-summary` and `-quick` output to compare tests which differ
 only by numbers, for example because they have different data sizes.
+* `-normalise` - replaces timings in list, summary and details outputs with a normalised
+number calculated as 1000 multiplied by the test time and divided by the total run
+time for all tests; this could be used to compare results obtained from similar systems 
+but which differ in the base speed by eliminating the variation due to the speed
 * `-export` `FILE`  - write the selected runs to `FILE` in a text format, useful for example to send the run information by email
 * `-copy` `DATABASE`  - copies all information about the selected runs to `DATABASE`;
 if the database already exists, it must have the same schema and must not already
@@ -461,6 +465,9 @@ however future versions of LumoSQL may define more tests
 
 * `-add` `NAME=VALUE` - adds some run information, for example to find older benchmark results which did not include the default value for `datasize` and to update them to have it, one could specify: "`-missing datasize -add option-datasize=1`"
 * `-delete` - delete the selected runs from the database; it is recommended to run the tool with `-list` instead of `-delete` first, and/or make a copy of the database before running `-delete`
+* `-delete-from` `DB` - delete the selected runs from `DB`, as opposed to the database used to extract the data from;
+for example, if runs were added using `-copy` `DB`, then running the same filter with `-delete-from` `DB` will
+delete the runs again
 
 ## checking test results
 
