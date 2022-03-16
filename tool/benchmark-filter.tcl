@@ -31,7 +31,7 @@ set out_add [list]
 set out_export [list]
 set out_copy ""
 set out_stats 0
-set out_delete 0
+set out_delete [list]
 set out_default 1
 set out_column 0
 set ignore_numbers 0
@@ -251,7 +251,11 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
 	lappend out_add $o
 	set out_default 0
     } elseif {$o eq "-delete"} {
-	set out_delete 1
+	lappend out_delete ""
+	set out_default 0
+    } elseif {$o eq "-delete-from"} {
+	optarg {^.} "database to delete runs from"
+	lappend out_delete $o
 	set out_default 0
     } elseif {$o eq "-stats"} {
 	set out_stats 1
@@ -1470,8 +1474,23 @@ if {$out_copy ne ""} {
     file delete $sql_file
 }
 
-if {$out_delete} {
-    # TODO delete these runs from both tables
+if {[llength $out_delete] > 0} {
+    # delete these runs from both tables
+    set sql [file tempfile sql_file]
+    puts $sql "BEGIN;"
+    for {set i 0} {$i < [llength $runlist]} {incr i} {
+	set run_id [lindex $runlist $i]
+	puts $sql "DELETE FROM run_data WHERE run_id='$run_id';"
+	puts $sql "DELETE FROM test_data WHERE run_id='$run_id';"
+    }
+    puts $sql "COMMIT;"
+    flush $sql
+    foreach deldb $out_delete {
+	if {$deldb eq ""} { set deldb $database }
+	exec $sqlite3 $deldb < $sql_file
+    }
+    close $sql
+    file delete $sql_file
 }
 
 # TODO -stats                    summary statistics on all tests
