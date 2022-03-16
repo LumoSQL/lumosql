@@ -38,6 +38,7 @@ set ignore_numbers 0
 
 set limit 20
 set average 0
+set normalise 0
 
 set only_failed 0
 set only_interrupted 0
@@ -107,6 +108,7 @@ proc display_help {} {
 	puts stderr "     -sqlite            path to a valid SQLite3 binary              ~/tmp/path/to/sqlite3         "
 	puts stderr "     -limit             maximum number of SQL rows to return        50                            "
 	puts stderr "     -average           average across all runs, per dimension      NOT IMPLEMENTED YET           "
+	puts stderr "     -normalise         normalise test times against total run time                               "
 	puts stderr "     -list              select list output (default if no filters selected)                       "
 	puts stderr "     -fields            list of fields to return with -list         ARCH,OS,TARGET,DURATION       "
 	puts stderr "     -quick             show sqlite+backend name as column headers for timings                    "
@@ -150,6 +152,8 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
 	set limit $o
     } elseif {$o eq "-average"} {
 	set average 1
+    } elseif {$o eq "-normalise" || $o eq "-normalize"} {
+	set normalise 1
     } elseif {$o eq "-list"} {
 	set out_list 1
 	set out_default 0
@@ -1055,6 +1059,7 @@ if {$out_column && $out_summary && $out_summary < 3} {
 	set run_id [lindex $runlist $i]
 	set ttimes [get_test_key $run_id "real-time"]
 	set tstatus [get_test_key $run_id "status"]
+	set tduration [dict get [dict get $rundict $run_id] "duration"]
 	for {set t 0} {$t < [llength $tnames]} {incr t} {
 	    if {[llength $list_tests] > 0 && ! [lindex $show_tests $t]} {
 		continue;
@@ -1062,14 +1067,18 @@ if {$out_column && $out_summary && $out_summary < 3} {
 	    set d [lindex $ttimes $t]
 	    set s [lindex $tstatus $t]
 	    if {$s eq "OK" || $s eq ""} {
-		set s [format "%.3f" $d]
+		if {$normalise} {
+		    set s [format "%.1f" [expr {$d * 1000.0 / $tduration}]]
+		} else {
+		    set s [format "%.3f" $d]
+		}
 	    }
 	    if {[string length $s] > [lindex $maxlen $t]} {
 		lset maxlen $t [string length $s]
 	    }
 	}
 	set t [llength $tnames]
-	set s [format "%.3f" [dict get [dict get $rundict $run_id] "duration"]]
+	set s [format "%.3f" $tduration]
 	if {[string length $s] > [lindex $maxlen $t]} {
 	    lset maxlen $t [string length $s]
 	}
@@ -1080,8 +1089,13 @@ if {$out_column && $out_summary && $out_summary < 3} {
     set tfmt [list]
     set efmt [list]
     set header ""
+    if {$normalise} {
+	set dfmt "1f"
+    } else {
+	set dfmt "3f"
+    }
     for {set t 0; set c 1} {$t < [llength $tnames]} {incr t; incr c} {
-	lappend tfmt "%[lindex $maxlen $t].3f "
+	lappend tfmt "%[lindex $maxlen $t].$dfmt "
 	lappend efmt "%[lindex $maxlen $t]s "
 	if {[llength $list_tests] > 0 && ! [lindex $show_tests $t]} {
 	    continue;
@@ -1091,7 +1105,7 @@ if {$out_column && $out_summary && $out_summary < 3} {
 	    puts "Column $c: [lindex $tnames $t]"
 	}
     }
-    if {$has_totals} {
+    if {$has_totals && ! $normalise} {
 	puts "Column T: Total run duration"
 	append header [format "%[lindex $maxlen end]s " "T"]
 	set fmt_totals "%[lindex $maxlen end].3f "
@@ -1103,6 +1117,7 @@ if {$out_column && $out_summary && $out_summary < 3} {
 	set d [dict get $rundict $run_id]
 	set ttimes [get_test_key $run_id "real-time"]
 	set tstatus [get_test_key $run_id "status"]
+	set tduration [dict get $d "duration"]
 	set line ""
 	for {set t 0} {$t < [llength $tnames]} {incr t} {
 	    if {[llength $list_tests] > 0 && ! [lindex $show_tests $t]} {
@@ -1111,13 +1126,17 @@ if {$out_column && $out_summary && $out_summary < 3} {
 	    set n [lindex $ttimes $t]
 	    set s [lindex $tstatus $t]
 	    if {$s eq "OK" || $s eq ""} {
-		append line [format [lindex $tfmt $t] $n]
+		if {$normalise} {
+		    append line [format [lindex $tfmt $t] [expr {$n * 1000.0 / $tduration}]]
+		} else {
+		    append line [format [lindex $tfmt $t] $n]
+		}
 	    } else {
 		append line [format [lindex $efmt $t] $s]
 	    }
 	}
-	if {$has_totals} {
-	    append line [format $fmt_totals [dict get $d "duration"]]
+	if {$has_totals && ! $normalise} {
+	    append line [format $fmt_totals $tduration]
 	}
 	puts "$line[dict get $d {target}]"
     }
@@ -1182,7 +1201,8 @@ if {$out_summary} {
 	    }
 	    puts "$xspace          ([dict get $d "sqlite-name"])"
 	    puts "$xspace   Ran at: [clock format [dict get $d "when-run"] -format "%Y-%m-%d %H:%M:%S"]"
-	    puts [format "$xspace Duration: %.3f" [dict get $d "duration"]]
+	    set tduration [dict get $d "duration"]
+	    puts [format "$xspace Duration: %.3f" $tduration]
 	    if {[dict exists $d "disk-read-time"] || [dict exists $d "disk-write-time"]} {
 		set dt ""
 		set sp ""
@@ -1265,7 +1285,13 @@ if {$out_summary} {
 		    if {$sc ne ""} { set sc [format " + system %.3f" $sc] }
 		    append cpu [format " (user %.3f%s)" $uc $sc]
 		}
-		puts [format "        Duration: %.3f%s" [find $tdata "real-time"] $cpu]
+		set rtime [find $tdata "real-time"]
+		if {$normalise} {
+		    set ntime [format " (%.1f)" [expr {$rtime * 1000.0 / $tduration}]]
+		} else {
+		    set ntime ""
+		}
+		puts [format "        Duration: %.3f%s%s" $rtime $ntime $cpu]
 		for {set t 0} {$t < [llength $tdata]} {incr t} {
 		    set rp [lindex $tdata $t];
 		    set key [lindex $rp 0];
@@ -1310,14 +1336,18 @@ if {$out_summary} {
 		set d [lindex [lindex $times $i] $t]
 		set s [lindex [lindex $status $i] $t]
 		if {$s eq "OK" || $s eq ""} {
-		    append r [format "%11.3f " $d]
+		    if {$normalise} {
+			append r [format "%11.1f " [expr {$d * 1000.0 / $tduration}]]
+		    } else {
+			append r [format "%11.3f " $d]
+		    }
 		} else {
 		    append r [format "%11.11s " $s]
 		}
 	    }
 	    puts "$r[format "%4d %s" $c [lindex $tnames $t]]"
 	}
-	if ($has_totals) {
+	if {$has_totals && ! $normalise} {
 	    puts [string repeat "-" [string length $hdr]]
 	    set r ""
 	    for {set i 0} {$i < [llength $runlist]} {incr i} {
