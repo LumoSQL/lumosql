@@ -1,18 +1,17 @@
-
 # Table of Contents
 
-1.  [Questions](#orgd58f343)
-2.  [Data](#orgf4fe222)
-3.  [Design of experiment](#org042f079)
-    1.  [Concepts](#org7fd6605)
-    2.  [Benchmark data](#org0cd5356)
-4.  [Methods](#org03386ee)
-    1.  [General considerations](#org60ecddd)
-    2.  [Model matrix](#org339e4e3)
-5.  [References](#org5bd0e06)
+1.  [Questions](#org081d72b)
+2.  [Data](#org1e0a816)
+3.  [Design of experiment](#orgbdea20e)
+	1.  [Concepts](#org2138e95)
+	2.  [Benchmark data](#orga3dc82e)
+4.  [Methods](#org2e34430)
+	1.  [General considerations](#org4ff8485)
+	2.  [Model matrix](#orgf2eb4fc)
+5.  [References](#org678a630)
 
 
-<a id="orgd58f343"></a>
+<a id="org081d72b"></a>
 
 # Questions
 
@@ -20,24 +19,24 @@ Some are documented in [1], others were mentioned in #lumosql at
 libera.chat
 
 -   Main questions
-    -   What happens to performance when LMDB is swapped in as a storage
-        backend for SQLite?
+	-   What happens to performance when LMDB is swapped in as a storage
+		backend for SQLite?
 -   Peripheric questions
-    -   Does SQLite get faster with each version?
-    -   Which compile options make a given version of SQLite faster?
-    -   How do different versions and compile options combine to change
-        performance as data size gets large?
-    -   Does SQLITE<sub>DEBUG</sub> really make SQLite run approximately three
-        times slower?
-    -   What happens when a given set of compile options, versions and
-        data size are tested on faster and slower disks?
-    -   Submitted SQLite-only at datasize 100,1 and 1,100 all with and
-        without discard to show if, as expected, discard makes no
-        significant timing difference other than not crashing on giant
-        sizes. (danshearer 20220316)
+	-   Does SQLite get faster with each version?
+	-   Which compile options make a given version of SQLite faster?
+	-   How do different versions and compile options combine to change
+		performance as data size gets large?
+	-   Does SQLITE<sub>DEBUG</sub> really make SQLite run approximately three
+		times slower?
+	-   What happens when a given set of compile options, versions and
+		data size are tested on faster and slower disks?
+	-   Submitted SQLite-only at datasize 100,1 and 1,100 all with and
+		without discard to show if, as expected, discard makes no
+		significant timing difference other than not crashing on giant
+		sizes. (danshearer 20220316)
 
 
-<a id="orgf4fe222"></a>
+<a id="org1e0a816"></a>
 
 # Data
 
@@ -45,32 +44,32 @@ libera.chat
 -   Use the `all-lumosql-benchmark-data-combined.sqlite` file
 
 
-<a id="org042f079"></a>
+<a id="orgbdea20e"></a>
 
 # Design of experiment
 
 
-<a id="org7fd6605"></a>
+<a id="org2138e95"></a>
 
 ## Concepts
 
 -   **Control variables:** Experimenter-selected treatment variables where knowledge of
-    their effect is the primary objective
+	their effect is the primary objective
 -   **Environmental variables:** Describe the operating conditions of an experimental
-    subject/unit/process
-    -   A *blocking factor* is a qualitative environmental variables
-        identifying identical groups of experimental material
-    -   A *confounding variable* is unrecognized by the experimental
-        but actively affect the mean output of the physical
-        system. These can mask or exaggerate the effect of a treatment
-        variable. E.g., active confounding variable that is correlated
-        with the treatment variable.
+	subject/unit/process
+	-   A *blocking factor* is a qualitative environmental variables
+		identifying identical groups of experimental material
+	-   A *confounding variable* is unrecognized by the experimental
+		but actively affect the mean output of the physical
+		system. These can mask or exaggerate the effect of a treatment
+		variable. E.g., active confounding variable that is correlated
+		with the treatment variable.
 -   **Model variables:** Not present in this experiment
 -   **Reproducibility variables:** data recorded for reproducibility that is expected to have no
-    effect, or whose effect is not of interest, on the response
+	effect, or whose effect is not of interest, on the response
 
 
-<a id="org0cd5356"></a>
+<a id="orga3dc82e"></a>
 
 ## Benchmark data
 
@@ -78,13 +77,13 @@ The following table contains all the key-values recorded for each
 run. We classify them into the following groups:
 
 1.  Variables selected by the experimenters whose knowledge of their
-    effect on running times is the primary objective
+	effect on running times is the primary objective
 2.  Variables not directly selected by the experimenters that can
-    plausibly have some impact on running times
+	plausibly have some impact on running times
 3.  Variables that are of no interest, and were recorded only for
-    the purpose of reproducibility or debugging the LumoSQL Build
-    and Benchmark system, are not expected to impact on running
-    times
+	the purpose of reproducibility or debugging the LumoSQL Build
+	and Benchmark system, are not expected to impact on running
+	times
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 <caption class="t-above"><span class="table-number">Table 1:</span> ZV = zero-variance variable (Y = yes), B = Bayes, D = Dan, L = Labhraich. Comments from L: 3* if we change the list of tests, <code>notforking-date</code> and <code>-id</code> will help knowing which list we ran, which could affect timings 3** they may affect timings if <code>tests-fail</code>, <code>-intr</code> are non-zero, <code>tests-ok</code> is not 17</caption>
@@ -466,22 +465,22 @@ run. We classify them into the following groups:
 </table>
 
 
-<a id="org03386ee"></a>
+<a id="org2e34430"></a>
 
 # Methods
 
 
-<a id="org60ecddd"></a>
+<a id="org4ff8485"></a>
 
 ## General considerations
 
 -   Some systems are faster than others, need to account for that
-    (Labhraich 20220316)
+	(Labhraich 20220316)
 -   Consider normalizing test timings by the total run time (Labhraich
-    1.
+	1.
 
 
-<a id="org339e4e3"></a>
+<a id="orgf2eb4fc"></a>
 
 ## Model matrix
 
@@ -504,19 +503,19 @@ have no variability in the collected data
 Notes on control variables:
 
 1.  Include the interaction between `backend-name` and
-    `backend-version` if there is interest in the latter main
-    effect. Drop `backend`, which is 1-1 to the interaction.
+	`backend-version` if there is interest in the latter main
+	effect. Drop `backend`, which is 1-1 to the interaction.
 2.  Include `diskComment`. `diskReadTime` and `DiskWriteTime` are
-    correlated with `diskComment`, no need to have the times in the
-    model.
+	correlated with `diskComment`, no need to have the times in the
+	model.
 3.  Include `option-datasize` as categorical because the effect
-    might be non-lineal
+	might be non-lineal
 4.  Include `sqlite-version`
 
 Notes on environmental variables:
 
 1.  Include `cpuComment` for blocking, drop `cpuType`. There is only
-    one `cpuComment` with `cpuType=armv7l`
+	one `cpuComment` with `cpuType=armv7l`
 2.  Include `osVersion` for blocking, drop `osType`
 
 Notes on reproducibility variables: these are excluded from model
@@ -529,9 +528,8 @@ TBD
 1.  All control variables not commented on.
 
 
-<a id="org5bd0e06"></a>
+<a id="org678a630"></a>
 
 # References
 
 1.  [LumoSQL Build and Benchmark System](https://lumosql.org/src/lumosql/doc/trunk/doc/lumo-build-benchmark.md)
-

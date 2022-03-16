@@ -1,0 +1,92 @@
+---
+title: "Untitled"
+author: "Luis Damiano"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = TRUE, warning = TRUE)
+knitr::opts_knit$set(root.dir = "..")
+```
+
+```{r preamble}
+library(data.table)
+library(ggplot2)
+
+for (f in dir(file.path(c("..", "."), "R"), "*.R", full.names = TRUE))
+  source(f)
+```
+
+```{r initialize}
+init_viz()
+```
+
+```{r read-data}
+dbName  <- file.path("data-raw", "all-lumosql-benchmark-data-combined.sqlite")
+benchDF <- get_dataframe(dbName)
+
+# BDB uses a custom SQLite, we call this version as {versionId}bdb
+benchDF[sqliteVersion == "", 
+        sqliteVersion := sprintf("%sbdb", tstrsplit(sqliteName, " ")[[1]])]
+
+```
+
+```{r fit-model}
+library(lme4)
+
+fit <- lmer(log(benchRealTime) ~
+              backendName * backendVersion +        ## Control, main interest
+              optionDatasize +                      ## Control, main interest
+              sqliteVersion +                       ## Control, main interest
+              diskComment +                         ## Envr, but large impact
+              (1|cpuComment) +                      ## Blocking
+              (1|osVersion),                        ## Blocking
+              data = benchDF)
+
+
+# Since SQLversion is nested within backendName, 
+# consider fitting lmdb and dbd in separate models
+tmp <- lmer(log(benchRealTime) ~
+              backendVersion +                      ## Control, main interest
+              optionDatasize +                      ## Control, main interest
+              sqliteVersion +                       ## Control, main interest
+              diskComment +                         ## Envr, but large impact
+              (1|cpuComment) +                      ## Blocking
+              (1|osVersion),                        ## Blocking
+              data = benchDF[backendName == "lmdb"])
+```
+
+```{r compute-emmeans}
+library(emmeans)
+options(rg.limit = 447440, pbkrtest.limit = 154195, lmerTest.limit = 154195)
+
+byCols <- c("backendName", "backendVersion", "optionDatasize",
+            "sqliteVersion","diskComment")
+emm0 <- emmeans(fit, ~ 1, type = "response", by = byCols)
+emm1 <- emmeans(fit, ~ 1, type = "response", by = byCols[1:3])
+emm2 <- emmeans(tmp, ~ 1, type = "response", by = byCols[2:3])
+```
+
+### Notes
+
+#### Disk read and write time
+
+`diskReadTime` and `diskWriteTime` are correlated with `diskComment`, 
+no need to have the times in the model.
+
+```{r results = 'hold'}
+ggplot(benchDF, aes(y = diskComment, x = diskReadTime)) + 
+    geom_violin() + 
+    scale_x_log10()
+
+ggplot(benchDF, aes(y = diskComment, x = diskWriteTime)) + 
+    geom_violin() + 
+    scale_x_log10()
+```
+
+#### CPU type and comment
+
+```{r}
+with(benchDF, table(cpuComment, cpuType))
+```
