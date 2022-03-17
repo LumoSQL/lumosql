@@ -19,7 +19,7 @@ runs documented in [1] and stored in [2].
 
 # How to use
 
--   See [Research notes](docs/notes.md)
+-   See [Research notes](doc/notes.md)
 -   Report files to be added
 
 
