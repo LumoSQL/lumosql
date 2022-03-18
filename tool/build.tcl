@@ -967,7 +967,7 @@ while {[llength $build_todo] > 0} {
 	    }
 	}
 	if {! $other_values(DEBUG_BUILD)} { file delete -force $dest_dir }
-	puts "*** $rebuilding $build (sources changed) $bnum/$num_builds"
+	puts "*** [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"] $rebuilding $build (sources changed) $bnum/$num_builds"
 	if {$operation eq "cleanup"} {
 	    funlock $lock_id
 	    close $lock_id
@@ -980,7 +980,7 @@ while {[llength $build_todo] > 0} {
 	    continue
 	}
     } else {
-	puts "*** Building $build $bnum/$num_builds"
+	puts "*** [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"] Building $build $bnum/$num_builds"
     }
     if {$sqlite3_version ne ""} {
 	puts "    SQLITE3_VERSION = $sqlite3_version"
@@ -1262,7 +1262,7 @@ set test_result [list]
 for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
     set benchmark [lindex $benchmark_list $bnum]
     set benchmark_optlist [lindex $benchmark_option_list $bnum]
-    puts "*** Running $operation $benchmark [expr {$bnum + 1}]/[llength $benchmark_list]"
+    puts "*** [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"] Running $operation $benchmark [expr {$bnum + 1}]/[llength $benchmark_list]"
     set build [lindex $benchmark_to_build $bnum]
     set tl [split $build "+"]
     set sqlite3_version [lindex $tl 0]
@@ -1375,7 +1375,7 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
     }
     for {set r 1} {$r <= $repeat} {incr r} {
 	if {$repeat > 1} {
-	    puts "    *** Run $r / $repeat"
+	    puts "    *** [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"] Run $r / $repeat"
 	    set space "        "
 	} else {
 	    set space "    "
