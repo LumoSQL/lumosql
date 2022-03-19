@@ -14,6 +14,23 @@
 # with no arguments, provide defaults for CPU_COMMENT
 # with 1 argument, provide defaults for DISK_COMMENT
 
+proc rotational_linux {basedev} {
+    set R ""
+    catch {
+	set f [open "/sys/block/$basedev/queue/rotational" r]
+	set R [read $f]
+	close $f
+    }
+    if {[regexp {^([01])} $R skip is_rot]} {
+	if {$is_rot} {
+	    return " (rotational)"
+	} else {
+	    return " (non-rotational)"
+	}
+    }
+    return ""
+}
+
 proc device_name_linux {dev devname} {
     # first see if lsblk is installed and can find it; if not we just use
     # the device "df" gave us, which means we won't know how to map LVM
@@ -30,7 +47,7 @@ proc device_name_linux {dev devname} {
 	    set f [open "/sys/block/$basedev/device/vendor" r]
 	    set vendorid [string trim [read $f]]
 	    close $f
-	    if {$vendorid ne ""} { return $vendorid }
+	    if {$vendorid ne ""} { return "$vendorid[rotational_linux $devname]" }
 	}
 	{^nvme\d+n\d+} {
 	    set basedev [lindex $v 0]
@@ -53,12 +70,12 @@ proc device_name_linux {dev devname} {
 	    }
 	    if {$model ne ""} {
 		if {$vendor ne ""} {
-		    return "$vendor $model"
+		    return "$vendor $model[rotational_linux $devname]"
 		} else {
-		    return $model
+		    return "$model[rotational_linux $devname]"
 		}
 	    } elseif {$vendor ne ""} {
-		return $vendor
+		return "$vendor[rotational_linux $devname]"
 	    }
 	}
 	{^mmcblk\d+} {
