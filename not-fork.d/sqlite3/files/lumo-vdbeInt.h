@@ -46,9 +46,9 @@ void lumoExtension(int, const unsigned char *, unsigned int, unsigned int,
 		   const unsigned char *, unsigned int, unsigned char *);
 
 /* take a packed record and add the Lumo extension data; it allocates a
- * new buffer which needs to be freed by the caller; if the first argument
- * is NULL, it is allocated with sqlite3MallocZero, if not NULL with
- * sqlite3DbMallocZero */
+** new buffer which needs to be freed by the caller; if the first argument
+** is NULL, it is allocated with sqlite3MallocZero, if not NULL with
+** sqlite3DbMallocZero */
 int lumoExtensionAdd(sqlite3 *, int, const unsigned char *, sqlite3_int64,
 		     sqlite3_int64, unsigned char **, sqlite3_int64 *);
 
@@ -59,6 +59,10 @@ int lumoExtensionPresent(int, u32, u32, u64, u32, const unsigned char *,
 /* handle data in a Lumo column, if it is really a Lumo column; return 0
 ** if not handled (not a Lumo column), 1 if OK, -1 if error */
 int lumoExtensionHandle(int, const unsigned char *, u64, u64, VdbeCursor *);
+
+/* function to call when no metadata was found: this could be an error if
+** we were expecting to find it; return 0 if error, 1 if OK */
+int lumoExtensionMissing(sqlite3 *);
 
 #endif /* _LUMO_VDBEINT_ */
 #endif /* LUMO_EXTENSIONS */

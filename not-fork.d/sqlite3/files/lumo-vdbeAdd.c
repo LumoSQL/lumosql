@@ -432,6 +432,15 @@ int lumoExtensionHandle(
   return 1;
 }
 
+/* function to call when no metadata was found: this could be an error if
+** we were expecting to find it; return 0 if error, 1 if OK */
+int lumoExtensionMissing(sqlite3 *db){
+#ifdef LUMO_ROWSUM
+  if (lumo_extension_check_rowsum > 1) return 0;
+#endif
+  return 1;
+}
+
 #endif
 #endif
 

@@ -192,7 +192,7 @@ start
  
      if( pC->szRow<aOffset[0] ){      /*OPTIMIZATION-IF-FALSE*/
        /* pC->aRow does not have to hold the entire row, but it does at least
-@@ -183,6 +193,26 @@
+@@ -183,6 +193,27 @@
        }
        goto op_column_out;
      }
@@ -211,7 +211,8 @@ start
 +	if (ok < 0) goto op_column_corrupt;
 +      }
 +      if (!ok) {
-+	// XXX handle case of missing Lumo column, if important
++	/* handle case of missing Lumo column, if important */
++	if (! lumoExtensionMissing(db)) goto op_column_corrupt;
 +      }
 +    }
 +#endif

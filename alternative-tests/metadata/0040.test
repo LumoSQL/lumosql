@@ -1,0 +1,4 @@
+set name {Copying table with unmodified sqlite}
+
+append sql "CREATE TABLE t2 AS SELECT * FROM t1;\n"
+

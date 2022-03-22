@@ -294,7 +294,9 @@ array set other_values [list \
 	DB_DIR           "" \
 	DEBUG_BUILD      0 \
 	DISK_COMMENT     "" \
+	EXTRA_BUILDS     "" \
 	KEEP_SOURCES     0 \
+	LUMO_TEST_DIR    "" \
 	MAKE_COMMAND     "make" \
 	NOTFORK_COMMAND  "not-fork" \
 	NOTFORK_ONLINE   0 \
@@ -574,7 +576,10 @@ set build_list [list $sqlite3_for_db]
 set build_option_list [list $default_options]
 set benchmark_to_build [list]
 set benchmark_option_list [list]
+set expanded_targets [list]
+set expanded_extra [list]
 if {$operation ne "database"} {
+    # see if we want to generate a target string from other options,,,
     if {$target_string eq "" && $operation ne "cleanup"} {
 	# generate a new list of benchmarks from all the other options
 	set benchmark_opts ""
@@ -676,96 +681,153 @@ if {$operation ne "database"} {
 		}
 	    }
 	}
-    } else {
-	if {$operation eq "cleanup"} {
-	    # targets to check are existing builds
-	    set target_list [list]
-	    set build_list [list]
-	    foreach fn [glob -directory $build_dir -nocomplain *] {
-		lappend target_list [lindex [file split $fn] end]
-	    }
-	    if {[llength $target_list] == 0} { exit 0 }
-	} else {
-	    # parse list of benchmarks
-	    set target_list [split $target_string]
+	set target_string ""
+	# we continue with any extra builds which might have been requested
+    }
+    set target_list [list]
+    if {$operation eq "cleanup"} {
+	# targets to check are existing builds
+	set build_list [list]
+	foreach fn [glob -directory $build_dir -nocomplain *] {
+	    lappend target_list [lindex [file split $fn] end]
 	}
-	for {set tptr 0} {$tptr < [llength $target_list]} {incr tptr} {
-	    set benchmark [lindex $target_list $tptr]
-	    if {$benchmark eq ""} { continue }
-	    set tdata [split $benchmark "+"]
-	    set sv [lindex $tdata 0]
+	if {[llength $target_list] == 0} { exit 0 }
+    } else {
+	if {$target_string ne ""} {
+	    foreach tname [split [string map {: :c "\\ " :s} $target_string]] {
+		if {$tname ne ""} {
+		    lappend target_list [string map {:c : :s " "} $tname]
+		}
+	    }
+	}
+	if {$other_values(EXTRA_BUILDS) ne ""} {
+	    foreach tname [split [string map {: :c "\\ " :s} $other_values(EXTRA_BUILDS)]] {
+		if {$tname ne ""} {
+		    lappend target_list " [string map {:c : :s " "} $tname]"
+		}
+	    }
+	}
+    }
+    for {set tptr 0} {$tptr < [llength $target_list]} {incr tptr} {
+	set benchmark [lindex $target_list $tptr]
+	if {$benchmark eq ""} { continue }
+	set do_benchmark 1
+	if {[string range $benchmark 0 0] eq " "} {
+	    set do_benchmark 0
+	    set benchmark [string range $benchmark 1 end]
+	}
+	# allow some special syntax to help running alternative tests... this
+	# is not recommended for TARGETS because it results in non-repeatable
+	# lists, but we can use that with "make targets" to convert a target
+	# of the type "3.35.0\++lmdb-all" into a constant (long) list
+	set tdata [list]
+	foreach titem [split [string map {: :c \\+ :p} $benchmark] "+"] {
+	    lappend tdata [string map {:p + :c :} $titem]
+	}
+	if {[llength $tdata] < 1} {continue}
+	versions_list svlist sqlite3 [lindex $tdata 0] ""
+	set bvlist [list ""]
+	if {[llength $tdata] > 1} {
 	    set bv [lindex $tdata 1]
-	    # get a new option array and update it from the targt string
-	    array set opt_arr [array get option_values]
-	    foreach optstring [lrange $tdata 2 end] {
-		if {! [regexp {^(\w+)-(.*)$} $optstring skip option value]} {
-		    puts stderr "Invalid option $optstring"
-		    exit 1
-		}
-		if {[llength [array names options -exact [string toupper $option]]] == 0} {
-		    puts stderr "Invalid option name: $option"
-		    exit 1
-		}
-		set od $options([string toupper $option])
-		if {[llength $od] < 2} {
-		    puts stderr "Invalid option name: $option"
-		    exit 1
-		}
-		if {$value eq [lindex $od 2]} { continue }
-		if {! [regexp "^(?:[lindex $od 1])$" $value]} {
-		    puts stderr "Invalid value for $option: $value"
-		    exit 1
-		}
-		foreach {e1 e2} [lindex $od 3] {
-		    if {$value eq $e1} {
-			set value $e2
+	    if {$bv ne ""} {
+		set failed 1
+		if {[regexp {^(\w+)-(.*)$} $bv skip bname bversion]} {
+		    if {[file isdirectory [file join $notfork_dir $bname benchmark]]} {
+			versions_list bxlist $bname $bversion ""
+			if {[llength $bxlist] > 0} {
+			    set bvlist [list]
+			    foreach bv $bxlist {
+				lappend bvlist "$bname-$bv"
+			    }
+			    set failed 0
+			}
 		    }
 		}
-		foreach {re s} [lindex $od 4] {
-		    regsub "^(?:$re)$" $value $s value
+		if {$failed} {
+		    puts stderr "Invalid target ($benchmark), backend needs to be NAME-VERSION"
+		    exit 2
 		}
-		if {$value eq [lindex $od 2]} { continue }
-		set option [string toupper $option]
-		array set opt_arr [list $option $value]
 	    }
-	    # now construct a new normalised target string
-	    set benchmark_opts ""
-	    set benchmark_plus ""
-	    set benchmark_ol [list]
-	    set build_opts ""
-	    set build_plus ""
-	    set build_ol [list]
-	    foreach {option value} [lsort -stride 2 [array get opt_arr]] {
-		set od $options($option)
-		lappend benchmark_ol $option
-		lappend benchmark_ol $value
-		if {$value ne [lindex $od 2]} {
-		    append benchmark_opts "+[string tolower $option]-$value"
-		    set benchmark_plus "+"
+	}
+	foreach sv $svlist {
+	    foreach bv $bvlist {
+		# get a new option array and update it from the targt string
+		array set opt_arr [array get option_values]
+		foreach optstring [lrange $tdata 2 end] {
+		    if {! [regexp {^(\w+)-(.*)$} $optstring skip option value]} {
+			puts stderr "Invalid option $optstring"
+			exit 1
+		    }
+		    if {[llength [array names options -exact [string toupper $option]]] == 0} {
+			puts stderr "Invalid option name: $option"
+			exit 1
+		    }
+		    set od $options([string toupper $option])
+		    if {[llength $od] < 2} {
+			puts stderr "Invalid option name: $option"
+			exit 1
+		    }
+		    if {$value eq [lindex $od 2]} { continue }
+		    if {! [regexp "^(?:[lindex $od 1])$" $value]} {
+			puts stderr "Invalid value for $option: $value"
+			exit 1
+		    }
+		    foreach {e1 e2} [lindex $od 3] {
+			if {$value eq $e1} {
+			    set value $e2
+			}
+		    }
+		    foreach {re s} [lindex $od 4] {
+			regsub "^(?:$re)$" $value $s value
+		    }
+		    if {$value eq [lindex $od 2]} { continue }
+		    set option [string toupper $option]
+		    array set opt_arr [list $option $value]
 		}
-		if {[lindex $od 0]} {
-		    lappend build_ol $option
-		    lappend build_ol $value
+		# now construct a new normalised target string
+		set benchmark_opts ""
+		set benchmark_plus ""
+		set benchmark_ol [list]
+		set build_opts ""
+		set build_plus ""
+		set build_ol [list]
+		foreach {option value} [lsort -stride 2 [array get opt_arr]] {
+		    set od $options($option)
+		    lappend benchmark_ol $option
+		    lappend benchmark_ol $value
 		    if {$value ne [lindex $od 2]} {
-			append build_opts "+[string tolower $option]-$value"
-			set build_plus "+"
+			append benchmark_opts "+[string tolower $option]-$value"
+			set benchmark_plus "+"
+		    }
+		    if {[lindex $od 0]} {
+			lappend build_ol $option
+			lappend build_ol $value
+			if {$value ne [lindex $od 2]} {
+			    append build_opts "+[string tolower $option]-$value"
+			    set build_plus "+"
+			}
 		    }
 		}
-	    }
-	    if {$bv eq ""} {
-		set t "$sv$benchmark_plus$benchmark_opts"
-		set b "$sv$build_plus$build_opts"
-	    } else {
-		set t "$sv+$bv$benchmark_opts"
-		set b "$sv+$bv$build_opts"
-	    }
-	    if {[lsearch -exact $benchmark_list $t] < 0} {
-		lappend benchmark_list $t
-		lappend benchmark_to_build $b
-		lappend benchmark_option_list $benchmark_ol
+		if {$bv eq ""} {
+		    set t "$sv$benchmark_plus$benchmark_opts"
+		    set b "$sv$build_plus$build_opts"
+		} else {
+		    set t "$sv+$bv$benchmark_opts"
+		    set b "$sv+$bv$build_opts"
+		}
+		if {$do_benchmark && [lsearch -exact $benchmark_list $t] < 0} {
+		    lappend benchmark_list $t
+		    lappend benchmark_to_build $b
+		    lappend benchmark_option_list $benchmark_ol
+		}
 		if {[lsearch -exact $build_list $b] < 0} {
 		    lappend build_list $b
 		    lappend build_option_list $build_ol
+		}
+		if {$do_benchmark} {
+		    lappend expanded_targets $t
+		} else {
+		    lappend expanded_extra $b
 		}
 	    }
 	}
@@ -1196,21 +1258,30 @@ proc read_data {dir name} {
 
 # see what tests we have
 set tests [list]
-foreach test_file [lsort [glob -directory [file join $notfork_dir sqlite3 benchmark] *.test]] {
+if {$other_values(LUMO_TEST_DIR) eq ""} {
+    set benchmark_dir [file join $notfork_dir sqlite3 benchmark]
+} else {
+    if {$operation ne "test"} {
+	puts stderr "Setting LUMO_TEST_DIR is currently supported only for 'test'"
+	exit 1
+    }
+    set benchmark_dir $other_values(LUMO_TEST_DIR)
+}
+foreach test_file [lsort [glob -directory $benchmark_dir *.test]] {
     lappend tests [lindex [file split $test_file] end]
     set fd [open $test_file r]
     lappend tests [read $fd]
     close $fd
 }
 set before_test ""
-if {[file exists [file join $notfork_dir sqlite3 benchmark before-test]]} {
-    set fd [open [file join $notfork_dir sqlite3 benchmark before-test] r]
+if {[file exists [file join $benchmark_dir before-test]]} {
+    set fd [open [file join $benchmark_dir before-test] r]
     set before_test [read $fd]
     close $fd
 }
 set after_test ""
-if {[file exists [file join $notfork_dir sqlite3 benchmark after-test]]} {
-    set fd [open [file join $notfork_dir sqlite3 benchmark after-test] r]
+if {[file exists [file join $benchmark_dir after-test]]} {
+    set fd [open [file join $benchmark_dir after-test] r]
     set after_test [read $fd]
     close $fd
 }
@@ -1335,7 +1406,7 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
     set temp_sql_file [file join $temp_db_dir sql]
     set backend_before_test ""
     set backend_after_test ""
-    if {$backend_name ne ""} {
+    if {$backend_name ne "" && $other_values(LUMO_TEST_DIR) eq ""} {
 	set backend_notfork [file join $notfork_dir $backend_name benchmark]
 	if {[file exists [file join $backend_notfork before-test]]} {
 	    set fd [open [file join $backend_notfork before-test] r]
@@ -1440,7 +1511,7 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 	    lappend test_tcl $backend_before_test
 	    lappend test_tcl $test_data
 	    # if there's something special for this backend, add it now
-	    if {$backend_name ne "" && \
+	    if {$backend_name ne "" && $other_values(LUMO_TEST_DIR) eq "" && \
 		    [file exists [file join $backend_notfork $test_file]]} {
 		set fd [open [file join $backend_notfork $test_file]]
 		lappend test_tcl [read $fd]
@@ -1448,6 +1519,7 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 	    }
 	    lappend test_tcl $backend_after_test
 	    lappend test_tcl $after_test
+	    set sqlite3_for_this_run $sqlite3_to_test
 	    apply \
 		[list {} "\
 		    upvar benchmark_options options \
@@ -1456,7 +1528,11 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 			  before_sql before_sql \
 			  test_sql sql \
 			  after_sql after_sql \
-			  results results
+			  results results \
+			  expanded_extra extra_builds \
+			  expanded_targets targets \
+			  sqlite3_for_this_run sqlite3 \
+			  build_dir build_dir
 		    [join $test_tcl]"]
 	    if {$is_benchmark || $operation ne "benchmark"} {
 		incr test_number
@@ -1495,9 +1571,9 @@ for {set bnum 0} {$bnum < [llength $benchmark_list]} {incr bnum} {
 		set owt [clock microseconds]
 		if {[catch {
 		    if {$benchmark_options(DISCARD_OUTPUT) eq "off"} {
-			set output [exec $sqlite3_to_test $temp_db_name < $temp_sql_file]
+			set output [exec $sqlite3_for_this_run $temp_db_name < $temp_sql_file]
 		    } else {
-			exec $sqlite3_to_test $temp_db_name < $temp_sql_file > /dev/null
+			exec $sqlite3_for_this_run $temp_db_name < $temp_sql_file > /dev/null
 		    }
 		} res opt]} {
 		    set nwt [clock microseconds]

@@ -1,0 +1,4 @@
+set name "Check index searchable by unmodified sqlite"
+
+append sql "SELECT * FROM t1 WHERE a = 42;\n"
+

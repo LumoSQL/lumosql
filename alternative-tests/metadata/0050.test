@@ -1,0 +1,11 @@
+set name {Updating original table with unmodified sqlite}
+
+set d100 [expr $options(DATASIZE_W) * 100]
+
+append sql "BEGIN;\n"
+for {set i 1} {$i<=$d100} {incr i} {
+  set r [expr $i * 7]
+  append sql "UPDATE t1 SET b=$i, c='[number_name $i]' WHERE a=$r;\n"
+}
+append sql "COMMIT;\n"
+

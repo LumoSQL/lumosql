@@ -1,0 +1,12 @@
+set name {Deleting rows without metadata}
+
+set d100 [expr $options(DATASIZE_W) * 100]
+
+append sql "BEGIN;\n"
+for {set i 1} {$i<=$d100} {incr i} {
+  set r [expr $i * 7]
+  append sql "DELETE FROM t1 WHERE a=$r;\n"
+}
+append sql "COMMIT;\n"
+append sql "DROP TABLE t2;\n"
+

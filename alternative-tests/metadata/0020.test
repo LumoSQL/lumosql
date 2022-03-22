@@ -1,0 +1,4 @@
+set name "Check index readable by unmodified sqlite"
+
+append sql "SELECT b FROM t1 WHERE a = 42;\n"
+

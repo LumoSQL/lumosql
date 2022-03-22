@@ -1,0 +1,17 @@
+set name "Creating database and table using modified SQLite"
+
+append sql "PRAGMA lumo_rowsum_algorithm=blake3;\n"
+
+append sql "CREATE TABLE t1(a INTEGER, b INTEGER, c VARCHAR(100));\n"
+append sql "CREATE INDEX i1 on t1 (a, c);\n"
+
+set d1000 [expr $options(DATASIZE_W) * 1000]
+
+for {set i 1} {$i<=$d1000} {incr i} {
+  set r [expr $i * 7]
+  append sql "INSERT INTO t1 VALUES($i,$r,'[number_name $r]');\n"
+}
+
+# we need to run this on the modified sqlite from EXTRA_BUILDS;
+set sqlite3 [file join $build_dir [lindex $extra_builds 0] sqlite3]
+

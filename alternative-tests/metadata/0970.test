@@ -1,0 +1,16 @@
+set name "Check table readable by modified sqlite, ignoring missing metadata"
+
+# we need to run this on the modified sqlite from EXTRA_BUILDS;
+set sqlite3 [file join $build_dir [lindex $extra_builds 0] sqlite3]
+
+append sql "PRAGMA lumo_check_rowsum=yes;\n"
+
+# full table scan
+append sql "SELECT * FROM t1;\n"
+
+# index search
+append sql "SELECT * FROM t1 WHERE a = 42;\n"
+
+# covering index
+append sql "SELECT b FROM t1 WHERE a = 42;\n"
+

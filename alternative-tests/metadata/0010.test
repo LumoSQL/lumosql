@@ -1,0 +1,4 @@
+set name "Check table readable by unmodified sqlite"
+
+append sql "SELECT * FROM t1;\n"
+
