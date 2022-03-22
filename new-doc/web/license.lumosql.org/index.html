@@ -1,50 +1,43 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<html id="home" lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>LumoSQL Project Repositories</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <link rel="stylesheet" href="./pandoc.css" />
+<title>LumoSQL MIT License</title>
+<meta charset=utf-8>
+<!-- Modified from original by anonymous at http://jsbin.com/uhagaw/10/edit
+     Modifications by Dan Shearer, dan@lumosql.org
+     Released under the MIT license by The LumoSQL Authors: http://license.lumosql.org
+-->
+<meta name=viewport content="width=device-width, initial-scale=0.70;">
+<script>document.createElement('article');document.createElement('footer');</script>
+<link rel="stylesheet" href="mit-license.css">
 </head>
 <body>
-<header id="title-block-header">
-<h1 class="title">LumoSQL Project Repositories</h1>
-</header>
-<p><strong>Non-technical Introduction</strong></p>
-<p>This is the home for the three <a href="https://license.lumosql.org">open source-licensed</a> <a href="https://lumosql.org/src/lumosql/">LumoSQL</a> repositories. LumoSQL is a modification of <a href="https://sqlite.org">SQLite</a>, the world’s <a href="https://www.sqlite.org/famous.html">most-used software</a>, to add technical enhancements for performance, security and measurement. The modifications are done in cooperation with SQLite community and its twin project <a href="https://fossil-scm.org/">Fossil</a>.</p>
-<p>LumoSQL is supported by <a href="https://nlnet.nl">NLnet</a>.</p>
-<h2 id="lumosql-database-project">LumoSQL Database Project</h2>
-<p>The <a href="https://lumosql.org/src/lumosql">LumoSQL Database Project</a> builds modified SQLite. The user can specify which version of SQLite is to have which features added to it, and whether to benchmark the resulting binary. Features that can be added to SQLite relate to different key-value storage backends, and to security/integrity.</p>
-<p>LumoSQL has code to:</p>
-<ul>
-<li>pull in multiple versions of SQLite, LMDB and BDB. We are also trying hard to get 21st-century K-V stores too, such as Adaptive Radix Trees and Fractal Trees</li>
-<li>combine these disparate trees to give a matrix of SQLite versions and backends, and versions of backends</li>
-<li>run <a href="https://lumosql.org/src/lumosql/doc/trunk/doc/lumo-build-benchmark.md">benchmarking</a> of the matrix according to user-selected parameters, storing the results in an SQLite database</li>
-<li>assure data integrity. LumoSQL exposes data verfication mechanisms to end users, possibly the first SQL database to do so. Every row can be checksummed as it is written and verified as it is read. This is transparent to unmodified SQLite reading these databases, and works with new K-V store backends</li>
-</ul>
-<p>LumoSQL Database preview version 0.4 <a href="https://lumosql.org/src/lumosql/doc/trunk/doc/release-announce-0.4.md">was released</a> on 2021-01-10 .</p>
-<h2 id="lumosql-documentation-project">LumoSQL Documentation Project</h2>
-<p>The <a href="https://lumosql.org/src/lumodoc/doc/trunk/README.md">LumoSQL Documentation Project</a> contains:</p>
-<ul>
-<li>The goals and technical details for the LumoSQL database</li>
-<li>A roadmap for the evolution of LumoSQL, towards new stable SQLite APIs</li>
-<li>Plans for new features for LumoSQL, such as per-row checksums</li>
-<li>Research on related codebases, mapping out the ecosystem of SQLite forks and other code</li>
-<li>Papers related to SQLite benchmarking, tuning and more</li>
-</ul>
-<h2 id="the-not-forking-tool">The Not-Forking Tool</h2>
-<p><a href="https://lumosql.org/src/not-forking">The Not-Forking Tool</a> is how LumoSQL combines codebases with minimal disruption. The ultimate goal is is to have a stable storage backend API in SQLite, but to develop that we need to see the codebases joined together, and to understand 20 years of closely-coupled history in SQLite internals. Not-forking has allowed us to work with multiple different versions of SQLite, LMDB and BDB without having to maintain ports or APIs. Not-forking is relevant to any project that needs to keep in synch with multiple upstreams each with multiple versions, whether available via Git, tarball or Fossil.</p>
-<p>SQLite is conservative about breaking compatibility due to its immense userbase, but LumoSQL can apply new features without forking SQLite thus getting the best of both worlds. SQLite can see alternate futures, while LumoSQL is not carrying the burden of forking.</p>
-<hr />
-<h2 id="the-lumosql-archives-of-dead-code">The LumoSQL Archives of Dead Code</h2>
-<p><a href="https://lumosql.org/src/archive2-lumosql-on-fossil/timeline">Archive 2: Early LumoSQL on Fossil</a> has lots of experimentation, dead-ends and more. It was imported from GitHub, and that sparked some <a href="https://fossil-scm.org/forum/forumpost/92db82a45e?t=h">Fossil development</a> because once upon a time a previous SQLite Fossil had been imported into an upstream. This archive also was the last time LumoSQL was a monolithic project.</p>
-<p><a href="https://github.com/LumoSQL/archive1-LumoSQL-on-github">Archive 1: Early LumoSQL on Github</a> has the very earliest work including excavations of ancient code. All the Gihub issues from this project have been moved to the current LumoSQL fossil archive, or wiki pages, or otherwise dealt with.</p>
+<article>
+<img id="gravatar" src="https://gravatar.com/avatar/1d9fba1e55957b7747250e08b4453bc5" />
+<h1>The LumoSQL MIT License (<a href="https://en.wikipedia.org/wiki/MIT_License">MIT</a>)</h1>
+<p>Copyright © 2022 The LumoSQL Authors &lt;<a href="mailto:authors@lumosql.org">authors@lumosql.org</a>&gt;</p>
+  
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the “Software”), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:</p>
+
+<p>The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.</p>
+
+<p>THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.</p>
+</article>
+<footer>
+<p><a href="https://license.lumosql.org">license.lumosql.org</a> contains the licensing terms for the
+   <a href="https://lumosql.org">LumoSQL project</a>.</p>
+</footer>
 </body>
 </html>
