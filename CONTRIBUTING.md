@@ -23,7 +23,6 @@ Please do:
 
 Things to note:
 
-* The [Documentation Project](https://lumosql.org/src/lumodoc/) is separate.
 * The LumoSQL GitHub mirror is one-way. Development happens with [Fossil], which has good documentation and a very [helpful forum][ffor].
 
 # Accessibility

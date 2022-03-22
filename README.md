@@ -35,10 +35,6 @@ reliable.
 
 LumoSQL is distributed under [very liberal licence terms](LICENCES/README.md).
 
-Full LumoSQL documentation is maintained by 
-[the LumoSQL Documentation project](https://lumosql.org/src/lumodoc), which has separate
-goals and tools to LumoSQL (and which is looking for contributors!)
-
 LumoSQL is supported by the [NLNet Foundation](https://nlnet.nl).
 
 Neither Windows nor Android are supported at present, despite being important

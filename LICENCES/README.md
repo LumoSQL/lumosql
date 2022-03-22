@@ -13,9 +13,9 @@ Every file should have a copyright statement at the top and also a
 it doesn't, the MIT licence still applies. It also applies to any file which is 
 not clearly code, such as configuration or input data.
 
-There are a few documentation files in the LumoSQL project tree, including this 
-README. These are also covered by the MIT license, to avoid any misunderstanding. 
-Virtually all of the LumoSQL documentation can be found at the 
-[LumoSQL Documentation Project](https://lumosql.org/src/lumodoc).
+The [LumoSQL Documentation](https://lumosql.org/src/lumodoc/doc/tip/doc/README.md) 
+is also generally covered by this MIT License. There are documentation-specific
+licenses and we will adopt one of them if the MIT License ever becomes a problem.
 
-To even further avoid misunderstanding, we maintain the site [license.lumosql.org](https://license.lumosql.org).
+To even further avoid potential misunderstanding, we maintain the site
+[license.lumosql.org](https://license.lumosql.org) with the full text of the MIT License.
