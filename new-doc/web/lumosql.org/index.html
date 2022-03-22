@@ -2,26 +2,25 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc-markdown-css-theme" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>LumoSQL Project Repositories</title>
-  <style>
-    code{white-space: pre-wrap;}
-    span.smallcaps{font-variant: small-caps;}
-    span.underline{text-decoration: underline;}
-    div.column{display: inline-block; vertical-align: top; width: 50%;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
-  </style>
-  <link rel="stylesheet" href="./pandoc.css" />
+  <title>LumoSQL</title>
+  <link rel="stylesheet" href="skylighting-solarized-theme.css" />
 </head>
 <body>
-<header id="title-block-header">
-<h1 class="title">LumoSQL Project Repositories</h1>
+
+<header>
+<h1 class="title">LumoSQL</h1>
+<blockquote class="metadata">
+<p class="subtitle">Adding features to SQLite for security, privacy, speed and measurability</p>
+</blockquote>
 </header>
+
+
+<main>
 <p><strong>Non-technical Introduction</strong></p>
 <p>This is the home of <a href="https://lumosql.org/src/lumosql/">LumoSQL</a>, which is a modification of <a href="https://sqlite.org">SQLite</a>, the world’s <a href="https://www.sqlite.org/famous.html">most-used software</a>. LumoSQL adds privacy, security and performance options to SQLite, but stays carefully within the SQLite project’s software guidelines and does not seek to replace SQLite. Several of LumoSQL’s features can be enabled in a standard SQLite database without disturbing traditional SQLite in any way.</p>
-<p>All LumoSQL code is licensed under the <a href="https://license.lumosql.org">MIT open source license</a>, perhaps the <a href="https://en.wikipedia.org/wiki/MIT_License">most-used license</a>.</p>
+<p>All LumoSQL code is licensed under the <a href="https://license.lumosql.org">MIT open source license</a>, which is likely the <a href="https://en.wikipedia.org/wiki/MIT_License">most-used software license</a>.</p>
 <p>LumoSQL is compliant with the mandatory privacy and security requirements of legislation based on <a href="https://fra.europa.eu/en/eu-charter/article/7-respect-private-and-family-life">Article 7</a> and <a href="https://fra.europa.eu/en/eu-charter/article/8-protection-personal-data">Article 8</a> of the <a href="https://fra.europa.eu/en/eu-charter">EU Charter of Fundamental Rights</a>. Many countries outside Europe have similar legislation. SQLite cannot offer this, and yet is used at enormous scale for handling personal data within the EU and these other countries.</p>
 <p>When LumoSQL becomes a readily-available option just like SQLite, this will have implications for almost all mobile phone users, motor vehicles, web browsers and many other kinds of embedded software. This software will then have a database which:</p>
 <ul>
@@ -48,5 +47,19 @@
 <li>Recording prior art. For both the encryption and database design parts of LumoSQL we have gathered and annotated references in BibLaTeX format. Some of these are exported as part of the Lumions RFC.</li>
 </ul>
 <p>LumoSQL is supported by <a href="https://nlnet.nl">NLnet</a>.</p>
+</main>
+
+<script>
+;(function() {
+  // Non-essential if user has JavaScript off. Just makes checkboxes look nicer.
+  var selector = '.task-list > li > input[type="checkbox"]';
+  var checkboxes = document.querySelectorAll(selector);
+  Array.from(checkboxes).forEach((checkbox) => {
+    var wasChecked = checkbox.checked;
+    checkbox.disabled = false;
+    checkbox.addEventListener('click', (ev) => {ev.target.checked = wasChecked});
+  });
+})();
+</script>
 </body>
 </html>

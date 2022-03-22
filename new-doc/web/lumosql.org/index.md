@@ -1,5 +1,6 @@
 ---
-title: LumoSQL Project Repositories
+title: LumoSQL
+subtitle: "Adding features to SQLite for security, privacy, speed and measurability"
 ---
 
 **Non-technical Introduction**
@@ -13,7 +14,7 @@ LumoSQL's features can be enabled in a standard SQLite database without
 disturbing traditional SQLite in any way.
 
 All LumoSQL code is licensed under the [MIT open source
-license](https://license.lumosql.org), perhaps the [most-used license](https://en.wikipedia.org/wiki/MIT_License).
+license](https://license.lumosql.org), which is likely the [most-used software license](https://en.wikipedia.org/wiki/MIT_License).
 
 LumoSQL is compliant with the mandatory privacy and security requirements of legislation based on 
 [Article 7](https://fra.europa.eu/en/eu-charter/article/7-respect-private-and-family-life) and
