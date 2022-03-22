@@ -4,73 +4,51 @@ title: LumoSQL Project Repositories
 
 **Non-technical Introduction**
 
-This is the technical home for the three [open source-licensed](https://license.lumosql.org) [LumoSQL](https://lumosql.org/src/lumosql/) repositories. LumoSQL is a modification of [SQLite](https://sqlite.org), the world's 
-[most-used software](https://www.sqlite.org/famous.html), to 
-add technical enhancements for performance, security and measurement. The modifications are done in cooperation wiSQLite.
+This is the home of [LumoSQL](https://lumosql.org/src/lumosql/), which is a
+modification of [SQLite](https://sqlite.org), the world's [most-used
+software](https://www.sqlite.org/famous.html). LumoSQL adds privacy, security
+and performance options to SQLite, but stays carefully within the SQLite
+project's software guidelines and does not seek to replace SQLite. Several of
+LumoSQL's features can be enabled in a standard SQLite database without
+disturbing traditional SQLite in any way.
+
+All LumoSQL code is licensed under the [MIT open source
+license](https://license.lumosql.org), perhaps the [most-used license](https://en.wikipedia.org/wiki/MIT_License).
 
 LumoSQL is compliant with the mandatory privacy and security requirements of legislation based on 
 [Article 7](https://fra.europa.eu/en/eu-charter/article/7-respect-private-and-family-life) and
 [Article 8](https://fra.europa.eu/en/eu-charter/article/8-protection-personal-data) of the 
-[EU Charter of Fundamental Rights](https://fra.europa.eu/en/eu-charter). Many countries outside Europe have similar legislation. SQLite cannot offer this.
+[EU Charter of Fundamental Rights](https://fra.europa.eu/en/eu-charter). Many countries outside Europe have similar legislation. SQLite cannot offer this, and yet is used at enormous scale for handling personal data within the EU and these other countries.
+
+When LumoSQL becomes a readily-available option just like SQLite, this will
+have implications for almost all mobile phone users, motor vehicles, web
+browsers and many other kinds of embedded software. This software will then have 
+a database which:
+
+* Is not stored in plain text. LumoSQL's [at-rest encryption](https://en.wikipedia.org/wiki/Data_at_rest#Encryption) means that personal data is more secure.
+* Checks for corruption. LumoSQL notices if the data it reads is not identical to the data it wrote. That might sound obvious, but no mainstream database does this yet!
+* May be faster, depending on what your application is doing.
+* Gives the user the option to keep data encrypted even if it is transferred to the cloud. Only when the user hands over a password can the data be decrypted, and even then the user might decide to only give the password for a portion of the data.
+
+In the latter half of 2022 we hope there will be a usable general release, accompanied by documentation for end users.
 
 **Technical Introduction**
 
-LumoSQL provides features not previously available for SQLite:
+LumoSQL provides new features for SQLite:
 
-* no need to fork. SQLite is conservative about breaking compatibility due to its immense userbase, but LumoSQL can apply new features without forking SQLite thus getting the best of both worlds. SQLite can see alternate futures, while LumoSQL is not carrying the burnden of forking
-* alternative key-value stores underneath the standard SQLite interface: switch between standard SQLite btree, LMDB and BDB, with more coming
-* performance, and measuring performance. LumoSQL measures and compares configurations across users, platforms, versions and time. SQLite provides testing, but not benchmarking
-* data integrity. LumoSQL exposes data verfication mechanisms to end users. Every single row can be checksummed as it is written, and verified as it is read. Transparently to unmodified SQLite, and with new K-V store backends
-* ease of development. LumoSQL has multiple debugging classes, and a way to test alternative storage backends
+* Security. LumoSQL's design provides page-level encryption. There are commercially-licensed code patches that will add this to SQLite, but open source solutions are very limited. Security cannot be assured without open source, so this is an essential feature we have added to SQLite.
+* Corruption detection and prevention. LumoSQL offers per-row checksums invisible to the application by default, but optionally visible and available to be operated on. This feature behaves like the existing SQLite ROWID column, implemented via additional hidden columns. No other mainstream database has this feature.
+* Fine-grained Security. Using the hidden columns feature, LumoSQL is able to provide per-row encryption, meaning that some rows might be visible to a particular user while other rows are not.
+* An encrypted equivalent to JSON called Lumions, usable in any application. [Lumions are an early draft standard](https://lumosql.org/src/lumosql/doc/tip/doc/rfc/README.md) and offer Attribute Based Encryption, versioning, strong GUID, checksumming and more. This RFC is ambitious but sufficiently limited in scope that it seems possible it could become a universal tool for privacy-compliant cloud-portable data.
+* Alternative key-value stores. Every database has a key-value store underneath it, but only LumoSQL has the ability to swap key-value stores with full functionality. The native SQLite Btree can be replaced with LMDB, and with a sufficiently general API that other key-value stores are equally possible. We are very interested in 21st-century K-V stores such as Adaptive Radix Trees and Fractal Trees.
 
-In the first half of 2021 we hope there will be a usable general release, accompanied by documentation for end users.
+The techniques used to implement LumoSQL contain some important advances:
 
-LumoSQL Database preview version 0.4 [was released](https://lumosql.org/src/lumosql/doc/trunk/doc/release-announce-0.4.md) on 2021-01-10 .
+* LumoSQL [does not fork SQLite](https://lumosql.org/src/not-forking). SQLite is conservative about breaking compatibility due to its immense userbase, but LumoSQL applies new features to the current codebase or any previous version. This means that the SQLite project can experiment with alternate futures for its architecture and design, while LumoSQL does not have to carry the burden of forking such a successful and intricate codebase.
+* LumoSQL provides a user-selectable matrix of code versions. As of today, some 600 combinations of SQLite versions and LMDB versions can be builts, tested and benchmarked. This matrix will grow as more key-value store backends are implemented via the LumoSQL backend API.
+* Measurement-based. LumoSQL has an [extensive benchmarking toolset](https://lumosql.org/src/lumosql/doc/tip/doc/lumo-build-benchmark.md) which allows anyone to run their own benchmarks, store the results in a standard SQLite file, and then aggregate them. We have some early [graphical results](http://r.lumosql.org:3838/contrastexample.html) for the first ten thousand benchmark runs. We measure across platforms, versions, time and data size among other variables, and we are doing [careful statistical modelling](https://lumosql.org/src/lumosql/dir?ci=tip&name=analysis/contrasts).
+* Recording prior art. For both the encryption and database design parts of LumoSQL we have gathered and annotated references in BibLaTeX format. Some of these are exported as part of the Lumions RFC.
 
 LumoSQL is supported by [NLnet](https://nlnet.nl).
 
 
-## LumoSQL Database Project
-
-
-The [LumoSQL Database Project](https://lumosql.org/src/lumosql) has code to:
-
-* pull in multiple versions of SQLite, LMDB and BDB. We are trying hard to get 21st-century K-V stores too, such as Adaptive Radix Trees and Fractal Trees
-* combine these disparate trees to give a matrix of SQLite versions and backends, and versions of backends
-* run [benchmarking](https://lumosql.org/src/lumosql/doc/trunk/doc/lumo-build-benchmark.md) of the matrix according to user-selected parameters, storing the results in an SQLite database
-
-## LumoSQL Documentation Project
-
-The [LumoSQL Documentation Project](https://lumosql.org/src/lumodoc/doc/trunk/README.md) contains:
-
-* The goals and technical details for the LumoSQL database
-* A roadmap for the evolution of LumoSQL, towards new stable SQLite APIs
-* Plans for new features for LumoSQL, such as per-row checksums
-* Research on related codebases, mapping out the ecosystem of SQLite forks and other code
-* Papers related to SQLite benchmarking, tuning and more
-
-## The Not-Forking Tool
-
- [The Not-Forking Tool](https://lumosql.org/src/not-forking) is how LumoSQL
-combines codebases with minimal disruption. The ultimate goal is is to have a
-stable storage backend API in SQLite, but to develop that we need to see the
-codebases joined together, and to understand 20 years of closely-coupled
-history in SQLite internals. Not-forking has allowed us to work with multiple
-different versions of SQLite, LMDB and BDB without having to maintain ports or
-APIs. Not-forking is relevant to any project that needs to keep in synch with
-multiple upstreams each with multiple versions, whether  available via Git,
-tarball or Fossil.
-
---------------------------
-
-## The LumoSQL Archives of Dead Code
-
-[Archive 2: Early LumoSQL on Fossil](https://lumosql.org/src/archive2-lumosql-on-fossil/timeline)
-has lots of experimentation, dead-ends and more. It was imported from GitHub, and 
-that sparked some [Fossil development](https://fossil-scm.org/forum/forumpost/92db82a45e?t=h) because
-once upon a time a previous SQLite Fossil had been imported into an upstream. This archive also
-was the last time LumoSQL was a monolithic project.
-
-[Archive 1: Early LumoSQL on Github](https://github.com/LumoSQL/archive1-LumoSQL-on-github) has the
-very earliest work including excavations of ancient code. All the Gihub issues from this project have been moved to the
-current LumoSQL fossil archive, or wiki pages, or otherwise dealt with. 
