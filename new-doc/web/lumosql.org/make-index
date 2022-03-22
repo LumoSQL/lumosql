@@ -1,0 +1,1 @@
+pandoc -s --css ./pandoc.css ./index.md -f markdown+pipe_tables -t html -o index.html
