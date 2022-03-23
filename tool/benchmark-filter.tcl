@@ -859,6 +859,14 @@ if {$out_default} {
     }
 }
 
+proc dict_get {d key defval} {
+    if {[dict exists $d $key]} {
+	return [dict get $d $key]
+    } else {
+	return $defval
+    }
+}
+
 proc if_key {d key op defval} {
     if {[dict exists $d $key]} {
 	set v [dict get $d $key]
@@ -951,19 +959,24 @@ if {$out_list} {
 	    add_run_key "disk-comment"
 	    set width -[field_width "disk-comment" [string length $field]]
 	    lappend fmt "%${width}s"
-	    lappend op {[dict get $d "disk-comment" ]}
+	    lappend op {[dict_get $d "disk-comment" ""]}
 	} elseif {$field eq "CPU_COMMENT" || $field eq "CPU"} {
 	    add_run_key "cpu-comment"
 	    set width -[field_width "cpu-comment" [string length $field]]
 	    lappend fmt "%${width}s"
-	    lappend op {[dict get $d "cpu-comment" ]}
+	    lappend op {[dict_get $d "cpu-comment" ""]}
 	} elseif {$field eq "DISK_WRITE_TIME" || $field eq "DISK_TIME"} {
 	    # disk-read-time seems to be the time it takes to get data
 	    # off the disk cache and is not particularly useful; but
 	    # disk-write-time does have a useful value
 	    add_run_key "disk-write-time"
-	    lappend fmt "%9.3f"
-	    lappend op {[dict get $d "disk-write-time" ]}
+	    set width [string length $field]
+	    lappend fmt "%${width}s"
+	    if {$field eq "DISK_TIME"} {
+		lappend op {[if_key $d "disk-write-time" {format "%9.3f" $v} "-"]}
+	    } else {
+		lappend op {[if_key $d "disk-write-time" {format "%15.3f" $v} "-"]}
+	    }
 	} elseif {$field eq "CPU_TYPE" || $field eq "ARCH"} {
 	    add_run_key "cpu-type"
 	    set width -[field_width "cpu-type" [string length $field]]
@@ -979,6 +992,21 @@ if {$out_list} {
 	    lappend fmt "%7d"
 	    add_test_op "n-tests" "test-name" "count(*)"
 	    lappend op {[dict get $d "n-tests" ]}
+	} elseif {$field eq "SQLITE_VERSION" || $field eq "SQLITE"} {
+	    add_run_key "sqlite-version"
+	    set width -[field_width "sqlite-version" [string length $field]]
+	    lappend fmt "%${width}s"
+	    lappend op {[dict_get $d "sqlite-version" ""]}
+	} elseif {$field eq "BACKEND_VERSION" || $field eq "BE_VERSION"} {
+	    add_run_key "backend-version"
+	    set width -[field_width "backend-version" [string length $field]]
+	    lappend fmt "%${width}s"
+	    lappend op {[dict_get $d "backend-version" ""]}
+	} elseif {$field eq "BACKEND_NAME" || $field eq "BE_NAME"} {
+	    add_run_key "backend-name"
+	    set width -[field_width "backend-name" [string length $field]]
+	    lappend fmt "%${width}s"
+	    lappend op {[dict_get $d "backend-name" ""]}
 	} else {
 	    puts stderr "Invalid field: $field"
 	    if {$database_orig ne ""} {file delete $database}

@@ -458,6 +458,16 @@ storage medium used for the databases during the benchmark, or "-" if not provid
 note that the benchmark system will try to detect the storage device
 if the user did not provide a ciomment; this doesn't always succeed, so
 the column can still show as "-"
+* `DISK_TIME` (or `DISK_WRITE_TIME`): the time taken to write a fixed amount of
+data (256 KB) to disk, which may help determining how fast the storage medium was;
+older benchmarks don't have this information and it will show as "-".
+* `SQLITE` or `SQLITE_VERSION`: the version of sqlite used in the benchmark;
+the special case of BDB, which used its own include sqlite, shows this as an
+empty field
+* `BACKEND_NAME` (or `BE_NAME`: the name of the backend used (an empty field if this was
+unmodified sqlite)
+* `BACKEND_VERSION` (or `BE_VERSION`: the version of the backend used (an empty field
+if this was unmodified sqlite)
 * `N_TESTS`: the number of tests in the run, currently 17 for benchmarks;
 however future versions of LumoSQL may define more tests
 
