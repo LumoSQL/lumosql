@@ -1,0 +1,588 @@
+// Variables
+//
+// Bootstrap-Dark (https://vinorodrigues.github.io/bootstrap-dark)
+// Copyright 2020 Vino Rodrigues
+//
+// Variables should follow the `$component-state-property-size` formula for
+// consistent naming. Ex: $nav-link-disabled-color and $modal-content-box-shadow-xs.
+
+
+// Color system
+// ---------------------------------------
+
+// Set the secondary color scheme, can only be `light` or `dark`
+$color-scheme-alt: dark;
+
+// the below colors where borrowed from other sources
+// items marked //** from https://bootswatch.com/darkly/
+// items marked //~~ from https://uxdesign.cc/dark-mode-ui-design-the-definitive-guide-part-1-color-53dcfaea5129
+
+$white-alt:    #fafafa !default;  // #fff !default;
+$gray-100-alt: #e1e1e1 !default;  //~~  // #f8f9fa !default;
+$gray-200-alt: #cfcfcf !default;  //~~  // #ebebeb !default;  // #e9ecef !default;
+$gray-300-alt: #b1b1b1 !default;  //~~  // #dee2e6 !default;
+$gray-400-alt: #9e9e9e !default;  //~~  // #ced4da !default;
+$gray-500-alt: #7e7e7e !default;  //~~  // #adb5bd !default;
+$gray-600-alt: #626262 !default;  //~~  // #888 !default;     // #6c757d !default;
+$gray-700-alt: #515151 !default;  //~~  // #444 !default;     // #495057 !default;
+$gray-800-alt: #3b3b3b !default;  //~~  // #303030 !default;  // #343a40 !default;
+$gray-900-alt: #222222 !default;  //~~  // #222 !default;     // #212529 !default;
+$black-alt:    #111 !default;     // #000 !default;
+
+$grays-alt: () !default;
+// stylelint-disable-next-line scss/dollar-variable-default
+$grays-alt: map-merge(
+  (
+    "100": $gray-100-alt,
+    "200": $gray-200-alt,
+    "300": $gray-300-alt,
+    "400": $gray-400-alt,
+    "500": $gray-500-alt,
+    "600": $gray-600-alt,
+    "700": $gray-700-alt,
+    "800": $gray-800-alt,
+    "900": $gray-900-alt
+  ),
+  $grays-alt
+);
+
+$blue-alt:    #375a7f !default;  // #007bff !default;
+$indigo-alt:  #6610f2 !default;
+$purple-alt:  #654ea3 !default;  // Panatone CotY 2018  // #6f42c1 !default;
+$pink-alt:    #e83e8c !default;
+$red-alt:     #e74c3c !default;  //**  // #dc3545 !default;
+$orange-alt:  #fd7e14 !default;
+$yellow-alt:  #f39c12 !default;  //**  // #ffc107 !default;
+$green-alt:   #00bc8c !default;  //**  // #28a745 !default;
+$teal-alt:    #45b5aa !default;  // Panatone CotY 2010
+$cyan-alt:    #17a2b8 !default;
+
+$colors-alt: () !default;
+// stylelint-disable-next-line scss/dollar-variable-default
+$colors-alt: map-merge(
+  (
+    "blue":       $blue-alt,
+    "indigo":     $indigo-alt,
+    "purple":     $purple-alt,
+    "pink":       $pink-alt,
+    "red":        $red-alt,
+    "orange":     $orange-alt,
+    "yellow":     $yellow-alt,
+    "green":      $green-alt,
+    "teal":       $teal-alt,
+    "cyan":       $cyan-alt,
+    "white":      $white-alt,
+    "gray":       #7e7e7e,  //~~  // $gray-600-alt,
+    "gray-dark":  #121212,  //~~  // $gray-800-alt
+  ),
+  $colors-alt
+);
+
+$primary-alt:       $blue-alt !default;
+$secondary-alt:     $gray-600-alt !default;
+$success-alt:       $green-alt !default;
+$info-alt:          $cyan-alt !default;
+$warning-alt:       $yellow-alt !default;
+$danger-alt:        $red-alt !default;
+$light-alt:         $gray-500-alt !default;  // $gray-100-alt !default;
+$dark-alt:          $gray-800-alt !default;
+
+$theme-colors-alt: () !default;
+// stylelint-disable-next-line scss/dollar-variable-default
+$theme-colors-alt: map-merge(
+  (
+    "primary":    $primary-alt,
+    "secondary":  $secondary-alt,
+    "success":    $success-alt,
+    "info":       $info-alt,
+    "warning":    $warning-alt,
+    "danger":     $danger-alt,
+    "light":      $light-alt,
+    "dark":       $dark-alt
+  ),
+  $theme-colors-alt
+);
+
+$theme-color-interval-alt:      8% !default;
+
+$yiq-contrasted-threshold-alt:  175 !default;
+
+$yiq-text-dark-alt:             $gray-900-alt !default;
+$yiq-text-light-alt:            $white-alt !default;
+
+
+// Body
+// ---------------------------------------
+
+$body-bg-alt:                   $gray-900-alt !default;
+$body-color-alt:                $gray-100-alt !default;
+
+// Links
+// ---------------------------------------
+
+$link-color-alt:                              lighten(theme-color-alt("primary"), 15%) !default;
+$link-hover-color-alt:                        lighten($link-color-alt, 15%) !default;
+$emphasized-link-hover-darken-percentage-alt: 15% !default;
+
+
+// Components
+// ---------------------------------------
+
+$border-color-alt:                $gray-700 !default;
+
+$box-shadow-sm-alt:               0 .125rem .25rem rgba($black-alt, .075) !default;
+$box-shadow-alt:                  0 .5rem 1rem rgba($black-alt, .15) !default;
+$box-shadow-lg-alt:               0 1rem 3rem rgba($black-alt, .175) !default;
+
+$component-active-color-alt:      $white-alt !default;
+$component-active-bg-alt:         theme-color-alt("primary") !default;
+
+
+// Typography
+// ---------------------------------------
+
+$headings-color-alt:              null !default;
+
+$text-muted-alt:                  $gray-600-alt !default;
+
+$blockquote-small-color-alt:      $gray-400-alt !default;
+
+$hr-border-color-alt:             rgba($white-alt, .1) !default;
+
+$kbd-box-shadow-alt:              inset 0 -.1rem 0 rgba($black, .25) !default;
+
+$mark-bg-alt:                     rgba($yellow-alt, .3) !default;
+
+
+// Tables
+// ---------------------------------------
+
+$table-color-alt:                 $body-color-alt !default;
+$table-bg-alt:                    null !default;
+$table-accent-bg-alt:             rgba($white-alt, .05) !default;
+$table-hover-color-alt:           $table-color-alt !default;
+$table-hover-bg-alt:              rgba($white-alt, .075) !default;
+$table-active-bg-alt:             $table-hover-bg-alt !default;
+
+$table-border-color-alt:          $border-color-alt !default;
+
+$table-head-bg-alt:               $gray-800-alt !default;
+$table-head-color-alt:            $gray-300-alt !default;
+
+$table-dark-color-alt:            $white-alt !default;
+$table-dark-bg-alt:               $gray-400 !default;
+$table-dark-accent-bg-alt:        rgba($black-alt, .05) !default;
+$table-dark-hover-color-alt:      $table-dark-color-alt !default;
+$table-dark-hover-bg-alt:         rgba($black-alt, .075) !default;
+$table-dark-border-color-alt:     darken($table-dark-bg, 7.5%) !default;
+
+$table-caption-color-alt:         $text-muted-alt !default;
+
+$table-bg-level-alt:              +9 !default;
+$table-border-level-alt:          +6 !default;
+
+
+// Buttons + Forms
+// ---------------------------------------
+
+$input-btn-focus-color-alt:       rgba($component-active-bg-alt, .25) !default;
+$input-btn-focus-box-shadow-alt:  0 0 0 $input-btn-focus-width $input-btn-focus-color-alt !default;
+
+
+// Buttons
+// ---------------------------------------
+
+$btn-box-shadow-alt:              inset 0 1px 0 rgba($white, .15), 0 1px 1px rgba($black, .075) !default;
+$btn-focus-box-shadow-alt:        $input-btn-focus-box-shadow-alt !default;
+$btn-disabled-opacity-alt:        .65 !default;
+$btn-active-box-shadow-alt:       inset 0 3px 5px rgba($black, .125) !default;
+
+$btn-link-disabled-color-alt:     $gray-600 !default;
+
+
+// Forms
+// ---------------------------------------
+
+$input-bg-alt:                              $gray-800-alt !default;
+$input-disabled-bg-alt:                     $gray-900-alt !default;
+
+$input-color-alt:                           $gray-300-alt !default;
+$input-border-color-alt:                    $gray-700-alt !default;
+$input-box-shadow-alt:                      inset 0 1px 1px rgba($white-alt, .075) !default;
+
+$input-focus-bg-alt:                        $input-bg-alt !default;
+$input-focus-border-color-alt:              lighten($component-active-bg-alt, 5%) !default;
+$input-focus-color-alt:                     $input-color-alt !default;
+$input-focus-box-shadow-alt:                $input-btn-focus-box-shadow-alt !default;
+
+$input-placeholder-color-alt:               mix($gray-600-alt, $gray-700-alt) !default;
+$input-plaintext-color-alt:                 $body-color-alt !default;
+
+$input-group-addon-color-alt:               $input-color-alt !default;
+$input-group-addon-bg-alt:                  $gray-700-alt !default;
+$input-group-addon-border-color-alt:        $input-border-color-alt !default;
+
+$custom-control-indicator-bg-alt:           $input-bg-alt !default;
+
+$custom-control-indicator-box-shadow-alt:   $input-box-shadow-alt !default;
+$custom-control-indicator-border-color-alt: $gray-500-alt !default;
+
+$custom-control-label-color-alt:            null !default;
+
+$custom-control-indicator-disabled-bg-alt:          $input-disabled-bg-alt !default;
+$custom-control-label-disabled-color-alt:           mix($gray-600-alt, $gray-700-alt) !default;
+
+$custom-control-indicator-checked-color-alt:        $component-active-color-alt !default;
+$custom-control-indicator-checked-bg-alt:           $component-active-bg-alt !default;
+$custom-control-indicator-checked-disabled-bg-alt:  rgba(theme-color-alt("primary"), .5) !default;
+$custom-control-indicator-checked-box-shadow-alt:   none !default;
+$custom-control-indicator-checked-border-color-alt: $custom-control-indicator-checked-bg-alt !default;
+
+$custom-control-indicator-focus-box-shadow-alt:     $input-focus-box-shadow-alt !default;
+$custom-control-indicator-focus-border-color-alt:   $input-focus-border-color-alt !default;
+
+$custom-control-indicator-active-color-alt:         $component-active-color-alt !default;
+$custom-control-indicator-active-bg-alt:            lighten($component-active-bg-alt, 35%) !default;
+$custom-control-indicator-active-box-shadow-alt:    none !default;
+$custom-control-indicator-active-border-color-alt:  $custom-control-indicator-active-bg-alt !default;
+
+$custom-checkbox-indicator-icon-checked-alt:        url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'><path fill='#{$custom-control-indicator-checked-color-alt}' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26l2.974 2.99L8 2.193z'/></svg>") !default;
+
+$custom-checkbox-indicator-indeterminate-bg-alt:           $component-active-bg-alt !default;
+$custom-checkbox-indicator-indeterminate-color-alt:        $custom-control-indicator-checked-color-alt !default;
+$custom-checkbox-indicator-icon-indeterminate-alt:         url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'><path stroke='#{$custom-checkbox-indicator-indeterminate-color-alt}' d='M0 2h4'/></svg>") !default;
+$custom-checkbox-indicator-indeterminate-box-shadow-alt:   none !default;
+$custom-checkbox-indicator-indeterminate-border-color-alt: $custom-checkbox-indicator-indeterminate-bg-alt !default;
+
+$custom-radio-indicator-icon-checked-alt:           url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='-4 -4 8 8'><circle r='3' fill='#{$custom-control-indicator-checked-color-alt}'/></svg>") !default;
+
+$custom-select-color-alt:               $input-color-alt !default;
+$custom-select-disabled-color-alt:      $gray-400-alt !default;
+$custom-select-bg-alt:                  $input-bg-alt !default;
+$custom-select-disabled-bg-alt:         $gray-800-alt !default;
+$custom-select-indicator-color-alt:     $gray-200-alt !default;
+$custom-select-indicator-alt:           url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='5' viewBox='0 0 4 5'><path fill='#{$custom-select-indicator-color-alt}' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>") !default;
+$custom-select-background-alt:          escape-svg($custom-select-indicator-alt) right $custom-select-padding-x center / $custom-select-bg-size no-repeat !default; // Used so we can have multiple background elements (e.g., arrow and feedback icon)
+
+$custom-select-border-color-alt:        $input-border-color-alt !default;
+$custom-select-box-shadow-alt:          inset 0 1px 2px rgba($white-alt, .075) !default;
+
+$custom-select-focus-border-color-alt:  $input-focus-border-color-alt !default;
+$custom-select-focus-box-shadow-alt:    0 0 0 $custom-select-focus-width $input-btn-focus-color-alt !default;
+
+$custom-range-track-bg-alt:             $gray-700-alt !default;
+$custom-range-track-box-shadow-alt:     inset 0 .25rem .25rem rgba($white-alt, .1) !default;
+
+$custom-range-thumb-bg-alt:                      $component-active-bg-alt !default;
+$custom-range-thumb-border-alt:                  0 !default;
+$custom-range-thumb-box-shadow-alt:              0 .1rem .25rem rgba($white-alt, .1) !default;
+$custom-range-thumb-focus-box-shadow-alt:        0 0 0 1px $body-color-alt, $input-focus-box-shadow-alt !default;
+$custom-range-thumb-active-bg-alt:               lighten($component-active-bg-alt, 35%) !default;
+$custom-range-thumb-disabled-bg-alt:             $gray-500-alt !default;
+
+$custom-file-focus-border-color-alt:    $input-focus-border-color-alt !default;
+$custom-file-focus-box-shadow-alt:      $input-focus-box-shadow-alt !default;
+$custom-file-disabled-bg-alt:           $input-disabled-bg-alt !default;
+
+$custom-file-color-alt:                 $input-color-alt !default;
+$custom-file-bg-alt:                    $input-bg-alt !default;
+$custom-file-border-color-alt:          $input-border-color-alt !default;
+$custom-file-box-shadow-alt:            $input-box-shadow-alt !default;
+$custom-file-button-color-alt:          $custom-file-color-alt !default;
+$custom-file-button-bg-alt:             $input-group-addon-bg-alt !default;
+
+
+// Form validation
+// ---------------------------------------
+
+$form-feedback-valid-color-alt:         theme-color-alt("success") !default;
+$form-feedback-invalid-color-alt:       theme-color-alt("danger") !default;
+
+$form-feedback-icon-valid-color-alt:    $form-feedback-valid-color-alt !default;
+$form-feedback-icon-valid-alt:          url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'><path fill='#{$form-feedback-icon-valid-color-alt}' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/></svg>") !default;
+$form-feedback-icon-invalid-color-alt:  $form-feedback-invalid-color-alt !default;
+$form-feedback-icon-invalid-alt:        url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='#{$form-feedback-icon-invalid-color-alt}' viewBox='0 0 12 12'><circle cx='6' cy='6' r='4.5'/><path stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/><circle cx='6' cy='8.2' r='.6' fill='#{$form-feedback-icon-invalid-color}' stroke='none'/></svg>") !default;
+
+$form-validation-states-alt: () !default;
+$form-validation-states-alt: map-merge(
+  (
+    "valid": (
+      "color": $form-feedback-valid-color-alt,
+      "icon": $form-feedback-icon-valid-alt
+    ),
+    "invalid": (
+      "color": $form-feedback-invalid-color-alt,
+      "icon": $form-feedback-icon-invalid-alt
+    ),
+  ),
+  $form-validation-states-alt
+);
+
+
+// Navs
+// ---------------------------------------
+
+$nav-link-disabled-color-alt:           $gray-400-alt !default;
+
+$nav-tabs-border-color-alt:             $gray-700-alt !default;
+$nav-tabs-link-hover-border-color-alt:  $gray-800-alt $gray-800-alt $nav-tabs-border-color-alt !default;
+$nav-tabs-link-active-color-alt:        $gray-300-alt !default;
+$nav-tabs-link-active-bg-alt:           $body-bg-alt !default;
+$nav-tabs-link-active-border-color-alt: $gray-700-alt $gray-700-alt $nav-tabs-link-active-bg-alt !default;
+
+$nav-pills-link-active-color-alt:       $component-active-color-alt !default;
+$nav-pills-link-active-bg-alt:          $component-active-bg-alt !default;
+
+$nav-divider-color-alt:                 $gray-800-alt !default;
+
+
+// Navbar
+// ---------------------------------------
+
+$navbar-dark-color-alt:                 rgba($white, .5) !default;
+$navbar-dark-hover-color-alt:           rgba($white, .75) !default;
+$navbar-dark-active-color-alt:          $white !default;
+$navbar-dark-disabled-color-alt:        rgba($white, .25) !default;
+$navbar-dark-toggler-icon-bg-alt:       url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'><path stroke='#{$navbar-dark-color-alt}' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/></svg>") !default;
+$navbar-dark-toggler-border-color-alt:  rgba($white, .1) !default;
+
+$navbar-light-color-alt:                rgba($black, .5) !default;
+$navbar-light-hover-color-alt:          rgba($black, .7) !default;
+$navbar-light-active-color-alt:         rgba($black, .9) !default;
+$navbar-light-disabled-color-alt:       rgba($black, .3) !default;
+$navbar-light-toggler-icon-bg-alt:      url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'><path stroke='#{$navbar-light-color-alt}' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/></svg>") !default;
+$navbar-light-toggler-border-color-alt: rgba($black, .1) !default;
+
+$navbar-light-brand-color-alt:          $navbar-light-active-color-alt !default;
+$navbar-light-brand-hover-color-alt:    $navbar-light-active-color-alt !default;
+$navbar-dark-brand-color-alt:           $navbar-dark-active-color-alt !default;
+$navbar-dark-brand-hover-color-alt:     $navbar-dark-active-color-alt !default;
+
+
+// Dropdowns
+// ---------------------------------------
+
+$dropdown-color-alt:                    $body-color-alt !default;
+$dropdown-bg-alt:                       $black-alt !default;
+$dropdown-border-color-alt:             rgba($white-alt, .15) !default;
+$dropdown-divider-bg-alt:               $gray-800 !default;
+$dropdown-box-shadow-alt:               0 .5rem 1rem rgba($white-alt, .175) !default;
+
+$dropdown-link-color-alt:               $gray-100 !default;
+$dropdown-link-hover-color-alt:         lighten($gray-100, 5%) !default;
+$dropdown-link-hover-bg-alt:            $gray-800 !default;
+
+$dropdown-link-active-color-alt:        $component-active-color-alt !default;
+$dropdown-link-active-bg-alt:           $component-active-bg-alt !default;
+
+$dropdown-link-disabled-color-alt:      $gray-500-alt !default;
+
+$dropdown-header-color-alt:             $gray-400-alt !default;
+
+
+// Pagination
+// ---------------------------------------
+
+$pagination-color-alt:                  $link-color-alt !default;
+$pagination-bg-alt:                     $gray-800-alt !default;
+$pagination-border-color-alt:           $gray-700-alt !default;
+
+$pagination-focus-box-shadow-alt:       $input-btn-focus-box-shadow-alt !default;
+$pagination-focus-outline-alt:          0 !default;
+
+$pagination-hover-color-alt:            $link-hover-color-alt !default;
+$pagination-hover-bg-alt:               $gray-700-alt !default;
+$pagination-hover-border-color-alt:     mix($gray-600-alt, $gray-700-alt) !default;
+
+$pagination-active-color-alt:           $component-active-color-alt !default;
+$pagination-active-bg-alt:              $component-active-bg-alt !default;
+$pagination-active-border-color-alt:    $pagination-active-bg-alt !default;
+
+$pagination-disabled-color-alt:         mix($gray-600-alt, $gray-700-alt) !default;
+$pagination-disabled-bg-alt:            $gray-900-alt !default;
+$pagination-disabled-border-color-alt:  $gray-700-alt !default;
+
+
+// Jumbotron
+// ---------------------------------------
+
+$jumbotron-color-alt:                   null !default;
+$jumbotron-bg-alt:                      $gray-800-alt !default;
+
+
+// Cards
+// ---------------------------------------
+
+$card-border-color-alt:                 rgba($white-alt, .125) !default;
+$card-cap-bg-alt:                       rgba($white-alt, .03) !default;
+$card-cap-color-alt:                    null !default;
+$card-color-alt:                        null !default;
+$card-bg-alt:                           mix($gray-800-alt, $gray-900-alt) !default;
+
+
+// Tooltips
+// ---------------------------------------
+
+$tooltip-color-alt:                     $black-alt !default;
+$tooltip-bg-alt:                        $white-alt !default;
+$tooltip-opacity-alt:                   .9 !default;
+
+$tooltip-arrow-color-alt:               $tooltip-bg-alt !default;
+
+$form-feedback-tooltip-opacity-alt:     $tooltip-opacity-alt !default;
+
+
+// Popovers
+// ---------------------------------------
+
+$popover-bg-alt:                        $black-alt !default;
+$popover-border-color-alt:              rgba($white-alt, .2) !default;
+$popover-box-shadow-alt:                0 .25rem .5rem rgba($white-alt, .2) !default;
+
+$popover-header-bg-alt:                 darken($popover-bg-alt, 3%) !default;
+$popover-header-color-alt:              $headings-color-alt !default;
+
+$popover-body-color-alt:                $body-color-alt !default;
+
+$popover-arrow-color-alt:               $popover-bg-alt !default;
+
+$popover-arrow-outer-color-alt:         fade-in($popover-border-color-alt, .05) !default;
+
+
+// Toasts
+// ---------------------------------------
+
+$toast-color-alt:                       null !default;
+$toast-background-color-alt:            rgba($gray-800-alt, .85) !default;
+$toast-border-color-alt:                rgba(255, 255, 255, .1) !default;
+$toast-box-shadow-alt:                  0 .25rem .75rem rgba($gray-500-alt, .1) !default;
+
+$toast-header-color-alt:                $gray-400-alt !default;
+$toast-header-background-color-alt:     rgba($gray-700-alt, .85) !default;
+$toast-header-border-color-alt:         rgba(255, 255, 255, .05) !default;
+
+
+// Badges
+// ---------------------------------------
+// nil
+
+
+// Modals
+// ---------------------------------------
+
+$modal-content-color-alt:               null !default;
+$modal-content-bg-alt:                  mix($gray-800-alt, $gray-900-alt) !default;
+$modal-content-border-color-alt:        rgba($white-alt, .2) !default;
+$modal-content-box-shadow-xs-alt:       0 .25rem .5rem rgba($white-alt, .5) !default;
+$modal-content-box-shadow-sm-up-alt:    0 .5rem 1rem rgba($white-alt, .5) !default;
+
+$modal-backdrop-bg-alt:                 $black-alt !default;
+$modal-backdrop-opacity-alt:            .85 !default;
+$modal-header-border-color-alt:         $border-color-alt !default;
+$modal-footer-border-color-alt:         $modal-header-border-color-alt !default;
+
+
+// Alerts
+// ---------------------------------------
+
+$alert-bg-level-alt:                    5 !default;
+$alert-border-level-alt:                4 !default;
+$alert-color-level-alt:                 -3 !default;
+
+
+// Progress bars
+// ---------------------------------------
+
+$progress-bg-alt:                       $gray-800-alt !default;
+$progress-box-shadow-alt:               inset 0 .1rem .1rem rgba($white-alt, .1) !default;
+$progress-bar-color-alt:                $black-alt !default;
+$progress-bar-bg-alt:                   theme-color-alt("primary") !default;
+
+
+// List group
+// ---------------------------------------
+
+$list-group-color-alt:                  null !default;
+$list-group-bg-alt:                     mix($gray-800-alt, $gray-900-alt) !default;
+$list-group-border-color-alt:           rgba($white-alt, .125) !default;
+
+$list-group-hover-bg-alt:               $gray-900-alt !default;
+$list-group-active-color-alt:           $component-active-color-alt !default;
+$list-group-active-bg-alt:              $component-active-bg-alt !default;
+$list-group-active-border-color-alt:    $list-group-active-bg-alt !default;
+
+$list-group-disabled-color-alt:         $gray-400-alt !default;
+$list-group-disabled-bg-alt:            $list-group-bg-alt !default;
+
+$list-group-action-color-alt:           $gray-300-alt !default;
+$list-group-action-hover-color-alt:     $list-group-action-color-alt !default;
+
+$list-group-action-active-color-alt:    $body-color-alt !default;
+$list-group-action-active-bg-alt:       $gray-800-alt !default;
+
+
+// Image thumbnails
+// ---------------------------------------
+
+$thumbnail-bg-alt:                      $body-bg-alt !default;
+$thumbnail-border-color-alt:            $gray-700-alt !default;
+$thumbnail-box-shadow-alt:              0 1px 2px rgba($white-alt, .075) !default;
+
+
+// Figures
+// ---------------------------------------
+
+$figure-caption-color-alt:              $gray-400-alt !default;
+
+
+// Breadcrumbs
+// ---------------------------------------
+
+$breadcrumb-bg-alt:                     $gray-800-alt !default;
+$breadcrumb-divider-color-alt:          $gray-400-alt !default;
+$breadcrumb-active-color-alt:           $gray-400-alt !default;
+$breadcrumb-divider-alt:                quote("/") !default;
+
+// Carousel
+// ---------------------------------------
+
+$carousel-control-color-alt:             $white-alt !default;
+$carousel-control-opacity-alt:           .5 !default;
+$carousel-control-hover-opacity-alt:     .9 !default;
+
+$carousel-indicator-active-bg-alt:       $black-alt !default;
+
+$carousel-caption-color-alt:             $black-alt !default;
+
+$carousel-control-prev-icon-bg-alt:      url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='#{$carousel-control-color-alt}' width='8' height='8' viewBox='0 0 8 8'><path d='M5.25 0l-4 4 4 4 1.5-1.5L4.25 4l2.5-2.5L5.25 0z'/></svg>") !default;
+$carousel-control-next-icon-bg-alt:      url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='#{$carousel-control-color-alt}' width='8' height='8' viewBox='0 0 8 8'><path d='M2.75 0l-1.5 1.5L3.75 4l-2.5 2.5L2.75 8l4-4-4-4z'/></svg>") !default;
+
+
+// Spinners
+// ---------------------------------------
+// nil
+
+
+// Close
+// ---------------------------------------
+
+$close-color-alt:                       $white-alt !default;
+$close-text-shadow-alt:                 0 1px 0 $black-alt !default;
+
+
+// Code
+// ---------------------------------------
+
+$code-color-alt:                        $teal-alt !default;
+
+$kbd-color-alt:                         $gray-100-alt !default;
+$kbd-bg-alt:                            $gray-800-alt !default;
+
+$pre-color-alt:                         $gray-100-alt !default;
+
+
+// Selection
+// ---------------------------------------
+
+$selection-color:                       $gray-200-alt;
+$selection-bg:                          rgba($cyan-alt, 0.5);

@@ -1,0 +1,44 @@
+
+// Left/right controls for nav
+
+.carousel-control-prev,
+.carousel-control-next {
+  color: $carousel-control-color-alt;
+  opacity: $carousel-control-opacity-alt;
+
+  @include hover-focus() {
+    color: $carousel-control-color-alt;
+    opacity: $carousel-control-hover-opacity-alt;
+  }
+}
+.carousel-control-prev {
+  @if $enable-gradients {
+    background-image: linear-gradient(90deg, rgba($black-alt, .25), rgba($black-alt, .001));
+  }
+}
+.carousel-control-next {
+  @if $enable-gradients {
+    background-image: linear-gradient(270deg, rgba($black-alt, .25), rgba($black-alt, .001));
+  }
+}
+
+.carousel-control-prev-icon {
+  background-image: escape-svg($carousel-control-prev-icon-bg-alt);
+}
+.carousel-control-next-icon {
+  background-image: escape-svg($carousel-control-next-icon-bg-alt);
+}
+
+// Optional indicator pips
+
+.carousel-indicators {
+  li {
+    background-color: $carousel-indicator-active-bg-alt;
+  }
+}
+
+// Optional captions
+
+.carousel-caption {
+  color: $carousel-caption-color-alt;
+}

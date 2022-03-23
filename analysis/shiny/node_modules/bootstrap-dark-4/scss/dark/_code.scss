@@ -1,0 +1,30 @@
+
+// Inline code
+code {
+  color: $code-color-alt;
+
+  a > & {
+    color: inherit;
+  }
+}
+
+// User input typically entered via keyboard
+kbd {
+  color: $kbd-color-alt;
+  background-color: $kbd-bg-alt;
+  @include box-shadow($kbd-box-shadow-alt);
+
+  kbd {
+    @include box-shadow(none);
+  }
+}
+
+// Blocks of code
+pre {
+  color: $pre-color-alt;
+
+  // Account for some code outputs that place code tags in pre tags
+  code {
+    color: inherit;
+  }
+}

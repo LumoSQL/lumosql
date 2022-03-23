@@ -1,0 +1,15 @@
+
+// Base styles
+
+.alert {
+  // border: $alert-border-width solid transparent;
+}
+
+
+// Alternate styles
+
+@each $color, $value in $theme-colors-alt {
+  .alert-#{$color} {
+    @include alert-variant(theme-color-level($color, $alert-bg-level-alt), theme-color-level($color, $alert-border-level-alt), theme-color-level($color, $alert-color-level-alt));
+  }
+}

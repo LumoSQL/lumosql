@@ -1,0 +1,14 @@
+
+.close {
+  color: $close-color-alt;
+  text-shadow: $close-text-shadow-alt;
+
+  // Override <a>'s hover style
+  @include hover() {
+    color: $close-color-alt;
+  }
+}
+
+// button.close {
+//   background-color: transparent;
+// }

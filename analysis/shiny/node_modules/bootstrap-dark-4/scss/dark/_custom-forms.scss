@@ -1,0 +1,264 @@
+
+// Checkboxes and radios
+
+.custom-control-input {
+  &:checked ~ .custom-control-label::before {
+    color: $custom-control-indicator-checked-color-alt;
+    border-color: $custom-control-indicator-checked-border-color-alt;
+    @include gradient-bg($custom-control-indicator-checked-bg-alt);
+    @include box-shadow($custom-control-indicator-checked-box-shadow-alt);
+  }
+
+  &:focus ~ .custom-control-label::before {
+    // the mixin is not used here to make sure there is feedback
+    @if $enable-shadows {
+      box-shadow: $input-box-shadow-alt, $input-focus-box-shadow-alt;
+    } @else {
+      box-shadow: $custom-control-indicator-focus-box-shadow-alt;
+    }
+  }
+
+  &:focus:not(:checked) ~ .custom-control-label::before {
+    border-color: $custom-control-indicator-focus-border-color-alt;
+  }
+
+  &:not(:disabled):active ~ .custom-control-label::before {
+    color: $custom-control-indicator-active-color-alt;
+    background-color: $custom-control-indicator-active-bg-alt;
+    border-color: $custom-control-indicator-active-border-color-alt;
+    @include box-shadow($custom-control-indicator-active-box-shadow-alt);
+  }
+
+  // Use [disabled] and :disabled to work around https://github.com/twbs/bootstrap/issues/28247
+  &[disabled],
+  &:disabled {
+    ~ .custom-control-label {
+      color: $custom-control-label-disabled-color-alt;
+
+      &::before {
+        background-color: $custom-control-indicator-disabled-bg-alt;
+      }
+    }
+  }
+}
+
+// Custom control indicators
+
+.custom-control-label {
+  color: $custom-control-label-color-alt;
+
+  // Background-color and (when enabled) gradient
+  &::before {
+    background-color: $custom-control-indicator-bg-alt;
+    border: $custom-control-indicator-border-color-alt solid $custom-control-indicator-border-width;
+    @include box-shadow($custom-control-indicator-box-shadow-alt);
+  }
+}
+
+// Checkboxes
+
+.custom-checkbox {
+  .custom-control-input:indeterminate ~ .custom-control-label {
+    &::before {
+      border-color: $custom-checkbox-indicator-indeterminate-border-color-alt;
+      @include gradient-bg($custom-checkbox-indicator-indeterminate-bg-alt);
+      @include box-shadow($custom-checkbox-indicator-indeterminate-box-shadow-alt);
+    }
+    &::after {
+      background-image: escape-svg($custom-checkbox-indicator-icon-indeterminate-alt);
+    }
+  }
+
+  .custom-control-input:disabled {
+    &:checked ~ .custom-control-label::before {
+      background-color: $custom-control-indicator-checked-disabled-bg-alt;
+    }
+    &:indeterminate ~ .custom-control-label::before {
+      background-color: $custom-control-indicator-checked-disabled-bg-alt;
+    }
+  }
+}
+
+// Radios
+
+.custom-radio {
+  .custom-control-input:checked ~ .custom-control-label {
+    &::after {
+      background-image: escape-svg($custom-radio-indicator-icon-checked-alt);
+    }
+  }
+
+  .custom-control-input:disabled {
+    &:checked ~ .custom-control-label::before {
+      background-color: $custom-control-indicator-checked-disabled-bg-alt;
+    }
+  }
+}
+
+// switches
+
+.custom-switch {
+  .custom-control-label {
+    &::after {
+      background-color: $custom-control-indicator-border-color-alt;
+    }
+  }
+
+  .custom-control-input:checked ~ .custom-control-label {
+    &::after {
+      background-color: $custom-control-indicator-bg-alt;
+    }
+  }
+
+  .custom-control-input:disabled {
+    &:checked ~ .custom-control-label::before {
+      background-color: $custom-control-indicator-checked-disabled-bg-alt;
+    }
+  }
+}
+
+// Select
+
+.custom-select {
+  color: $custom-select-color-alt;
+  background: $custom-select-bg-alt $custom-select-background-alt;
+  border: $custom-select-border-width solid $custom-select-border-color-alt;
+  @include box-shadow($custom-select-box-shadow-alt);
+
+  &:focus {
+    border-color: $custom-select-focus-border-color-alt;
+    @if $enable-shadows {
+      @include box-shadow($custom-select-box-shadow-alt, $custom-select-focus-box-shadow-alt);
+    } @else {
+      box-shadow: $custom-select-focus-box-shadow-alt;
+    }
+
+    &::-ms-value {
+      color: $input-color-alt;
+      background-color: $input-bg-alt;
+    }
+  }
+
+  &:disabled {
+    color: $custom-select-disabled-color-alt;
+    background-color: $custom-select-disabled-bg-alt;
+  }
+
+  &:-moz-focusring {
+    color: transparent;
+    text-shadow: 0 0 0 $custom-select-color-alt;
+  }
+}
+
+// File
+
+.custom-file-input {
+  &:focus ~ .custom-file-label {
+    border-color: $custom-file-focus-border-color-alt;
+    box-shadow: $custom-file-focus-box-shadow-alt;
+  }
+
+  &[disabled] ~ .custom-file-label,
+  &:disabled ~ .custom-file-label {
+    background-color: $custom-file-disabled-bg-alt;
+  }
+}
+
+.custom-file-label {
+  color: $custom-file-color-alt;
+  background-color: $custom-file-bg-alt;
+  border: $custom-file-border-width solid $custom-file-border-color-alt;
+  @include box-shadow($custom-file-box-shadow-alt);
+
+  &::after {
+    color: $custom-file-button-color-alt;
+    @include gradient-bg($custom-file-button-bg-alt);
+  }
+}
+
+// Range
+
+.custom-range {
+  // background-color: transparent;
+
+  &:focus {
+    outline: none;
+
+    &::-webkit-slider-thumb { box-shadow: $custom-range-thumb-focus-box-shadow-alt; }
+    &::-moz-range-thumb     { box-shadow: $custom-range-thumb-focus-box-shadow-alt; }
+    &::-ms-thumb            { box-shadow: $custom-range-thumb-focus-box-shadow-alt; }
+  }
+
+  &::-webkit-slider-thumb {
+    @include gradient-bg($custom-range-thumb-bg-alt);
+    border: $custom-range-thumb-border-alt;
+    @include box-shadow($custom-range-thumb-box-shadow-alt);
+
+    &:active {
+      @include gradient-bg($custom-range-thumb-active-bg-alt);
+    }
+  }
+
+  &::-webkit-slider-runnable-track {
+    // color: transparent; // Why?
+    background-color: $custom-range-track-bg-alt;
+    // border-color: transparent;
+    @include box-shadow($custom-range-track-box-shadow-alt);
+  }
+
+  &::-moz-range-thumb {
+    @include gradient-bg($custom-range-thumb-bg-alt);
+    border: $custom-range-thumb-border-alt;
+    @include box-shadow($custom-range-thumb-box-shadow-alt);
+
+    &:active {
+      @include gradient-bg($custom-range-thumb-active-bg-alt);
+    }
+  }
+
+  &::-moz-range-track {
+    // color: transparent;
+    background-color: $custom-range-track-bg-alt;
+    // border-color: transparent; // Firefox specific?
+    @include box-shadow($custom-range-track-box-shadow-alt);
+  }
+
+  &::-ms-thumb {
+    @include gradient-bg($custom-range-thumb-bg-alt);
+    border: $custom-range-thumb-border-alt;
+    @include box-shadow($custom-range-thumb-box-shadow-alt);
+
+    &:active {
+      @include gradient-bg($custom-range-thumb-active-bg-alt);
+    }
+  }
+
+  &::-ms-track {
+    // color: transparent;
+    // background-color: transparent;
+    // border-color: transparent;
+    @include box-shadow($custom-range-track-box-shadow-alt);
+  }
+
+  &::-ms-fill-lower {
+    background-color: $custom-range-track-bg-alt;
+  }
+
+  &::-ms-fill-upper {
+    background-color: $custom-range-track-bg-alt;
+  }
+
+  &:disabled {
+    &::-webkit-slider-thumb {
+      background-color: $custom-range-thumb-disabled-bg-alt;
+    }
+
+    &::-moz-range-thumb {
+      background-color: $custom-range-thumb-disabled-bg-alt;
+    }
+
+    &::-ms-thumb {
+      background-color: $custom-range-thumb-disabled-bg-alt;
+    }
+  }
+}

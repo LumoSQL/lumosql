@@ -1,0 +1,6 @@
+
+@mixin prefers-color-scheme( $scheme: dark ) {
+  @media (prefers-color-scheme: #{$scheme}) {
+    @content;
+  }
+}

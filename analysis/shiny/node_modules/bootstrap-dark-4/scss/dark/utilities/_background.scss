@@ -1,0 +1,18 @@
+
+@each $color, $value in $theme-colors-alt {
+  @include bg-variant(".bg-#{$color}", $value, true);
+}
+
+@if $enable-gradients {
+  @each $color, $value in $theme-colors-alt {
+    @include bg-gradient-variant(".bg-gradient-#{$color}", $value, true);
+  }
+}
+
+.bg-white {
+  background-color: $white-alt !important;
+}
+
+.bg-black {  // ADDED THIS ONE!
+  background-color: $black-alt !important;
+}

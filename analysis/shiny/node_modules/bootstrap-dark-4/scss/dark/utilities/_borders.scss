@@ -1,0 +1,23 @@
+
+// Border
+
+.border         { border: $border-width solid $border-color-alt !important; }
+.border-top     { border-top: $border-width solid $border-color-alt !important; }
+.border-right   { border-right: $border-width solid $border-color-alt !important; }
+.border-bottom  { border-bottom: $border-width solid $border-color-alt !important; }
+.border-left    { border-left: $border-width solid $border-color-alt !important; }
+
+
+@each $color, $value in $theme-colors-alt {
+  .border-#{$color} {
+    border-color: $value !important;
+  }
+}
+
+.border-white {
+  border-color: $white-alt !important;
+}
+
+.border-black {  // ADDED THIS ONE!
+  border-color: $white-alt !important;
+}

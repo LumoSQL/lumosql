@@ -1,0 +1,514 @@
+// Variables
+//
+// for exclusive use in bootstrap-unlit
+
+
+// Color system
+// ---------------------------------------
+
+$white-alt:    $white-save;
+$gray-100-alt: $gray-100-save;
+$gray-200-alt: $gray-200-save;
+$gray-300-alt: $gray-300-save;
+$gray-400-alt: $gray-400-save;
+$gray-500-alt: $gray-500-save;
+$gray-600-alt: $gray-600-save;
+$gray-700-alt: $gray-700-save;
+$gray-800-alt: $gray-800-save;
+$gray-900-alt: $gray-900-save;
+$black-alt:    $black-save;
+
+$grays-alt: $grays-save;
+
+$blue-alt:    $blue-save;
+$indigo-alt:  $indigo-save;
+$purple-alt:  $purple-save;
+$pink-alt:    $pink-save;
+$red-alt:     $red-save;
+$orange-alt:  $orange-save;
+$yellow-alt:  $yellow-save;
+$green-alt:   $green-save;
+$teal-alt:    $teal-save;
+$cyan-alt:    $cyan-save;
+
+$colors-alt: $colors-save;
+
+$primary-alt:       $primary-save;
+$secondary-alt:     $secondary-save;
+$success-alt:       $success-save;
+$info-alt:          $info-save;
+$warning-alt:       $warning-save;
+$danger-alt:        $danger-save;
+$light-alt:         $light-save;
+$dark-alt:          $dark-save;
+
+$theme-colors-alt: $theme-colors-save;
+
+$theme-color-interval-alt:      $theme-color-interval-save;
+
+$yiq-contrasted-threshold-alt:  $yiq-contrasted-threshold-save;
+
+$yiq-text-dark-alt:             $yiq-text-dark-save;
+$yiq-text-light-alt:            $yiq-text-light-save;
+
+
+// Body
+// ---------------------------------------
+
+$body-bg-alt:                   $body-bg-save;
+$body-color-alt:                $body-color-save;
+
+
+// Links
+// ---------------------------------------
+
+$link-color-alt:                              $link-color-save;
+$link-hover-color-alt:                        $link-hover-color-save;
+$emphasized-link-hover-darken-percentage-alt: $emphasized-link-hover-darken-percentage-save;
+
+
+// Components
+// ---------------------------------------
+
+$border-color-alt:                $border-color-save;
+
+$box-shadow-sm-alt:               $box-shadow-sm-save;
+$box-shadow-alt:                  $box-shadow-save;
+$box-shadow-lg-alt:               $box-shadow-lg-save;
+
+$component-active-color-alt:      $component-active-color-save;
+$component-active-bg-alt:         $component-active-bg-save;
+
+
+// Typography
+// ---------------------------------------
+
+$headings-color-alt:              $headings-color-save;
+
+$text-muted-alt:                  $text-muted-save;
+
+$blockquote-small-color-alt:      $blockquote-small-color-save;
+
+$hr-border-color-alt:             $hr-border-color-save;
+
+$kbd-box-shadow-alt:              $kbd-box-shadow-save;
+
+$mark-bg-alt:                     $mark-bg-save;
+
+
+// Tables
+// ---------------------------------------
+
+$table-color-alt:                 $table-color-save;
+$table-bg-alt:                    $table-bg-save;
+$table-accent-bg-alt:             $table-accent-bg-save;
+$table-hover-color-alt:           $table-hover-color-save;
+$table-hover-bg-alt:              $table-hover-bg-save;
+$table-active-bg-alt:             $table-active-bg-save;
+
+$table-border-color-alt:          $table-border-color-save;
+
+$table-head-bg-alt:               $table-head-bg-save;
+$table-head-color-alt:            $table-head-color-save;
+
+$table-dark-color-alt:            $table-dark-color-save;
+$table-dark-bg-alt:               $table-dark-bg-save;
+$table-dark-accent-bg-alt:        $table-dark-accent-bg-save;
+$table-dark-hover-color-alt:      $table-dark-hover-color-save;
+$table-dark-hover-bg-alt:         $table-dark-hover-bg-save;
+$table-dark-border-color-alt:     $table-dark-border-color-save;
+
+$table-caption-color-alt:         $table-caption-color-save;
+
+$table-bg-level-alt:              $table-bg-level-save;
+$table-border-level-alt:          $table-border-level-save;
+
+
+// Buttons + Forms
+// ---------------------------------------
+
+$input-btn-focus-color-alt:       $input-btn-focus-color-save;
+$input-btn-focus-box-shadow-alt:  $input-btn-focus-box-shadow-save;
+
+
+// Buttons
+// ---------------------------------------
+
+$btn-box-shadow-alt:              $btn-box-shadow-save;
+$btn-focus-box-shadow-alt:        $btn-focus-box-shadow-save;
+$btn-disabled-opacity-alt:        $btn-disabled-opacity-save;
+$btn-active-box-shadow-alt:       $btn-active-box-shadow-save;
+
+$btn-link-disabled-color-alt:     $btn-link-disabled-color-save;
+
+
+// Forms
+// ---------------------------------------
+
+$input-bg-alt:                              $input-bg-save;
+$input-disabled-bg-alt:                     $input-disabled-bg-save;
+
+$input-color-alt:                           $input-color-save;
+$input-border-color-alt:                    $input-border-color-save;
+$input-box-shadow-alt:                      $input-box-shadow-save;
+
+$input-focus-bg-alt:                        $input-focus-bg-save;
+$input-focus-border-color-alt:              $input-focus-border-color-save;
+$input-focus-color-alt:                     $input-focus-color-save;
+$input-focus-box-shadow-alt:                $input-focus-box-shadow-save;
+
+$input-placeholder-color-alt:               $input-placeholder-color-save;
+$input-plaintext-color-alt:                 $input-plaintext-color-save;
+
+$input-group-addon-color-alt:               $input-group-addon-color-save;
+$input-group-addon-bg-alt:                  $input-group-addon-bg-save;
+$input-group-addon-border-color-alt:        $input-group-addon-border-color-save;
+
+$custom-control-indicator-bg-alt:           $custom-control-indicator-bg-save;
+
+$custom-control-indicator-box-shadow-alt:   $custom-control-indicator-box-shadow-save;
+$custom-control-indicator-border-color-alt: $custom-control-indicator-border-color-save;
+
+$custom-control-label-color-alt:            $custom-control-label-color-save;
+
+$custom-control-indicator-disabled-bg-alt:          $custom-control-indicator-disabled-bg-save;
+$custom-control-label-disabled-color-alt:           $custom-control-label-disabled-color-save;
+
+$custom-control-indicator-checked-color-alt:        $custom-control-indicator-checked-color-save;
+$custom-control-indicator-checked-bg-alt:           $custom-control-indicator-checked-bg-save;
+$custom-control-indicator-checked-disabled-bg-alt:  $custom-control-indicator-checked-disabled-bg-save;
+$custom-control-indicator-checked-box-shadow-alt:   $custom-control-indicator-checked-box-shadow-save;
+$custom-control-indicator-checked-border-color-alt: $custom-control-indicator-checked-border-color-save;
+
+$custom-control-indicator-focus-box-shadow-alt:     $custom-control-indicator-focus-box-shadow-save;
+$custom-control-indicator-focus-border-color-alt:   $custom-control-indicator-focus-border-color-save;
+
+$custom-control-indicator-active-color-alt:         $custom-control-indicator-active-color-save;
+$custom-control-indicator-active-bg-alt:            $custom-control-indicator-active-bg-save;
+$custom-control-indicator-active-box-shadow-alt:    $custom-control-indicator-active-box-shadow-save;
+$custom-control-indicator-active-border-color-alt:  $custom-control-indicator-active-border-color-save;
+
+$custom-checkbox-indicator-icon-checked-alt:        $custom-checkbox-indicator-icon-checked-save;
+
+$custom-checkbox-indicator-indeterminate-bg-alt:           $custom-checkbox-indicator-indeterminate-bg-save;
+$custom-checkbox-indicator-indeterminate-color-alt:        $custom-checkbox-indicator-indeterminate-color-save;
+$custom-checkbox-indicator-icon-indeterminate-alt:         $custom-checkbox-indicator-icon-indeterminate-save;
+$custom-checkbox-indicator-indeterminate-box-shadow-alt:   $custom-checkbox-indicator-indeterminate-box-shadow-save;
+$custom-checkbox-indicator-indeterminate-border-color-alt: $custom-checkbox-indicator-indeterminate-border-color-save;
+
+$custom-radio-indicator-icon-checked-alt:           $custom-radio-indicator-icon-checked-save;
+
+$custom-select-color-alt:               $custom-select-color-save;
+$custom-select-disabled-color-alt:      $custom-select-disabled-color-save;
+$custom-select-bg-alt:                  $custom-select-bg-save;
+$custom-select-disabled-bg-alt:         $custom-select-disabled-bg-save;
+$custom-select-indicator-color-alt:     $custom-select-indicator-color-save;
+$custom-select-indicator-alt:           $custom-select-indicator-save;
+$custom-select-background-alt:          $custom-select-background-save;
+
+$custom-select-border-color-alt:        $custom-select-border-color-save;
+$custom-select-box-shadow-alt:          $custom-select-box-shadow-save;
+
+$custom-select-focus-border-color-alt:  $custom-select-focus-border-color-save;
+$custom-select-focus-box-shadow-alt:    $custom-select-focus-box-shadow-save;
+
+$custom-range-track-bg-alt:             $custom-range-track-bg-save;
+$custom-range-track-box-shadow-alt:     $custom-range-track-box-shadow-save;
+
+$custom-range-thumb-bg-alt:                      $custom-range-thumb-bg-save;
+$custom-range-thumb-border-alt:                  $custom-range-thumb-border-save;
+$custom-range-thumb-box-shadow-alt:              $custom-range-thumb-box-shadow-save;
+$custom-range-thumb-focus-box-shadow-alt:        $custom-range-thumb-focus-box-shadow-save;
+$custom-range-thumb-active-bg-alt:               $custom-range-thumb-active-bg-save;
+$custom-range-thumb-disabled-bg-alt:             $custom-range-thumb-disabled-bg-save;
+
+$custom-file-focus-border-color-alt:    $custom-file-focus-border-color-save;
+$custom-file-focus-box-shadow-alt:      $custom-file-focus-box-shadow-save;
+$custom-file-disabled-bg-alt:           $custom-file-disabled-bg-save;
+
+$custom-file-color-alt:                 $custom-file-color-save;
+$custom-file-bg-alt:                    $custom-file-bg-save;
+$custom-file-border-color-alt:          $custom-file-border-color-save;
+$custom-file-box-shadow-alt:            $custom-file-box-shadow-save;
+$custom-file-button-color-alt:          $custom-file-button-color-save;
+$custom-file-button-bg-alt:             $custom-file-button-bg-save;
+
+
+// Form validation
+// ---------------------------------------
+
+$form-feedback-valid-color-alt:         $form-feedback-valid-color-save;
+$form-feedback-invalid-color-alt:       $form-feedback-invalid-color-save;
+
+$form-feedback-icon-valid-color-alt:    $form-feedback-icon-valid-color-save;
+$form-feedback-icon-valid-alt:          $form-feedback-icon-valid-save;
+$form-feedback-icon-invalid-color-alt:  $form-feedback-icon-invalid-color-save;
+$form-feedback-icon-invalid-alt:        $form-feedback-icon-invalid-save;
+
+$form-validation-states-alt: $form-validation-states-save;
+
+
+// Navs
+// ---------------------------------------
+
+$nav-link-disabled-color-alt:           $nav-link-disabled-color-save;
+
+$nav-tabs-border-color-alt:             $nav-tabs-border-color-save;
+$nav-tabs-link-hover-border-color-alt:  $nav-tabs-link-hover-border-color-save;
+$nav-tabs-link-active-color-alt:        $nav-tabs-link-active-color-save;
+$nav-tabs-link-active-bg-alt:           $nav-tabs-link-active-bg-save;
+$nav-tabs-link-active-border-color-alt: $nav-tabs-link-active-border-color-save;
+
+$nav-pills-link-active-color-alt:       $nav-pills-link-active-color-save;
+$nav-pills-link-active-bg-alt:          $nav-pills-link-active-bg-save;
+
+$nav-divider-color-alt:                 $nav-divider-color-save;
+
+
+// Navbar
+// ---------------------------------------
+
+$navbar-dark-color-alt:                 $navbar-dark-color-save;
+$navbar-dark-hover-color-alt:           $navbar-dark-hover-color-save;
+$navbar-dark-active-color-alt:          $navbar-dark-active-color-save;
+$navbar-dark-disabled-color-alt:        $navbar-dark-disabled-color-save;
+$navbar-dark-toggler-icon-bg-alt:       $navbar-dark-toggler-icon-bg-save;
+$navbar-dark-toggler-border-color-alt:  $navbar-dark-toggler-border-color-save;
+
+$navbar-light-color-alt:                $navbar-light-color-save;
+$navbar-light-hover-color-alt:          $navbar-light-hover-color-save;
+$navbar-light-active-color-alt:         $navbar-light-active-color-save;
+$navbar-light-disabled-color-alt:       $navbar-light-disabled-color-save;
+$navbar-light-toggler-icon-bg-alt:      $navbar-light-toggler-icon-bg-save;
+$navbar-light-toggler-border-color-alt: $navbar-light-toggler-border-color-save;
+
+$navbar-light-brand-color-alt:          $navbar-light-brand-color-save;
+$navbar-light-brand-hover-color-alt:    $navbar-light-brand-hover-color-save;
+$navbar-dark-brand-color-alt:           $navbar-dark-brand-color-save;
+$navbar-dark-brand-hover-color-alt:     $navbar-dark-brand-hover-color-save;
+
+
+// Dropdowns
+// ---------------------------------------
+
+$dropdown-color-alt:                    $dropdown-color-save;
+$dropdown-bg-alt:                       $dropdown-bg-save;
+$dropdown-border-color-alt:             $dropdown-border-color-save;
+$dropdown-divider-bg-alt:               $dropdown-divider-bg-save;
+$dropdown-box-shadow-alt:               $dropdown-box-shadow-save;
+
+$dropdown-link-color-alt:               $dropdown-link-color-save;
+$dropdown-link-hover-color-alt:         $dropdown-link-hover-color-save;
+$dropdown-link-hover-bg-alt:            $dropdown-link-hover-bg-save;
+
+$dropdown-link-active-color-alt:        $dropdown-link-active-color-save;
+$dropdown-link-active-bg-alt:           $dropdown-link-active-bg-save;
+
+$dropdown-link-disabled-color-alt:      $dropdown-link-disabled-color-save;
+
+$dropdown-header-color-alt:             $dropdown-header-color-save;
+
+
+// Pagination
+// ---------------------------------------
+
+$pagination-color-alt:                  $pagination-color-save;
+$pagination-bg-alt:                     $pagination-bg-save;
+$pagination-border-color-alt:           $pagination-border-color-save;
+
+$pagination-focus-box-shadow-alt:       $pagination-focus-box-shadow-save;
+$pagination-focus-outline-alt:          $pagination-focus-outline-save;
+
+$pagination-hover-color-alt:            $pagination-hover-color-save;
+$pagination-hover-bg-alt:               $pagination-hover-bg-save;
+$pagination-hover-border-color-alt:     $pagination-hover-border-color-save;
+
+$pagination-active-color-alt:           $pagination-active-color-save;
+$pagination-active-bg-alt:              $pagination-active-bg-save;
+$pagination-active-border-color-alt:    $pagination-active-border-color-save;
+
+$pagination-disabled-color-alt:         $pagination-disabled-color-save;
+$pagination-disabled-bg-alt:            $pagination-disabled-bg-save;
+$pagination-disabled-border-color-alt:  $pagination-disabled-border-color-save;
+
+
+// Jumbotron
+// ---------------------------------------
+
+$jumbotron-color-alt:                   $jumbotron-color-save;
+$jumbotron-bg-alt:                      $jumbotron-bg-save;
+
+
+// Cards
+// ---------------------------------------
+
+$card-border-color-alt:                 $card-border-color-save;
+$card-cap-bg-alt:                       $card-cap-bg-save;
+$card-cap-color-alt:                    $card-cap-color-save;
+$card-color-alt:                        $card-color-save;
+$card-bg-alt:                           $card-bg-save;
+
+
+// Tooltips
+// ---------------------------------------
+
+$tooltip-color-alt:                     $tooltip-color-save;
+$tooltip-bg-alt:                        $tooltip-bg-save;
+$tooltip-opacity-alt:                   $tooltip-opacity-save;
+
+$tooltip-arrow-color-alt:               $tooltip-arrow-color-save;
+
+$form-feedback-tooltip-opacity-alt:     $form-feedback-tooltip-opacity-save;
+
+
+// Popovers
+// ---------------------------------------
+
+$popover-bg-alt:                        $popover-bg-save;
+$popover-border-color-alt:              $popover-border-color-save;
+$popover-box-shadow-alt:                $popover-box-shadow-save;
+
+$popover-header-bg-alt:                 $popover-header-bg-save;
+$popover-header-color-alt:              $popover-header-color-save;
+
+$popover-body-color-alt:                $popover-body-color-save;
+
+$popover-arrow-color-alt:               $popover-arrow-color-save;
+
+$popover-arrow-outer-color-alt:         $popover-arrow-outer-color-save;
+
+
+// Toasts
+// ---------------------------------------
+
+$toast-color-alt:                       $toast-color-save;
+$toast-background-color-alt:            $toast-background-color-save;
+$toast-border-color-alt:                $toast-border-color-save;
+$toast-box-shadow-alt:                  $toast-box-shadow-save;
+
+$toast-header-color-alt:                $toast-header-color-save;
+$toast-header-background-color-alt:     $toast-header-background-color-save;
+$toast-header-border-color-alt:         $toast-header-border-color-save;
+
+
+// Badges
+// ---------------------------------------
+// nil
+
+
+// Modals
+// ---------------------------------------
+
+$modal-content-color-alt:               $modal-content-color-save;
+$modal-content-bg-alt:                  $modal-content-bg-save;
+$modal-content-border-color-alt:        $modal-content-border-color-save;
+$modal-content-box-shadow-xs-alt:       $modal-content-box-shadow-xs-save;
+$modal-content-box-shadow-sm-up-alt:    $modal-content-box-shadow-sm-up-save;
+
+$modal-backdrop-bg-alt:                 $modal-backdrop-bg-save;
+$modal-backdrop-opacity-alt:            $modal-backdrop-opacity-save;
+$modal-header-border-color-alt:         $modal-header-border-color-save;
+$modal-footer-border-color-alt:         $modal-footer-border-color-save;
+
+
+// Alerts
+// ---------------------------------------
+
+$alert-bg-level-alt:                    $alert-bg-level-save;
+$alert-border-level-alt:                $alert-border-level-save;
+$alert-color-level-alt:                 $alert-color-level-save;
+
+
+// Progress bars
+// ---------------------------------------
+
+$progress-bg-alt:                       $progress-bg-save;
+$progress-box-shadow-alt:               $progress-box-shadow-save;
+$progress-bar-color-alt:                $progress-bar-color-save;
+$progress-bar-bg-alt:                   $progress-bar-bg-save;
+
+
+// List group
+// ---------------------------------------
+
+$list-group-color-alt:                  $list-group-color-save;
+$list-group-bg-alt:                     $list-group-bg-save;
+$list-group-border-color-alt:           $list-group-border-color-save;
+
+$list-group-hover-bg-alt:               $list-group-hover-bg-save;
+$list-group-active-color-alt:           $list-group-active-color-save;
+$list-group-active-bg-alt:              $list-group-active-bg-save;
+$list-group-active-border-color-alt:    $list-group-active-border-color-save;
+
+$list-group-disabled-color-alt:         $list-group-disabled-color-save;
+$list-group-disabled-bg-alt:            $list-group-disabled-bg-save;
+
+$list-group-action-color-alt:           $list-group-action-color-save;
+$list-group-action-hover-color-alt:     $list-group-action-hover-color-save;
+
+$list-group-action-active-color-alt:    $list-group-action-active-color-save;
+$list-group-action-active-bg-alt:       $list-group-action-active-bg-save;
+
+
+// Image thumbnails
+// ---------------------------------------
+
+$thumbnail-bg-alt:                      $thumbnail-bg-save;
+$thumbnail-border-color-alt:            $thumbnail-border-color-save;
+$thumbnail-box-shadow-alt:              $thumbnail-box-shadow-save;
+
+
+// Figures
+// ---------------------------------------
+
+$figure-caption-color-alt:              $figure-caption-color-save;
+
+
+// Breadcrumbs
+// ---------------------------------------
+
+$breadcrumb-bg-alt:                     $breadcrumb-bg-save;
+$breadcrumb-divider-color-alt:          $breadcrumb-divider-color-save;
+$breadcrumb-active-color-alt:           $breadcrumb-active-color-save;
+$breadcrumb-divider-alt:                $breadcrumb-divider-save;
+
+
+// Carousel
+// ---------------------------------------
+
+$carousel-control-color-alt:             $carousel-control-color-save;
+$carousel-control-opacity-alt:           $carousel-control-opacity-save;
+$carousel-control-hover-opacity-alt:     $carousel-control-hover-opacity-save;
+
+$carousel-indicator-active-bg-alt:       $carousel-indicator-active-bg-save;
+
+$carousel-caption-color-alt:             $carousel-caption-color-save;
+
+$carousel-control-prev-icon-bg-alt:      $carousel-control-prev-icon-bg-save;
+$carousel-control-next-icon-bg-alt:      $carousel-control-next-icon-bg-save;
+
+
+// Spinners
+// ---------------------------------------
+// nil
+
+
+// Close
+// ---------------------------------------
+
+$close-color-alt:                       $close-color-save;
+$close-text-shadow-alt:                 $close-text-shadow-save;
+
+
+// Code
+// ---------------------------------------
+
+$code-color-alt:                        $code-color-save;
+
+$kbd-color-alt:                         $kbd-color-save;
+$kbd-bg-alt:                            $kbd-bg-save;
+
+$pre-color-alt:                         $pre-color-save;
+
+
+// ---------------------------------------

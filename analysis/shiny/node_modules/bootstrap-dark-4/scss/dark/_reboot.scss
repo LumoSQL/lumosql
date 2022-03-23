@@ -1,0 +1,25 @@
+// Reboot
+
+// Body
+
+body {
+  color: $body-color-alt;
+  background-color: $body-bg-alt;
+}
+
+// Links
+
+a {
+  color: $link-color-alt;
+  background-color: transparent; // Remove the gray background on active links in IE 10.
+
+  @include hover() {
+    color: $link-hover-color-alt;
+  }
+}
+
+// Tables
+
+caption {
+  color: $table-caption-color-alt;
+}

@@ -1,0 +1,8 @@
+
+:root {
+  @if $color-scheme-alt == dark {
+    color-scheme: light dark;
+  } @else {
+    color-scheme: dark light;
+  }
+}

@@ -1,0 +1,8 @@
+
+// Colors
+
+@each $color, $value in $theme-colors-alt {
+  .badge-#{$color} {
+    @include badge-variant($value);
+  }
+}

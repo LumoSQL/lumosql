@@ -1,0 +1,31 @@
+
+// Actual modal
+.modal-content {
+  color: $modal-content-color-alt;
+  background-color: $modal-content-bg-alt;
+  border: $modal-content-border-width solid $modal-content-border-color-alt;
+  @include box-shadow($modal-content-box-shadow-xs-alt);
+}
+
+// Modal background
+.modal-backdrop {
+  background-color: $modal-backdrop-bg-alt;
+  &.show { opacity: $modal-backdrop-opacity-alt; }
+}
+
+// Modal header
+.modal-header {
+  border-bottom: $modal-header-border-width solid $modal-header-border-color-alt;
+}
+
+// Footer (for actions)
+.modal-footer {
+  border-top: $modal-footer-border-width solid $modal-footer-border-color-alt;
+}
+
+// Scale up the modal
+@include media-breakpoint-up(sm) {
+  .modal-content {
+    @include box-shadow($modal-content-box-shadow-sm-up-alt);
+  }
+}

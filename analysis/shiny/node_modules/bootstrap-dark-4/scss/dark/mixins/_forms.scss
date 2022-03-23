@@ -1,0 +1,14 @@
+
+// Form control focus state
+@mixin form-control-focus-alt($ignore-warning: false) {
+	&:focus {
+		color: $input-focus-color-alt;
+		background-color: $input-focus-bg-alt;
+		border-color: $input-focus-border-color-alt;
+		@if $enable-shadows {
+			@include box-shadow($input-box-shadow-alt, $input-focus-box-shadow-alt);
+		} @else {
+			box-shadow: $input-focus-box-shadow-alt;
+		}
+	}
+}

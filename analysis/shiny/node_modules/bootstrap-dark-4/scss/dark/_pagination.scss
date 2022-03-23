@@ -1,0 +1,30 @@
+
+.page-link {
+  background-color: $pagination-bg-alt;
+  border: $pagination-border-width solid $pagination-border-color-alt;
+
+  &:hover {
+    color: $pagination-hover-color-alt;
+    background-color: $pagination-hover-bg-alt;
+    border-color: $pagination-hover-border-color-alt;
+  }
+
+  &:focus {
+    outline: $pagination-focus-outline-alt;
+    box-shadow: $pagination-focus-box-shadow-alt;
+  }
+}
+
+.page-item {
+  &.active .page-link {
+    color: $pagination-active-color-alt;
+    background-color: $pagination-active-bg-alt;
+    border-color: $pagination-active-border-color-alt;
+  }
+
+  &.disabled .page-link {
+    color: $pagination-disabled-color-alt;
+    background-color: $pagination-disabled-bg-alt;
+    border-color: $pagination-disabled-border-color-alt;
+  }
+}

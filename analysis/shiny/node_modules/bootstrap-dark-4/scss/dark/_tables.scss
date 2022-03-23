@@ -1,0 +1,109 @@
+
+// Basic Bootstrap table
+
+
+.table {
+  color: $table-color-alt;
+  background-color: $table-bg-alt;
+
+  th,
+  td {
+    border-top: $table-border-width solid $table-border-color-alt;
+  }
+
+  thead th {
+    border-bottom: (2 * $table-border-width) solid $table-border-color-alt;
+  }
+
+  tbody + tbody {
+    border-top: (2 * $table-border-width) solid $table-border-color-alt;
+  }
+}
+
+
+// Border versions
+
+.table-bordered {
+  border: $table-border-width solid $table-border-color-alt;
+
+  th,
+  td {
+    border: $table-border-width solid $table-border-color-alt;
+  }
+}
+
+// Zebra-striping
+
+.table-striped {
+  tbody tr:nth-of-type(#{$table-striped-order}) {
+    background-color: $table-accent-bg-alt;
+  }
+}
+
+
+// Hover effect
+
+.table-hover {
+  tbody tr {
+    @include hover() {
+      color: $table-hover-color-alt;
+      background-color: $table-hover-bg-alt;
+    }
+  }
+}
+
+
+// Table backgrounds
+
+@each $color, $value in $theme-colors-alt {
+  @include table-row-variant($color, theme-color-level-alt($color, $table-bg-level-alt), theme-color-level-alt($color, $table-border-level-alt));
+}
+
+@include table-row-variant(active, $table-active-bg-alt);
+
+
+// Dark styles
+
+.table {
+  .thead-dark {
+    th {
+      color: $table-dark-color-alt;
+      background-color: $table-dark-bg-alt;
+      border-color: $table-dark-border-color-alt;
+    }
+  }
+
+  .thead-light {
+    th {
+      color: $table-head-color-alt;
+      background-color: $table-head-bg-alt;
+      border-color: $table-border-color-alt;
+    }
+  }
+}
+
+.table-dark {
+  color: $table-dark-color-alt;
+  background-color: $table-dark-bg-alt;
+
+  th,
+  td,
+  thead th {
+    border-color: $table-dark-border-color-alt;
+  }
+
+  &.table-striped {
+    tbody tr:nth-of-type(#{$table-striped-order}) {
+      background-color: $table-dark-accent-bg-alt;
+    }
+  }
+
+  &.table-hover {
+    tbody tr {
+      @include hover() {
+        color: $table-dark-hover-color-alt;
+        background-color: $table-dark-hover-bg-alt;
+      }
+    }
+  }
+}

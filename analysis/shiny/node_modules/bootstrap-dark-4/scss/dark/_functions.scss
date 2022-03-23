@@ -1,0 +1,41 @@
+// Bootstrap functions
+//
+// Utility mixins and functions for evaluating source code across our variables, maps, and mixins.
+
+
+// Color contrast
+@function color-yiq-alt($color, $dark: $yiq-text-dark-alt, $light: $yiq-text-light-alt) {
+  $r: red($color);
+  $g: green($color);
+  $b: blue($color);
+
+  $yiq: (($r * 299) + ($g * 587) + ($b * 114)) * .001;
+
+  @if ($yiq >= $yiq-contrasted-threshold) {
+    @return $dark;
+  } @else {
+    @return $light;
+  }
+}
+
+// Retrieve color Sass maps
+@function color-alt($key: "blue-alt") {
+  @return map-get($colors-alt, $key);
+}
+
+@function theme-color-alt($key: "primary-alt") {
+  @return map-get($theme-colors-alt, $key);
+}
+
+@function gray-alt($key: "100-alt") {
+  @return map-get($grays-alt, $key);
+}
+
+// Request a theme color level
+@function theme-color-level-alt($color-name: "primary-alt", $level: 0) {
+  $color: theme-color-alt($color-name);
+  $color-base: if($level > 0, $black-alt, $white-alt);
+  $level: abs($level);
+
+  @return mix($color-base, $color, $level * $theme-color-interval-alt);
+}

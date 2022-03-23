@@ -1,0 +1,10 @@
+
+$color-schemes: no-preference, light, dark !default;
+
+@each $mode in $color-schemes {
+  @include prefers-color-scheme($mode) {
+    @each $value in $displays {
+      .d-#{$mode}-#{$value} { display: $value !important; }
+    }
+  }
+}

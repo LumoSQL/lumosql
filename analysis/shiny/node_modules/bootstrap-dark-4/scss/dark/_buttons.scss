@@ -1,0 +1,66 @@
+
+// Base styles
+
+.btn {
+  color: $body-color-alt;
+
+  @include hover() {
+    color: $body-color-alt;
+  }
+
+  &:focus,
+  &.focus {
+    box-shadow: $btn-focus-box-shadow-alt;
+  }
+
+  // Disabled comes first so active can properly restyle
+  &.disabled,
+  &:disabled {
+    opacity: $btn-disabled-opacity-alt;
+    @include box-shadow(none);
+  }
+
+  &:not(:disabled):not(.disabled) {
+
+    &:active,
+    &.active {
+      @include box-shadow($btn-active-box-shadow-alt);
+
+      &:focus {
+        @include box-shadow($btn-focus-box-shadow-alt, $btn-active-box-shadow-alt);
+      }
+    }
+  }
+}
+
+// Alternate buttons
+
+@each $color, $value in $theme-colors-alt {
+  .btn-#{$color} {
+    @include button-variant($value, $value);
+  }
+}
+
+@each $color, $value in $theme-colors-alt {
+  .btn-outline-#{$color} {
+    @include button-outline-variant($value);
+  }
+}
+
+
+// Link buttons
+
+// Make a button look and behave like a link
+.btn-link {
+  color: $link-color-alt;
+
+  @include hover() {
+    color: $link-hover-color-alt;
+  }
+
+  &:disabled,
+  &.disabled {
+    color: $btn-link-disabled-color-alt;
+    pointer-events: none;
+  }
+}

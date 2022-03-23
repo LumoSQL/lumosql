@@ -1,0 +1,48 @@
+
+// The dropdown menu
+.dropdown-menu {
+  color: $dropdown-color-alt;
+  background-color: $dropdown-bg-alt;
+  border: $dropdown-border-width solid $dropdown-border-color-alt;
+  @include box-shadow($dropdown-box-shadow-alt);
+}
+
+// Dividers (basically an `<hr>`) within the dropdown
+.dropdown-divider {
+  @include nav-divider($dropdown-divider-bg-alt, $dropdown-divider-margin-y, true);
+}
+
+// Links, buttons, and more within the dropdown menu
+.dropdown-item {
+  color: $dropdown-link-color-alt;
+
+  @include hover-focus() {
+    color: $dropdown-link-hover-color-alt;
+    @include gradient-bg($dropdown-link-hover-bg-alt);
+  }
+
+  &.active,
+  &:active {
+    color: $dropdown-link-active-color-alt;
+    @include gradient-bg($dropdown-link-active-bg-alt);
+  }
+
+  &.disabled,
+  &:disabled {
+    color: $dropdown-link-disabled-color-alt;
+    // background-color: transparent;
+    // @if $enable-gradients {
+    //   background-image: none;
+    // }
+  }
+}
+
+// Dropdown section headers
+.dropdown-header {
+  color: $dropdown-header-color-alt;
+}
+
+// Dropdown text
+.dropdown-item-text {
+  color: $dropdown-link-color-alt;
+}

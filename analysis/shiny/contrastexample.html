@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en-US" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>User Interface Test for LumoSQL Shiny</title>
+  <link rel="stylesheet" href="darkly.min.css"> 
+  <style type="text/css">
+   pre {
+      color: cyan;
+      background-color: black;
+    }
+   code {
+      color: white;
+      background-color: black;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="titleBar">
+    <div id="container">
+      <h1>Welcome to LumoSQL Benchmarking</h1>
+    </div>
+  </div>
+  <div id="outer-content">
+    <div id="intro">
+	    <p>Welcome to LumoSQL's graphical benchmark data presentation, which summarises thousands of <a href="https://sqlite.org">SQLite</a> 
+	    and <a href="https://lumosql.org/src/lumosql">LumoSQL</a> benchmarking runs.<p>
+	    We are experimenting with R, so feel free to review our <a href="server.R.text">R server</a> and <a href="ui.R.text">R ui</a> code as we develop our data model.<p>
+	At the bottom of this page is information about how you can get the data for yourself, or generate your own data sets.
+      <p>
+      Each data point represents the duration of one benchmark run and the line connecting the points indicates the benchmarks were run on the same computer. The legend consists of : backend version, cpu-info, disk-info, os-version and byte order. Hover above the data points to see the measured time and run information. 
+      <p>
+    </div>
+      <div id="main">
+      </div>
+      <div id="shiny">
+        <iframe id="shiny1" src="./sample-apps/contrastdemo2/" style="border: 1px solid #AAA; width: 1000px; height: 1660px"></iframe>
+        <div class="caption">
+          Contrast demo above...
+        </div>
+
+<h1 id="replicating-benchmarking-results-from-our-data">Replicating benchmarking results from our data</h1>
+<p>There are 4 minimum requirements for you to display the data we have collected from our benchmark runs:</p>
+<ul class="incremental">
+<li>tclsh in the path</li>
+<li>sqlite3 in the path</li>
+<li>The Tcl script https://lumosql.org/src/lumosql/file?name=tool/benchmark-filter.tcl</li>
+<li>The data: wget https://lumosql.org/dist/benchmarks-to-date/all-lumosql-benchmark-data-combined.sqlite</li>
+</ul>
+<h2 id="schema-of-benchmarking-data">Schema of benchmarking data</h2>
+<p>There are two tables: <code>run_data</code> for information about the setup of a particular run (hardware, versions of software being tested, etc) and <code>test_data</code>, for the timing or other results from the run.</p>
+<p>Every benchmarking run in <code>run_data</code> has an SHA3 runid allocated, stored as (run_id, key, value) tuples.</p>
+<pre><code>CREATE TABLE run_data (
+        run_id VARCHAR(128),
+        key VARCHAR(256),
+        value TEXT
+    );
+CREATE UNIQUE INDEX run_data_index ON run_data (run_id, key);
+CREATE TABLE test_data (
+        run_id VARCHAR(128),
+        test_number INTEGER,
+        key VARCHAR(256),
+        value TEXT
+    );
+CREATE UNIQUE INDEX test_data_index_1 ON test_data (run_id, test_number, key);
+CREATE UNIQUE INDEX test_data_index_2 ON test_data (run_id, key, test_number);</code></pre>
+<h2 id="trying-it-out">Trying it out</h2>
+<p>Here are some commands to get a feel for benchmark-filter.tcl:</p>
+<pre><code>tclsh benchmark-filter.tcl -help
+# The following command tells us there are 8140 tests in this data file
+tclsh benchmark-filter.tcl -db all-lumosql-benchmark-data-combined.sqlite \
+      -count
+# This one shows the test result from the most recent 20 runs, with 20
+# rows of data, one test timing per column
+tclsh benchmark-filter.tcl -db all-lumosql-benchmark-data-combined.sqlite \
+      -summary -column test
+# We can select for hardware types, for example two types of autodetected disk:
+tclsh benchmark-filter.tcl -db all-lumosql-benchmark-data-combined.sqlite \
+      -column test -disk %ramdisk%
+tclsh benchmark-filter.tcl -db all-lumosql-benchmark-data-combined.sqlite \
+      -column test -disk %wdc%
+# Or for example an autodetected processor:
+tclsh benchmark-filter.tcl -db all-lumosql-benchmark-data-combined.sqlite \
+      -column test -cpu %ryzen%
+# The same, but showing one column per run, one row per test, with more
+# details about runs, but also getting unreadable if showing more runs)
+tclsh benchmark-filter.tcl -db all-lumosql-benchmark-data-combined.sqlite \
+      -cpu %ryzen%
+# This compares SQLite against other versions of itself on a particular
+# hardware combination (-no-backend means only to show an unmodified SQLite,
+# as opposed to one with an alternative storage backend provided)
+tclsh benchmark-filter.tcl -db all-lumosql-benchmark-data-combined.sqlite \
+      -column test -no-backend -datasize 1 -cpu %ryzen% -disk &#39;%ssd%&#39;
+# This compares one version of SQLite with all versions of LMDB on the same
+# hardware combination (-no-backend shows unmodified SQLite, and
+# -backend lmdb adds to that runs with LMDB as alternative storage backend):
+tclsh benchmark-filter.tcl -db all-lumosql-benchmark-data-combined.sqlite \
+      -column test -version 3.37.2 -datasize 1 -no-backend -backend lmdb \
+      -cpu %ryzen% -disk &#39;%ssd%&#39;
+# This compares all versions of SQLite with one version of LMDB again on
+# the same hardware combination:
+tclsh benchmark-filter.tcl -db all-lumosql-benchmark-data-combined.sqlite \
+      -column test -datasize 1 -backend lmdb-0.9.29 -no-backend \
+      -cpu %ryzen% -disk %ssd% -limit 0
+# This compares the last 200 benchmarks we ran, _unreadably_:
+tclsh benchmark-filter.tcl -db all-lumosql-benchmark-data-combined.sqlite \
+      -ignore-numbers -summary -limit 200
+# same, but swapping rows and columns for an easier to read output:
+tclsh benchmark-filter.tcl -db all-lumosql-benchmark-data-combined.sqlite \
+      -ignore-numbers -summary -limit 200 -column test
+# And finally, for humour value, this compares native SQLite with the copy
+# of SQLite 3.18.2 included as &quot;SQL option&quot; in BDB 18.1.32 (we filter by
+# -version 3.18.2 which selects both the native and the modified SQLite):
+tclsh benchmark-filter.tcl -db all-lumosql-benchmark-data-combined.sqlite \
+      -version 3.18.2 -quick</code></pre>
+
+<h1 id="datasizerw-option-and-implications">DATASIZE=r,w option and implications</h1>
+<p>These are some of the more interesting results.</p>
+<p>Most tests include a number of SQL statements executed in sequence; <code>DATASIZE=r,w</code> allows to multiply the number of statements which read data by <code>r</code> and the number of statement which write or update data by <code>w</code> (if <code>r</code> = <code>w</code>, we use <code>DATASIZE=r</code> as an abbreviation, and this is how it is displayed by <code>benchmark-filter.tcl</code>)</p>
+<p>Note: when results include different data sizes, the test names will differ so it refuses to show them all in one combined output; however the <code>-ignore-numbers</code> option replaces all numbers in the test names by a single <code>#</code>, so they can be shown side by side.</p>
+<p>(show some examples of comparing for example 1,2 2,1 and 2 and comment on this, using -ignore-numbers )</p>
+<h1 id="replicating-results-ab-initio">Replicating results ab initio</h1>
+<p>We expect quite a few of you might want to see these results for yourself, on your systems. Our <a href="https://lumosql.org/src/lumosql/doc/trunk/README.md#build-environment-and-dependencies">install instructions</a> are fairly well tested, after which you should be able to continue to the next section, <a href="https://lumosql.org/src/lumosql/doc/trunk/README.md#using-the-build-and-benchmark-system">Quickstart Build and Benchmarking</a>. This is about generating benchmark run data for <em>your</em> system. You will then be able to run all the <code>benchmark-filter.tcl</code> commands listed earlier in this document on <em>your</em> benchmarks.sqlite file.</p>
+<h2 id="refining-your-benchmarking">Refining your benchmarking</h2>
+<ul class="incremental">
+<li>Add runs to a combined file, detecting duplicates: <code>sh tool/add-results-to-combined tool/benchmark-filter.tcl combined.sqlite *.sqlite</code></li>
+<li>The -completed status on benchmark-filter.tcl is about selecting runs which ran successfully to the end</li>
+<li>If you are suspicious about corruption: <code>for n in *.sqlite; do echo "$n"; echo 'pragma integrity_check;' | sqlite3 -readonly "$n"; done</code></li>
+<li>To see what the benchmarking will guess for DISK_COMMENT and CPU_COMMENT: <code>tclsh tool/hardware-detect.tcl $PATH-THAT-WOULD-BE-VALID</code> and <code>tclsh tool/hardware-detect.tcl</code>, respectively. PATH-THAT-WOULD-BE-VALID means to detect the disk that would contain the supplied path, whether or not it exists at the moment. Sometimes there will be a null response, but that is because we can’t guess on that system yet, and is not an error. Do please report any detection tips for us to add. We are trying to avoid a dependency on Tclx, which not all systems have and which is not in any case so brilliant at hardware detection.</li>
+<li>We have some hints for <a href="https://lumosql.org/src/lumosql/file?name=kbench/README.md">running benchmarking on a cluster</a></li>
+<li>Do please send us your benchmarking sqlite files with a suitable filename, so we can add them to <a href="https://lumosql.org/dist/benchmarks-to-date/">our growing collection</a></li>
+</ul>
+<h1 id="limitations">Limitations</h1>
+<ul class="incremental">
+<li>The LumoSQL tooling works with whole, human-readable version numbers rather than SCM commit hashes. It would be good to add support for SCM hashes.</li>
+<li>Some of the benchmark runs were done before all the fields were fully populated. Therefore, some comparisons have less source data available than others (eg the disk media detection is relatively new.)</li>
+<li>Nearly all benchmarking has been done on IA-64 architectures, with some on ARM32.</li>
+<li>All testing so far has been conducted by the three authors. The LumoSQL benchmarking system is intended to be used by anyone and to have output databases easily mergable, however we have not yet had external contributions.</li>
+<li>The SQL queries in benchmark-filter are not optimal, and we expect SQL specialists will be able to improve them. This won’t change the benchmark results but will change how quickly we can get summary results.</li>
+</ul>
+<h1 id="whats-next">What’s next</h1>
+<ul class="incremental">
+<li>Incorporate feedback from the good recipients of this document!</li>
+<li>Use R and various graphs to supplement the output of benchmark-filter.tcl. This is being worked on now.</li>
+<li>Upload facility so (a) trusted people can upload benchmarks and (b) untrusted people can upload benchmarks, with suitable checks and suspicions.</li>
+<li>Carry on with improving LumoSQL and the privacy/security enhancements enabled by Lumions.</li>
+</ul>
+
+        
+    </div>
+  </div>
+</body>
+</html>

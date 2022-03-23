@@ -1,0 +1,36 @@
+
+// Tabs
+
+.nav-tabs {
+  border-bottom: $nav-tabs-border-width solid $nav-tabs-border-color-alt;
+
+  .nav-link {
+    // border: $nav-tabs-border-width solid transparent;
+
+    @include hover-focus() {
+      border-color: $nav-tabs-link-hover-border-color-alt;
+    }
+
+    &.disabled {
+      color: $nav-link-disabled-color-alt;
+    }
+  }
+
+  .nav-link.active,
+  .nav-item.show .nav-link {
+    color: $nav-tabs-link-active-color-alt;
+    background-color: $nav-tabs-link-active-bg-alt;
+    border-color: $nav-tabs-link-active-border-color-alt;
+  }
+}
+
+
+// Pills
+
+.nav-pills {
+  .nav-link.active,
+  .show > .nav-link {
+    color: $nav-pills-link-active-color-alt;
+    background-color: $nav-pills-link-active-bg-alt;
+  }
+}

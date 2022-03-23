@@ -1,0 +1,560 @@
+// Variables
+//
+// Variables should follow the `$component-state-property-size` formula for
+// consistent naming. Ex: $nav-link-disabled-color and $modal-content-box-shadow-xs.
+
+
+// Color system
+// ---------------------------------------
+
+$white:    $white-alt;
+$gray-100: $gray-100-alt;
+$gray-200: $gray-200-alt;
+$gray-300: $gray-300-alt;
+$gray-400: $gray-400-alt;
+$gray-500: $gray-500-alt;
+$gray-600: $gray-600-alt;
+$gray-700: $gray-700-alt;
+$gray-800: $gray-800-alt;
+$gray-900: $gray-900-alt;
+$black:    $black-alt;
+
+$grays: map-merge(
+  $grays,  // not `-alt`
+  (
+    "100": $gray-100-alt,
+    "200": $gray-200-alt,
+    "300": $gray-300-alt,
+    "400": $gray-400-alt,
+    "500": $gray-500-alt,
+    "600": $gray-600-alt,
+    "700": $gray-700-alt,
+    "800": $gray-800-alt,
+    "900": $gray-900-alt
+  )
+);
+
+$blue:    $blue-alt;
+$indigo:  $indigo-alt;
+$purple:  $purple-alt;
+$pink:    $pink-alt;
+$red:     $red-alt;
+$orange:  $orange-alt;
+$yellow:  $yellow-alt;
+$green:   $green-alt;
+$teal:    $teal-alt;
+$cyan:    $cyan-alt;
+
+$colors: map-merge(
+  $colors,  // not `-alt`
+  (
+    "blue":       $blue-alt,
+    "indigo":     $indigo-alt,
+    "purple":     $purple-alt,
+    "pink":       $pink-alt,
+    "red":        $red-alt,
+    "orange":     $orange-alt,
+    "yellow":     $yellow-alt,
+    "green":      $green-alt,
+    "teal":       $teal-alt,
+    "cyan":       $cyan-alt,
+    "white":      $white-alt,
+    "gray":       $gray-600-alt,
+    "gray-dark":  $gray-800-alt
+  )
+);
+
+$primary:       $primary-alt;
+$secondary:     $secondary-alt;
+$success:       $success-alt;
+$info:          $info-alt;
+$warning:       $warning-alt;
+$danger:        $danger-alt;
+$light:         $light-alt;
+$dark:          $dark-alt;
+
+$theme-colors: map-merge(
+  $theme-colors,  // not `-alt`
+  (
+    "primary":    $primary-alt,
+    "secondary":  $secondary-alt,
+    "success":    $success-alt,
+    "info":       $info-alt,
+    "warning":    $warning-alt,
+    "danger":     $danger-alt,
+    "light":      $light-alt,
+    "dark":       $dark-alt
+  )
+);
+
+$theme-color-interval:      $theme-color-interval-alt;
+
+$yiq-contrasted-threshold:  $yiq-contrasted-threshold-alt;
+
+$yiq-text-dark:             $yiq-text-dark-alt;
+$yiq-text-light:            $yiq-text-light-alt;
+
+
+// Body
+// ---------------------------------------
+
+$body-bg:                   $body-bg-alt;
+$body-color:                $body-color-alt;
+
+
+// Links
+// ---------------------------------------
+
+$link-color:                              $link-color-alt;
+$link-hover-color:                        $link-hover-color-alt;
+$emphasized-link-hover-darken-percentage: $emphasized-link-hover-darken-percentage-alt;
+
+
+// Components
+// ---------------------------------------
+
+$border-color:                $border-color-alt;
+
+$box-shadow-sm:               $box-shadow-sm-alt;
+$box-shadow:                  $box-shadow-alt;
+$box-shadow-lg:               $box-shadow-lg-alt;
+
+$component-active-color:      $component-active-color-alt;
+$component-active-bg:         $component-active-bg-alt;
+
+
+// Typography
+// ---------------------------------------
+
+$headings-color:              $headings-color-alt;
+
+$text-muted:                  $text-muted-alt;
+
+$blockquote-small-color:      $blockquote-small-color-alt;
+
+$hr-border-color:             $hr-border-color-alt;
+
+$kbd-box-shadow:              $kbd-box-shadow-alt;
+
+$mark-bg:                     $mark-bg-alt;
+
+
+// Tables
+// ---------------------------------------
+
+$table-color:                 $table-color-alt;
+$table-bg:                    $table-bg-alt;
+$table-accent-bg:             $table-accent-bg-alt;
+$table-hover-color:           $table-hover-color-alt;
+$table-hover-bg:              $table-hover-bg-alt;
+$table-active-bg:             $table-active-bg-alt;
+
+$table-border-color:          $table-border-color-alt;
+
+$table-head-bg:               $table-head-bg-alt;
+$table-head-color:            $table-head-color-alt;
+
+$table-dark-color:            $table-dark-color-alt;
+$table-dark-bg:               $table-dark-bg-alt;
+$table-dark-accent-bg:        $table-dark-accent-bg-alt;
+$table-dark-hover-color:      $table-dark-hover-color-alt;
+$table-dark-hover-bg:         $table-dark-hover-bg-alt;
+$table-dark-border-color:     $table-dark-border-color-alt;
+
+$table-caption-color:         $table-caption-color-alt;
+
+$table-bg-level:              $table-bg-level-alt;
+$table-border-level:          $table-border-level-alt;
+
+
+// Buttons + Forms
+// ---------------------------------------
+
+$input-btn-focus-color:       $input-btn-focus-color-alt;
+$input-btn-focus-box-shadow:  $input-btn-focus-box-shadow-alt;
+
+
+// Buttons
+// ---------------------------------------
+
+$btn-box-shadow:              $btn-box-shadow-alt;
+$btn-focus-box-shadow:        $btn-focus-box-shadow-alt;
+$btn-disabled-opacity:        $btn-disabled-opacity-alt;
+$btn-active-box-shadow:       $btn-active-box-shadow-alt;
+
+$btn-link-disabled-color:     $btn-link-disabled-color-alt;
+
+
+// Forms
+// ---------------------------------------
+
+$input-bg:                              $input-bg-alt;
+$input-disabled-bg:                     $input-disabled-bg-alt;
+
+$input-color:                           $input-color-alt;
+$input-border-color:                    $input-border-color-alt;
+$input-box-shadow:                      $input-box-shadow-alt;
+
+$input-focus-bg:                        $input-focus-bg-alt;
+$input-focus-border-color:              $input-focus-border-color-alt;
+$input-focus-color:                     $input-focus-color-alt;
+$input-focus-box-shadow:                $input-focus-box-shadow-alt;
+
+$input-placeholder-color:               $input-placeholder-color-alt;
+$input-plaintext-color:                 $input-plaintext-color-alt;
+
+$input-group-addon-color:               $input-group-addon-color-alt;
+$input-group-addon-bg:                  $input-group-addon-bg-alt;
+$input-group-addon-border-color:        $input-group-addon-border-color-alt;
+
+$custom-control-indicator-bg:           $custom-control-indicator-bg-alt;
+
+$custom-control-indicator-box-shadow:   $custom-control-indicator-box-shadow-alt;
+$custom-control-indicator-border-color: $custom-control-indicator-border-color-alt;
+
+$custom-control-label-color:            $custom-control-label-color-alt;
+
+$custom-control-indicator-disabled-bg:          $custom-control-indicator-disabled-bg-alt;
+$custom-control-label-disabled-color:           $custom-control-label-disabled-color-alt;
+
+$custom-control-indicator-checked-color:        $custom-control-indicator-checked-color-alt;
+$custom-control-indicator-checked-bg:           $custom-control-indicator-checked-bg-alt;
+$custom-control-indicator-checked-disabled-bg:  $custom-control-indicator-checked-disabled-bg-alt;
+$custom-control-indicator-checked-box-shadow:   $custom-control-indicator-checked-box-shadow-alt;
+$custom-control-indicator-checked-border-color: $custom-control-indicator-checked-border-color-alt;
+
+$custom-control-indicator-focus-box-shadow:     $custom-control-indicator-focus-box-shadow-alt;
+$custom-control-indicator-focus-border-color:   $custom-control-indicator-focus-border-color-alt;
+
+$custom-control-indicator-active-color:         $custom-control-indicator-active-color-alt;
+$custom-control-indicator-active-bg:            $custom-control-indicator-active-bg-alt;
+$custom-control-indicator-active-box-shadow:    $custom-control-indicator-active-box-shadow-alt;
+$custom-control-indicator-active-border-color:  $custom-control-indicator-active-border-color-alt;
+
+$custom-checkbox-indicator-icon-checked:        $custom-checkbox-indicator-icon-checked-alt;
+
+$custom-checkbox-indicator-indeterminate-bg:           $custom-checkbox-indicator-indeterminate-bg-alt;
+$custom-checkbox-indicator-indeterminate-color:        $custom-checkbox-indicator-indeterminate-color-alt;
+$custom-checkbox-indicator-icon-indeterminate:         $custom-checkbox-indicator-icon-indeterminate-alt;
+$custom-checkbox-indicator-indeterminate-box-shadow:   $custom-checkbox-indicator-indeterminate-box-shadow-alt;
+$custom-checkbox-indicator-indeterminate-border-color: $custom-checkbox-indicator-indeterminate-border-color-alt;
+
+$custom-radio-indicator-icon-checked:           $custom-radio-indicator-icon-checked-alt;
+
+$custom-select-color:               $custom-select-color-alt;
+$custom-select-disabled-color:      $custom-select-disabled-color-alt;
+$custom-select-bg:                  $custom-select-bg-alt;
+$custom-select-disabled-bg:         $custom-select-disabled-bg-alt;
+$custom-select-indicator-color:     $custom-select-indicator-color-alt;
+$custom-select-indicator:           $custom-select-indicator-alt;
+$custom-select-background:          $custom-select-background-alt;
+
+$custom-select-border-color:        $custom-select-border-color-alt;
+$custom-select-box-shadow:          $custom-select-box-shadow-alt;
+
+$custom-select-focus-border-color:  $custom-select-focus-border-color-alt;
+$custom-select-focus-box-shadow:    $custom-select-focus-box-shadow-alt;
+
+$custom-range-track-bg:             $custom-range-track-bg-alt;
+$custom-range-track-box-shadow:     $custom-range-track-box-shadow-alt;
+
+$custom-range-thumb-bg:                      $custom-range-thumb-bg-alt;
+$custom-range-thumb-border:                  $custom-range-thumb-border-alt;
+$custom-range-thumb-box-shadow:              $custom-range-thumb-box-shadow-alt;
+$custom-range-thumb-focus-box-shadow:        $custom-range-thumb-focus-box-shadow-alt;
+$custom-range-thumb-active-bg:               $custom-range-thumb-active-bg-alt;
+$custom-range-thumb-disabled-bg:             $custom-range-thumb-disabled-bg-alt;
+
+$custom-file-focus-border-color:    $custom-file-focus-border-color-alt;
+$custom-file-focus-box-shadow:      $custom-file-focus-box-shadow-alt;
+$custom-file-disabled-bg:           $custom-file-disabled-bg-alt;
+
+$custom-file-color:                 $custom-file-color-alt;
+$custom-file-bg:                    $custom-file-bg-alt;
+$custom-file-border-color:          $custom-file-border-color-alt;
+$custom-file-box-shadow:            $custom-file-box-shadow-alt;
+$custom-file-button-color:          $custom-file-button-color-alt;
+$custom-file-button-bg:             $custom-file-button-bg-alt;
+
+
+// Form validation
+// ---------------------------------------
+
+$form-feedback-valid-color:         $form-feedback-valid-color-alt;
+$form-feedback-invalid-color:       $form-feedback-invalid-color-alt;
+
+$form-feedback-icon-valid-color:    $form-feedback-icon-valid-color-alt;
+$form-feedback-icon-valid:          $form-feedback-icon-valid-alt;
+$form-feedback-icon-invalid-color:  $form-feedback-icon-invalid-color-alt;
+$form-feedback-icon-invalid:        $form-feedback-icon-invalid-alt;
+
+$form-validation-states: map-merge(
+  $form-validation-states,
+  $form-validation-states-alt
+);
+
+
+// Navs
+// ---------------------------------------
+
+$nav-link-disabled-color:           $nav-link-disabled-color-alt;
+
+$nav-tabs-border-color:             $nav-tabs-border-color-alt;
+$nav-tabs-link-hover-border-color:  $nav-tabs-link-hover-border-color-alt;
+$nav-tabs-link-active-color:        $nav-tabs-link-active-color-alt;
+$nav-tabs-link-active-bg:           $nav-tabs-link-active-bg-alt;
+$nav-tabs-link-active-border-color: $nav-tabs-link-active-border-color-alt;
+
+$nav-pills-link-active-color:       $nav-pills-link-active-color-alt;
+$nav-pills-link-active-bg:          $nav-pills-link-active-bg-alt;
+
+$nav-divider-color:                 $nav-divider-color-alt;
+
+
+// Navbar
+// ---------------------------------------
+
+$navbar-dark-color:                 $navbar-dark-color-alt;
+$navbar-dark-hover-color:           $navbar-dark-hover-color-alt;
+$navbar-dark-active-color:          $navbar-dark-active-color-alt;
+$navbar-dark-disabled-color:        $navbar-dark-disabled-color-alt;
+$navbar-dark-toggler-icon-bg:       $navbar-dark-toggler-icon-bg-alt;
+$navbar-dark-toggler-border-color:  $navbar-dark-toggler-border-color-alt;
+
+$navbar-light-color:                $navbar-light-color-alt;
+$navbar-light-hover-color:          $navbar-light-hover-color-alt;
+$navbar-light-active-color:         $navbar-light-active-color-alt;
+$navbar-light-disabled-color:       $navbar-light-disabled-color-alt;
+$navbar-light-toggler-icon-bg:      $navbar-light-toggler-icon-bg-alt;
+$navbar-light-toggler-border-color: $navbar-light-toggler-border-color-alt;
+
+$navbar-light-brand-color:          $navbar-light-brand-color-alt;
+$navbar-light-brand-hover-color:    $navbar-light-brand-hover-color-alt;
+$navbar-dark-brand-color:           $navbar-dark-brand-color-alt;
+$navbar-dark-brand-hover-color:     $navbar-dark-brand-hover-color-alt;
+
+
+// Dropdowns
+// ---------------------------------------
+
+$dropdown-color:                    $dropdown-color-alt;
+$dropdown-bg:                       $dropdown-bg-alt;
+$dropdown-border-color:             $dropdown-border-color-alt;
+$dropdown-divider-bg:               $dropdown-divider-bg-alt;
+$dropdown-box-shadow:               $dropdown-box-shadow-alt;
+
+$dropdown-link-color:               $dropdown-link-color-alt;
+$dropdown-link-hover-color:         $dropdown-link-hover-color-alt;
+$dropdown-link-hover-bg:            $dropdown-link-hover-bg-alt;
+
+$dropdown-link-active-color:        $dropdown-link-active-color-alt;
+$dropdown-link-active-bg:           $dropdown-link-active-bg-alt;
+
+$dropdown-link-disabled-color:      $dropdown-link-disabled-color-alt;
+
+$dropdown-header-color:             $dropdown-header-color-alt;
+
+
+// Pagination
+// ---------------------------------------
+
+$pagination-color:                  $pagination-color-alt;
+$pagination-bg:                     $pagination-bg-alt;
+$pagination-border-color:           $pagination-border-color-alt;
+
+$pagination-focus-box-shadow:       $pagination-focus-box-shadow-alt;
+$pagination-focus-outline:          $pagination-focus-outline-alt;
+
+$pagination-hover-color:            $pagination-hover-color-alt;
+$pagination-hover-bg:               $pagination-hover-bg-alt;
+$pagination-hover-border-color:     $pagination-hover-border-color-alt;
+
+$pagination-active-color:           $pagination-active-color-alt;
+$pagination-active-bg:              $pagination-active-bg-alt;
+$pagination-active-border-color:    $pagination-active-border-color-alt;
+
+$pagination-disabled-color:         $pagination-disabled-color-alt;
+$pagination-disabled-bg:            $pagination-disabled-bg-alt;
+$pagination-disabled-border-color:  $pagination-disabled-border-color-alt;
+
+
+// Jumbotron
+// ---------------------------------------
+
+$jumbotron-color:                   $jumbotron-color-alt;
+$jumbotron-bg:                      $jumbotron-bg-alt;
+
+
+// Cards
+// ---------------------------------------
+
+$card-border-color:                 $card-border-color-alt;
+$card-cap-bg:                       $card-cap-bg-alt;
+$card-cap-color:                    $card-cap-color-alt;
+$card-color:                        $card-color-alt;
+$card-bg:                           $card-bg-alt;
+
+
+// Tooltips
+// ---------------------------------------
+
+$tooltip-color:                     $tooltip-color-alt;
+$tooltip-bg:                        $tooltip-bg-alt;
+$tooltip-opacity:                   $tooltip-opacity-alt;
+
+$tooltip-arrow-color:               $tooltip-arrow-color-alt;
+
+$form-feedback-tooltip-opacity:     $form-feedback-tooltip-opacity-alt;
+
+
+// Popovers
+// ---------------------------------------
+
+$popover-bg:                        $popover-bg-alt;
+$popover-border-color:              $popover-border-color-alt;
+$popover-box-shadow:                $popover-box-shadow-alt;
+
+$popover-header-bg:                 $popover-header-bg-alt;
+$popover-header-color:              $popover-header-color-alt;
+
+$popover-body-color:                $popover-body-color-alt;
+
+$popover-arrow-color:               $popover-arrow-color-alt;
+
+$popover-arrow-outer-color:         $popover-arrow-outer-color-alt;
+
+
+// Toasts
+// ---------------------------------------
+
+$toast-color:                       $toast-color-alt;
+$toast-background-color:            $toast-background-color-alt;
+$toast-border-color:                $toast-border-color-alt;
+$toast-box-shadow:                  $toast-box-shadow-alt;
+
+$toast-header-color:                $toast-header-color-alt;
+$toast-header-background-color:     $toast-header-background-color-alt;
+$toast-header-border-color:         $toast-header-border-color-alt;
+
+
+// Badges
+// ---------------------------------------
+// nil
+
+
+// Modals
+// ---------------------------------------
+
+$modal-content-color:               $modal-content-color-alt;
+$modal-content-bg:                  $modal-content-bg-alt;
+$modal-content-border-color:        $modal-content-border-color-alt;
+$modal-content-box-shadow-xs:       $modal-content-box-shadow-xs-alt;
+$modal-content-box-shadow-sm-up:    $modal-content-box-shadow-sm-up-alt;
+
+$modal-backdrop-bg:                 $modal-backdrop-bg-alt;
+$modal-backdrop-opacity:            $modal-backdrop-opacity-alt;
+$modal-header-border-color:         $modal-header-border-color-alt;
+$modal-footer-border-color:         $modal-footer-border-color-alt;
+
+
+// Alerts
+// ---------------------------------------
+
+$alert-bg-level:                    $alert-bg-level-alt;
+$alert-border-level:                $alert-border-level-alt;
+$alert-color-level:                 $alert-color-level-alt;
+
+
+// Progress bars
+// ---------------------------------------
+
+$progress-bg:                       $progress-bg-alt;
+$progress-box-shadow:               $progress-box-shadow-alt;
+$progress-bar-color:                $progress-bar-color-alt;
+$progress-bar-bg:                   $progress-bar-bg-alt;
+
+
+// List group
+// ---------------------------------------
+
+$list-group-color:                  $list-group-color-alt;
+$list-group-bg:                     $list-group-bg-alt;
+$list-group-border-color:           $list-group-border-color-alt;
+
+$list-group-hover-bg:               $list-group-hover-bg-alt;
+$list-group-active-color:           $list-group-active-color-alt;
+$list-group-active-bg:              $list-group-active-bg-alt;
+$list-group-active-border-color:    $list-group-active-border-color-alt;
+
+$list-group-disabled-color:         $list-group-disabled-color-alt;
+$list-group-disabled-bg:            $list-group-disabled-bg-alt;
+
+$list-group-action-color:           $list-group-action-color-alt;
+$list-group-action-hover-color:     $list-group-action-hover-color-alt;
+
+$list-group-action-active-color:    $list-group-action-active-color-alt;
+$list-group-action-active-bg:       $list-group-action-active-bg-alt;
+
+
+// Image thumbnails
+// ---------------------------------------
+
+$thumbnail-bg:                      $thumbnail-bg-alt;
+$thumbnail-border-color:            $thumbnail-border-color-alt;
+$thumbnail-box-shadow:              $thumbnail-box-shadow-alt;
+
+
+// Figures
+// ---------------------------------------
+
+$figure-caption-color:              $figure-caption-color-alt;
+
+
+// Breadcrumbs
+// ---------------------------------------
+
+$breadcrumb-bg:                     $breadcrumb-bg-alt;
+$breadcrumb-divider-color:          $breadcrumb-divider-color-alt;
+$breadcrumb-active-color:           $breadcrumb-active-color-alt;
+$breadcrumb-divider:                $breadcrumb-divider-alt;
+
+
+// Carousel
+// ---------------------------------------
+
+$carousel-control-color:             $carousel-control-color-alt;
+$carousel-control-opacity:           $carousel-control-opacity-alt;
+$carousel-control-hover-opacity:     $carousel-control-hover-opacity-alt;
+
+$carousel-indicator-active-bg:       $carousel-indicator-active-bg-alt;
+
+$carousel-caption-color:             $carousel-caption-color-alt;
+
+$carousel-control-prev-icon-bg:      $carousel-control-prev-icon-bg-alt;
+$carousel-control-next-icon-bg:      $carousel-control-next-icon-bg-alt;
+
+
+// Spinners
+// ---------------------------------------
+// nil
+
+
+// Close
+// ---------------------------------------
+
+$close-color:                       $close-color-alt;
+$close-text-shadow:                 $close-text-shadow-alt;
+
+
+// Code
+// ---------------------------------------
+
+$code-color:                        $code-color-alt;
+
+$kbd-color:                         $kbd-color-alt;
+$kbd-bg:                            $kbd-bg-alt;
+
+$pre-color:                         $pre-color-alt;
+
+
+// ---------------------------------------

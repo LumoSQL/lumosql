@@ -1,0 +1,15 @@
+
+// Contextual colors
+
+.text-white { color: $white-alt !important; }
+.text-black { color: $black-alt !important; }  // ADDED THIS ONE!
+
+@each $color, $value in $theme-colors-alt {
+  @include text-emphasis-variant(".text-#{$color}", $value, true);
+}
+
+.text-body { color: $body-color-alt !important; }
+.text-muted { color: $text-muted-alt !important; }
+
+.text-black-50 { color: rgba($black-alt, .5) !important; }
+.text-white-50 { color: rgba($white-alt, .5) !important; }

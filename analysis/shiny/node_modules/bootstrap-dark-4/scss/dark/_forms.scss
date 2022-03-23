@@ -1,0 +1,55 @@
+
+// Textual form controls
+
+.form-control {
+  color: $input-color-alt;
+  background-color: $input-bg-alt;
+  border: $input-border-width solid $input-border-color-alt;
+
+  @include box-shadow($input-box-shadow-alt);
+
+  @include form-control-focus-alt($ignore-warning: true);
+
+  &:disabled,
+  &[readonly] {
+    background-color: $input-disabled-bg-alt;
+  }
+}
+
+select.form-control {
+  -webkit-appearance: caret;
+
+  &:-moz-focusring {
+    // color: transparent;
+    text-shadow: 0 0 0 $input-color-alt;
+  }
+
+  &:focus::-ms-value {
+    color: $input-color-alt;
+    background-color: $input-bg-alt;
+  }
+}
+
+
+// Labels
+
+.form-control-plaintext {
+  color: $input-plaintext-color-alt;
+}
+
+
+// Checkboxes and radios
+
+.form-check-input {
+  &[disabled] ~ .form-check-label,
+  &:disabled ~ .form-check-label {
+    color: $text-muted-alt;
+  }
+}
+
+
+// Form validation
+
+@each $state, $data in $form-validation-states-alt {
+  @include form-validation-state($state, map-get($data, color), map-get($data, icon));
+}
