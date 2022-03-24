@@ -17,14 +17,15 @@
 
 <main>
 <p>
-<b>NOTE - This is a dummy page at the moment. None of the links work. If you have feedback we'd love to hear it. LumoSQL is tricky to explain simply.</b>
+<b>NOTE - This is a dummy page at the moment. None of the links work. If you have feedback we'd love to hear it. LumoSQL is tricky to explain simply, and this dummy page is to experiment with how a public release of LumoSQL should be presented. We assume that if you want to download LumoSQL you know it is a drop-in replacement for the SQLite library (eg /usr/lib/libsqlite3.so depending on your operating system) and that you are either writing an application that uses the sqlite3 library, or, you are using the commandline version (eg /usr/bin/sqlite3). We would also hope and expect LumoSQL to be packaged in operating systems, so that means the packagers have to understand how we do LumoSQL releases.</b>
 <p>
 <p>
-<p>LumoSQL is available in several ways, depending on your needs. We will not be providing binaries until LumoSQL v1.0 is released, so your choices are to get <em>all</em> the source for generating 700+ versions and combinations, <em>or</em>, to select just the sources that LumoSQL tools generate relevant to your needs. None are large downloads.</p>
+<p>LumoSQL is available in several ways, depending on your needs. We will not be providing binaries until LumoSQL v1.0 is released, so your choices are to get <em>all</em> the source for generating 700+ versions and combinations, <em>or</em>, to select just the sources that LumoSQL tools generate relevant to your needs. None are large downloads, and the <a href="https://lumosql.org/src/not-forking">Not-forking</a> tool does cache downloads and reconstruct trees from local versions as much as possible.</p>
 <p>
-SQLite is used on just about every operating system in use today, and most kinds of computer hardware including hardware that does not run an operating system. Currently the LumoSQL source code is tested on a limited range of mainstream operating systems. We know that once our core functionality is complete there is some work to do to re-enable portability and to create thousands more benchmarking runs on the newly-supported hardware. We would love to <a href="mailto:authors@lumosql.org">be contacted</a> by people interested in seeing LumoSQL support improve.
+If you have problems getting a LumoSQL release you can <a href="mailto:authors@lumosql.org">contact us</a> and we will do our best.
 
-<h2 style="color: #5e9ca0;">LumoSQL Trunk (master tree)</h2>
+<h2 style="color: #5e9ca0;">LumoSQL Trunk</h2>
+<p>'Trunk' means the same as 'master', 'default' or 'HEAD'. It's the current latest development version.
 <p>If you are a developer curious about which of the many combinations might be right for your application, then you want the ability to generate everything the LumoSQL tools can give you. This includes any version of modified SQLite with encryption, privacy, backend, benchmarking etc features. For this you will need the <strong>Fossil</strong> trunk SCM tree, or its <strong>Git</strong> mirror, or the <strong>Trunk source tarball</strong>:</p>
 <table border="1">
 <tbody>
@@ -35,8 +36,8 @@ SQLite is used on just about every operating system in use today, and most kinds
 </td>
 </tr>
 <tr>
-<td>Git mirror of LumoSQL trunk</td>
-<td><em>git clone https://lumosql/src/lumosql<br />cd lumosql<br /><em>git checkout</em> # for current trunk<br /><em>git checkout version-0.7 # for a specific LumoSQL version</em><br /><em>git tag | grep version # to list all versions</em> </em></td>
+	<td><a href="https://github.com/LumoSQL/lumosql">GitHub mirror of LumoSQL trunk</a></td>
+<td><em>git clone https://github.com/LumoSQL/lumosql<br />cd lumosql<br /><em>git checkout</em> # for current trunk<br /><em>git checkout version-0.7 # for a specific LumoSQL version</em><br /><em>git tag | grep version # to list all versions</em> </em></td>
 </tr>
 <tr>
 <td>Tarball of trunk</td>
