@@ -1,44 +1,85 @@
 
 # Table of Contents
 
-1.  [Questions](#orga6bb7a6)
-2.  [Data](#org90706b9)
-3.  [Design of experiment](#orgf252887)
-    1.  [Concepts](#orga69da89)
-    2.  [LumoSQL versus SQLite](#orgce9baf3)
-    3.  [Benchmark data](#org096cbd1)
-4.  [Methods](#org5e5d94d)
-    1.  [General considerations](#org61c94c0)
-    2.  [Model matrix](#org31326cd)
-5.  [References](#org64f5005)
+1.  [Research questions](#orgc3e34f0)
+2.  [Data](#orge3f663a)
+3.  [Design of experiment](#org1fa9c9c)
+    1.  [Concepts](#org4c9f39a)
+    2.  [LumoSQL versus SQLite](#orga4c3602)
+    3.  [Benchmark data](#org4ce47ab)
+4.  [Methods](#org5e20a6a)
+    1.  [General considerations](#org9602d2a)
+    2.  [Model matrix](#org3d7cf37)
+5.  [References](#org47694e5)
 
 
-<a id="orga6bb7a6"></a>
+<a id="orgc3e34f0"></a>
 
-# Questions
+# Research questions
 
-Some are documented in [1], others were mentioned in #lumosql at
-libera.chat
+Amassing data is not enough. We need to define the comparisons that
+we want to make to design the type of runs suitable for the analysis.
 
--   Main questions
-    -   What happens to performance when LMDB is swapped in as a storage
-        backend for SQLite?
--   Peripheric questions
-    -   Does SQLite get faster with each version?
-    -   Which compile options make a given version of SQLite faster?
-    -   How do different versions and compile options combine to change
-        performance as data size gets large?
-    -   Does SQLITE<sub>DEBUG</sub> really make SQLite run approximately three
-        times slower?
-    -   What happens when a given set of compile options, versions and
-        data size are tested on faster and slower disks?
-    -   Submitted SQLite-only at datasize 100,1 and 1,100 all with and
-        without discard to show if, as expected, discard makes no
-        significant timing difference other than not crashing on giant
-        sizes. (danshearer 20220316)
+We have *many* run time measurements produced under varying conditions:
+
+-   Data size
+-   Backend (unmodified vs. lmdb)
+-   SQLite version
+-   lmdb version
+
+We have *some* run time measurements produced under varying
+conditions of storage, cpu, and OS version. If we want to address
+the impact of these on run times, we'd need to produce new runs.
+
+We have *no* data to study the effects of these:
+
+1.  `byte-order`
+2.  `option-debug`
+3.  `option-lmdb_debug`
+4.  `option-lmdb_fixed_rowid`
+5.  `option-lmdb_transaction`
+6.  `option-rowsum`
+7.  `option-rowsum_algorithm`
+8.  `option-sqlite3_journal`
+9.  `os-type`
+
+These are questions pulled from [1] and or #lumosql at libera.chat
+
+-   What happens to performance when LMDB is swapped in as a storage
+    backend for SQLite?
+-   Does SQLite get faster with each version?
+-   Which compile options make a given version of SQLite faster?
+-   How do different versions and compile options combine to change
+    performance as data size gets large?
+-   Does SQLITE<sub>DEBUG</sub> really make SQLite run approximately three
+    times slower?
+-   What happens when a given set of compile options, versions and
+    data size are tested on faster and slower disks?
+-   Submitted SQLite-only at datasize 100,1 and 1,100 all with and
+    without discard to show if, as expected, discard makes no
+    significant timing difference other than not crashing on giant
+    sizes. (danshearer 20220316)
+
+Please, list below your questions in the right category. Leave your
+name after each question so we can follow up. Consider framing your
+questions in terms of *how much* rather than binary terms (*how
+much does A differ from B?* versus *is A higher than B?*)
+
+-   Main questions: that should be up front the focus of the immediate
+    runs and analysis
+    -   Add question and name here
+    -   Add question and name here
+-   Peripheric questions: that you would like answer as a side effect
+    with little to no additional effort involved
+    -   Add question and name here
+    -   Add question and name here
+-   Dream questions: that you would like to answer in the future but
+    it's out of reach right now
+    -   Add question and name here
+    -   Add question and name here
 
 
-<a id="org90706b9"></a>
+<a id="orge3f663a"></a>
 
 # Data
 
@@ -52,12 +93,12 @@ libera.chat
 -   Subset records with `sqliteVersion`  matching `3\.3[4-8]`
 
 
-<a id="orgf252887"></a>
+<a id="org1fa9c9c"></a>
 
 # Design of experiment
 
 
-<a id="orga69da89"></a>
+<a id="org4c9f39a"></a>
 
 ## Concepts
 
@@ -77,7 +118,7 @@ libera.chat
     effect, or whose effect is not of interest, on the response
 
 
-<a id="orgce9baf3"></a>
+<a id="orga4c3602"></a>
 
 ## LumoSQL versus SQLite
 
@@ -87,7 +128,7 @@ where the latter acts as a baseline. This analysis focuses on two
 configuration sets:
 
 
-<a id="org096cbd1"></a>
+<a id="org4ce47ab"></a>
 
 ## Benchmark data
 
@@ -483,12 +524,12 @@ run. We classify them into the following groups:
 </table>
 
 
-<a id="org5e5d94d"></a>
+<a id="org5e20a6a"></a>
 
 # Methods
 
 
-<a id="org61c94c0"></a>
+<a id="org9602d2a"></a>
 
 ## General considerations
 
@@ -498,7 +539,7 @@ run. We classify them into the following groups:
     1.
 
 
-<a id="org31326cd"></a>
+<a id="org3d7cf37"></a>
 
 ## Model matrix
 
@@ -546,7 +587,7 @@ TBD
 1.  All control variables not commented on.
 
 
-<a id="org64f5005"></a>
+<a id="org47694e5"></a>
 
 # References
 
