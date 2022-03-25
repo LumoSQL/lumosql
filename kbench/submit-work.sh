@@ -5,6 +5,13 @@
 # LumoSQL: https://lumosql.org/
 # Cluster scripts: https://lumosql.org/src/lumosql/dir?ci=tip&name=kbench
 #
+# Copyright 2022 The LumoSQL Authors under the terms contained in LICENSES/MIT
+#
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2022 The LumoSQL Authors
+# SPDX-ArtifactOfProjectName: LumoSQL
+# SPDX-FileType: Code
+# SPDX-FileComment: Original by Dan Shearer, 2022
 
 # Set defaults
 

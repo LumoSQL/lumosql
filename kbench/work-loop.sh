@@ -1,5 +1,19 @@
 #!/bin/bash -xe
 
+# Process LumoSQL benchmark/test jobs on a cluster. This is run on an 
+# administration node.
+#
+# LumoSQL: https://lumosql.org/
+# Cluster scripts: https://lumosql.org/src/lumosql/dir?ci=tip&name=kbench
+#
+# Copyright 2022 The LumoSQL Authors under the terms contained in LICENSES/MIT
+#
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2022 The LumoSQL Authors
+# SPDX-ArtifactOfProjectName: LumoSQL
+# SPDX-FileType: Code
+# SPDX-FileComment: Original by Ruben De Smet, 2022
+
 fossil clone https://lumosql.org/src/lumosql
 cd lumosql
 
