@@ -121,7 +121,7 @@ SubmitOneJob() {
 	GenerateOutMakefile $size
 	# break this string up because quoting in Bash related to eval() is fragile
 	x="\"Authorization: Bearer $TOKEN\""
-	cmd="curl -vv -L -H "$x" -X PUT $CLUSTER/job/$myjobname  --data-binary  $OUTMAKEFRAG 2>&1"
+	cmd="curl -vv -L -H "$x" -X PUT $CLUSTER/job/$myjobname  --data-binary  @$OUTMAKEFRAG 2>&1"
 
 	if [[ $DRYRUN == "yes" ]]; then
 		echo "Would have submitted: "$myjobname
