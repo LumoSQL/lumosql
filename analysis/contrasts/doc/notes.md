@@ -75,7 +75,15 @@ much does A differ from B?* versus *is A higher than B?*)
     -   Add question and name here
 -   Dream questions: that you would like to answer in the future but
     it's out of reach right now
-    -   Add question and name here
+    -   What is the performance impact of row checksums?  This will
+        need to wait until we've reworked the way we store it
+	(Uilebheist 20220325)
+    -   What is the impact of using a different strategy to implement
+        sqlite transactions using LMDB transactions?  This is the
+	`option-lmdb_transaction` but its effect is only visible
+	when lots of processes try to run concurrent transaction, and
+	would require a different experiment from what we've been running
+	(Uilebheist 20220325)
     -   Add question and name here
 
 
