@@ -117,8 +117,6 @@ SubmitOneJob() {
 	cmd="curl -vv -L -H "$x" -X PUT $CLUSTER/job/$myjobname  --data-binary  $OUTMAKEFRAG 2>&1"
 
 	if [[ $DRYRUN == "yes" ]]; then
-		echo "DRY RUN"
-		echo "Would have executed: "$cmd
 		echo "Would have submitted: "$myjobname
 	else
 		output=$(ExecCommand "$cmd" yes)
@@ -250,10 +248,12 @@ else
 	i=$BEGINSIZE
 	while [ $i -lt $ENDSIZE ];
 	do
-		DATASIZE="$i,$ENDSIZE"
-		SubmitOneJob $DATASIZE
-		DATASIZE="$ENDSIZE,$i"
-		SubmitOneJob $DATASIZE
+		SubmitOneJob "$i,$ENDSIZE"
+		SubmitOneJob "$BEGINSIZE,$i"
+
+		SubmitOneJob "$i,$BEGINSIZE"
+		SubmitOneJob "$ENDSIZE,$i"
+
 		i=$(( i += 2 ))
 	done
 fi
