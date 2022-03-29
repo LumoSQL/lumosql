@@ -91,6 +91,7 @@ proc optlist {var what {delim ""}} {
 	    }
 	}
 	incr a
+	if {$delim ne ""} {break}
     }
     incr a -1
     if {$done == 0} {

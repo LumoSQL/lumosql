@@ -353,7 +353,7 @@ The tool accepts a large set of options:
 * `-database` `PATH_TO_DATABASE`  - the database to read, default is the last database updated by `make benchmark`, normally `benchmarks.sqlite`
 * `-sqlite` `PATH_TO_SQLITE`  - the sqlite3 executable; by default the tool tries to find it either in the LumoSQL build directory or installed on the system
 * `-limit` `N`  - limit the output to the most recent `N` runs which match other criteria; the default is 20
-* `-import` `FILE`  - instead of using runs in the database, read `FILE` (which must have been created using the `-export` option) into a temporary database, then process the data as normal; if it is desired to import the runs into a permanent database, see the `-copy` option below; multiple files can be specified, for example `-import FILE1 FILE2` or `-import downloads/data.*`
+* `-import` `FILE` `[FILE]...` - instead of using runs in the database, read each `FILE` (which must have been created using the `-export` option) into a temporary database, then process the data as normal; if it is desired to import the runs into a permanent database, see the `-copy` option below; multiple files can be specified, for example `-import FILE1 FILE2` or `-import downloads/data.*`; the file names must not start with a `-` which would be interpreted as the next option; such files can be specified using `./-NAME`
 
 ## selecting runs
 
