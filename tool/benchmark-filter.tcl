@@ -195,7 +195,7 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
 	lappend only_ids $o
 	set has_selection 1
     } elseif {$o eq "-datasize"} {
-	optarg {^\d+(?:,\d+)$} "number"
+	optarg {^\d+(?:,\d+)?$} "number"
 	lappend only_option "datasize-$o"
 	set has_selection 1
     } elseif {$o eq "-option"} {
