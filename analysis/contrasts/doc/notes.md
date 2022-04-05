@@ -45,20 +45,22 @@ We have *no* data to study the effects of these:
 
 These are questions pulled from [1] and or #lumosql at libera.chat
 
--   What happens to performance when LMDB is swapped in as a storage
+-   [Q1] What happens to performance when LMDB is swapped in as a storage
     backend for SQLite?
--   Does SQLite get faster with each version?
--   Which compile options make a given version of SQLite faster?
--   How do different versions and compile options combine to change
-    performance as data size gets large?
--   Does SQLITE<sub>DEBUG</sub> really make SQLite run approximately three
-    times slower?
--   What happens when a given set of compile options, versions and
+-   [Q2] Does SQLite get faster with each version?
+-   [Q3] Does LMDB get faster with each version?
+-   [Q4] Which compile options make a given version of SQLite faster?
+-   [Q5] How do different versions combine to change performance as data size gets large, separately for read and write?
+-   [Q6] Do compile options affect performance differently as data size changes?
+-   [Q7] Does SQLITE_DEBUG really make SQLite run approximately three
+    times slower, as claimed on sqlite.org?
+-   [Q8] What happens when a given set of compile options, versions and
     data size are tested on faster and slower disks?
--   Submitted SQLite-only at datasize 100,1 and 1,100 all with and
-    without discard to show if, as expected, discard makes no
-    significant timing difference other than not crashing on giant
-    sizes. (danshearer 20220316)
+-   [Q9] What is the effect of testing reads and writes on different disks,
+    given that the relative speeds for read and write may differ greatly?
+-   [Q10] meta-benchmarking question: does the "discard output" option to
+    benchmarking make no significant timing difference, as expected?
+    (it may prevent benchmarking crashing on giant sizes).
 
 Please, list below your questions in the right category. Leave your
 name after each question so we can follow up. Consider framing your
@@ -67,16 +69,16 @@ much does A differ from B?* versus *is A higher than B?*)
 
 -   Main questions: that should be up front the focus of the immediate
     runs and analysis
-    -   Add question and name here
+    -   Dan - Q1, Q2, Q3, Q5, Q9
     -   Add question and name here
 -   Peripheric questions: that you would like answer as a side effect
     with little to no additional effort involved
-    -   Add question and name here
+    -   Dan - Q4, Q6, Q8
     -   Add question and name here
 -   Dream questions: that you would like to answer in the future but
     it's out of reach right now
     -   What is the performance impact of row checksums?  This will
-        need to wait until we've reworked the way we store it
+        need to wait until we've reworked the way we store it.
 	(Uilebheist 20220325)
     -   What is the impact of using a different strategy to implement
         sqlite transactions using LMDB transactions?  This is the
@@ -84,7 +86,11 @@ much does A differ from B?* versus *is A higher than B?*)
 	when lots of processes try to run concurrent transaction, and
 	would require a different experiment from what we've been running
 	(Uilebheist 20220325)
-    -   Add question and name here
+    -   What difference does it make to use the pre-computed checksum
+        columns for operations such as selecting the rows which have changed
+        compared with a traditional method such as a column called "last updated",
+        and also a straight SELECT.
+        (Dan 20220405)
 
 
 <a id="orge3f663a"></a>
