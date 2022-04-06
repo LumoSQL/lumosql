@@ -601,6 +601,18 @@ TBD
 1.  All control variables not commented on.
 
 
+## Other considerations
+
+- Comments from gabby_bch (2022-04-05)
+  - error bar runs: 5.4.0.91-generic, 5.15.29
+  - big error bars: 5.13.0-22-generic
+  - sqlite old normal : 5.4.0-100-generic
+  - anomaly: 5.4.0.104-generic
+  - unmodified superior to lmdb: 5.10.92, 5.10.100
+  - lmdb superior to unmodified: 5.15.24
+  - compare cpu influence: 5.10.91, 5.10.92
+  - raspberry pi: 5.10.63
+
 <a id="org47694e5"></a>
 
 # References
