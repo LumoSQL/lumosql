@@ -196,6 +196,9 @@ for {set a 0} {$a < [llength $argv]} {incr a} {
 	set has_selection 1
     } elseif {$o eq "-datasize"} {
 	optarg {^\d+(?:,\d+)?$} "number"
+	if {[regexp {^(\d+),(\d+)$} $o skip r w]} {
+	    if {$r == $w} {set o $r}
+	}
 	lappend only_option "datasize-$o"
 	set has_selection 1
     } elseif {$o eq "-option"} {
@@ -1287,16 +1290,16 @@ if {$out_summary} {
 		} elseif {$key eq "end-run"} {
 		    set end_run $value
 		} elseif {
-		    $key ne "backend-id" &&
-		    $key ne "backend-name" &&
-		    $key ne "backend-version" &&
-		    $key ne "sqlite-id" &&
-		    $key ne "sqlite-name" &&
-		    $key ne "sqlite-version" &&
 		    $key ne "target" &&
 		    $key ne "title" &&
 		    $key ne "when-run" } \
 		{
+#		    $key ne "backend-id" &&
+#		    $key ne "backend-name" &&
+#		    $key ne "backend-version" &&
+#		    $key ne "sqlite-id" &&
+#		    $key ne "sqlite-name" &&
+#		    $key ne "sqlite-version" &&
 		    puts [format "%13s: %s" $key $value]
 		}
 	    }
