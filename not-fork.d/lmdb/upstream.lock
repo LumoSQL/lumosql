@@ -1,0 +1,44 @@
+block
+subtree = libraries/liblmdb
+srcmirror = lmdb-$C $C lmdb-$C.tar.gz
+vcs = git
+repository = https://github.com/openldap/openldap
+version-0.9.15 = 56e4e20ebca0ae6459c479de66cd174c10d2d4c6
+time-0.9.15 = 2015-06-19 13:10:32
+version-0.9.16 = 5d67c6aed16366ddcfac77eb6a166928a257ab7b
+time-0.9.16 = 2015-08-14 00:00:38
+version-0.9.17 = 2011eb37c1a3d390df2336cb2c55843771723a0c
+time-0.9.17 = 2015-11-30 16:55:33
+version-0.9.18 = 627c85175007bdd95c87054e4816dcf46ddff75c
+time-0.9.18 = 2016-02-05 21:22:15
+version-0.9.19 = 14cff072ec29f48093a9d40cc79934cf5376af4a
+time-0.9.19 = 2016-12-28 18:36:01
+version-0.9.20 = 65b4c49dd33d46e6449f3e8359f7af94f9438804
+time-0.9.20 = 2017-01-11 16:19:33
+version-0.9.21 = 60d500206a108b2c64ca7e36b0113b2cd3711b98
+time-0.9.21 = 2017-06-01 16:51:10
+version-0.9.22 = c760e564a0c043ccb69fa8d183bce411cc9476ec
+time-0.9.22 = 2018-03-22 15:23:05
+version-0.9.23 = 8f24bb1b16b565721d27dc3223dff0b91157033d
+time-0.9.23 = 2018-12-19 15:51:03
+version-0.9.24 = 0c357cc88a00bda03aa4a982fc227a5872707df2
+time-0.9.24 = 2019-07-19 16:41:12
+version-0.9.25 = be509acd4a5cccdc6e6a5c011fd415f068e3deed
+time-0.9.25 = 2020-01-30 17:57:13
+version-0.9.26 = 8827a6c1c33bbcadd512ab637ab5bce0f8ae613d
+time-0.9.26 = 2020-08-11 18:24:07
+version-0.9.27 = 970298f55d234ed05d491e4d2e015603e32708e6
+time-0.9.27 = 2020-10-26 19:00:40
+version-0.9.28 = 033ca8f96bc1ecdc6696871bac7392b0043b456e
+time-0.9.28 = 2021-02-04 20:46:33
+version-0.9.29 = c45a3a3b8e8db84574ccab7531938d0427ce4f25
+time-0.9.29 = 2021-03-16 16:41:19
+
+block
+subtree = libraries/liblmdb
+srcmirror = lmdb-$C $C lmdb-$C.tar.gz
+vcs = git
+repository = https://github.com/LMDB/lmdb
+version-0.9.14 = 2f587ae081d076e3707360c5db086520c219d3ea
+time-0.9.14 = 2014-09-20 06:24:32
+

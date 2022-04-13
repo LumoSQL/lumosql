@@ -1,0 +1,7 @@
+block
+prefix = 1
+srcmirror = db-$V
+vcs = download
+source-18.1.32 = https://lumosql.org/dist/berkeley-db.18.1.32.tar.gz
+sha256-18.1.32 = fa1fe7de9ba91ad472c25d026f931802597c29f28ae951960685cde487c8d654
+
