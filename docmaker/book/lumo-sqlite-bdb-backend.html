@@ -1,0 +1,335 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>BDB 18.1.32 Backend</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="favicon.svg">
+                        <link rel="shortcut icon" href="favicon.png">
+                <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+                <link rel="stylesheet" href="css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="1.1-front-page.html"><strong aria-hidden="true">1.</strong> Welcome</a></li><li class="chapter-item expanded "><a href="about.html"><strong aria-hidden="true">2.</strong> About LumoSQL</a></li><li class="chapter-item expanded "><a href="1.2-top-features.html"><strong aria-hidden="true">3.</strong> Top Features</a></li><li class="chapter-item expanded "><a href="1.4-install-LumoSQL.html"><strong aria-hidden="true">4.</strong> Install</a></li><li class="chapter-item expanded "><a href="quickstart.html"><strong aria-hidden="true">5.</strong> Quick Build and Benchmark</a></li><li class="chapter-item expanded affix "><li class="part-title">Features</li><li class="chapter-item expanded "><a href="3.4-not-forking-tool.html"><strong aria-hidden="true">6.</strong> Not-Forking Tool</a></li><li class="chapter-item expanded "><a href="lumo-build-benchmark.html"><strong aria-hidden="true">7.</strong> Build and Benchmark System (build.tcl)</a></li><li class="chapter-item expanded "><a href="backends.html"><strong aria-hidden="true">8.</strong> Available Backends - SQLite B-tree and LMDB</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="lumo-sqlite-bdb-backend.html" class="active"><strong aria-hidden="true">8.1.</strong> BDB 18.1.32 Backend</a></li><li class="chapter-item expanded "><a href="lumo-malbrain-backend.html"><strong aria-hidden="true">8.2.</strong> Karl Malbrain's C Btree</a></li></ol></li><li class="chapter-item expanded "><a href="lumo-corruption-detection-and-magic.html"><strong aria-hidden="true">9.</strong> Corruption Detection</a></li><li class="chapter-item expanded "><a href="3.3-benchmarking.html"><strong aria-hidden="true">10.</strong> Benchmarking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="lumo-benchmark-filter.html"><strong aria-hidden="true">10.1.</strong> Displaying Benchmark Results (benchmark-filter.tcl)</a></li><li class="chapter-item expanded "><a href="statistical_analysis.html"><strong aria-hidden="true">10.2.</strong> Statistical Analysis</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">New features</li><li class="chapter-item expanded "><a href="rbac-design.html"><strong aria-hidden="true">11.</strong> Design of Role-Based Access Control</a></li><li class="chapter-item expanded "><a href="encryption.html"><strong aria-hidden="true">12.</strong> Encryption</a></li><li class="chapter-item expanded "><a href="lumion_intro.html"><strong aria-hidden="true">13.</strong> Lumion</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="rfc.html"><strong aria-hidden="true">13.1.</strong> Lumion RFC</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Research</li><li class="chapter-item expanded "><a href="2.1-development-landscape.html"><strong aria-hidden="true">14.</strong> SQLite Development Landscape</a></li><li class="chapter-item expanded "><a href="3.7-relevant-codebases.html"><strong aria-hidden="true">15.</strong> Overview of Relevant Codebases</a></li><li class="chapter-item expanded "><a href="2.4-relevant-knowledgebase.html"><strong aria-hidden="true">16.</strong> Overview of the Relevant Knowledgebase</a></li><li class="chapter-item expanded "><a href="3.6-development-notes.html"><strong aria-hidden="true">17.</strong> LumoSQL 2019 Prototype</a></li><li class="chapter-item expanded affix "><li class="part-title">Design</li><li class="chapter-item expanded "><a href="api.html"><strong aria-hidden="true">18.</strong> SQLite API Interception Points</a></li><li class="chapter-item expanded "><a href="virtual-machine.html"><strong aria-hidden="true">19.</strong> SQLite Virtual Machine Layer</a></li><li class="chapter-item expanded "><a href="WALs.html"><strong aria-hidden="true">20.</strong> LMDB Alternative to WALs</a></li><li class="chapter-item expanded "><a href="what-are-savepoints.html"><strong aria-hidden="true">21.</strong> Savepoints in SQLite</a></li><li class="chapter-item expanded "><a href="online-database-servers.html"><strong aria-hidden="true">22.</strong> Online Database Servers</a></li><li class="chapter-item expanded affix "><li class="part-title">Other</li><li class="chapter-item expanded "><a href="LumoSQL-PhaseII-Announce.html"><strong aria-hidden="true">23.</strong> News - Phase II Announcement</a></li><li class="chapter-item expanded "><a href="release-announce-0.4.html"><strong aria-hidden="true">24.</strong> News - Release 0.4 Announcement</a></li><li class="chapter-item expanded "><a href="release-announce-0.3.html"><strong aria-hidden="true">25.</strong> News - Release 0.3 Announcement</a></li><li class="chapter-item expanded "><a href="lumo-gsoc-ideas.html"><strong aria-hidden="true">26.</strong> Google Summer of Code 2021</a></li><li class="chapter-item expanded "><a href="lumo-proposed-debug.html"><strong aria-hidden="true">27.</strong> SQLite Debug Proposal</a></li><li class="chapter-item expanded "><a href="CONTRIBUTING.html"><strong aria-hidden="true">28.</strong> Conributing</a></li><li class="chapter-item expanded "><a href="lumosql-meetbot.html"><strong aria-hidden="true">29.</strong> Contributing - IRC Meetbot</a></li><li class="chapter-item expanded "><a href="CODE-OF-CONDUCT.html"><strong aria-hidden="true">30.</strong> Code of Conduct</a></li><li class="chapter-item expanded "><a href="3.2-legal-aspects.html"><strong aria-hidden="true">31.</strong> Legal Aspects</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="licensing.html"><strong aria-hidden="true">31.1.</strong> Licensing</a></li><li class="chapter-item expanded "><a href="MIT.html"><strong aria-hidden="true">31.2.</strong> MIT Licence</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                                                <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <!-- Copyright 2020 The LumoSQL Authors, see LICENSES/MIT -->
+<!-- SPDX-License-Identifier: MIT -->
+<!-- SPDX-FileCopyrightText: 2020 The LumoSQL Authors -->
+<!-- SPDX-ArtifactOfProjectName: LumoSQL -->
+<!-- SPDX-FileType: Documentation -->
+<!-- SPDX-FileComment: Original by Dan Shearer, September 2020 -->
+<h1 id="notes-on-the-port-of-sqlite-to-bdb-18132"><a class="header" href="#notes-on-the-port-of-sqlite-to-bdb-18132">Notes on the Port of SQLite to BDB 18.1.32</a></h1>
+<h1 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h1>
+<ul>
+<li><a href="#notes-on-the-port-of-sqlite-to-bdb-18132">Notes on the Port of SQLite to BDB 18.1.32</a></li>
+<li><a href="#motivation">Motivation</a></li>
+<li><a href="#versions-and-availability">Versions and Availability</a></li>
+<li><a href="#licensing-gotchas">Licensing Gotchas</a></li>
+<li><a href="#running-out-of-the-box">Running Out of the Box</a></li>
+<li><a href="#design-of-the-port">Design of the Port</a>
+<ul>
+<li><a href="#files-and-directories">Files and Directories</a></li>
+<li><a href="#code-changes">Code Changes</a></li>
+</ul>
+</li>
+</ul>
+<h1 id="motivation"><a class="header" href="#motivation">Motivation</a></h1>
+<p>The work described in this document is part of an ongoing project to test,
+document and consolidate source code for numerous back-end storage systems that
+have been ported to SQLite in various ways. There are 4 key-value stores used
+at scale and widely-ported that have the property of being
+<a href="https://en.wikipedia.org/wiki/Multiversion_concurrency_control">MVCC</a>. BDB is
+one of them.</p>
+<p>The original port of SQLite to BDB was funded by Oracle, who have ceased development
+on it as of July 2020. LumoSQL plans to continue this, using the 
+<a href="./lumo-not-forking.html">Not-Forking Upstream Source Code Tracker</a> . Once the BDB non-fork 
+configuration is created and tested, and once the first forward-port of BDB 18.1.32 
+has been completed, then:</p>
+<ol>
+<li>This document will be of historical interest only, and</li>
+<li>LumoSQL will be where updated versions of SQLite+BDB can be found</li>
+</ol>
+<p>At that point, it will be possible to compare the performance and other
+attributes of the BDB KV store to SQLite's default Btree store and to the LMDB
+backend.</p>
+<h1 id="versions-and-availability"><a class="header" href="#versions-and-availability">Versions and Availability</a></h1>
+<p>BDB is freely available under the GNU AGPL license. It was formerly Sleepycat
+BDB, before Sleepycat was purchased by Oracle. </p>
+<p>BDB version 18.1.32 was the last to have a port of SQLite to BDB included. From
+the 
+<a href="https://download.oracle.com/otndocs/products/berkeleydb/html/changelog_18_1_40.html">release notes for BDB 18.1.40</a>:</p>
+<blockquote>
+<p><strong>Changes between version 18.1.32 and version 18.1.40</strong> [..]
+The SQL API is no longer supported. 
+If you require SQL support you must use Berkeley DB 18.1.32 or earlier. </p>
+</blockquote>
+<p>BDB 18.1.32 contains scripts that patch SQLite 3.18.2 to have BDB support. The scripts are 
+intended to assist with forward-porting to later versions of SQLite.</p>
+<p>A convenient place to get the source for BDB 18.1.32 is
+<a href="https://lumosql.org/dist">the LumoSQL mirror</a>
+.  It is also available at an Oracle site that requires a login. </p>
+<p>This document will refer to the port as BDB-SQLite, because SQLite was modified
+to fit BDB, not the other way around. This is the how nearly all of the many
+projects that provide a different storage backend for SQLite have approached
+the task.</p>
+<h1 id="licensing-gotchas"><a class="header" href="#licensing-gotchas">Licensing Gotchas</a></h1>
+<p>Oracle applied the AGPL to the BDB code so that it could no longer be used as
+an embedded library without all code linked to it also becoming subject to the
+AGPL. That is the viral nature of a 
+<a href="https://en.wikipedia.org/wiki/Viral_license">Copyleft License</a>. The 
+<a href="https://en.wikipedia.org/wiki/GNU_Lesser_General_Public_License">GNU Lesser GPL</a> would have 
+avoided this, or indeed the original BDB license. Nevertheless, BDB is truly open source under GNU licensing without any tricks; it is just unhelpful for a library to be licensed as if it were an application.</p>
+<p>This definitely means:</p>
+<ul>
+<li>All code linked to SQLite with a BDB backend is subject to the AGPL</li>
+<li>Source code present in the same tree as the BDB backend is <em>not</em> subject to the AGPL, so there is nothing to worry about distributing BDB source code</li>
+<li>LumoSQL contributions to BDB code are covered by the AGPL, as well as the LumoSQL license.</li>
+</ul>
+<p>Without offering legal advice in any way, this probably means:</p>
+<ul>
+<li>Users who have paid Oracle for a commercial licence to BDB code are probably exempt from the AGPL requirement, but do check with your open source lawyer</li>
+</ul>
+<h1 id="running-out-of-the-box"><a class="header" href="#running-out-of-the-box">Running Out of the Box</a></h1>
+<p>Comments and documentation for BDB-SQLite suggest it should compile and run on
+many platforms including some quite niche embedded operating systems.  However
+we have only tested BDB-SQLite on common and current Linux distributions, where
+the process is:</p>
+<pre><code>tar zxvf berkeley-db-18.1.32.tar.gz
+cd db-18.1.32/build_unix
+../dist/configure --enable-sql_compat
+make
+</code></pre>
+<p>This will create:</p>
+<ol>
+<li>libdb_sqlXX.{so|la} - A C API library, that exactly mirrors the SQLite
+C API.</li>
+<li>dbsql - A command line SQL interpreter, that exactly matches
+the default sqlite3 command line interpreter.</li>
+<li>libsqlite.{so|la} - A C API library, that exactly mirrors the SQLite C API,
+and has the same name as the library generated by a SQLite build.</li>
+<li>sqlite3 - A command line SQL interpreter, that exactly matches the 
+semantics and name of the default sqlite3 command line interpreter.</li>
+</ol>
+<h1 id="design-of-the-port"><a class="header" href="#design-of-the-port">Design of the Port</a></h1>
+<h2 id="files-and-directories"><a class="header" href="#files-and-directories">Files and Directories</a></h2>
+<p>db-18.1.32/lang/sql/sqlite has the unmodified source for SQLite 3.18.2</p>
+<p>db-18.1.32/lang/sql/adaptor has all of the replaced SQLite source files, 
+such as btree.c</p>
+<p>db-18.1.32/lang/sql/adaptor/sqlite-patches has 43 patches that modify the SQLite
+sources. Most of them are very small patches, often just a line or two:</p>
+<ul>
+<li>inserting DB-specific files into the Makefile (eg the DB-specific pragmas)</li>
+<li>branding (eg 07_shell_prompt.patch)</li>
+<li>build fixes for less common platforms (Solaris, VS, Cygwin etc)</li>
+<li>11 modifications to the test code that comes with SQLite</li>
+</ul>
+<p>db-18.1.32/dist/s_sql_upgrade is a script to help with upgrading the SQLite version</p>
+<h2 id="code-changes"><a class="header" href="#code-changes">Code Changes</a></h2>
+<p>In lang/sql/adaptor the significant files replaced are:</p>
+<p>btree.c
+backup.c
+btreeInt.h
+vacuum.c
+userauth.c
+userauth.h</p>
+<p>There are also placeholder files, containing only function definitons and a
+tiny amount of code. But most of these are not needed and a cleaner port would
+probably eliminate them altogether:</p>
+<p>backup.h
+backup.c
+pager.c
+pager.h
+btmutex.c
+pcache.h  (stubs only, no code)
+pcache.c  (stubs only, no code)
+wal.h     (stubs only, no code)
+pcache1.c (stubs only, no code)
+wal.c     (stubs only, no code)</p>
+<p>In addition there are files added to SQLite for entirely BDB-specific functionality. These
+could probably be removed from the build without causing problems elsewhere:</p>
+<p>db_encrypt.c
+db_pragma.c
+db_sequence.c
+db_shell.c </p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="backends.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="lumo-malbrain-backend.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="backends.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="lumo-malbrain-backend.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>

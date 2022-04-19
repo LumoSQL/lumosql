@@ -1,0 +1,270 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>SQLite API Interception Points</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="favicon.svg">
+                        <link rel="shortcut icon" href="favicon.png">
+                <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+                <link rel="stylesheet" href="css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="1.1-front-page.html"><strong aria-hidden="true">1.</strong> Welcome</a></li><li class="chapter-item expanded "><a href="about.html"><strong aria-hidden="true">2.</strong> About LumoSQL</a></li><li class="chapter-item expanded "><a href="1.2-top-features.html"><strong aria-hidden="true">3.</strong> Top Features</a></li><li class="chapter-item expanded "><a href="1.4-install-LumoSQL.html"><strong aria-hidden="true">4.</strong> Install</a></li><li class="chapter-item expanded "><a href="quickstart.html"><strong aria-hidden="true">5.</strong> Quick Build and Benchmark</a></li><li class="chapter-item expanded affix "><li class="part-title">Features</li><li class="chapter-item expanded "><a href="3.4-not-forking-tool.html"><strong aria-hidden="true">6.</strong> Not-Forking Tool</a></li><li class="chapter-item expanded "><a href="lumo-build-benchmark.html"><strong aria-hidden="true">7.</strong> Build and Benchmark System (build.tcl)</a></li><li class="chapter-item expanded "><a href="backends.html"><strong aria-hidden="true">8.</strong> Available Backends - SQLite B-tree and LMDB</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="lumo-sqlite-bdb-backend.html"><strong aria-hidden="true">8.1.</strong> BDB 18.1.32 Backend</a></li><li class="chapter-item expanded "><a href="lumo-malbrain-backend.html"><strong aria-hidden="true">8.2.</strong> Karl Malbrain's C Btree</a></li></ol></li><li class="chapter-item expanded "><a href="lumo-corruption-detection-and-magic.html"><strong aria-hidden="true">9.</strong> Corruption Detection</a></li><li class="chapter-item expanded "><a href="3.3-benchmarking.html"><strong aria-hidden="true">10.</strong> Benchmarking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="lumo-benchmark-filter.html"><strong aria-hidden="true">10.1.</strong> Displaying Benchmark Results (benchmark-filter.tcl)</a></li><li class="chapter-item expanded "><a href="statistical_analysis.html"><strong aria-hidden="true">10.2.</strong> Statistical Analysis</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">New features</li><li class="chapter-item expanded "><a href="rbac-design.html"><strong aria-hidden="true">11.</strong> Design of Role-Based Access Control</a></li><li class="chapter-item expanded "><a href="encryption.html"><strong aria-hidden="true">12.</strong> Encryption</a></li><li class="chapter-item expanded "><a href="lumion_intro.html"><strong aria-hidden="true">13.</strong> Lumion</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="rfc.html"><strong aria-hidden="true">13.1.</strong> Lumion RFC</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Research</li><li class="chapter-item expanded "><a href="2.1-development-landscape.html"><strong aria-hidden="true">14.</strong> SQLite Development Landscape</a></li><li class="chapter-item expanded "><a href="3.7-relevant-codebases.html"><strong aria-hidden="true">15.</strong> Overview of Relevant Codebases</a></li><li class="chapter-item expanded "><a href="2.4-relevant-knowledgebase.html"><strong aria-hidden="true">16.</strong> Overview of the Relevant Knowledgebase</a></li><li class="chapter-item expanded "><a href="3.6-development-notes.html"><strong aria-hidden="true">17.</strong> LumoSQL 2019 Prototype</a></li><li class="chapter-item expanded affix "><li class="part-title">Design</li><li class="chapter-item expanded "><a href="api.html" class="active"><strong aria-hidden="true">18.</strong> SQLite API Interception Points</a></li><li class="chapter-item expanded "><a href="virtual-machine.html"><strong aria-hidden="true">19.</strong> SQLite Virtual Machine Layer</a></li><li class="chapter-item expanded "><a href="WALs.html"><strong aria-hidden="true">20.</strong> LMDB Alternative to WALs</a></li><li class="chapter-item expanded "><a href="what-are-savepoints.html"><strong aria-hidden="true">21.</strong> Savepoints in SQLite</a></li><li class="chapter-item expanded "><a href="online-database-servers.html"><strong aria-hidden="true">22.</strong> Online Database Servers</a></li><li class="chapter-item expanded affix "><li class="part-title">Other</li><li class="chapter-item expanded "><a href="LumoSQL-PhaseII-Announce.html"><strong aria-hidden="true">23.</strong> News - Phase II Announcement</a></li><li class="chapter-item expanded "><a href="release-announce-0.4.html"><strong aria-hidden="true">24.</strong> News - Release 0.4 Announcement</a></li><li class="chapter-item expanded "><a href="release-announce-0.3.html"><strong aria-hidden="true">25.</strong> News - Release 0.3 Announcement</a></li><li class="chapter-item expanded "><a href="lumo-gsoc-ideas.html"><strong aria-hidden="true">26.</strong> Google Summer of Code 2021</a></li><li class="chapter-item expanded "><a href="lumo-proposed-debug.html"><strong aria-hidden="true">27.</strong> SQLite Debug Proposal</a></li><li class="chapter-item expanded "><a href="CONTRIBUTING.html"><strong aria-hidden="true">28.</strong> Conributing</a></li><li class="chapter-item expanded "><a href="lumosql-meetbot.html"><strong aria-hidden="true">29.</strong> Contributing - IRC Meetbot</a></li><li class="chapter-item expanded "><a href="CODE-OF-CONDUCT.html"><strong aria-hidden="true">30.</strong> Code of Conduct</a></li><li class="chapter-item expanded "><a href="3.2-legal-aspects.html"><strong aria-hidden="true">31.</strong> Legal Aspects</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="licensing.html"><strong aria-hidden="true">31.1.</strong> Licensing</a></li><li class="chapter-item expanded "><a href="MIT.html"><strong aria-hidden="true">31.2.</strong> MIT Licence</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                                                <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: 2020 The LumoSQL Authors -->
+<!-- SPDX-ArtifactOfProjectName: LumoSQL -->
+<!-- SPDX-FileType: Documentation -->
+<!-- SPDX-FileComment: Original by Dan Shearer, 2020 -->
+<h1 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h1>
+<ul>
+<li><a href="#sqlite-api-interception-points">SQLite API Interception Points</a></li>
+</ul>
+<p><img src="./images/lumo-implementation-intro.jpg" alt="" title="Metro Station Construction Futian Shenzhen China, CC license, https://www.flickr.com/photos/dcmaster/36740345496" /></p>
+<h2 id="sqlite-api-interception-points"><a class="header" href="#sqlite-api-interception-points">SQLite API Interception Points</a></h2>
+<p>LumoSQL identifies choke points at which APIs can be intercepted to provide modular choices for backends, front-end parcers, encryption and networking.</p>
+<p>The API interception points are:</p>
+<ol>
+<li>
+<p>Setup APIs/commandline/Pragmas, where we pass in info about what
+front/backends we want to use or initialise. Noting that SQLite is
+zero-config and so supplying no information to LumoSQL must always be an option.
+Nevertheless, if a user wants to select a particular backend, or have
+encryption or networking etc there will be some setup. Sqlite.org provides a
+large number of controls in pragmas and the commandline already.</p>
+</li>
+<li>
+<p>SQL processing front ends. Code exists (see <a href="./3.7-relevant-codebases.html">Relevant Codebases</a>
+that implements MySQL-like behaviour in parallel with supporting SQLite semantics.
+There is a choice codebases to do that with, covering different approaches to the problem.</p>
+</li>
+<li>
+<p>Transaction interception and handling, which in the case of the LMDB
+backend will be pass-through but in other backends may be for replicated
+storage, or backup. This interception point would be in <code>wal.c</code> if all
+backends used a writeahead log and used it in a similar way, but they do not.
+Instead this is where the new <code>backend.c</code> API interception point will be
+used - see further down in this document.  This is where, for example, we can
+choose to add replication features to the standard SQLite btree storage
+backend.</p>
+</li>
+<li>
+<p>Storage backends, being a choice of native SQLite btree or LMDB today, and
+swiftly after that other K-V stores. This is the choke point where we expect to
+introduce <a href="./3.7-relevant-codebases#libkv">libkv</a>, or a modification of libkv.</p>
+</li>
+<li>
+<p>Network layers, which will be at all of the above, depending whether they
+are for client access to the parser, or replicating transactions, or being
+plain remote storage etc.</p>
+</li>
+</ol>
+<p>In most if not all cases it needs to be possible to have multiple choices
+active at once, including the obvious cases of multiple parsers and multiple
+storage backends, for example. This is because one of the important new use
+cases for LumoSQL is conversion between formats, dialects and protocols.</p>
+<p>Having designed the API architecture we can then produce a single LumoSQL tree
+with these choke point APIs in place and proof of two things:</p>
+<ol>
+<li>
+<p>ability to have stock-standard identical SQLite APIs and on-disk
+btree format, and</p>
+</li>
+<li>
+<p>an example of an alternative chunk of code at each choke point:
+MySQL; T-pipe writing out the transaction log in a text file; LMDB .
+Not necessarily with the full flexibility of having all code active at
+once if that's too hard (ie able to take any input SQL and store in
+any backend)</p>
+<p>and then, having demonstrated we have a major step forward for the entire world,</p>
+</li>
+<li>
+<p>Identify what chunks of SQLite we really don't want to support any more.
+Like maybe the ramdisk pragma given that we can/should/might have an
+in-memory storage backend, which initially might just be LMDB with overcommit
+switched off. This is where testing and benchmarking really matters.</p>
+</li>
+</ol>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="3.6-development-notes.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="virtual-machine.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="3.6-development-notes.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="virtual-machine.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>

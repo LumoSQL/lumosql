@@ -1,0 +1,303 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>LMDB Alternative to WALs</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="favicon.svg">
+                        <link rel="shortcut icon" href="favicon.png">
+                <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+                <link rel="stylesheet" href="css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="1.1-front-page.html"><strong aria-hidden="true">1.</strong> Welcome</a></li><li class="chapter-item expanded "><a href="about.html"><strong aria-hidden="true">2.</strong> About LumoSQL</a></li><li class="chapter-item expanded "><a href="1.2-top-features.html"><strong aria-hidden="true">3.</strong> Top Features</a></li><li class="chapter-item expanded "><a href="1.4-install-LumoSQL.html"><strong aria-hidden="true">4.</strong> Install</a></li><li class="chapter-item expanded "><a href="quickstart.html"><strong aria-hidden="true">5.</strong> Quick Build and Benchmark</a></li><li class="chapter-item expanded affix "><li class="part-title">Features</li><li class="chapter-item expanded "><a href="3.4-not-forking-tool.html"><strong aria-hidden="true">6.</strong> Not-Forking Tool</a></li><li class="chapter-item expanded "><a href="lumo-build-benchmark.html"><strong aria-hidden="true">7.</strong> Build and Benchmark System (build.tcl)</a></li><li class="chapter-item expanded "><a href="backends.html"><strong aria-hidden="true">8.</strong> Available Backends - SQLite B-tree and LMDB</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="lumo-sqlite-bdb-backend.html"><strong aria-hidden="true">8.1.</strong> BDB 18.1.32 Backend</a></li><li class="chapter-item expanded "><a href="lumo-malbrain-backend.html"><strong aria-hidden="true">8.2.</strong> Karl Malbrain's C Btree</a></li></ol></li><li class="chapter-item expanded "><a href="lumo-corruption-detection-and-magic.html"><strong aria-hidden="true">9.</strong> Corruption Detection</a></li><li class="chapter-item expanded "><a href="3.3-benchmarking.html"><strong aria-hidden="true">10.</strong> Benchmarking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="lumo-benchmark-filter.html"><strong aria-hidden="true">10.1.</strong> Displaying Benchmark Results (benchmark-filter.tcl)</a></li><li class="chapter-item expanded "><a href="statistical_analysis.html"><strong aria-hidden="true">10.2.</strong> Statistical Analysis</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">New features</li><li class="chapter-item expanded "><a href="rbac-design.html"><strong aria-hidden="true">11.</strong> Design of Role-Based Access Control</a></li><li class="chapter-item expanded "><a href="encryption.html"><strong aria-hidden="true">12.</strong> Encryption</a></li><li class="chapter-item expanded "><a href="lumion_intro.html"><strong aria-hidden="true">13.</strong> Lumion</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="rfc.html"><strong aria-hidden="true">13.1.</strong> Lumion RFC</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Research</li><li class="chapter-item expanded "><a href="2.1-development-landscape.html"><strong aria-hidden="true">14.</strong> SQLite Development Landscape</a></li><li class="chapter-item expanded "><a href="3.7-relevant-codebases.html"><strong aria-hidden="true">15.</strong> Overview of Relevant Codebases</a></li><li class="chapter-item expanded "><a href="2.4-relevant-knowledgebase.html"><strong aria-hidden="true">16.</strong> Overview of the Relevant Knowledgebase</a></li><li class="chapter-item expanded "><a href="3.6-development-notes.html"><strong aria-hidden="true">17.</strong> LumoSQL 2019 Prototype</a></li><li class="chapter-item expanded affix "><li class="part-title">Design</li><li class="chapter-item expanded "><a href="api.html"><strong aria-hidden="true">18.</strong> SQLite API Interception Points</a></li><li class="chapter-item expanded "><a href="virtual-machine.html"><strong aria-hidden="true">19.</strong> SQLite Virtual Machine Layer</a></li><li class="chapter-item expanded "><a href="WALs.html" class="active"><strong aria-hidden="true">20.</strong> LMDB Alternative to WALs</a></li><li class="chapter-item expanded "><a href="what-are-savepoints.html"><strong aria-hidden="true">21.</strong> Savepoints in SQLite</a></li><li class="chapter-item expanded "><a href="online-database-servers.html"><strong aria-hidden="true">22.</strong> Online Database Servers</a></li><li class="chapter-item expanded affix "><li class="part-title">Other</li><li class="chapter-item expanded "><a href="LumoSQL-PhaseII-Announce.html"><strong aria-hidden="true">23.</strong> News - Phase II Announcement</a></li><li class="chapter-item expanded "><a href="release-announce-0.4.html"><strong aria-hidden="true">24.</strong> News - Release 0.4 Announcement</a></li><li class="chapter-item expanded "><a href="release-announce-0.3.html"><strong aria-hidden="true">25.</strong> News - Release 0.3 Announcement</a></li><li class="chapter-item expanded "><a href="lumo-gsoc-ideas.html"><strong aria-hidden="true">26.</strong> Google Summer of Code 2021</a></li><li class="chapter-item expanded "><a href="lumo-proposed-debug.html"><strong aria-hidden="true">27.</strong> SQLite Debug Proposal</a></li><li class="chapter-item expanded "><a href="CONTRIBUTING.html"><strong aria-hidden="true">28.</strong> Conributing</a></li><li class="chapter-item expanded "><a href="lumosql-meetbot.html"><strong aria-hidden="true">29.</strong> Contributing - IRC Meetbot</a></li><li class="chapter-item expanded "><a href="CODE-OF-CONDUCT.html"><strong aria-hidden="true">30.</strong> Code of Conduct</a></li><li class="chapter-item expanded "><a href="3.2-legal-aspects.html"><strong aria-hidden="true">31.</strong> Legal Aspects</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="licensing.html"><strong aria-hidden="true">31.1.</strong> Licensing</a></li><li class="chapter-item expanded "><a href="MIT.html"><strong aria-hidden="true">31.2.</strong> MIT Licence</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                                                <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: 2020 The LumoSQL Authors -->
+<!-- SPDX-ArtifactOfProjectName: LumoSQL -->
+<!-- SPDX-FileType: Documentation -->
+<!-- SPDX-FileComment: Original by Dan Shearer, 2020 -->
+<h1 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h1>
+<ul>
+<li><a href="#database-storage-systems">Database Storage Systems</a>
+<ul>
+<li><a href="#wals-in-sqlite">WALs in SQLite</a></li>
+<li><a href="#single-level-store">Single-level Store</a></li>
+</ul>
+</li>
+</ul>
+<h1 id="how-lumosql-architecture-differs-from-sqlite"><a class="header" href="#how-lumosql-architecture-differs-from-sqlite">How LumoSQL Architecture Differs from SQLite</a></h1>
+<p><img src="./images/lumo-architecture-lumosql-theoretical-future.svg" alt="" title="Where LumoSQL architecture is headed" /></p>
+<h1 id="database-storage-systems"><a class="header" href="#database-storage-systems">Database Storage Systems</a></h1>
+<p>LumoSQL explores several features that are in advance of every other
+widely-used database. With the first prototype complete with an LMDB backend,
+LumoSQL is already the first major SQL database to offer an alternative to batch
+processing, since it has a backend that does not use Write-Ahead Logs.  LumoSQL
+also needs to be able to use both the original SQLite and additional storage
+mechanisms, and any or all of these storage backends at once. Not all future
+storage will be on local disk, or btree key-values.</p>
+<p><a href="https://en.wikipedia.org/wiki/Write-ahead_logging">Write-ahead Logging in Transactional Databases</a> has been the only
+way since the 1990s that atomicity and durability are provided in
+databases. A version of same technique is used in filesystems, where is is
+called <a href="https://en.wikipedia.org/wiki/Journaling_file_system">journalling</a>.
+Write-ahead Logging (WAL) is a method of making sure that all modifications to
+a file are first written to a separate log, and then they are merged (or
+updated) into a master file in a later step. If this update operation is
+aborted or interrupted, the log has enough information to undo the updates and
+reset the database to the state before the update began. Implementations need
+to solve the problem of WAL files growing without bound, which means some kind
+of whole-database snapshot or checkpoint is required.</p>
+<p>WALs seek to address issues with concurrent transactions, and reliability in
+the face of crashes or errors. There are decades of theory around how to
+implement WAL, and it is a significant part of any University course in
+database internals. As well as somewhat-reliable commit and rollback, it is the
+WAL that lets all the main databases in use offer online backup features, and
+point-in-time recovery. Every WAL feature and benefit comes down to being able
+to have a stream of atomic operations that can be replayed forwards or
+backwards.</p>
+<p>WAL is inherently batch-oriented. The more a WAL-based database tries to be to
+real time, the more expensive it is to keep all WAL functionality working. </p>
+<p>The WAL implementation in the most common networked databases is comprehensive
+and usually kept as a rarely-seen technical feature. Postgresql is an exception, 
+going out of its way to inform administrators how the WAL system works and what 
+can be done with access to the log files.</p>
+<p>All the most common networked databases describe their WAL implementation and
+most offer some degree of control over it:</p>
+<ul>
+<li><a href="https://www.postgresql.org/docs/12/wal-intro.html">Postgresql</a></li>
+<li><a href="https://docs.microsoft.com/en-us/sql/relational-databases/sql-server-transaction-log-architecture-and-management-guide?view=sql-server-ver15">SQL Server</a></li>
+<li><a href="https://docs.oracle.com/en/database/oracle/oracle-database/19/cncpt/process-architecture.html#GUID-B6BE2C31-1543-4504-9763-6FFBBF99DC85">Oracle Log Writer Process</a></li>
+<li><a href="https://dev.mysql.com/doc/refman/8.0/en/optimizing-innodb-logging.html">MySQL ReDo Log</a></li>
+<li><a href="https://mariadb.com/kb/en/library/innodb-undo-log/">MariaDB Undo Log</a></li>
+</ul>
+<p>Companies have invested billions of Euros into these codebases, with stability
+and reliability as their first goal. And yet even with all the runtime
+advantages of huge resources and stable datacentre environments - even these
+companies can't make WALs fully deliver on reliability. </p>
+<p>These issues are well-described in the case of Postgresql. Postgresql has an
+easier task than SQLite in the sense it is not intended for unpredictable
+embedded use cases, and also that Postgresql has a large amount of code
+dedicated to safe WAL handling.  Even so, Postgresql still requires its users
+to make compromises regarding reliability. For example <a href="https://dzone.com/articles/postgresql-why-and-how-wal-bloats">this WAL mitigation
+article</a>
+describes a few of the tradeoffs of merge frequency vs reliability in the case
+of a crash. This is a very real problem for every traditional database and that
+includes SQLite - which does not have a fraction of the WAL-handling code of
+the large databases, and which is frequently deployed in embedded use cases
+where crashes and resets happen very frequently.</p>
+<h2 id="wals-in-sqlite"><a class="header" href="#wals-in-sqlite">WALs in SQLite</a></h2>
+<p>SQLite WALs are special.</p>
+<p>The <a href="https://www.sqlite.org/draft/wal.html">SQLite WAL</a> requires multiple
+files to be maintained in synch, otherwise there will be corruption. Unlike the
+other databases listed here, SQLite has no pre-emptive corruption detection and
+only fairly basic on-demand detection.</p>
+<h2 id="single-level-store"><a class="header" href="#single-level-store">Single-level Store</a></h2>
+<p>Single-level store concepts are well-explained in <a href="./lumo-relevant-knowledgebase.html#list-of-sqlite-code-related-knowledge">Howard Chu's 2013 MDB Paper</a>:</p>
+<blockquote>
+<p>One fundamental concept behind the MDB approach is known as &quot;Single-Level
+Store&quot;. The basic idea is to treat all of computer memory as a single address
+space. Pages of storage may reside in primary storage (RAM) or in secondary
+storage (disk) but the actual location is unimportant to the application. If
+a referenced page is currently in primary storage the application can use it
+immediately, if not a page fault occurs and the operating system brings the
+page into primary storage. The concept was introduced in 1964 in the Multics
+operating system but was generally abandoned by the early 1990s as data
+volumes surpassed the capacity of 32 bit address spaces. (We last knew of it
+in the Apollo DOMAIN operating system, though many other Multics-influenced
+designs carried it on.) With the ubiquity of 64 bit processors today this
+concept can again be put to good use. (Given a virtual address space limit of
+63 bits that puts the upper bound of database size at 8 exabytes. Commonly
+available processors today only implement 48 bit address spaces, limiting us
+to 47 bits or 128 terabytes.) Another operating system requirement for this
+approach to be viable is a Unified BufferCache. While most POSIX-based
+operating systems have supported an mmap() system call for many years, their
+initial implementations kept memory managed by the VM subsystem separate from
+memory managed by the filesystem cache. This was not only wasteful
+(again, keeping data cached in two places at once) but also led to coherency
+problems - data modified through a memory map was not visible using
+filesystem read() calls, or data modified through a filesystem write() was not
+visible in the memory map. Most modern operating systems now have filesystem
+and VM paging unified, so this should not be a concern in most deployments.</p>
+</blockquote>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="virtual-machine.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="what-are-savepoints.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="virtual-machine.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="what-are-savepoints.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>

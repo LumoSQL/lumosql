@@ -1,0 +1,380 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Overview of Relevant Codebases</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="favicon.svg">
+                        <link rel="shortcut icon" href="favicon.png">
+                <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+                <link rel="stylesheet" href="css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="1.1-front-page.html"><strong aria-hidden="true">1.</strong> Welcome</a></li><li class="chapter-item expanded "><a href="about.html"><strong aria-hidden="true">2.</strong> About LumoSQL</a></li><li class="chapter-item expanded "><a href="1.2-top-features.html"><strong aria-hidden="true">3.</strong> Top Features</a></li><li class="chapter-item expanded "><a href="1.4-install-LumoSQL.html"><strong aria-hidden="true">4.</strong> Install</a></li><li class="chapter-item expanded "><a href="quickstart.html"><strong aria-hidden="true">5.</strong> Quick Build and Benchmark</a></li><li class="chapter-item expanded affix "><li class="part-title">Features</li><li class="chapter-item expanded "><a href="3.4-not-forking-tool.html"><strong aria-hidden="true">6.</strong> Not-Forking Tool</a></li><li class="chapter-item expanded "><a href="lumo-build-benchmark.html"><strong aria-hidden="true">7.</strong> Build and Benchmark System (build.tcl)</a></li><li class="chapter-item expanded "><a href="backends.html"><strong aria-hidden="true">8.</strong> Available Backends - SQLite B-tree and LMDB</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="lumo-sqlite-bdb-backend.html"><strong aria-hidden="true">8.1.</strong> BDB 18.1.32 Backend</a></li><li class="chapter-item expanded "><a href="lumo-malbrain-backend.html"><strong aria-hidden="true">8.2.</strong> Karl Malbrain's C Btree</a></li></ol></li><li class="chapter-item expanded "><a href="lumo-corruption-detection-and-magic.html"><strong aria-hidden="true">9.</strong> Corruption Detection</a></li><li class="chapter-item expanded "><a href="3.3-benchmarking.html"><strong aria-hidden="true">10.</strong> Benchmarking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="lumo-benchmark-filter.html"><strong aria-hidden="true">10.1.</strong> Displaying Benchmark Results (benchmark-filter.tcl)</a></li><li class="chapter-item expanded "><a href="statistical_analysis.html"><strong aria-hidden="true">10.2.</strong> Statistical Analysis</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">New features</li><li class="chapter-item expanded "><a href="rbac-design.html"><strong aria-hidden="true">11.</strong> Design of Role-Based Access Control</a></li><li class="chapter-item expanded "><a href="encryption.html"><strong aria-hidden="true">12.</strong> Encryption</a></li><li class="chapter-item expanded "><a href="lumion_intro.html"><strong aria-hidden="true">13.</strong> Lumion</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="rfc.html"><strong aria-hidden="true">13.1.</strong> Lumion RFC</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Research</li><li class="chapter-item expanded "><a href="2.1-development-landscape.html"><strong aria-hidden="true">14.</strong> SQLite Development Landscape</a></li><li class="chapter-item expanded "><a href="3.7-relevant-codebases.html" class="active"><strong aria-hidden="true">15.</strong> Overview of Relevant Codebases</a></li><li class="chapter-item expanded "><a href="2.4-relevant-knowledgebase.html"><strong aria-hidden="true">16.</strong> Overview of the Relevant Knowledgebase</a></li><li class="chapter-item expanded "><a href="3.6-development-notes.html"><strong aria-hidden="true">17.</strong> LumoSQL 2019 Prototype</a></li><li class="chapter-item expanded affix "><li class="part-title">Design</li><li class="chapter-item expanded "><a href="api.html"><strong aria-hidden="true">18.</strong> SQLite API Interception Points</a></li><li class="chapter-item expanded "><a href="virtual-machine.html"><strong aria-hidden="true">19.</strong> SQLite Virtual Machine Layer</a></li><li class="chapter-item expanded "><a href="WALs.html"><strong aria-hidden="true">20.</strong> LMDB Alternative to WALs</a></li><li class="chapter-item expanded "><a href="what-are-savepoints.html"><strong aria-hidden="true">21.</strong> Savepoints in SQLite</a></li><li class="chapter-item expanded "><a href="online-database-servers.html"><strong aria-hidden="true">22.</strong> Online Database Servers</a></li><li class="chapter-item expanded affix "><li class="part-title">Other</li><li class="chapter-item expanded "><a href="LumoSQL-PhaseII-Announce.html"><strong aria-hidden="true">23.</strong> News - Phase II Announcement</a></li><li class="chapter-item expanded "><a href="release-announce-0.4.html"><strong aria-hidden="true">24.</strong> News - Release 0.4 Announcement</a></li><li class="chapter-item expanded "><a href="release-announce-0.3.html"><strong aria-hidden="true">25.</strong> News - Release 0.3 Announcement</a></li><li class="chapter-item expanded "><a href="lumo-gsoc-ideas.html"><strong aria-hidden="true">26.</strong> Google Summer of Code 2021</a></li><li class="chapter-item expanded "><a href="lumo-proposed-debug.html"><strong aria-hidden="true">27.</strong> SQLite Debug Proposal</a></li><li class="chapter-item expanded "><a href="CONTRIBUTING.html"><strong aria-hidden="true">28.</strong> Conributing</a></li><li class="chapter-item expanded "><a href="lumosql-meetbot.html"><strong aria-hidden="true">29.</strong> Contributing - IRC Meetbot</a></li><li class="chapter-item expanded "><a href="CODE-OF-CONDUCT.html"><strong aria-hidden="true">30.</strong> Code of Conduct</a></li><li class="chapter-item expanded "><a href="3.2-legal-aspects.html"><strong aria-hidden="true">31.</strong> Legal Aspects</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="licensing.html"><strong aria-hidden="true">31.1.</strong> Licensing</a></li><li class="chapter-item expanded "><a href="MIT.html"><strong aria-hidden="true">31.2.</strong> MIT Licence</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                                                <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <!--- SPDX-License-Identifier: CC-BY-SA-4.0 --->
+<!--- SPDX-FileCopyrightText: 2020 The LumoSQL Authors --->
+<!--- SPDX-ArtifactOfProjectName: LumoSQL --->
+<!--- SPDX-FileType: Documentation --->
+<!--- SPDX-FileComment: Original by Dan Shearer, 2019 --->
+<h1 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h1>
+<ul>
+<li><a href="#codebases-relevant-to-lumosql">Codebases Relevant to LumoSQL</a></li>
+<li><a href="#what-is-a-relevant-codebase">What is a Relevant Codebase?</a></li>
+<li><a href="#useful-dead-sqlite-forks">Useful Dead SQLite Forks</a></li>
+<li><a href="#oracle-bdb-and-oracle-bdb-sql-codebases">Oracle BDB and Oracle BDB-SQL Codebases</a></li>
+<li><a href="#distributed-or-clustered-codebases">Distributed or Clustered Codebases</a></li>
+<li><a href="#modular-code-to-potentially-incorporate-in-lumosql">Modular Code to Potentially Incorporate in LumoSQL</a></li>
+<li><a href="#on-disk-file-format-related-knowledge">On-disk File Format-related Knowledge</a></li>
+<li><a href="#list-of-relevant-benchmarking-and-test-knowledge">List of Relevant Benchmarking and Test Knowledge</a></li>
+<li><a href="#sqlite-and-encryption-issues">SQLite and Encryption Issues</a></li>
+<li><a href="#list-of-from-scratch-mysql-sql-and-mysql-server-implementations">List of from-scratch MySQL SQL and MySQL Server implementations</a></li>
+</ul>
+<h1 id="codebases-relevant-to-lumosql"><a class="header" href="#codebases-relevant-to-lumosql">Codebases Relevant to LumoSQL</a></h1>
+<p><img src="./images/lumo-relevant-codebases-intro.jpg" alt="Ingredients" title="FuQin Market in Chengdu, CC license, https://chopsticksinmysuitcase.typepad.com/.a/6a0133f251ecbe970b0133f60d5807970b-500wi" /></p>
+<h1 id="what-is-a-relevant-codebase"><a class="header" href="#what-is-a-relevant-codebase">What is a Relevant Codebase?</a></h1>
+<p>There are four dimensions to codebases relevant to LumoSQL:</p>
+<ol>
+<li>Code that is a derivative of SQLite code adding a feature or improvement</li>
+<li>Code that is, or could become, a candidate for a LumoSQL backend store</li>
+<li>Code that has nothing to do with SQLite but implements an interesting database feature we want to use in LumoSQL</li>
+<li>Code that supports the development of LumoSQL such as testing, benchmarking or analysing relevant codebasesembarrasing</li>
+</ol>
+<p>This is a discussion document, describing our findings as we look at hundreds
+of thousands of lines of other people's code. In addition there is the <a href="./2.4-relevant-knowledgebase.html">Full Knowledgebase Relevant to LumoSQL</a> .
+There is a lot more in the Knowledgebase than there is in this more detailed document.</p>
+<h1 id="useful-dead-sqlite-forks"><a class="header" href="#useful-dead-sqlite-forks">Useful Dead SQLite Forks</a></h1>
+<p>Code becomes unmaintained for many reasons, and some interesting code is definitely dead. We have considered the following codebases.</p>
+<table><thead><tr><th>Project</th><th>Last modified</th><th>Description</th></tr></thead><tbody>
+<tr><td><a href="https://github.com/LMDB/sqlightning">sqlightning</a></td><td>2013</td><td>SQLight ported to the LMDB key-value store</td></tr>
+<tr><td><a href="https://github.com/btrask/sqlheavy">SQLHeavy</a></td><td>2016</td><td>SQLite ported to LevelDB, LMDB, RocksDB and more, with a key-value store library abstraction</td></tr>
+<tr><td><a href="https://github.com/btrask/libkvstore">libkvstore</a></td><td>2016</td><td>The backend library used by SQLHeavy</td></tr>
+<tr><td><a href="https://sqlite.org/src4/tree?ci=trunk">SQLite 4</a></td><td>2014</td><td>Abandoned new version of SQLite with improved backend support and other features</td></tr>
+</tbody></table>
+<p>The library <code>libkvstore</code> is after the style of what we are implementing at the API interception point in <code>backend.c</code>, and the author remains active in this general area.</p>
+<p>SQLHeavy never got beyond prototype stage but it did support multiple K-V stores. Despite looking at a great deal of code we never noticed SQLHeavy until we had already done our own work to revive sqlightning. This is a reminder that we may still be missing important existing contributions.</p>
+<p>The defunct version 4 of SQLite intended to implement <a href="https://sqlite.org/src4/doc/trunk/www/storage.wiki">pluggable storage engines</a>, to similar effect
+to LumoSQL. The intention was that &quot;Transaction commit and rollback is handled
+by the storage engine&quot;, suggesting that SQLite4 was intended to be quite conservative technically, not using 
+MVCC-compliant K-V stores, and still using Write-Ahead Logs.</p>
+<h1 id="oracle-bdb-and-oracle-bdb-sql-codebases"><a class="header" href="#oracle-bdb-and-oracle-bdb-sql-codebases">Oracle BDB and Oracle BDB-SQL Codebases</a></h1>
+<p>As of June 2020, Oracle announced that it has dropped support for the BDB port
+to SQLite. DB 18.1.32 is the last version to carry this, which is based on
+SQLite from 2017. This is the reference and basis for the BDB backend in
+LumoSQL. </p>
+<table><thead><tr><th>Project</th><th>Last modified</th><th>Description</th></tr></thead><tbody>
+<tr><td><a href="https://fossies.org/linux/misc/db-18.1.32.tar.gz">Sleepycat/Oracle BDB</a></td><td>current</td><td>The original ubiquitous Unix K-V store, disused in open source since Oracle's 2013 license change; the API template for most of the k-v btree stores around. Now includes many additional features including full MVCC transactions, networking and replication. This link is a mirror of code from download.oracle.com, which requires a login</td></tr>
+<tr><td><a href="https://fossies.org/linux/misc/db-18.1.32.tar.gz">Sleepycat/Oracle BDB-SQL</a></td><td>current</td><td>Port of SQLite to the Sleepycat/Oracle transactional bdb K-V store. As of 5th March 2020 this mirror is identical to Oracle's login-protected tarball for db 18.1.32</td></tr>
+</tbody></table>
+<p>It turns out though that Oracle is not the only developer of KV stores based on BDB
+code. ComDB, listed under &quot;Clustered Codebases&quot;, uses a KV store derived from
+BDB before Oracle bought Sleepcat Software, meaning before the license changed
+from BSD to AGPL. ComDB added row-level locks to BDB, and prefaulting/readahead among 
+other features. It is not yet clear whether it is still possible to extract the BDB 
+library from ComDB and use it standalone elsewhere (such as a LumoSQL backend.)</p>
+<h1 id="actual-or-potential-lumosql-backends"><a class="header" href="#actual-or-potential-lumosql-backends">Actual or Potential LumoSQL Backends</a></h1>
+<p>During 2020 at least, the only backends to be considered for LumoSQL will be btree-style KV 
+stores capable of serialised transactions. As identified in the Knowledbase there are only 
+six or so under active development, 5 of them in C and 1 in Go. Of these, three are the first
+candidates to be a LumoSQL backend.</p>
+<p>Since LumoSQL implements a single backend API for the VDBE to talk to, that API
+can be externally exposed. This means that all LumoSQL backend KV stores can be
+exposed via a single library API, meaning nothing has to change if the user
+decides to switch to a different KV store. This is possible because all of the
+KV stores have a very similar API dealing with identical objects, despite their
+substantial differences in implementation.</p>
+<p>From our research we expect a transactional KV store implemented in C or Go to
+be between 11-16k lines of code, excluding comments and test code.</p>
+<table><thead><tr><th>Project</th><th>Last modified</th><th>Description</th></tr></thead><tbody>
+<tr><td>SQLite's built-in KV store</td><td>current</td><td>As used by billions.</td></tr>
+<tr><td><a href="https://github.com/LMDB/">LMDB</a></td><td>current</td><td>11k LOC</td></tr>
+<tr><td><a href="https://bintray.com/version/files/homebrew/mirror/berkeley-db/18.1.40">Oracle BDB KV Store</a></td><td>current</td><td>16k LOC</td></tr>
+<tr><td><a href="https://github.com/btrask/libkvstore">libkvstore</a></td><td>2016</td><td>Defunct, but similar to the API that lumo-backend.h implements</td></tr>
+</tbody></table>
+<p>The other KV stores listed in the Knowledgebase are also all potential
+backends, but we haven't spent enough time looking at them. </p>
+<h1 id="distributed-or-clustered-codebases"><a class="header" href="#distributed-or-clustered-codebases">Distributed or Clustered Codebases</a></h1>
+<p>The following five projects are widely-varying examples of how SQLite data can
+be distributed, whether across just a few local nodes or across a much higher
+number of internet-connected nodes.</p>
+<table><thead><tr><th>Project</th><th>Last modified</th><th>Description</th></tr></thead><tbody>
+<tr><td><a href="https://github.com/rqlite/rqlite">rqlite</a></td><td>current</td><td>Distributed database with networking and Raft consensus on top of SQLite nodes</td></tr>
+<tr><td><a href="https://github.com/Expensify/Bedrock">Bedrock</a></td><td>current</td><td>WAN-replicated blockchain multimaster database built on SQLite. Has MySQL emulation</td></tr>
+<tr><td><a href="https://github.com/bloomberg/comdb2">Comdb</a></td><td>current</td><td>Clustered HA RDBMS built on SQLite and a forked old Sleepcat BDB, synchronous replication, stored procedures</td></tr>
+<tr><td><a href="https://github.com/biokoda/actordb">ActorDB</a></td><td>current</td><td>SQLite with a data sharding/distribution system across clustered nodes. Each node stores data in LMDB, which is connected to SQLite at the SQLite WAL layer</td></tr>
+<tr><td><a href="https://github.com/wal-g/wal-g">WAL-G</a></td><td>current</td><td>Backup/replication tool that intercepts the WAL journal log for each of Postgres, Mysql, MonogoDB and Redis</td></tr>
+</tbody></table>
+<p>Unlike all other solutions we have found, rqlite builds its replication on top of SQLite nodes rather than underneath the SQLite storage API layer.</p>
+<p>ActorDB uses LMDB but still has a WAL.</p>
+<p>WAL-G illustrates a useful side-effect of having a WAL, in that it can be used as a list of transactions for archival as well as replay reasons. A non-WAL storage databases such as LMDB can also generate transaction logs for these sorts of purpose, but they aren't for replay reasons. </p>
+<p>Oracle BDB-SQL discussed in the previous section also has replication. </p>
+<p>Comdb has a large team of active developers, and is the most ambitious of the SQLite-derived databases. Bloomberg LP created Comdb in 2004 and designed it for scale and yet with synchronous replication and full RDBMS functionality, the opposite of NoSQL solutions. SQLite has been ported to an old version of Sleepycat Berkely DB, which has been forked and extensively modified. The BDB interface is still largely used. This <a href="http://www.vldb.org/pvldb/vol9/p1377-scotti.pdf">2016 paper on Comdb</a> by the Bloomberg team is a very thorough introduction to the architecture and the BDB btree modifications. Comdb creates a VDBE layer abstraction such that VDBE operates on tables with rows, not a key-value store.</p>
+<p>| <a href="https://github.com/kripken/sql.js/">sql.js</a> | current | SQLite compiled to JavaScript WebAssembly through Emscripten |</p>
+<h1 id="modular-code-to-potentially-incorporate-in-lumosql"><a class="header" href="#modular-code-to-potentially-incorporate-in-lumosql">Modular Code to Potentially Incorporate in LumoSQL</a></h1>
+<table><thead><tr><th>Project</th><th>Last modified</th><th>Description</th></tr></thead><tbody>
+<tr><td><a href="https://github.com/gdev2018/sqlite3odbc">sqlite3odbc</a></td><td>current</td><td>ODBC driver for SQLite by <a href="http://www.ch-werner.de/sqliteodbc/">Christian Werner</a> as used by many projects including LibreOffice</td></tr>
+</tbody></table>
+<p>SQLite3ODBC is a wrapper around the whole of the SQLite library. None of the
+LumoSQL API interception points can be used for this, nevertheless, ODBC is an
+important cross-platform standard heavily used on Windows and IBM's operating
+systems. The potential benefit to this is that many Windows users would the be 
+able to use LumoSQL as a drop-in data source like any other ODBC connector. The 
+maintenance costs could well be quite low since it does not modify SQLite in any way.</p>
+<p>| <a href="https://www.gaia-gis.it/fossil/libspatialite/index">Spatialite</a>| current | Geospatial GIS extension to SQLite, similar to PostGIS |</p>
+<p><em>update:</em> sadly no, Spatialite cannot be incorporated into LumoSQL, but Spatialite
+should be included in the LumoSQL test suite, as follows...</p>
+<p>GIS features are a vertical use case, but one that is extreme popular and
+widely-used, and increasingly as part of public information and journalism.
+For example, PostGIS has very large numbers of users and would likely have been
+merged into PostgreSQL long ago, except for incompatible licenses.  Spatialite
+has a similar licensing problem, because it is only offered under copyleft
+licenses including MPL and two GPLs, and so cannot be included as part of
+LumoSQL. However because this is such an important use case, and because
+Spatialite tracks LumoSQL so carefully, the LumoSQL test suite should include
+building with Spatialite and running Spatialite's own test suite. This brings 
+up another class of tests, because Spatialite isn't the only important 
+source-available SQLite addon.</p>
+<p>| <a href="https://github.com/gigimushroom/DatabaseBackendEngine">Gigimushroom's Database Backend Engine</a>|2019| A good example of an alternative BTree storage engine implemented using SQLite's Virtual Table Interface. This approach is not what LumoSQL has chosen for many reasons, but this code demonstrates virtual tables can work, and also that storage engines implemented at virtual tables can be ported to be LumoSQL backends.|</p>
+<h1 id="on-disk-file-format-related-knowledge"><a class="header" href="#on-disk-file-format-related-knowledge">On-disk File Format-related Knowledge</a></h1>
+<p>The on-disk file format is important to many SQLite use cases, and introspection tools are both important and rare. Other K-V stores also have third-party on-disk introspection tools. There are advantages to having investigative tools that do not use the original/canonical source code to read and write these databases. The SQLite file format is promoted as being a stable, backwards-compatible transport (recommend by the Library of Congress as an archive format) but it also has significant drawbacks as discussed elsewhere in the LumoSQL documentation.</p>
+<table><thead><tr><th>Project</th><th>Last modified</th><th>Description</th></tr></thead><tbody>
+<tr><td><a href="https://www.sciencedirect.com/science/article/pii/S1742287618300471">A standardized corpus for SQLite database forensics</a></td><td>current</td><td>Sample SQLite databases and evaluations of 5 tools that do extraction and recovery from SQLite, including Undark and SQLite Deleted Records Parser</td></tr>
+<tr><td><a href="https://github.com/fastogt/fastonosql">FastoNoSQL</a></td><td>current</td><td>GUI inspector and management tool for on-disk databases including LMDB and LevelDB</td></tr>
+<tr><td><a href="https://github.com/inflex/undark">Undark</a></td><td>2016</td><td>SQLite deleted and corrupted data recovery tool</td></tr>
+<tr><td><a href="https://github.com/mdegrazia/SQLite-Deleted-Records-Parser">SQLite Deleted Records Parser</a></td><td>2015</td><td>Script to recover deleted entries in an SQLite database</td></tr>
+<tr><td><a href="https://github.com/catwell/cw-lua/tree/master/lua-mdb">lua-mdb</a></td><td>2016</td><td>Parse and investigate LMDB file format</td></tr>
+</tbody></table>
+<h1 id="list-of-relevant-benchmarking-and-test-knowledge"><a class="header" href="#list-of-relevant-benchmarking-and-test-knowledge">List of Relevant Benchmarking and Test Knowledge</a></h1>
+<p>Benchmarking is a big part of LumoSQL, to determine if changes are an improvement. The trouble is that SQLite and other top databases are not really benchmarked in realistic and consistent way, despite SQL server benchmarking using tools like TPC being an obsessive industry in itself, and there being myriad of testing tools released with SQLite, Postgresql, MariaDB etc. But in practical terms there is no way of comparing the most-used databases with each other, or even of being sure that the tests that do exist are in any way realistic, or even of simply reproducing results that other people have found. LumoSQL covers so many codebases and use cases that better SQL benchmarking is a project requirement. Benchmarking and testing overlap, which is addressed in the code and docs.</p>
+<p>The well-described <a href="https://sqlite.org/testing.html">testing of SQLite</a> involves some open code, some closed code, and many ad hoc processes. Clearly the SQLite team have an internal culture of testing that has benefitted the world. However that is very different to reproducible testing, which is in turn very different to reproducible benchmarking, and that is even without considering whether the benchmarking is a reasonable approximation of actual use cases.</p>
+<p>To highlight how poorly SQL benchmarking is done: there are virtually no test harnesses that cover encrypted databases and/or encrypted database connections, despite encryption being frequently required, and despite crypto implementation decisions making a very big difference in performance.</p>
+<table><thead><tr><th>Project</th><th>Last modified</th><th>Description</th></tr></thead><tbody>
+<tr><td><a href="https://www.cs.utexas.edu/%7Evijay/papers/apsys17-sqlite.pdf">Dangers and complexity of sqlite3 benchmarking</a></td><td>n/a</td><td>Helpful 2017 paper: &quot;...changing just one parameter in SQLite can change the performance by 11.8X... up to 28X difference in performance&quot;</td></tr>
+<tr><td><a href="https://www.sqlite.org/sqllogictest/doc/trunk/about.wiki">sqllogictest</a></td><td>2017</td><td><a href="https://www.sqlite.org/sqllogictest/artifact/2c354f3d44da6356">sqlite.org code</a> to <a href="https://gerardnico.com/data/type/relation/sql/test">compare the results</a> of many SQL statements between multiple SQL servers, either SQLite or an ODBC-supporting server</td></tr>
+<tr><td><a href="https://github.com/sqlite/sqlite/tree/master/test">TCL SQLite tests</a></td><td>current</td><td>These are a mixture of code coverage tests, unit tests and test coverage. Actively maintained.</td></tr>
+<tr><td><a href="https://github.com/brianfrankcooper/YCSB/">Yahoo Cloud Serving Benchmark</a></td><td>current</td><td>Benchmarking tool for K-V stores and cloud-accessible databases</td></tr>
+<tr><td><a href="https://github.com/greenrobot/android-database-performance">Example Android Storage Benchmark</a></td><td>2018</td><td>This code is an example of the very many Android benchmarking/testing tools. This needs further investigation</td></tr>
+<tr><td><a href="https://github.com/akopytov/sysbench">Sysbench</a></td><td>current</td><td>A multithreaded generic benchmarking tool, with one well-supported use case being networked SQL servers, and <a href="https://www.percona.com/blog/2019/04/25/creating-custom-sysbench-scripts/">MySQL in particular</a></td></tr>
+</tbody></table>
+<h1 id="sqlite-and-encryption-issues"><a class="header" href="#sqlite-and-encryption-issues">SQLite and Encryption Issues</a></h1>
+<p>Encryption is a major problem for SQLite users looking for open code. There are no official implementations in open source, although the APIs are documented (seemingly by an SCM mistake years ago (?), see sqlite3-dbx below) and most solutions use the SQLite extension interface. This means that there are many mutually-incompatible implementations, several of them seeming to be very popular. None appear to have received encryption certification (?) and none seem to publish test results to reassure users about compatibility with SQLite upstream or with the file format. Besides the closed source solution from sqlite.org, there are also at least three other closed source options not listed here. This choice between either closed source or fragmented solutions is a poor security approach from the point of view of maintenance as well as peer-reviewed security. This means that SQLite in 2020 does not have a good approach to privacy. Privacy is more than encryption, but encryption is an essential pre-requisite for privacy.</p>
+<table><thead><tr><th>Project</th><th>Last modified</th><th>Description</th></tr></thead><tbody>
+<tr><td><a href="https://www.sqlite.org/see/doc/release/www/readme.wiki">SQLite Encryption Extension</a></td><td>current</td><td>Info about the (closed source) official SQLite crypto solution, illustrating that there is little to be compatible with in the wider SQLite landscape (although see the decade-old crypto implementation described in sqlite3-dbx below)</td></tr>
+<tr><td><a href="https://github.com/sqlcipher/sqlcipher">SQLCipher</a></td><td>current</td><td>Adds at-rest encryption to SQLite <a href="https://www.zetetic.net/sqlcipher/design/">at the pager level</a>, using OpenSSL (the default) or optionally other providers</td></tr>
+<tr><td><a href="https://github.com/resilar/sqleet">sqleet</a></td><td>current</td><td>Implements SHA256 encryption, also at the pager level</td></tr>
+<tr><td><a href="https://github.com/newsoft/sqlite3-dbx">sqlite3-dbx</a></td><td>kinda-current</td><td>Interesting documentation that perhaps sqlite.org never meant to publish their crypto APIs?</td></tr>
+<tr><td><a href="https://github.com/darkman66/SQLite3-Encryption">SQLite3-Encryption</a></td><td>current</td><td>No crypto libraries (DIY crypto!) and based on the similar-sounding official SQLite3-with-Encryption project</td></tr>
+</tbody></table>
+<p>While there are many more crypto projects, the architecture issues are the same for all of them. SQLCipher makes some very helpful comments in their <a href="https://www.zetetic.net/sqlcipher/design/">design document</a> under the heading Packaging:</p>
+<blockquote>
+<p>SQLCipher is an extension to SQLite, but it does not function as a loadable plugin for many reasons. Instead, SQLCipher modifies SQLite itself, and is maintained as a separate version of the source tree. SQLCipher releases are baselined against a specific source version of SQLite. However, the project minimizes alterations to core SQLite code to reduce the risk of breaking changes during upstream SQLite merges.</p>
+<p>The reasons that SQLCipher is packaged this way, as opposed to a &quot;plugin&quot; or extension to the SQLite amalgamation, follow:</p>
+<ul>
+<li>Enabling an SQLite codec requires the compile-time definition of SQLITE_HAS_CODEC, which is not present on standard, unmodified SQLite builds.</li>
+<li>Even when enabled, SQLite isn't setup to load codecs as plugins. While SQLite does have a plugin function for loadable extensions, it does not extend access to any system internals (it mainly used to allow custom user functions).</li>
+<li>SQLCipher makes calls to internal functions that are not part of the public SQLite API. Sometimes these APIs change, even in between minor SQLite versions. Thus, each update adn merge requires inspection, testing and verification. Making SQLCipher portable across multiple versions of SQLite would not be feasible, nor could it to use only the public API (for instance, even the first critical step of attaching the codec callback to the pager uses an internal API).</li>
+<li>SQLCipher modifies supporting functions to introduce special pragmas, built in functions, etc (e.g. PRAGMA cipher_*). Injecting this functionality in a plugin architecture wouldn't be possible.</li>
+<li>SQLCipher's test harness relies on support in testfixture to take advantage of the test API and various internal checks (memory reference counting, etc.)</li>
+<li>Even if it were possible to use a loadable plugin, dynamic libraries aren't available on all supported platforms, for example iOS</li>
+</ul>
+</blockquote>
+<p>This last point is generally relevant to LumoSQL, being one good reason among several why &quot;just write a VFS module&quot; isn't the answer to what LumoSQL is trying to do.</p>
+<p>Comparing all these projects, it seems important to consider whether page-level
+encryption and page-level locking should be looked at as closely related. The
+only page-level locking key-value store there is to study is the modified
+Berkeley DB underneath Comdb2 (ibid); anything else will need to be done with a
+modified LMDB or possibly Btree. There is no evidence that the official SQLite
+SEE solution does anything to the page level, but that is being followed up.
+Furthermore we need to look at metadata store (because otherwise we can only
+guess whether a given series of bytes is an encrypted database or not. </p>
+<h1 id="list-of-from-scratch-mysql-sql-and-mysql-server-implementations"><a class="header" href="#list-of-from-scratch-mysql-sql-and-mysql-server-implementations">List of from-scratch MySQL SQL and MySQL Server implementations</a></h1>
+<p>If we want to make SQLite able to process MySQL queries there is a lot of existing code in this area to consider. There are at least 80 projects on github which implement some or all of the MySQL network-parse-optimise-execute SQL pathway, a few of them implement all of it. None so far reviewed used MySQL or MariaDB code to do so. Perhaps that is because the SQL processing code alone in these databases is many times bigger than the whole of SQLite, and it isn't even clear how to add them to this table if we wanted to. Only a few of these projects put a MySQL frontend on SQLite, but two well-maintained projects do, showing us two ways of implementing this.</p>
+<table><thead><tr><th>Project</th><th>Last modified</th><th>Description</th></tr></thead><tbody>
+<tr><td><a href="https://github.com/Expensify/Bedrock">Bedrock</a></td><td>current</td><td>The MySQL compatibility seems to be popular and is actively supported but it is also small. It speaks the MySQL/MariaDB protocol accurately but doesn't seem to try very hard to match MySQL SQL language semantics and extensions, rather relying on the fact that SQLite substantially overlaps with MySQL.</td></tr>
+<tr><td><a href="https://github.com/pingcap/tidb/">TiDB</a></td><td>current</td><td>Distributed database with MySQL emulation as the primary dialect and referred to throughout the code, with frequent detailed bugfixes on deviations from MySQL SQL language behaviour.</td></tr>
+<tr><td><a href="https://github.com/phpmyadmin/sql-parser">phpMyAdmin parser</a></td><td>current</td><td>A very complete parser for MySQL code, demonstrating that completeness is not the unrealistic goal some claim it to be</td></tr>
+<tr><td><a href="https://github.com/src-d/go-mysql-server">Go MySQL Server</a></td><td>current</td><td>A MySQL server written in Go that executes queries but mostly leaves the backend for the user to implement. Intended to put a compliant MySQL server on top of arbitrary backend sources.</td></tr>
+<tr><td><a href="https://github.com/ClickHouse/ClickHouse/tree/146109fe27074229a38cd704d60f23ec7bd2ed67/base/mysqlxx">ClickHouse MySQL Frontend</a></td><td>current</td><td>Yandex' <a href="https://clickhouse.tech/">Clickhouse</a> has a MySQL frontend.</td></tr>
+</tbody></table>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="2.1-development-landscape.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="2.4-relevant-knowledgebase.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="2.1-development-landscape.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="2.4-relevant-knowledgebase.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>

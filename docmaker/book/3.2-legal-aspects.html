@@ -1,0 +1,344 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Legal Aspects</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="favicon.svg">
+                        <link rel="shortcut icon" href="favicon.png">
+                <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+                <link rel="stylesheet" href="css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="1.1-front-page.html"><strong aria-hidden="true">1.</strong> Welcome</a></li><li class="chapter-item expanded "><a href="about.html"><strong aria-hidden="true">2.</strong> About LumoSQL</a></li><li class="chapter-item expanded "><a href="1.2-top-features.html"><strong aria-hidden="true">3.</strong> Top Features</a></li><li class="chapter-item expanded "><a href="1.4-install-LumoSQL.html"><strong aria-hidden="true">4.</strong> Install</a></li><li class="chapter-item expanded "><a href="quickstart.html"><strong aria-hidden="true">5.</strong> Quick Build and Benchmark</a></li><li class="chapter-item expanded affix "><li class="part-title">Features</li><li class="chapter-item expanded "><a href="3.4-not-forking-tool.html"><strong aria-hidden="true">6.</strong> Not-Forking Tool</a></li><li class="chapter-item expanded "><a href="lumo-build-benchmark.html"><strong aria-hidden="true">7.</strong> Build and Benchmark System (build.tcl)</a></li><li class="chapter-item expanded "><a href="backends.html"><strong aria-hidden="true">8.</strong> Available Backends - SQLite B-tree and LMDB</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="lumo-sqlite-bdb-backend.html"><strong aria-hidden="true">8.1.</strong> BDB 18.1.32 Backend</a></li><li class="chapter-item expanded "><a href="lumo-malbrain-backend.html"><strong aria-hidden="true">8.2.</strong> Karl Malbrain's C Btree</a></li></ol></li><li class="chapter-item expanded "><a href="lumo-corruption-detection-and-magic.html"><strong aria-hidden="true">9.</strong> Corruption Detection</a></li><li class="chapter-item expanded "><a href="3.3-benchmarking.html"><strong aria-hidden="true">10.</strong> Benchmarking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="lumo-benchmark-filter.html"><strong aria-hidden="true">10.1.</strong> Displaying Benchmark Results (benchmark-filter.tcl)</a></li><li class="chapter-item expanded "><a href="statistical_analysis.html"><strong aria-hidden="true">10.2.</strong> Statistical Analysis</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">New features</li><li class="chapter-item expanded "><a href="rbac-design.html"><strong aria-hidden="true">11.</strong> Design of Role-Based Access Control</a></li><li class="chapter-item expanded "><a href="encryption.html"><strong aria-hidden="true">12.</strong> Encryption</a></li><li class="chapter-item expanded "><a href="lumion_intro.html"><strong aria-hidden="true">13.</strong> Lumion</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="rfc.html"><strong aria-hidden="true">13.1.</strong> Lumion RFC</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Research</li><li class="chapter-item expanded "><a href="2.1-development-landscape.html"><strong aria-hidden="true">14.</strong> SQLite Development Landscape</a></li><li class="chapter-item expanded "><a href="3.7-relevant-codebases.html"><strong aria-hidden="true">15.</strong> Overview of Relevant Codebases</a></li><li class="chapter-item expanded "><a href="2.4-relevant-knowledgebase.html"><strong aria-hidden="true">16.</strong> Overview of the Relevant Knowledgebase</a></li><li class="chapter-item expanded "><a href="3.6-development-notes.html"><strong aria-hidden="true">17.</strong> LumoSQL 2019 Prototype</a></li><li class="chapter-item expanded affix "><li class="part-title">Design</li><li class="chapter-item expanded "><a href="api.html"><strong aria-hidden="true">18.</strong> SQLite API Interception Points</a></li><li class="chapter-item expanded "><a href="virtual-machine.html"><strong aria-hidden="true">19.</strong> SQLite Virtual Machine Layer</a></li><li class="chapter-item expanded "><a href="WALs.html"><strong aria-hidden="true">20.</strong> LMDB Alternative to WALs</a></li><li class="chapter-item expanded "><a href="what-are-savepoints.html"><strong aria-hidden="true">21.</strong> Savepoints in SQLite</a></li><li class="chapter-item expanded "><a href="online-database-servers.html"><strong aria-hidden="true">22.</strong> Online Database Servers</a></li><li class="chapter-item expanded affix "><li class="part-title">Other</li><li class="chapter-item expanded "><a href="LumoSQL-PhaseII-Announce.html"><strong aria-hidden="true">23.</strong> News - Phase II Announcement</a></li><li class="chapter-item expanded "><a href="release-announce-0.4.html"><strong aria-hidden="true">24.</strong> News - Release 0.4 Announcement</a></li><li class="chapter-item expanded "><a href="release-announce-0.3.html"><strong aria-hidden="true">25.</strong> News - Release 0.3 Announcement</a></li><li class="chapter-item expanded "><a href="lumo-gsoc-ideas.html"><strong aria-hidden="true">26.</strong> Google Summer of Code 2021</a></li><li class="chapter-item expanded "><a href="lumo-proposed-debug.html"><strong aria-hidden="true">27.</strong> SQLite Debug Proposal</a></li><li class="chapter-item expanded "><a href="CONTRIBUTING.html"><strong aria-hidden="true">28.</strong> Conributing</a></li><li class="chapter-item expanded "><a href="lumosql-meetbot.html"><strong aria-hidden="true">29.</strong> Contributing - IRC Meetbot</a></li><li class="chapter-item expanded "><a href="CODE-OF-CONDUCT.html"><strong aria-hidden="true">30.</strong> Code of Conduct</a></li><li class="chapter-item expanded "><a href="3.2-legal-aspects.html" class="active"><strong aria-hidden="true">31.</strong> Legal Aspects</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="licensing.html"><strong aria-hidden="true">31.1.</strong> Licensing</a></li><li class="chapter-item expanded "><a href="MIT.html"><strong aria-hidden="true">31.2.</strong> MIT Licence</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                                                <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: 2020 The LumoSQL Authors -->
+<!-- SPDX-ArtifactOfProjectName: LumoSQL -->
+<!-- SPDX-FileType: Documentation -->
+<!-- SPDX-FileComment: Original by Dan Shearer, 2020 -->
+<p><img src="./images/lumo-legal-aspects-intro.png" alt="" title="XXXXXXXX" /></p>
+<h1 id="table-of-contents"><a class="header" href="#table-of-contents">Table of Contents</a></h1>
+<ul>
+<li><a href="#lumosql-licensing">LumoSQL Licensing</a></li>
+<li><a href="#why-mit-why-not-mit">Why MIT? Why Not MIT?</a></li>
+<li><a href="#in-detail-patents-mit-and-apache-20">In Detail: Patents, MIT and Apache 2.0</a></li>
+<li><a href="#in-detail-the-sqlite-public-domain-licensing-problem">In Detail: the SQLite Public Domain Licensing Problem</a></li>
+<li><a href="#history-and-rationale">History and Rationale</a></li>
+<li><a href="#encryption-legal-issues">Encryption Legal Issues</a></li>
+<li><a href="#lumosql-requirements-and-decisions">LumoSQL Requirements and Decisions</a></li>
+</ul>
+<h1 id="lumosql-licensing"><a class="header" href="#lumosql-licensing">LumoSQL Licensing</a></h1>
+<p>SQLite is released as <a href="https://www.sqlite.org/copyright.html">Public Domain</a>.
+In order to both respect and improve on this, the <a href="lumo-projet-aims.html">LumoSQL Project Aims</a> make this promise to SQLite users:</p>
+<blockquote>
+<p>LumoSQL will not come with legal terms less favourable than SQLite. LumoSQL
+will try to improve the legal standing and safety worldwide as compared to
+SQLite.</p>
+</blockquote>
+<p>To achieve this LumoSQL has made these policy decisions:</p>
+<ul>
+<li>New LumoSQL code is licensed under the <a href="https://opensource.org/licenses/MIT">MIT License</a>, as used by many large corporations worldwide</li>
+<li>LumoSQL documentation is licensed under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons</a></li>
+<li>Existing and future SQLite code is relicenced by the act of being distributed under the terms of the MIT license</li>
+<li>Open Source code from elsewhere, such as backend data stores, remain under the terms of the original license except where distribution under MIT effectively relicenses it</li>
+<li>Open Content documentation from elsewhere remains under the terms of the original license. No documentation is used in LumoSQL unless it can be freely mixed with any other documentation. </li>
+</ul>
+<p>The effect of these policy decisions are:</p>
+<ul>
+<li>
+<p>LumoSQL users gain certainty as compared with SQLite users because they have a
+license that is recognised in jurisdictions worldwide. </p>
+</li>
+<li>
+<p>LumoSQL users do not lose any rights. For example, the MIT license permits use
+with fully proprietary software, by anyone. Whatever users do today with
+SQLite they can continue to do with LumoSQL. </p>
+</li>
+<li>
+<p>While MIT does require users to include a copy of the license and the
+copyright notice, the MIT license also permits the user to remove the
+sentence requiring this from the license (thus re-licensing LumoSQL.) </p>
+</li>
+</ul>
+<h1 id="why-mit-why-not-mit"><a class="header" href="#why-mit-why-not-mit">Why MIT? Why Not MIT?</a></h1>
+<p>Github's <a href="https://choosealicense.com/licenses/mit/">License Chooser for MIT</a> describes the MIT as:</p>
+<blockquote>
+<p>A short and simple permissive license with conditions only requiring
+preservation of copyright and license notices. Licensed works, modifications,
+and larger works may be distributed under different terms and without source
+code. </p>
+</blockquote>
+<p>The MIT license aims to get out of the way of software developers, and despite
+some flaws it appears to do so reliably.</p>
+<p>In addition, MIT is popular. As documented <a href="https://en.wikipedia.org/wiki/MIT_License">on Wikipedia</a> MIT appears to be the most-used open source licenses. Popularity matters, because all licenses are in part a matter of community belief and momentum.  Microsoft releasedi
+<a href="https://en.wikipedia.org/wiki/.NET_Core">.NET Core</a> and Facebook released
+<a href="https://en.wikipedia.org/wiki/React_(web_framework)">React</a> under the MIT, and
+these companies are very cautious about the validity of the licenses they use.</p>
+<p>In a forensic article analysing <a href="https://writing.kemitchell.com/2016/09/21/MIT-License-Line-by-Line.html">the 171 words of the MIT license</a> as they apply in the US, lawyer Kyle E. Mitchell writes in his conclusion:</p>
+<blockquote>
+<p>The MIT License is a legal classic. The MIT License works. It is by no means
+a panacea for all software IP ills, in particular the software patent
+scourge, which it predates by decades. But MIT-style licenses have served
+admirably... We’ve seen that despite some crusty verbiage and lawyerly
+affectation, one hundred and seventy one little words can get a hell of a lot
+of legal work done, clearing a path for open-source software through a dense
+underbrush of intellectual property and contract.</p>
+</blockquote>
+<p>Overall, in LumoSQL we have concluded that the MIT license is solid and it is
+better than any other mainstream license for existing SQLite users. It is
+certainly better than the SQLite Public Domain terms.</p>
+<h1 id="in-detail-patents-mit-and-apache-20"><a class="header" href="#in-detail-patents-mit-and-apache-20">In Detail: Patents, MIT and Apache 2.0</a></h1>
+<p>LumoSQL has a narrower range of possible licenses because of its nature as an
+embedded library, where it is tightly combined with users' code. This means
+that the terms and conditions for using LumoSQL have to be as open as possible
+to accommodate all the different legal statuses of software that users combine
+with LumoSQL. And the status that worries corporate lawyers the most is
+&quot;unknown&quot;. What if you aren't completely sure of the patent status of the
+software, or the intentions of your company? And where there is uncertainty,
+users are wise not to commit.</p>
+<p>LumoSQL has tried hard to bring more certainty, not less, and this is tricky when it comes to patents.</p>
+<p>Software patents are an issue in many jurisdictions. The MIT license includes a
+grant of patents to its users, as <a href="https://opensource.com/article/18/3/patent-grant-mit-license">explained by the Open Source Initiative</a>,
+including in the grant &quot;... to deal in the software without restriction.&quot; While the
+Apache 2.0 license specifically grants patent rights (as do the GPL and MPL), they are not more generous than the MIT license. There is some debate that varies by jurisdiction about exactly how clear the patent grant is, as documented in <a href="https://en.wikipedia.org/wiki/MIT_License#Relation_to_patents">the patent section on Wikipedia</a>.</p>
+<p>The difficulty is that the Apache 2.0 (similar to the GPL and MPL) license also
+includes a <em>patent retaliation</em> clause:</p>
+<blockquote>
+<p>If You institute patent litigation against any entity (including a
+cross-claim or counterclaim in a lawsuit) alleging that the Work or a
+Contribution incorporated within the Work constitutes direct or contributory
+patent infringement, then any patent licenses granted to You under this
+License for that Work shall terminate as of the date such litigation is
+filed.</p>
+</blockquote>
+<p>The intention is progressive and seemingly a Good Thing - after all, unless you
+are a patent troll who wants more pointless patent litigation? However the
+effect is that the Apache 2.0 license brings with it the requirement to check
+for patent issues in any code it is connected to. It also is possible that the
+company using LumoSQL actually does want the liberty to take software patent
+action in court. So whether by the risk or the constraint, Apache 2.0 brings with it
+significant change compared to SQLite's license terms in countries that recognise them. </p>
+<p>MIT has only a patent grant, not retaliation. That is why LumoSQL does not use the Apache 2.0 license.</p>
+<h1 id="in-detail-the-sqlite-public-domain-licensing-problem"><a class="header" href="#in-detail-the-sqlite-public-domain-licensing-problem">In Detail: the SQLite Public Domain Licensing Problem</a></h1>
+<p>There are numerous reasons other than licensing why SQLite is less open source
+than it appears, and these are covered in the <a href="./lumo-landscape.html">LumoSQL Landscape</a>. As to licensing, SQLite is distributed as
+Public Domain software, and this is mentioned by D Richard Hipp in his <a href="https://changelog.com/podcast/201">2016 Changelog Podcast Interview</a>. Although he is aware of the problems, Hipp has decided not to introduce changes.</p>
+<p>The <a href="https://opensource.org/node/878">Open Source Initiative</a> explains the Public Domain problem like this:</p>
+<blockquote>
+<p>“Public Domain” means software (or indeed anything else that could be
+copyrighted) that is not restricted by copyright. It may be this way because
+the copyright has expired, or because the person entitled to control the
+copyright has disclaimed that right. Disclaiming copyright is only possible
+in some countries, and copyright expiration happens at different times in
+different jurisdictions (and usually after such a long time as to be
+irrelevant for software). As a consequence, it’s impossible to make a
+globally applicable statement that a certain piece of software is in the
+public domain.</p>
+</blockquote>
+<p>Germany and Australia are examples of countries in which Public Domain is not
+normally recognised which means that legal certainty is not possible for users
+in these countries who need it or want it. This is why the Open Source
+Initiative does not recommend it and nor does it appear on the <a href="https://spdx.org/licenses/">SPDX License List</a>.</p>
+<p>The SPDX License List is a tool used by many organisations to understand where they stand legally with the millions of lines of code they are using. David A Wheeler has produced a helpful <a href="https://github.com/david-a-wheeler/spdx-tutorial">SPDX Tutorial</a> . All code and documentation developed by the LumoSQL project has a SPDX identifier.</p>
+<h1 id="history-and-rationale"><a class="header" href="#history-and-rationale">History and Rationale</a></h1>
+<p>SQLite Version 1 used the gdbm key-value store. This was under the GPL and
+therefore so was SQLite. gdbm is limited, and is not a binary tree. When
+Richard Hipp replaced it for SQLite version 2, he also dropped the GPL. SQLite
+has been released as &quot;Public Domain&quot;</p>
+<h1 id="encryption-legal-issues"><a class="header" href="#encryption-legal-issues">Encryption Legal Issues</a></h1>
+<p>SQLite is not available with encryption. There are two common ways of adding encryption to SQLite, both of which have legal implications: </p>
+<ol>
+<li>Purchasing the <a href="https://www.hwaci.com/sw/sqlite/see.html">SQLite Encryption Extension</a>(SEE) from Richard Hipp's company Hwaci. The SEE is proprietary software, and cannot be used with open source applications.</li>
+<li><a href="https://www.zetetic.net/sqlcipher/">SQLcipher</a> which has a open core model. The BSD-licensed open source version requires users to publish copyright notices, and the more capable commercial editions are available on similar terms to SEE, and therefore cannot be used with open source applications. </li>
+</ol>
+<p>There are many other ways of adding encryption to SQLite, some of which are listed in the <a href="./lumo-relevant-knowledgebase.html">Knowledgebase Relevant to LumoSQL</a>.</p>
+<p>The legal issues addressed in LumoSQL encryption include:</p>
+<ul>
+<li>Usability. Encryption should be available with LumoSQL in the core source code without having to consider any additional legal considerations.</li>
+<li>Unencumbered. No encryption code is used that may reasonably be subject to action by companies (eg copyright claims) or governments (eg export regulations). Crypto code will be reused from known-safe sources.</li>
+<li>Compliant with minimum requirements in various jurisdictions. With encryption being legally mandated or strongly recommended in many jurisdictions for particular use cases (banking, handling personal data, government data, etc) there are also minimum requirements. LumoSQL will not ship crypto code that fails minimum crypto requirements.</li>
+<li>Conspicuously <em>non-compliant</em> with maximum requirements in any jurisdiction. LumoSQL will not limit its encryption mechanisms or strength to comply with any legal restrictions, in common with other critical open source infrastructure. LumoSQL crypto tries to be as hard to break as possible regardless of the use case or jurisdiction.</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="CODE-OF-CONDUCT.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="licensing.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="CODE-OF-CONDUCT.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="licensing.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>

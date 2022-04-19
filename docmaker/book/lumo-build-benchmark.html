@@ -1,0 +1,931 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Build and Benchmark System (build.tcl)</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="favicon.svg">
+                        <link rel="shortcut icon" href="favicon.png">
+                <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+                <link rel="stylesheet" href="css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="1.1-front-page.html"><strong aria-hidden="true">1.</strong> Welcome</a></li><li class="chapter-item expanded "><a href="about.html"><strong aria-hidden="true">2.</strong> About LumoSQL</a></li><li class="chapter-item expanded "><a href="1.2-top-features.html"><strong aria-hidden="true">3.</strong> Top Features</a></li><li class="chapter-item expanded "><a href="1.4-install-LumoSQL.html"><strong aria-hidden="true">4.</strong> Install</a></li><li class="chapter-item expanded "><a href="quickstart.html"><strong aria-hidden="true">5.</strong> Quick Build and Benchmark</a></li><li class="chapter-item expanded affix "><li class="part-title">Features</li><li class="chapter-item expanded "><a href="3.4-not-forking-tool.html"><strong aria-hidden="true">6.</strong> Not-Forking Tool</a></li><li class="chapter-item expanded "><a href="lumo-build-benchmark.html" class="active"><strong aria-hidden="true">7.</strong> Build and Benchmark System (build.tcl)</a></li><li class="chapter-item expanded "><a href="backends.html"><strong aria-hidden="true">8.</strong> Available Backends - SQLite B-tree and LMDB</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="lumo-sqlite-bdb-backend.html"><strong aria-hidden="true">8.1.</strong> BDB 18.1.32 Backend</a></li><li class="chapter-item expanded "><a href="lumo-malbrain-backend.html"><strong aria-hidden="true">8.2.</strong> Karl Malbrain's C Btree</a></li></ol></li><li class="chapter-item expanded "><a href="lumo-corruption-detection-and-magic.html"><strong aria-hidden="true">9.</strong> Corruption Detection</a></li><li class="chapter-item expanded "><a href="3.3-benchmarking.html"><strong aria-hidden="true">10.</strong> Benchmarking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="lumo-benchmark-filter.html"><strong aria-hidden="true">10.1.</strong> Displaying Benchmark Results (benchmark-filter.tcl)</a></li><li class="chapter-item expanded "><a href="statistical_analysis.html"><strong aria-hidden="true">10.2.</strong> Statistical Analysis</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">New features</li><li class="chapter-item expanded "><a href="rbac-design.html"><strong aria-hidden="true">11.</strong> Design of Role-Based Access Control</a></li><li class="chapter-item expanded "><a href="encryption.html"><strong aria-hidden="true">12.</strong> Encryption</a></li><li class="chapter-item expanded "><a href="lumion_intro.html"><strong aria-hidden="true">13.</strong> Lumion</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="rfc.html"><strong aria-hidden="true">13.1.</strong> Lumion RFC</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Research</li><li class="chapter-item expanded "><a href="2.1-development-landscape.html"><strong aria-hidden="true">14.</strong> SQLite Development Landscape</a></li><li class="chapter-item expanded "><a href="3.7-relevant-codebases.html"><strong aria-hidden="true">15.</strong> Overview of Relevant Codebases</a></li><li class="chapter-item expanded "><a href="2.4-relevant-knowledgebase.html"><strong aria-hidden="true">16.</strong> Overview of the Relevant Knowledgebase</a></li><li class="chapter-item expanded "><a href="3.6-development-notes.html"><strong aria-hidden="true">17.</strong> LumoSQL 2019 Prototype</a></li><li class="chapter-item expanded affix "><li class="part-title">Design</li><li class="chapter-item expanded "><a href="api.html"><strong aria-hidden="true">18.</strong> SQLite API Interception Points</a></li><li class="chapter-item expanded "><a href="virtual-machine.html"><strong aria-hidden="true">19.</strong> SQLite Virtual Machine Layer</a></li><li class="chapter-item expanded "><a href="WALs.html"><strong aria-hidden="true">20.</strong> LMDB Alternative to WALs</a></li><li class="chapter-item expanded "><a href="what-are-savepoints.html"><strong aria-hidden="true">21.</strong> Savepoints in SQLite</a></li><li class="chapter-item expanded "><a href="online-database-servers.html"><strong aria-hidden="true">22.</strong> Online Database Servers</a></li><li class="chapter-item expanded affix "><li class="part-title">Other</li><li class="chapter-item expanded "><a href="LumoSQL-PhaseII-Announce.html"><strong aria-hidden="true">23.</strong> News - Phase II Announcement</a></li><li class="chapter-item expanded "><a href="release-announce-0.4.html"><strong aria-hidden="true">24.</strong> News - Release 0.4 Announcement</a></li><li class="chapter-item expanded "><a href="release-announce-0.3.html"><strong aria-hidden="true">25.</strong> News - Release 0.3 Announcement</a></li><li class="chapter-item expanded "><a href="lumo-gsoc-ideas.html"><strong aria-hidden="true">26.</strong> Google Summer of Code 2021</a></li><li class="chapter-item expanded "><a href="lumo-proposed-debug.html"><strong aria-hidden="true">27.</strong> SQLite Debug Proposal</a></li><li class="chapter-item expanded "><a href="CONTRIBUTING.html"><strong aria-hidden="true">28.</strong> Conributing</a></li><li class="chapter-item expanded "><a href="lumosql-meetbot.html"><strong aria-hidden="true">29.</strong> Contributing - IRC Meetbot</a></li><li class="chapter-item expanded "><a href="CODE-OF-CONDUCT.html"><strong aria-hidden="true">30.</strong> Code of Conduct</a></li><li class="chapter-item expanded "><a href="3.2-legal-aspects.html"><strong aria-hidden="true">31.</strong> Legal Aspects</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="licensing.html"><strong aria-hidden="true">31.1.</strong> Licensing</a></li><li class="chapter-item expanded "><a href="MIT.html"><strong aria-hidden="true">31.2.</strong> MIT Licence</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                                                <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <!-- Copyright 2020 The LumoSQL Authors, see LICENSES/MIT -->
+<!-- SPDX-License-Identifier: MIT -->
+<!-- SPDX-FileCopyrightText: 2022 The LumoSQL Authors -->
+<!-- SPDX-ArtifactOfProjectName: LumoSQL -->
+<!-- SPDX-FileType: Documentation -->
+<!-- SPDX-FileComment: Original by Claudio Calvelli, December 2020 -->
+<h1 id="lumosql-build-and-benchmark-system"><a class="header" href="#lumosql-build-and-benchmark-system">LumoSQL Build and Benchmark System</a></h1>
+<p><a href="https://lumosql.org">LumoSQL</a> implements a meta-build system for SQLite, using
+the <a href="https://lumosql.org/src/not-forking">Not-Forking tool</a> to handle many of
+the complexities so we can build a matrix of combined codebases and versions
+without having a mess of code specific to particular source trees.</p>
+<p>But once a binary is built, how can we know if our changes to SQLite make a difference, and
+what kind of difference? There was no standard way to compare software that
+implements the SQLite APIs, so we designed one.</p>
+<p>The LumoSQL Build and Benchmark System is relevant to all SQLite users wishing
+to compare different configurations and versions of standard SQLite.  In
+addition, the LumoSQL project includes code to combine any version of SQLite
+with any version of third party storeage backends, and to run tests on the
+combined code. This requires small modifications to SQLite itself, and some new
+code to interface each backend.</p>
+<h1 id="questions-the-build-and-benchmark-system-answers"><a class="header" href="#questions-the-build-and-benchmark-system-answers">Questions The Build and Benchmark System Answers</a></h1>
+<p>A single command can now give universal, repeatable, definitive answers to the
+following seemingly-simple questions:</p>
+<ul>
+<li>How can benchmarking runs be shared in a consistent manner between all users?
+<em><strong>(hint: use a standardised SQLite database)</strong></em></li>
+<li>Does SQLite get faster with each version? <em><strong>(hint: not always)</strong></em></li>
+<li>Which compile options make a given version of SQLite faster?</li>
+<li>How do different versions and compile options combine to change performance as
+data size gets larger?</li>
+<li>Does SQLITE_DEBUG really make
+<a href="https://sqlite.org/compile.html">SQLite run approximately three times slower?</a></li>
+<li>What happens when a given set of compile options, versions and data size are
+tested on faster and slower disks?</li>
+<li>Do I need to run hundreds of combinations to make decisions about SQLite versions/options/hardware?
+<em><strong>(hint: no, because you now can compare benchmarking results databases)</strong></em></li>
+</ul>
+<p>Having addressed the above questions, the following seemingly more-difficult questions
+now become very similar to the previous ones:</p>
+<ul>
+<li>What happens to performance when LMDB is swapped in as a storage backend for SQLite?
+<em><strong>(hint: there is a strange performance curve with increasing LMDB versions)</strong></em></li>
+<li>How does the Oracle-funded BDB backend compare with other backends, including the
+SQLite Btree? <em><strong>(hint: Oracle seems to have thought longer runtimes are better :-)</strong></em></li>
+<li>How do all of the above compare with each other with different build options,
+versions and datasizes? <em><strong>(hint: now can share benchmarking results, we can take
+advantage of thousands of CPU-hours from other people)</strong></em></li>
+</ul>
+<p>The rest of this document introduces and defines the benchmarking tool that 
+makes answering these questions possible. </p>
+<h2 id="build-and-benchmark-problem-statement"><a class="header" href="#build-and-benchmark-problem-statement">Build and benchmark problem statement</a></h2>
+<p>Motivation: LumoSQL has established that there is currently no way of comparing
+like-for-like SQLite-related databases. </p>
+<p>Test matrix: LumoSQL consists of multiple source trees from multiple sources,
+assembled with the assistance of the not-forking tool. These trees represent a
+matrix with a very large number of dimensions.  The dimensions include among
+other things: the combination of these source trees; their build process; their
+invocation parameters; their input data; and the running environment.</p>
+<p>Example instances of these dimensions are:</p>
+<ul>
+<li>SQLite version 1 combined with LMDB version 2, to make combined source object A</li>
+<li>Combined source object A can be compiled with <code>-DSQLITE_DEBUG</code>, and also 
+<code>-D MDB_MAXKEYSIZE</code> (which only applies to LMDB). That will give two build
+objects to test, call them binary objects B and C.</li>
+<li>Each of binary objects B and C can be tested with large data files, and
+many small files. </li>
+<li>Each of the above tests can be run in an environment with large amounts of
+memory, or with deliberate memory constraints.</li>
+<li>All of the above can then be repeated only with different versions of SQLite
+and LMDB</li>
+<li>... and then we move on to the different versions of pure SQLite, and SQLite
+combined with Berkeley DB, etc.</li>
+</ul>
+<p><em><strong>Problem statement:</strong></em></p>
+<blockquote>
+<p>The LumoSQL Build and Benchmark system solves the problem of defining the
+dimensions of the test matrix in a formal machine-friendly manner, and 
+presenting them to the user in a human-friendly manner.
+The user can then select some or all of these dimensions by human-readable
+name, and then cause them to be actioned. Every selection by the user will have
+multiple dependency actions.</p>
+</blockquote>
+<p>To ensure repeatability of tests, each test will include the following information:</p>
+<ul>
+<li>the version of the &quot;not-forking&quot; configuration used</li>
+<li>the version of sqlite3 used (in one special case building third-party backend code
+which provides its own patched version of sqlite3, this will be empty and the
+backend name and version will contain information about the third-party code)</li>
+<li>the name of the storage backend used: this is omitted if the test used an
+unchanged version of sqlite3 with its own backend</li>
+<li>the version of the storage backend used, also omitted for tests using
+an unchanged version of sqlite3</li>
+<li>any other options (currently only <code>datasize-N</code> to multiply the data size used
+in some benchmarks by <code>N</code>)</li>
+</ul>
+<p>Where the user has requested average results, the tests may be run several times.</p>
+<h1 id="build-and-benchmark-options"><a class="header" href="#build-and-benchmark-options">Build and benchmark options</a></h1>
+<h2 id="commandline-parameters"><a class="header" href="#commandline-parameters">Commandline parameters</a></h2>
+<p>(this section is included verbatim comments at the top of <code>build.tcl</code>, which is the master
+version. It helps to have it here for context for the rest of the documentation.)</p>
+<p>Executive summary:</p>
+<pre><code>	# build.tcl OPERATION NOTFORK_CONFIG ARGUMENTS
+
+	# OPERATION: options
+	# ARGUMENTS: [OUTPUT_FILE]
+	#            create a Makefile fragment so that &quot;make&quot; can accept
+	#            command-line options corresponding to build options
+
+	# OPERATION: database
+	# ARGUMENTS: BUILD_DIR DATABASE_NAME
+	#            create database
+
+	# OPERATION: what
+	# ARGUMENTS: BUILD_OPTIONS
+	#            show what targets/options have been selected based on command-line
+
+	# OPERATION: targets
+	# ARGUMENTS: BUILD_OPTIONS
+	#            same as &quot;what&quot;, but the list of targets are all in one line,
+	#            for easier copy-paste when trying to run the exact same list
+	#            in multiple places
+
+	# OPERATION: build
+	# ARGUMENTS: BUILD_DIR BUILD_OPTIONS
+	#            build LumoSQL, if necessary
+
+	# OPERATION: cleanup
+	# ARGUMENTS: BUILD_DIR BUILD_OPTIONS
+	#            check cached builds, and deletes anything which is no longer
+	#            up-to-date (would be rebuilt anyway)
+
+	# OPERATION: benchmark
+	# ARGUMENTS: BUILD_DIR DATABASE_NAME BUILD_OPTIONS
+	#            run benchmarks (run all tests marked for benchmarking and save timings)
+
+	# OPERATION: test
+	# ARGUMENTS: BUILD_DIR DATABASE_NAME BUILD_OPTIONS
+	#            run tests (run all tests without saving timings)
+</code></pre>
+<h2 id="build-and-benchmark-configuration"><a class="header" href="#build-and-benchmark-configuration">Build and Benchmark configuration</a></h2>
+<p>A special subdirectory <code>benchmark</code> in <code>not-fork.d/NAME</code> contain files to
+control the build and benchmark process for backend <code>NAME</code> (<code>NAME</code> can be
+<code>sqlite3</code> to control the process for all backends and/or for the unmodified
+sqlite3). There must be at least one of the following files in each of those
+directories:</p>
+<ul>
+<li>
+<p><code>versions</code> - contains a list of versions of <code>NAME</code> to build/benchmark by
+default, one version per line; if <code>NAME</code> is a backend (as opposed to <code>sqlite3</code>)
+the version line can have two special formats: <code>=VERSION</code> specified which
+version of sqlite3 to use with this backend; and <code>SQLITE_VERSION+BACKEND_VERSION</code>
+specifies the two versions explicitely for a particular build; a line containing
+just a version number will use the default specified with <code>=VERSION</code>; the
+file <code>not-fork.d/lmdb/benchmarking/versions</code> contains some examples.
+The special version <code>latest</code> corresponds to the latest version number
+known to the not-forking tool (usually, the latest available).</p>
+</li>
+<li>
+<p><code>standalone</code> - for backends which contain their own sqlite3 sources,
+possibly modified, this file specifies to build/benchmark these rather
+than build the backend and then link it to an &quot;official&quot; sqlite3.
+Each line contains two version numbers, separated by space: the version
+of the backend itself, and the version of sqlite3 that it includes these
+are expected to include their own sqlite3, and they are built using that;
+the file <code>not-fork.d/bdb/benchmarking/standalone</code> shows how to use this
+for the BDB backend.</p>
+</li>
+</ul>
+<p>The remaining files in these directories specify build/benchmark options and
+code to run to produce benchmarks; the code will be documented in another
+section.</p>
+<p>File names matching the pattern <code>*.option</code> specify options which are
+relevant to building and/or benchmarking <code>NAME</code>. Each file corresponds
+to a single option (the file name with the <code>.option</code> suffix removed must
+be the same as the option name). Each file contains lines of the form
+<code>key=value</code> (or <code>key</code> only) with the following keys defined at present:</p>
+<ul>
+<li><code>build</code> - does the option affects the build process? (value <code>yes</code> or <code>no</code>,
+default <code>no</code>)</li>
+<li><code>default</code> - default value for the option, if not specified</li>
+<li><code>equiv</code> - a list of values (separated by a comma) which are considered
+equivalent; the first value is the one used to form internal target strings</li>
+<li><code>requiv</code> - a regular expression and a string, separated by space; if
+a value matches the regular expression, it will be treated as though it
+were the replacement string instead</li>
+<li><code>syntax</code> - regular expression defining the valid syntax for the option;
+default is to accept any string of alphanumeric characters; note that the
+expression is anchored, i.e. it must match the whole string</li>
+<li><code>numeric</code> - abbreviation for <code>syntax=0|-?[1-9]\d*</code>, accept only (integer) numeric
+values (without leading zeros); this key has no value</li>
+<li><code>positive</code> - abbreviation for <code>syntax=[1-9]\d*</code>, accept only (integer) positive
+numeric values (without leading zeros); this key has no value</li>
+<li><code>boolean</code> - abbreviation for <code>syntax=on|off|true|false</code>, <code>equiv=on,true</code>
+and <code>equiv=off,false</code>; this key has no value</li>
+<li><code>enum</code> - followed by a comma-separated list of values, abbreviation for
+<code>syntax=value1|value2|...|valuen</code> i.e. accept only values from the list</li>
+</ul>
+<p>For example, <code>not-fork.d/sqlite3/options/datasize.option</code> contains information
+about the <code>datasize</code> benchmark option:</p>
+<pre><code>build = no
+syntax = [1-9]\d*(?:,[1-9]\d*)?
+default = 1
+requiv = (\d+),\1 \1
+
+</code></pre>
+<p>this means that the values are one or two positive numbers, and two identical
+values are equivalent to just a single one (e.g. 2,2 is the same as 2) for
+compatibility with previous versions of LumoSQL where the value was just
+a single positive integer.</p>
+<p>Options which affect the build must be known to the <code>lumo.build</code> script and/or
+to the <code>lumo.mk</code> Makefile fragment to be effective; these files are installed
+by the not-forking configuration and control the build process.</p>
+<p>Options which affect the benchmark must be implemented by one or more of the
+tests actually ran, for example by changing data sizes or using <code>PRAGMA</code>
+statements; the <code>tool/build.tcl</code> tries to know as little as possible about
+what is being done, to help using the framework for other systems.</p>
+<p>Options which apply to all backends are usually found in
+<code>not-fork.d/sqlite3/benchmark</code>; options which apply to a single backend
+will be found in the corresponding directory <code>not-fork.d/BACKEND/benchmark</code>.
+no matter which backend they use. Options which affect the build could be
+in any directory; currently there is no mechanism to address the case of the
+same option is present in multiple directories, and it is undefined which
+one will take precedence.</p>
+<h2 id="backends-as-of-lumosql-04"><a class="header" href="#backends-as-of-lumosql-04">Backends as of LumoSQL 0.4</a></h2>
+<p>At present the only backend provided (in addition to sqlite's own <code>btree</code>)
+is the <code>lmdb</code> backend; this was originally
+derived from the sqlightning sources but has been rewritten to work with more
+recent versions of lmdb and sqlite3;
+however to add new backends see <a href="#adding-backends">Adding new backends</a> below.</p>
+<p>A third backend, based on Oracle's Berkeley DB is in progress; a special target
+of <code>+bdb-VERSION</code> (without a sqlite3 version) indicates to build the code provided
+directy by Oracle, without using the LumoSQL build mechanism.</p>
+<h2 id="specifying-buildbenchmark-options-to-make"><a class="header" href="#specifying-buildbenchmark-options-to-make">Specifying build/benchmark options to &quot;make&quot;</a></h2>
+<p>The Makefile has a mechanism to recognise build/benchmark options as command-line
+option with the form <code>OPTION=value</code> where <code>OPTION</code> is the name of an option
+translated to be in all capital letters; the name can also be prefixes with
+the string <code>OPTION_</code> in case there is a name clash with other existing Makefile
+options: for example, if <code>datasize</code> is defined as the above example, the following
+two commands are equivalent and will set this option to the value 2:</p>
+<pre><code>make benchmark DATASIZE=2
+make benchmark OPTION_DATASIZE=2
+</code></pre>
+<p>Options which affect the build may cause a rebuild of the objects; options which
+only change the benchmark parameters can reuse an older build if available.</p>
+<p>These options are in addition to the existing Makefile mechanism to generate
+a list of targets, using the (previously documented) variables <code>USE_backend</code>,
+<code>backend_VERSIONS</code>, etc:</p>
+<ul>
+<li><code>SQLITE_VERSIONS=list</code> - build and benchmark the specified versions instead
+of the default; the first version in the list will also be used to update
+the benchmark result database (if a backend is built, the corresponding
+unmodified version of sqlite is also added to this list, so the benchmark
+can compare them); see below for the exact syntax of the list</li>
+<li><code>USE_SQLITE=yes</code> - build and benchmark an unmodified sqlite3: this is the
+default</li>
+<li><code>USE_SQLITE=no</code> - do not build/benchmark an unmodified sqlite3; however the
+version which will be used to store the benchmark results in a database will
+always be built if necessary</li>
+<li><code>USE_backend=yes</code> - include <code>backend</code> in the build/benchmark; this is the default</li>
+<li><code>USE_backend=no</code> - do not include <code>backend</code> in the build/benchmark</li>
+<li><code>SQLITE_FOR_backend=list</code> - versions of sqlite3 to use when building a
+backend if the backend version does not specify one; see below for the
+exact syntax of the list</li>
+<li><code>backend_VERSIONS=list</code> - replace the default list of versions to build; each
+element of the list can be a version number as for other lists, and each element
+of the resulting list will be combined with all versions specified by
+<code>SQLITE_FOR_backend</code>; however a special element containing two version numbers
+separated by a &quot;+&quot; is handled by expanding both versions separately; experimenting
+with <code>make what</code> is probably the best way to figure out how this works for
+anything but the simplest case (e.g. <code>latest+latest</code> will combine the latest
+version of sqlite with the latest version of the backend)</li>
+<li><code>backend_STANDALONE=list</code> - if a backend includes its own version of sqlite3,
+then build that instead of linking against an official one; the list of versions
+can be specified in the same way as other lists, to produce simple version
+numbers; additionally an element can specify a single version of the backend
+and a single version of sqlite3, in this order and separated by <code>=</code>: this
+documents which version of sqlite3 is included in that version of the backend,
+and will result in the unmodified sqlite3 being added to the benchmark for
+comparison: the benchmark system will make no other use of this sqlite version
+number, as the backend is expected to do what is necessary to build with it</li>
+<li><code>DATABASE_NAME=filename</code> - where to store benchmark results, default is
+<code>benchmarks.sqlite</code></li>
+<li><code>EXTRA_BUILDS=targets</code> - makes sure that the program also builds the
+targets specified; the targets are specified using the same syntax as
+<code>TARGETS</code> described below, with run-time options ignored (build-time
+options will be respected).  This is mainly used by some compatibility
+tests to make sure a version with some special options is also built.</li>
+<li><code>BENCHMARK_RUNS=number</code> - how many times to repeat each benchmark, default 1.</li>
+</ul>
+<p>Options which take a list of versions expect a space-separated list (this
+will need to be quoted from the shell); each element can be one of the
+following:</p>
+<ul>
+<li>version number (e.g. <code>3.37.2</code>): this number will be added as-is</li>
+<li><code>all</code>: all known versions which aren't already in the list will be added</li>
+<li><code>latest</code>: the latest known version</li>
+<li><code>-version</code> (e.g. <code>-3.35.0</code>): remove this from the list if it's there</li>
+<li><code>-latest</code>: remove the latest version from the list if it's there</li>
+<li><code>version+</code> (e.g. <code>3.34.0+</code>): the specified version and all the ones
+which follow it</li>
+<li><code>version-</code> (e.g. <code>3.17.0-</code>): the specified version and all the ones
+which precede it</li>
+<li>commit-<code>id</code> (e.g. <code>commit-9c4e21abdca664d6b7bcf0043fe9ec05ef8b2949</code>):
+the specified commit ID according to the version control system, which
+does not need to be a formal release</li>
+</ul>
+<p>For example, the following sqlite version list:</p>
+<pre><code>all -3.35.0- -latest
+</code></pre>
+<p>corresponds, at the time of writing to the list:</p>
+<pre><code>3.35.1 3.35.2 3.35.3 3.35.4 3.35.5 3.36.0 3.37.0 3.37.1 3.37.2 3.38.0
+</code></pre>
+<p>that is, all versions except the ones until 3.35.0 included, and also
+excluding the latest (3.38.1 at the time of writing); this could also
+be specified equivalently as:</p>
+<pre><code>3.35.1+ -latest
+</code></pre>
+<p>Instead of specifying <code>USE_backend=yes/no</code> and various lists of versions,
+it's possible to specify an explicit list of targets to build or benchmark;
+this list can be used, for example, to run the same set at different times,
+when <code>all</code> and <code>latest</code> may have different meanings. This is done by using
+the option <code>TARGETS</code> and is explained in the next section.</p>
+<p>Some options are provided to control the use of the not-forking tool:</p>
+<ul>
+<li><code>NOTFORK_COMMAND=path</code> (default: look for <code>not-fork</code> in <code>$PATH</code>): the
+name of the not-forking tool</li>
+<li><code>NOTFORK_UPDATE=number</code> (default: 0): if nonzero, it will pass <code>--update</code>
+the first time the not-forking tool is called with a particular repository;
+this could be necessary if the defaults have been set to <code>--no-update</code>
+and the cached copy of the repository is older than the version required.</li>
+<li><code>NOTFORK_ONLINE=number</code> (default: 0): if nonzero, it will pass <code>--online</code>
+to the not-forking tool; this could be necessary if the defaults have been
+set to <code>--offline</code> and the operation cannot be completed with cached data.</li>
+<li><code>CACHE_DIR=path</code> (default: <code>$HOME/.cache/LumoSQL/not-fork</code>), the directory
+where not-forking will cache its downloads</li>
+</ul>
+<p>To help debugging, some options provide a mechanism to copy intermediate
+files, as well as the SQL statement used:</p>
+<ul>
+<li><code>COPY_DATABASES=path</code> (default: empty, meaning the option is disabled).
+The <code>path</code> must contain a <code>%s</code> which will be replaced with the target name,
+and a <code>%d</code> which will be replaced with the test number, for example
+<code>COPY_DATABASES=/tmp/testdbs/%s.%d</code>.  The database at the beginning of each
+test will be copied to the resulting path, so the same test can be repeated
+by calling the program on the copy of the database.</li>
+<li><code>COPY_SQL=path</code> (defaul: empty, meaning the option is disabled). The
+<code>path</code> must contain a <code>%s</code> and a <code>%d</code> like <code>COPY_DATABASES</code>: the complete
+list of SQL statements executed by a test will be written to the file,
+so it's possible to re-run them on the copy of the database.</li>
+</ul>
+<p>The <code>make</code> target <code>test</code> is similar to <code>benchmark</code>, however it produces
+output in a different database (by default <code>tests.sqlite</code>) and can run some
+extra tests which are not useful as benchmarks; also, some code which
+helps produce precise timing is skipped in favour of speed of execution:
+the aim here is to check that a backend works, not how long it takes.
+The name of the <code>tests.sqlite</code> database can be changed using the option
+<code>TEST_DATABASE_NAME=newname</code>.</p>
+<h2 id="encoding-options-in-the-target-name"><a class="header" href="#encoding-options-in-the-target-name">Encoding options in the target name</a></h2>
+<p>The target name is used internally by the benchmark system to determine if two
+benchmarks are for similar things and can be compared; in general, two benchmarks
+are comparable if they have the same build and benchmark options; to simplify
+this decision, the options are encoded in the target name using the syntax:
+<code>sqlite3version+[backendname-backendversion]+option-value[+option-value]...</code>
+the options are always listed in lexycographic order, and default options are
+omitted, so that if two string differ then the options differ.  This is an
+internal representation, however it appears in the &quot;target&quot; field of the benchmark
+database, in the output of <code>make what</code> and <code>make targets</code>, and can be specified
+directly to make to repeat just a particular benchmark without specifying all
+the options separately.</p>
+<p>The syntax is:</p>
+<pre><code>make build TARGETS='target1 target2 ...'
+make benchmark TARGETS='target1 target2 ...'
+make test TARGETS='target1 target2 ...'
+</code></pre>
+<p>As mentioned, the list of targets can be obtained in several ways; possibly
+the easiest is <code>make targets</code> which will provide a single line for easy
+copy and paste, for example:</p>
+<pre><code>$ make targets USE_BDB=no USE_SQLITE=no LMDB_VERSIONS=0.9.28+ SQLITE_FOR_LMDB=3.37.1+
+BENCHMARK_RUNS=1
+COPY_DATABASES=
+COPY_SQL=
+CPU_COMMENT=
+DB_DIR=
+DISK_COMMENT=
+MAKE_COMMAND=make
+NOTFORK_COMMAND=not-fork
+NOTFORK_ONLINE=0
+NOTFORK_UPDATE=0
+SQLITE_VERSIONS=latest 3.36.0
+USE_SQLITE=no
+USE_BDB=no
+SQLITE_FOR_BDB=
+BDB_VERSIONS=
+BDB_STANDALONE=18.1.32=3.18.2
+USE_LMDB=yes
+SQLITE_FOR_LMDB=3.37.1+
+LMDB_VERSIONS=0.9.28+
+LMDB_STANDALONE=
+OPTION_DATASIZE=1
+OPTION_DEBUG=off
+OPTION_LMDB_DEBUG=off
+OPTION_LMDB_FIXED_ROWID=off
+OPTION_LMDB_TRANSACTION=optimistic
+OPTION_ROWSUM=off
+OPTION_ROWSUM_ALGORITHM=sha3_256
+OPTION_SQLITE3_JOURNAL=default
+BUILDS=
+    3.37.2 3.37.1 3.37.1+lmdb-0.9.28 3.37.2+lmdb-0.9.28 3.37.1+lmdb-0.9.29 3.37.2+lmdb-0.9.29
+TARGETS=
+    3.37.1 3.37.1+lmdb-0.9.28 3.37.2 3.37.2+lmdb-0.9.28 3.37.1+lmdb-0.9.29 3.37.2+lmdb-0.9.29
+</code></pre>
+<p>so to run exactly the same benchmark one can say:</p>
+<pre><code>make benchmark TARGETS='3.37.1 3.37.1+lmdb-0.9.28 3.37.2 3.37.2+lmdb-0.9.28 3.37.1+lmdb-0.9.29 3.37.2+lmdb-0.9.29'
+</code></pre>
+<p>A subset of the normal syntax for lists of versions is recognised, with the
+&quot;+&quot; and spaces escaped with a backslash, so for example one could run benchmarks
+for all sqlite versions since 3.35.0 combined with all LMDB versions since
+0.9.25, enabling LMDB debugging with:</p>
+<pre><code>make benchmark TARGETS='3.35.0\++lmdb-0.9.25\++lmdb_debug-on'
+</code></pre>
+<p>The list of benchmarks generated by this syntax obviously depends on what
+the current latest version is, however it can be converted to a fixed list
+with:</p>
+<pre><code>make targets TARGETS='3.35.0\++lmdb-0.9.25\++lmdb_debug-on'
+</code></pre>
+<h2 id="specifying-build-options-to-the-build-and-benchmark-tools"><a class="header" href="#specifying-build-options-to-the-build-and-benchmark-tools">Specifying build options to the build and benchmark tools</a></h2>
+<p>The various tools provided by previous versions of LumoSQL have been merged
+into a single tool, <code>tool/build.tcl</code>, which guarantees identical parsing of
+configuration and options in all stages of the process; the Makefile arranges
+to call this tool as appropriate, but it can be called manually using the
+syntax:</p>
+<pre><code>tclsh tool/build.tcl OPERATION NOTFORK_CONFIG ARGUMENTS
+</code></pre>
+<p>The <code>NOTFORK_CONFIG</code> is usually the not-fork.d directory provided with
+LumoSQL; the <code>OPERATION</code> specifies what to do, and the <code>ARGUMENTS</code>
+depend on the operation specified; the following <code>OPERATIONs</code> are
+defined:</p>
+<ul>
+<li>
+<p><code>options</code> - creates a Makefile fragment to instruct <code>make</code> to accept
+the command-line options described elsewhere in this document; this
+is normally generated automatically by <code>make</code> the first time it's needed
+but may need to be regenerated if the configuration changes in a way
+that <code>make</code> does not notice; <code>ARGUMENTS</code> contains just the name
+of the file to write.</p>
+</li>
+<li>
+<p><code>build</code> - builds all necessary binaries so that a benchmark can run;
+the <code>ARGUMENTS</code> are the destination directory for the build followed
+by build options of the form <code>-OPTION=VALUE</code> to set options specified
+by an <code>*.options</code> file, or <code>OPTION=VALUE</code> for other options (such as
+<code>USE_backend</code> and <code>TARGETS</code>); if the <code>VALUE</code> contains spaces or other
+characters which may be special to the shell it will need to be quoted.</p>
+</li>
+<li>
+<p><code>database</code> - creates a database to store benchmark results; this will
+also be done automatically if required before running benchmarks;
+<code>ARGUMENTS</code> contains just the database file name.</p>
+</li>
+<li>
+<p><code>benchmark</code> - runs all benchmarks taking into account applicable options;
+the <code>ARGUMENTS</code> are the destination directory for the build followed
+by the name of the database where to store the results, followed
+by build and runtime options in the same form as the <code>build</code> operation.</p>
+</li>
+<li>
+<p><code>test</code> - runs all tests (a superset of the benchmarks) taking into
+account applicable options; the <code>ARGUMENTS</code> are the same as for <code>benchmark</code>.</p>
+</li>
+<li>
+<p><code>what</code> - outputs a description of what it would be built and benchmarked
+as well as the values of any options; <code>ARGUMENTS</code> is just the build options,
+like <code>build</code>, but without the destination directory; the output will show
+the effect of applying these options without building or running anything.</p>
+</li>
+<li>
+<p><code>targets</code> - similar to <code>what</code>, however the list of targets is all in
+one line for easier copy and paste.</p>
+</li>
+</ul>
+<p>Note that apart from the slightly different syntax, build/benchmark/test options
+are specified in the same way as standard <code>Makefile</code> arguments.</p>
+<p>For example, to build two versions of plain sqlite3, two versions of sqlite3+LMDB
+and one version of BDB with its own sqlite3:</p>
+<pre><code>tclsh tool/build.tcl build not-fork.d /tmp/objects \
+      SQLITE_VERSIONS='3.14.15 3.33.0' \
+      USE_LMDB=yes LMDB_VERSIONS='0.9.9 0.9.27' SQLITE_FOR_LMDB=3.8.0 \
+      USE_BDB=yes BDB_STANDALONE='18.1.32'
+</code></pre>
+<p>To do the same build as above but specifying the target strings directly:</p>
+<pre><code>tclsh tool/build.tcl build not-fork.d /tmp/objects \
+      TARGETS='3.14.15 3.33.0 3.8.0+lmdb-0.9.9 3.8.0+lmdb-0.9.27 +bdb-18.1.32'
+</code></pre>
+<p>To add option <code>debug=on</code> to the build:</p>
+<pre><code>tclsh tool/build.tcl build not-fork.d /tmp/objects myresults.sqlite \
+      SQLITE_VERSIONS='3.14.15 3.33.0' \
+      USE_LMDB=yes LMDB_VERSIONS='0.9.9 0.9.27' SQLITE_FOR_LMDB=3.8.0 \
+      USE_BDB=yes BDB_STANDALONE='18.1.32' \
+      -DEBUG=on
+</code></pre>
+<p>or, with an explicit list of targets:</p>
+<pre><code>tclsh tool/build.tcl build not-fork.d /tmp/objects \
+      TARGETS='3.14.15++debug-on 3.33.0++debug-on \
+      3.8.0+lmdb-0.9.9+debug-on 3.8.0+lmdb-0.9.27+debug-on \
+      +bdb-18.1.32+debug-on'
+</code></pre>
+<p>To run the benchmarks rather just building the targets, replace <code>build</code> with
+<code>benchmark</code>, and add the name of the output database, for example:</p>
+<pre><code>tclsh tool/build.tcl benchmark not-fork.d /tmp/objects myresults.sqlite \
+      TARGETS='3.14.15++debug-on 3.33.0++debug-on \
+      3.8.0+lmdb-0.9.9+debug-on 3.8.0+lmdb-0.9.27+debug-on \
+      +bdb-18.1.32+debug-on'
+</code></pre>
+<p>The first version of sqlite3 provided (in this case 3.14.15) will be used to
+update the benchmark results database.</p>
+<h1 id="what-tests-will-run"><a class="header" href="#what-tests-will-run">What tests will run</a></h1>
+<p>Each test is composed of three lists of SQL statements, the &quot;before&quot; list
+prepares the environment for the test, then the test itself runs and the
+time it takes is logged, finally the &quot;after&quot; list can do any necessary
+cleanup.  Two special files in <code>not-fork.d/sqlite3/benchmark</code> can provide
+common &quot;before&quot; and &quot;after&quot; code which will be included in every test;
+these files must have names <code>before-test</code> and <code>after-test</code> respectively.</p>
+<p>A backend can add some extra statements to these lists: the special file
+<code>not-fork.d/BACKEND/benchmark/before</code>, if present, runs just after the
+one in the <code>sqlite3</code> directory; and similarly the special file
+<code>not-fork.d/BACKEND/benchmark/after</code>, if present, runs just before the
+one in the <code>sqlite3</code> directory: the idea is that the backend's &quot;before&quot;
+file executes some extra initialisation after the generic one, and
+the backend's &quot;after&quot; file does some extra cleanup before the generic one.</p>
+<p>Files matching the pattern <code>*.test</code> in directory <code>not-fork.d/sqlite3/benchmark</code>
+contain the individual tests: the benchmark will read these files in lexycographic
+order to decide which tests to run and in which order; for each test, the
+contents of <code>before-test</code>, the test itself, and <code>after-test</code> are concatenated
+and the result interpreted as TCL code; it is expected that this TCL code
+sets the variable <code>name</code> to contain the name of the text, and also appends
+SQL statements to three variables: <code>before_sql</code>, <code>sql</code> and <code>after_sql</code>:
+these SQL statements will then be executed in the order listed, but only
+the middle (<code>sql</code>) one is timed, so that setup and cleanup code does not
+count towards the benchmarking.</p>
+<p>If a backend defined a file with the same name as one in the directory
+<code>not-fork.d/sqlite3/benchmark</code>, that file will be executed immediately
+after the generic one and can modify the list of statement as appropriate;
+for example in the current distribution the first test to run,
+<code>not-fork.d/sqlite3/benchmark/0000.test</code>, creates a database; the LMDB
+backend has <code>not-fork.d/lmdb/benchmark/0000.test</code> which adds a
+<code>PRAGMA</code> to specify some backend-specific runtime options to the database.</p>
+<p>This TCL code can access a number of variables from the <code>build.tcl</code> script,
+in particular the array <code>options</code> contains the build and benchmark options;
+test; each file is a fragment of TCL expected to set two variables: <code>name</code>
+which is the name of the test, and <code>sql</code> which is the SQL to be executed;
+the fragment can access the array <code>options</code> to determine the build and
+benchmark options; examples are provided in the LumoSQL configuration to
+specify the default set of tests, we show here an example from one of the tests:</p>
+<pre><code>set d25000 [expr $options(DATASIZE) * 25000]
+set name &quot;$d25000 INSERTs in a transaction&quot;
+
+append sql &quot;BEGIN;\n&quot;
+append sql &quot;CREATE TABLE t2(a INTEGER, b INTEGER, c VARCHAR(100));\n&quot;
+for {set i 1} {$i&lt;=$d25000} {incr i} {
+  set r [expr {int(rand()*500000)}]
+  append sql &quot;INSERT INTO t2 VALUES($i,$r,'[number_name $r]');\n&quot;
+}
+append sql &quot;COMMIT;\n&quot;
+</code></pre>
+<p>This corresponds to the old &quot;25000 INSERTs in a transaction&quot; except that it now
+multiplies the number of inserts by the <code>DATASIZE</code> option; so it first uses
+<code>$options(DATASIZE)</code> to calculate the number of inserts, then sets the test
+name accordinly and generates the SQL. (For simplicity of presentation, this
+is an older version of the test; a recent version copes with the DATASIZE option
+having two numbers, a read datasize and a write datasize; see the files actually
+included in the distribution for the latest examples).</p>
+<p>When running the benchmark, the program will measure just the time required to
+run the appropriate version of sqlite3/backend on the sql generated by each
+test.</p>
+<p>The code fragment can optionally append to two more variables: <code>before_sql</code>
+is executed at the start, but not included in the time measurement, and
+<code>after_sql</code> is likewise executed at the end and not included in the time
+measurement.</p>
+<p>At present, tests must be specified in the <code>sqlite3</code> directory and not a backend
+one: this is so that we run the same tests for unmodified sqlite3 as we do for
+the one modified by a backend, to guarantee a meaningful comparison. If a
+test appears in a backend directory, it is considered additional code to
+add to the generic test, as described above.</p>
+<p>Some of the test files do not produce meaningful timings, but are useful
+to help checking correctness of backends: to inform the build system of
+this fact, they can set variable <code>is_benchmark</code> to 0 (by default it has
+value 1). These tests will then be skipped by <code>make benchmark</code> but still
+included by <code>make test</code>.</p>
+<h1 id="benchmark-run-comments-a-namebenchmark-commentsa"><a class="header" href="#benchmark-run-comments-a-namebenchmark-commentsa">Benchmark run comments <a name="benchmark-comments"></a></a></h1>
+<p>When running benchmarks it's possible to add up to two free-form comments
+which will be saved in the database but otherwise ignored by the program;
+these are intended to contain information about the system, and are
+specified using the command-line options <code>DISK_COMMENT</code> and
+<code>CPU_COMMENT</code> with the obvious intended meaning, for example:</p>
+<pre><code>make benchmark DISK_COMMENT='fast NVME' CPU_COMMENT='AMD Ryzen 3700x'
+</code></pre>
+<h1 id="adding-new-backends-a-nameadding-backendsa"><a class="header" href="#adding-new-backends-a-nameadding-backendsa">Adding new backends <a name="adding-backends"></a></a></h1>
+<p>To add new backends, create a new directory inside <code>not-fork.d</code> (or inside the
+appropriate not-forking configuration repository) with the same name as the
+backend, and add information about how to obtain the sources etc. At a minimum
+the directory will contain the following files:</p>
+<ul>
+<li><code>upstream.conf</code>: information about where to find the sources</li>
+<li><code>lumo-new-files.mod</code>: a list of new files to be installed to link the
+backend with sqlite3: see an existing backend for a quick example, or
+read the more comprehensive documentation below</li>
+<li><code>files/FILENAME</code>: every file mentioned in <code>lumo-new-files.mod</code> needs
+to be provided in the <code>files/</code> directory</li>
+<li>at least one of <code>benchmark/versions</code> or <code>benchmark/standalone</code>; the
+former includes versions of the backend to build and link against a
+&quot;standard&quot; sqlite, as well as specifying which versions of sqlite are
+compatible with that; the latter specifies versions to build using an
+included sqlite3; see the existing <code>versions</code> for LMDB and <code>standalone</code>
+for BDB as examples</li>
+</ul>
+<p>The build process requires the backend to provide the following two files
+(in directory <code>.lumosql</code>), which means that <code>lumo-new-files.mod</code> or some
+other file in the not-forking configuration must install them:</p>
+<ul>
+<li><code>lumo.mk</code> is a Makefile fragment which will be inserted into the sqlite3
+build process, for example to link against the backend</li>
+<li><code>lumo.build</code> is a TCL script to build the backend; it has access to
+various variables set by the build process; it needs to copy or move the
+build result to <code>$lumo_dir/build</code></li>
+</ul>
+<p>The LumoSQL build system modifies sqlite3 to replace some of its own files
+with a stub, which used the C preprocessor's <code>#include</code> directive to read
+the original file. It also sets the include search path so that it looks
+first in a subdirectory <code>.lumosql/backend</code> of the backend's sources, and
+if not found there in the original sqlite3 sources. To avoid file name
+collision, all such files will be prefixed with <code>lumo_</code></p>
+<p>Therefore, to replace one of these sqlite3 files with a new one the backend
+will need to have a line in <code>lumo-new-files.mod</code> to specify a new file with
+the appropriate name in <code>.lumosql/backend</code>, and also add this file in the
+<code>files</code> directory.</p>
+<p>For example, to replace <code>btree.c</code> with a new one (probably something to call
+the new backend using its own API rather than the original <code>btree.c</code> from
+sqlite3), one would have the following:</p>
+<p>File <code>lumo-new-files.mod</code>:</p>
+<pre><code>method = replace
+--
+# files required by the LumoSQL build system
+.lumosql/lumo.mk                 =  files/lumo.mk
+.lumosql/lumo.build              =  files/lumo.build
+
+# files we replace
+.lumosql/backend/lumo_btree.c    =  files/btree.c
+</code></pre>
+<p>Then file <code>files/btree.c</code> would contain the new version, and file <code>files/lumo.mk</code>
+would provide information on how to link the backend with sqlite3, for example:</p>
+<pre><code>TCC += -I$(LUMO_SOURCES)/$(LUMO_BACKEND)/include
+TLIBS += -L$(LUMO_BUILD)/$(LUMO_BACKEND)
+TLIBS += -lmy_backend
+</code></pre>
+<p>would add the <code>include</code> subdirectory in the backend's sources to the search
+path when building sqlite3 (probably because the replaced <code>btree.c</code> needs
+to include something from there), and also add the <code>build</code> directory in the
+backend's sources as library search path; finally it asks to link <code>libmy_backend.so</code>
+or <code>libmy_backend.a</code> into the sqlite3 executable, probably finding it in
+the build directory just added to the library search path.</p>
+<p><code>files/lumo.build</code> could be something like:</p>
+<pre><code>global backend_name
+global backend_version
+global build_options
+
+puts &quot;Configuring $backend_name $backend_version&quot;
+if {$build_options(DEBUG) eq &quot;on&quot;} {
+    system ./configure --enable-debug
+} else {
+    system ./configure --disable-debug
+}
+
+puts &quot;Building $backend_name $backend_version&quot;
+system make
+
+# now move files of interest to lumo/build
+global lumo_dir
+set dest [file join $lumo_dir build]
+if {! [file isdirectory $dest]} { file mkdir $dest }
+file rename mybackend.h $dest
+foreach fn [glob liblmybackend.*] {
+    file rename $fn $dest
+}
+</code></pre>
+<h1 id="sharing-the-buildbench-environment"><a class="header" href="#sharing-the-buildbench-environment">Sharing the Build/Bench Environment</a></h1>
+<p>It is often useful to run multiple benchmarking sessions at once on a cluster.
+Some but not all components of LumoSQL can be shared. The sharing status is as
+follows:</p>
+<ul>
+<li>sharing cache directory is fine if locking works</li>
+<li>sharing build directory is fine if locking works</li>
+<li>sharing results directory is fine as long as each node uses an unique
+file name when writing to it</li>
+<li>sharing lumosql repository is fine as long as the results database has
+a unique file name (and/or is moved somewhere else instead of using the
+default location).</li>
+<li>sharing directory where to run benchmarks is to be avoided at all costs;
+in fact it is best if it is a local disk or a ramdisk, as network drives
+would include random latency variation which will make the timing results
+less useful</li>
+</ul>
+<p>So, assuming you've set up:</p>
+<ul>
+<li>a shared cache volume in /mnt/cache (5GB)</li>
+<li>a shared results volume in /mnt/results (5GB)</li>
+<li>a local, non-shared, volume to run the benchmarks in /mnt/benchmarks (5GB)</li>
+<li>a shared volume for the builds in /mnt/build (25GB, possibly more depending
+on how many targets will be built)</li>
+<li>and maybe a shared volume containing the repository itself, for simplicity
+of keeping things up to date on all nodes</li>
+</ul>
+<p>You can create a file Makefile.local in the repository directory (please
+do not commit this file!) with:</p>
+<pre><code>BUILD_DIR = /mnt/build
+CACHE_DIR = /mnt/cache
+DB_DIR = /mnt/benchmarks
+DATABASE_NAME := /mnt/results/lumosql-$(shell hostname)-$(shell date +%Y-%m-%d).sqlite
+</code></pre>
+<p>Then these options will be automatically added to each run.  You may want to
+change the <code>DATABASE_NAME</code> with a filename which makes sense, as long as it
+is unique even when things are running at the same time.</p>
+<p>It is also possible to use the <code>not-fork</code> command directly from a clone if
+the fossil repository, rather than installing it; and that clone could be
+in a shared volume; a simple shell script needs to call it with the right
+options; if for example the repository is at <code>/mnt/repositories/not-forking</code>,
+the script could contain:</p>
+<pre><code>#!/bin/sh
+repo=/mnt/repositories/not-forking
+perl -I&quot;$repo/lib&quot; &quot;$repo/bin/not-fork&quot; &quot;$@&quot;
+</code></pre>
+<p>If the script is not in <code>$PATH</code>, or if it has a name other than <code>not-fork</code>,
+add a line like the following to <code>Makefile.local</code>:</p>
+<pre><code>NOTFORK_COMMAND = /path/to/not-fork-script
+</code></pre>
+<p>A specific example of a shared cluster is the <a href="../kbench/README.html">Kubernetes example files</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="3.4-not-forking-tool.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="backends.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="3.4-not-forking-tool.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="backends.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>
