@@ -38,6 +38,7 @@ and useful is not something LumoSQL uses.)
 * [irc chat][libera], for which there are many accessible clients
 * [paste-c](http://paste.c-net.org/) , which is an accessible and
   efficient Pastebin
+* [dudle](https://dud-poll.inf.tu-dresden.de/) open source polling and meeting scheduler
 * [R](https://www.r-project.org/), a data analysis toolkit
 * Unix-like operating systems and commandline toolchains, to nobody's
   surprise :-)
