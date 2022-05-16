@@ -46,6 +46,20 @@ and useful is not something LumoSQL uses.)
 We know these tools do work for many people, including all those
 involved with LumoSQL at present.`
 
+# The LumoSQL Timezone is *Brussels local time*
+
+Computers know how to handle [UTC calculations](https://www.utctime.net/utc-time-zone-converter), summer time
+etc, but humans don't find it so easy. Who knows which state in which country
+is going on or off summer time just now? 
+
+This is the [current time in LumoSQL](https://www.timeanddate.com/time/zone/belgium/brussels): https://www.timeanddate.com/time/zone/belgium/brussels
+
+Brussels is in Belgium. We chose Brussels because:
+
+* A majority of current LumoSQL contributors live in or were born in countries that jump between CET and CEST at the same time as Belgium.
+* [ETRO at Vrije Universiteit Brussel](http://www.etrovub.be/) is the only place LumoSQL has ever physically gathered.
+* We had to choose something.
+
 
 [home]: https://lumosql.org/src/lumosql
 [testbuild]: doc/lumo-build-benchmark.md
