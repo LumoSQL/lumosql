@@ -103,7 +103,7 @@ small, efficient embedded library.
   debugging classes/levels in a single number provided at compile-time, however
   that can only guarantee 31 separate numbers as any more may break on 32-bit
   processors due to the sign bit. Furthermore there are four kinds of endianness
-  and again this might break debugging on some architectures.  
+  and again this might break debugging on some architectures.
 
 * Bitmaps vs. booleans: Using boolean macros means that, say 4 debug classes plus the mandatory SQLITE_SELECTIVE_DEBUG and likely DEBUG_LEVEL, and possible SQLITE_DEBUG makes for an extremely long $CC invocation line. But this is much
   less likely to obscurely break the debug system than architecture/bitmap 

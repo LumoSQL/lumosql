@@ -203,8 +203,7 @@ learn from. This is covered in more detail in the next section.
 built-in** Sqlite.org commit to supporting the on-disk file format until 2050,
 without evidence of an enduring legal body. Similarly, claims are made for the
 reliability of the on-disk format even though there are virtually no intergity
-measures built in.  As can be seen from [the published
-specification](https://www.sqlite.org/fileformat2.html) the use of checksums is
+measures built in.  As can be seen from [the published specification](https://www.sqlite.org/fileformat2.html) the use of checksums is
 limited to pages in the writeback journal, and WAL records, and one 32-bit
 integer for when the official closed source encryption is used. Therefore file
 format provides no general means of validating the data it contains. It would
@@ -218,8 +217,7 @@ databases implement this feature awkwardly or not at all, and that it is
 particularly obvious in the case of SQLite because it an embedded local on-disk
 database library. SQLite could be the first database to have a modern reliable
 on-disk format, and it would not be difficult to make it so except for promises 
-not to break bit-for-bit compatibility. This issue is dealt with in more detail in 
-[LumoSQL architecture](./lumo-architecture) and [implementation](./lumo-implementation.md) documentation.
+not to break bit-for-bit compatibility.
 
 **the current Sqlite on-disk file format may be less robust than it seems**.
 Unscientific ad-hoc enquiries indicate that many IT professionals are familiar

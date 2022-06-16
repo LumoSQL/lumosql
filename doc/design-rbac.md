@@ -53,7 +53,7 @@ by the C API. However once connected, there is little distinction between a
 superuser or other users, and no encryption. Various solutions exist that
 modify the SQLite source code to give one kind of encryption or another, as
 documented in the 
-[LumoSQL Knowledgebase](https://lumosql.org/src/lumodoc/doc/tip/doc/lumo-relevant-knowledgebase.md#list-of-relevant-sql-checksumming-related-knowledge).
+[LumoSQL Knowledgebase](./context-relevant-knowledgebase.md#list-of-relevant-sql-checksumming-related-knowledge).
 
 The LumoSQL approach is completely different. LumoSQL recognises that the
 security and privacy requirements of the 21st century are very different to the
@@ -234,8 +234,7 @@ END:  oval "END"
 
 # LumoSQL RBAC Permissions System
 
-[Role-based Access
-Control](https://en.wikipedia.org/wiki/Role-based_access_control) (RBAC) is the
+[Role-based Access Control](https://en.wikipedia.org/wiki/Role-based_access_control) (RBAC) is the
 way that online relational databases make sure that only authorised users can
 access information. The SQL standard has the concept of "roles", rather like
 job titles. As a simple example, someone with "engineering cadet" role will see
@@ -390,7 +389,7 @@ The complete list of LumoSQL privileges is:
 * CREATE
 
 The UPDATE and DELETE privileges imply SELECT. CREATE only applies to tables.
-The keyword "ALL" is also allowed.  
+The keyword "ALL" is also allowed.
 
 Note: In LumoSQL, SUPERUSER privileges cover much more than ALL, and these
 additional privileges superuser has cannot be assigned in any way.

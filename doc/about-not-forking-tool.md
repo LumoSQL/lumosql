@@ -1,8 +1,8 @@
 <!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
-<!-- SPDX-FileCopyrightText: 2020 The LumoSQL Authors -->
+<!-- SPDX-FileCopyrightText: 2022 The LumoSQL Authors -->
 <!-- SPDX-ArtifactOfProjectName: LumoSQL -->
 <!-- SPDX-FileType: Documentation -->
-<!-- SPDX-FileComment: Original by Claudio Calvelli, March 2020 -->
+<!-- SPDX-FileComment: Original by Dan Shearer, 2022 -->
 
 
 Not-Forking Upstream Source Code Tracker

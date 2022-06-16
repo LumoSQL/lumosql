@@ -21,7 +21,7 @@
 	- [Statistical Analysis](./statistical_analysis.md)
 # New features
 
-- [Design of Role-Based Access Control](./rbac-design.md)
+- [Design of Role-Based Access Control](./design-rbac.md)
 - [Encryption](./about-encryption.md)
 - [Lumion](./lumion_intro.md)
 	- [Lumion RFC](./rfc.md)
@@ -44,10 +44,10 @@
 
 # Other
 
-- [News - Phase II Announcement](./LumoSQL-PhaseII-Announce.md)
-- [News - Release 0.4 Announcement](./release-announce-0.4.md)
-- [News - Release 0.3 Announcement](./release-announce-0.3.md)
-- [Google Summer of Code 2021](./lumo-gsoc-ideas.md)
+- [News - Phase II Announcement](./project-announce-phase2.md)
+- [News - Release 0.4 Announcement](./project-announce-release-0.4.md)
+- [News - Release 0.3 Announcement](./project-announce-release-0.3.md)
+- [Google Summer of Code 2021](./project-gsoc-2032.md)
 - [SQLite Debug Proposal](./lumo-proposed-debug.md)
 - [Conributing](./CONTRIBUTING.md)
 - [Code of Conduct](./CODE-OF-CONDUCT.md)

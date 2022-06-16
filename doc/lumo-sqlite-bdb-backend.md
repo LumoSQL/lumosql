@@ -33,7 +33,7 @@ one of them.
 
 The original port of SQLite to BDB was funded by Oracle, who have ceased development
 on it as of July 2020. LumoSQL plans to continue this, using the 
-[Not-Forking Upstream Source Code Tracker](./lumo-not-forking.md) . Once the BDB non-fork 
+[Not-Forking Upstream Source Code Tracker](./about-not-forking-tool.md) . Once the BDB non-fork 
 configuration is created and tested, and once the first forward-port of BDB 18.1.32 
 has been completed, then:
 

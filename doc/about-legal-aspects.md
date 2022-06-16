@@ -20,7 +20,7 @@ Table of Contents
 # LumoSQL Licensing
 
 SQLite is released as [Public Domain](https://www.sqlite.org/copyright.html).
-In order to both respect and improve on this, the [LumoSQL Project Aims](lumo-projet-aims.md) make this promise to SQLite users:
+In order to both respect and improve on this, the [LumoSQL Project Aims](./about-goals.md) make this promise to SQLite users:
 
 > LumoSQL will not come with legal terms less favourable than SQLite. LumoSQL
 > will try to improve the legal standing and safety worldwide as compared to
@@ -104,7 +104,7 @@ includes a *patent retaliation* clause:
 > Contribution incorporated within the Work constitutes direct or contributory
 > patent infringement, then any patent licenses granted to You under this
 > License for that Work shall terminate as of the date such litigation is
-> filed.  
+> filed.
 
 The intention is progressive and seemingly a Good Thing - after all, unless you
 are a patent troll who wants more pointless patent litigation? However the
@@ -120,7 +120,7 @@ MIT has only a patent grant, not retaliation. That is why LumoSQL does not use t
 # In Detail: the SQLite Public Domain Licensing Problem
 
 There are numerous reasons other than licensing why SQLite is less open source
-than it appears, and these are covered in the [LumoSQL Landscape](./lumo-landscape.md). As to licensing, SQLite is distributed as
+than it appears, and these are covered in the [LumoSQL Landscape](./context-development-landscape.md). As to licensing, SQLite is distributed as
 Public Domain software, and this is mentioned by D Richard Hipp in his [2016 Changelog Podcast Interview](https://changelog.com/podcast/201). Although he is aware of the problems, Hipp has decided not to introduce changes.
 
 The [Open Source Initiative](https://opensource.org/node/878) explains the Public Domain problem like this:
@@ -157,7 +157,7 @@ SQLite is not available with encryption. There are two common ways of adding enc
 1. Purchasing the [SQLite Encryption Extension](https://www.hwaci.com/sw/sqlite/see.html)(SEE) from Richard Hipp's company Hwaci. The SEE is proprietary software, and cannot be used with open source applications.
 2. [SQLcipher](https://www.zetetic.net/sqlcipher/) which has a open core model. The BSD-licensed open source version requires users to publish copyright notices, and the more capable commercial editions are available on similar terms to SEE, and therefore cannot be used with open source applications. 
 
-There are many other ways of adding encryption to SQLite, some of which are listed in the [Knowledgebase Relevant to LumoSQL](./lumo-relevant-knowledgebase.md).
+There are many other ways of adding encryption to SQLite, some of which are listed in the [Knowledgebase Relevant to LumoSQL](./context-relevant-knowledgebase.md).
 
 The legal issues addressed in LumoSQL encryption include:
 

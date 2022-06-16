@@ -46,7 +46,7 @@ make what
 `make what` will show which taregts will be built by typing `make`
 
 
-Now you can build different target databases and benchmark them. For make options read the [quickstart](./quickstart.md) and the [build and benchmark system](./lumo-build-benchmark.md) sections.
+Now you can build different target databases and benchmark them. For make options read the [quickstart](../README.md#using-the-build-and-benchmark-system) and the [build and benchmark system](./lumo-build-benchmark.md) sections.
 
 
 ## Installing on Popular Distributions

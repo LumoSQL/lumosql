@@ -1,3 +1,9 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: 2022 The LumoSQL Authors -->
+<!-- SPDX-ArtifactOfProjectName: LumoSQL -->
+<!-- SPDX-FileType: Documentation -->
+<!-- SPDX-FileComment: Original by Dan Shearer, 2022 -->
+
 # LumoSQL enforces rules by data guarantees.
 
 Normally it is the algorithms in software that enforce rules, for example You do not have permission to read salary information for that person. That rule is written in just one program, written by just one developer. What if the developer made a mistake? What if it is your own salary information but the algorithm doesn’t know that? This is how everyday problems occur that make people say “computers are just so stupid”. With LumoSQL, that same salary data is encrypted with several cryptographic keys. One of those keys will belong to the person whose salary it is, so they can always read it. Another one will belong to the HR group in the company, so anyone who has a key that belongs to that group can read the data and update it. And another read-only key may be issued to the tax department, and that key stops working as soon as there is a change to the salary data.

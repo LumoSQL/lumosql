@@ -22,7 +22,7 @@ Table of Contents
 
 # Summary of SQL Database Corruption Detection
 
-One of the short-term goals stated in the [LumoSQL Project Aims](./lumo-project-aims.md) is:
+One of the short-term goals stated in the [LumoSQL Project Aims](./about-goals.md) is:
 
 > LumoSQL will improve SQLite quality and privacy compliance by introducing
 > optional on-disk checksums for storage backends including to the original
@@ -73,7 +73,7 @@ every row, and transparently to database users. However, knowing a database
 page is corrupt isn't much help to the user, because there could be many rows
 in a single page.
 
-More on checksumming for SQL databses can be found referenced in [SQLite Relevant Knowledgebase](./2.4-relevant-knowledebase/#list-of-relevant-sql-checksumming-related-knowledge)) 
+More on checksumming for SQL databses can be found referenced in [SQLite Relevant Knowledgebase](./context-relevant-knowledebase.md/#list-of-relevant-sql-checksumming-related-knowledge)) 
 
 # SQLite and Integrity Checking
 
@@ -110,7 +110,7 @@ SQLite applications often need row-level integrity checking even more than the o
 * it is easy to backup an SQLite database partway through a transaction, meaning that the restore will be corrupted
 * SQLite does not have robust locking mechanisms available for access by multiple processes at once, since it relies on lockfiles and Posix advisory locking 
 * SQLite provides the [VFS API Interface](https://www.sqlite.org/vfs.html) which users can easily misuse to ignore locking via the sql3_*v2 APIs
-* the on-disk file format is seemingly often corrupted regardless of use case. Better evidence on this is needed but authors of SQLite data file recovery software (see listing in [SQLite Relevant Knowledgebase](./2.4-relevant-knowledebase/#list-of-relevant-sql-checksumming-related-knowledge)) indicates high demand for their services. Informal shows of hands at conferences indicates that SQLite users expect corruption.
+* the on-disk file format is seemingly often corrupted regardless of use case. Better evidence on this is needed but authors of SQLite data file recovery software (see listing in [SQLite Relevant Knowledgebase](./context-relevant-knowledebase.md/#list-of-relevant-sql-checksumming-related-knowledge)) indicates high demand for their services. Informal shows of hands at conferences indicates that SQLite users expect corruption.
 
 sqlite.org has a much more detailed, but still incomplete, summary of [How to Corrupt an SQLite Database](https://www.sqlite.org/howtocorrupt.html).
 

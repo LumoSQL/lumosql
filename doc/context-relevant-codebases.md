@@ -36,7 +36,7 @@ There are four dimensions to codebases relevant to LumoSQL:
 4. Code that supports the development of LumoSQL such as testing, benchmarking or analysing relevant codebasesembarrasing
 
 This is a discussion document, describing our findings as we look at hundreds
-of thousands of lines of other people's code. In addition there is the [Full Knowledgebase Relevant to LumoSQL](./2.4-relevant-knowledgebase.md) .
+of thousands of lines of other people's code. In addition there is the [Full Knowledgebase Relevant to LumoSQL](./context-relevant-knowledgebase.md) .
 There is a lot more in the Knowledgebase than there is in this more detailed document.
 
 

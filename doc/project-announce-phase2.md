@@ -15,7 +15,7 @@ In LumoSQL Phase II, the team is focussing on:
 * [Lumions as a universal data transport](./rfc/README.md) as well as the
   fundamental unit of private and secure data storage in LumoSQL.
 
-* Implementing a small [subset of the Postgresql 13 RBAC](./rbac-design.md)
+* Implementing a small [subset of the Postgresql 13 RBAC](./design-rbac.md)
   permissions model via
   the SQL statements CREATE ROLE/GRANT/REVOKE etc. An important addition to
   Postgres is to allow per-row permissions as well as per-table.
@@ -50,6 +50,6 @@ Further info from these URLs:
 
    [Not-Forking reproducibility tool](https://lumosql.org/src/not-forking)
 
-   [NLNet NGI Assure fund](https://nlnet.nl/assure/)
+   [NLnet NGI Assure fund](https://nlnet.nl/assure/)
 
 

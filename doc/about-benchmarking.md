@@ -30,11 +30,11 @@ The results are stored in an SQLite database which is available to download at  
 
 > [Direct Download Link](https://lumosql.org/dist/benchmarks-to-date/all-lumosql-benchmark-data-combined.sqlite)
 
-The source code for benchmarking tools can be found in the [lumosql repo](https://lumosql.org/src/lumosql/dir?name=tool). *benchmark-filter.tcl*  is a useful tool for viewing the data, see [documentation on how to use it](https://lumosql.org/src/lumosql/file?name=doc/lumo-benchmark-filter.md). 
+The source code for benchmarking tools can be found in the [lumosql repo](https://lumosql.org/src/lumosql/dir?name=tool). *benchmark-filter.tcl*  is a useful tool for viewing the data, see [documentation on how to use it](./lumo-benchmark-filter.md). 
 
 Alternatively, plotted data is presented with an [interactive web UI](http://r.lumosql.org:3838/contrastexample.html).
 
-Once LumoSQL is installed the user can perform benchmarks using `make benchmark [OPTIONS]`. Follow an [example of running a benchmark](https://lumosql.org/src/lumosql/doc/tip/README.md#using-the-build-and-benchmark-system) and read the full documantation on [benchmark options](https://lumosql.org/src/lumosql/doc/tip/doc/lumo-build-benchmark.md).
+Once LumoSQL is installed the user can perform benchmarks using `make benchmark [OPTIONS]`. Follow an [example of running a benchmark](../README.md#using-the-build-and-benchmark-system) and read the full documantation on [benchmark options](./lumo-build-benchmark.md).
 
 
 # Discussion
@@ -326,10 +326,10 @@ with a particular backend - to pick a pathological corner case, a magic string.
 
 # List of Relevant Benchmarking and Test Knowledge
 
-References articles and papers discussing benchmarking can be found in the [Full Knowledgebase Relevant to LumoSQL](./2.4-relevant-knowledgebase.md#list-of-relevant-benchmarking-and-test-knowledge) section.
+References articles and papers discussing benchmarking can be found in the [Full Knowledgebase Relevant to LumoSQL](./context-relevant-knowledgebase.md#list-of-relevant-benchmarking-and-test-knowledge) section.
 
 
-References to other benchmarking tools are linked in the [Relevant Codebases](./3.7-relevant-codebases.md/#list-of-relevant-benchmarking-and-test-knowledge) section.
+References to other benchmarking tools are linked in the [Relevant Codebases](./context-relevant-codebases.md/#list-of-relevant-benchmarking-and-test-knowledge) section.
 
 
 

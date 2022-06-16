@@ -37,12 +37,12 @@ Development Goals
   library APIs, and commandline parameters.
 
 
-* [Legal promise](./3.2-legal-aspects.md): LumoSQL does not come with legal terms less favourable than 
+* [Legal promise](./about-legal-aspects.md): LumoSQL does not come with legal terms less favourable than 
   SQLite. LumoSQL will aim to improve the legal standing and safety worldwide
   as compared to SQLite. 
 
 
-* Developer contract: LumoSQL has [stable APIs](./api.md) ([Application Programming Interfaces](https://en.wikipedia.org/wiki/Application_programming_interface#Libraries_and_frameworks)) for features found in multiple unrelated SQLite downstream projects:
+* Developer contract: LumoSQL has [stable APIs](./design-api.md) ([Application Programming Interfaces](https://en.wikipedia.org/wiki/Application_programming_interface#Libraries_and_frameworks)) for features found in multiple unrelated SQLite downstream projects:
   backends, frontends, encryption, networking and more. 
 
 * Devops contract: LumoSQL reduces risk by making it possible to omit
@@ -66,10 +66,10 @@ same user interface mechanisms as the rest of LumoSQL, and SQLite.
 
 * LumoSQL improves SQLite quality and privacy compliance by introducing
 optional on-disk checksums for storage backends including the original
-SQLite btree format.  This allows real-time row-level [corruption detection](./lumo-corruption-detection-and-magic.md).
+SQLite btree format.  This allows real-time row-level [corruption detection](./design-corruption-detection-and-magic.md).
 
 * LumoSQL improves SQLite quality and privacy compliance by introducing
-[optional storage backends](./backends.md) that are more crash-resistant than SQLite btree (such as LMDB)
+[optional storage backends](./about-backends.md) that are more crash-resistant than SQLite btree (such as LMDB)
 and more oriented towards complete recovery (such as BDB).
 
 * LumoSQL improves SQLite integrity in persistent storage by introducing
@@ -80,7 +80,7 @@ and continuing to accept and review contributions in an open way, using
 Fossil and having diverse [contributors](../CONTRIBUTING.md).
 
 
-* LumoSQL improves SQLite design by intercepting [APIs](./api.md) at a very small
+* LumoSQL improves SQLite design by intercepting [APIs](./design-api.md) at a very small
 number of critical choke-points, and giving the user optional choices at
 these choke points. The choices are for alternative storage backends,
 front end parsers, encryption, networking and more, all without removing
@@ -95,11 +95,11 @@ release, or more often if need be.
 and instructions for reproducing the test results. This also means
 excluding parts of the LumoSQL test suite that don't apply to new backends
 
-* LumoSQL provides [benchmarking tools](./3.3-benchmarking.md), otherwise as per the testing
+* LumoSQL provides [benchmarking tools](./about-benchmarking.md), otherwise as per the testing
 tools.
 
 
-* LumoSQL ensures that new code remains optional by means of [modularity](./3.5-lumo-test-build.md) at
+* LumoSQL ensures that new code remains optional by means of modularity at
 compiletime and also runtime. By illustration of modularity, at compiletime
 nearly all 30 million lines of the Linux kernel can be excluded giving just 200k
 lines. Runtime modularity is controlled through the same user interfaces 

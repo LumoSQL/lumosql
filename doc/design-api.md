@@ -31,7 +31,7 @@ Nevertheless, if a user wants to select a particular backend, or have
 encryption or networking etc there will be some setup. Sqlite.org provides a
 large number of controls in pragmas and the commandline already.
 
-  2. SQL processing front ends. Code exists (see [Relevant Codebases](./3.7-relevant-codebases.md)
+  2. SQL processing front ends. Code exists (see [Relevant Codebases](./context-relevant-codebases.md)
 that implements MySQL-like behaviour in parallel with supporting SQLite semantics.
 There is a choice codebases to do that with, covering different approaches to the problem.
 
@@ -46,7 +46,7 @@ backend.
 
   4. Storage backends, being a choice of native SQLite btree or LMDB today, and
 swiftly after that other K-V stores. This is the choke point where we expect to
-introduce [libkv](./3.7-relevant-codebases#libkv), or a modification of libkv.
+introduce [libkv](./context-relevant-codebases.md#libkv), or a modification of libkv.
 
   5. Network layers, which will be at all of the above, depending whether they
 are for client access to the parser, or replicating transactions, or being

@@ -94,7 +94,7 @@ only fairly basic on-demand detection.
 
 ## Single-level Store
 
-Single-level store concepts are well-explained in [Howard Chu's 2013 MDB Paper](./lumo-relevant-knowledgebase.md#list-of-sqlite-code-related-knowledge):
+Single-level store concepts are well-explained in [Howard Chu's 2013 MDB Paper](./context-relevant-knowledgebase.md#list-of-sqlite-code-related-knowledge):
 
 > One fundamental concept behind the MDB approach is known as "Single-Level
 > Store". The basic idea is to treat all of computer memory as a single address
