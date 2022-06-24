@@ -160,10 +160,10 @@ performance of the next statement, and so on.
 | [Example Android Storage Benchmark](https://github.com/greenrobot/android-database-performance) | 2018 | This code is an example of the very many Android benchmarking/testing tools. This needs further investigation |
 | [Sysbench](https://github.com/akopytov/sysbench) | current | A multithreaded generic benchmarking tool, with one well-supported use case being networked SQL servers, and [MySQL in particular](https://www.percona.com/blog/2019/04/25/creating-custom-sysbench-scripts/) |
 | [Regression Testing of SQL](https://www.diva-portal.org/smash/get/diva2:736996/FULLTEXT01.pdf)|n/a | 2014 paper "a framework for minimizing the required developer effort formanaging and running SQL regression tests" |
-| [Enhancing the Performance of SQLite](https://pdfs.semanticscholar.org/c2da/33304627649b599f80a5428354e116ba6201.pdf)| n/a | 2019 paper that does profiling and develops performance testing metrics for SQLite |
+| [Enhancing the Performance of SQLite](https://pdfs.semanticscholar.org/c2da/33304627649b599f80a5428354e116ba6201.pdf)| n/a | 2013 paper that does profiling and develops performance testing metrics for SQLite |
 | [SQLite Profiler and Tracer](https://github.com/microsoft/sqlite-tracer) | 2018 | Microsoft SQLite statement profiler and timer, helpful for comparing LumoSQL backends |
 | [SQLCipher Performance Optimisation](https://discuss.zetetic.net/t/sqlcipher-performance-optimization/14) | n/a | 2014 comments on the additional performance metric problems that come with SQLite encryption |
-| [Performance analysis ... on flash file systems](https://sci-hub.se/10.1007/s10617-014-9149-2) | 2019 | Discussion of SQLite and 2 others on Flash, examining the cost to flash of SQL operations |
+| [Performance analysis ... on flash file systems](https://sci-hub.se/10.1007/s10617-014-9149-2) | 2013 | Discussion of SQLite and 2 others on Flash, examining the cost to flash of SQL operations |
 
 
 # List of Just a Few SQLite Encryption Projects
