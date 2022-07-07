@@ -1,3 +1,6 @@
+
+<!-- toc -->
+
 # LumoSQL Database v0.4 Released
 
 *10th January 2021*

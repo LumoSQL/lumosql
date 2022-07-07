@@ -6,6 +6,8 @@
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Dan Shearer, February 2021 -->
 
+<!-- toc -->
+
 Notes Regarding Karl Malbrain's C Btree Code
 =============================================
 

@@ -1,3 +1,6 @@
+
+<!-- toc -->
+
 # LumoSQL Database v0.3 Released
 
 10th November 2020

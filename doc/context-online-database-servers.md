@@ -5,13 +5,7 @@
 <!-- SPDX-FileComment: Original by Dan Shearer, 2020 -->
 
 
-Table of Contents
-=================
-
-   * [LumoSQL Architecture](#lumosql-architecture)
-   * [Online Database Servers](#online-database-servers)
-   * [SQLite as an Embedded Database](#sqlite-as-an-embedded-database)
-  
+<!-- toc --> 
 
 LumoSQL Architecture
 ====================

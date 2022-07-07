@@ -4,6 +4,8 @@
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Dan Shearer, 2020 -->
 
+<!-- toc -->
+
 # Observations on Savepoints in SQLite Internals
 
 Dan Shearer

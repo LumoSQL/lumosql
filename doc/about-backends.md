@@ -4,6 +4,7 @@
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Dan Shearer, 2019 -->
 
+<!-- toc -->
 
 # LumoSQL Backend Storage Engines
 

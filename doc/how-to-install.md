@@ -4,6 +4,8 @@
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Dan Shearer, 2020 -->
 
+<!-- toc -->
+
 # Install LumoSQL
 
 Installation consists of obtaining all relevant 3rd party dependencies (tcl, tclx, perl with modules TextGlob and Git, file, gnumake, gzip, gnutar, fossil or git, wget or curl), then downloading and installing the not-forking tool as an executable command, and downloading LumoSQL build tools that work currently as `make` commands. 

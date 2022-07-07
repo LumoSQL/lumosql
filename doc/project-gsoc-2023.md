@@ -6,6 +6,8 @@
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Dan Shearer, February 2021 -->
 
+<!-- toc -->
+
 # Google Summer of Code Ideas
 
 This list was made for the LumoSQL project's application for 

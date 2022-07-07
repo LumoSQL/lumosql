@@ -5,12 +5,7 @@
 <!-- SPDX-FileComment: Original by Dan Shearer, 2020 -->
 
 
-Table of Contents
-=================
-
-   * [SQLite API Interception Points](#sqlite-api-interception-points)
-     
-
+<!-- toc -->
 
 ![](./images/lumo-implementation-intro.jpg "Metro Station Construction Futian Shenzhen China, CC license, https://www.flickr.com/photos/dcmaster/36740345496")
 

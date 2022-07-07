@@ -5,13 +5,7 @@
 <!-- SPDX-FileComment: Original by Dan Shearer, 2020 -->
 
 
-Table of Contents
-=================
-
-
-   * [Database Storage Systems](#database-storage-systems)
-      * [WALs in SQLite](#wals-in-sqlite)
-      * [Single-level Store](#single-level-store)
+<!-- toc -->
 
 
 # How LumoSQL Architecture Differs from SQLite

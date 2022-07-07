@@ -4,19 +4,7 @@
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Dan Shearer, 2020 -->
 
-Table of Contents
-=================
-
-   * [Summary of SQL Database Corruption Detection](#summary-of-sql-database-corruption-detection)
-   * [SQLite and Integrity Checking](#sqlite-and-integrity-checking)
-   * [LumoSQL Checksums and the SQLite On-disk File Format](#lumosql-checksums-and-the-sqlite-on-disk-file-format)
-   * [Design of the SQLite Checksum VFS Loadable Extension](#design-of-the-sqlite-checksum-vfs-loadable-extension)
-   * [Goals for Corruption Detection](#goals-for-corruption-detection)
-   * [Design for Corruption Detection](#design-for-corruption-detection)
-      * [For Non-row Data](#for-non-row-data)
-      * [For Row Data](#for-row-data)
-   * [Implementation for Corruption Detection](#implementation-for-corruption-detection)
-
+<!-- toc -->
 
 ![](./images/lumo-corruption-detection-and-magic-intro.png "Not Yet Done")
 

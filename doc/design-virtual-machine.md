@@ -4,7 +4,7 @@
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Dan Shearer, 2020 -->
 
-
+<!-- toc -->
 
 SQLite Virtual Machine Layer
 ----------------------------

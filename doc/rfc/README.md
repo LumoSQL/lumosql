@@ -35,12 +35,12 @@ IETF tools for RFC generation because we think it should become an RFC.  This
 RFC draft is the only specification for Lumions, and is the reference for
 LumoSQL and other software we write that handle Lumions in various ways.
 
-The draft RFC [draft-shearer-desmet-calvelli-lumionsrfc-00.txt](draft-shearer-desmet-calvelli-lumionsrfc-00.txt) is 
+The draft RFC [draft-shearer-desmet-calvelli-lumionsrfc-00.txt](./draft-shearer-desmet-calvelli-lumionsrfc-00.txt) is 
 taking shape. We have many references to add and other knowledge we have gained
 through implementation. This is going to be a long journey but we have started.
 
 We maintain the text in the markdown file
-[draft-shearer-desmet-calvelli-lumionsrfc-00.md](draft-shearer-desmet-calvelli-lumionsrfc-00.md),
+[draft-shearer-desmet-calvelli-lumionsrfc-00.md](./draft-shearer-desmet-calvelli-lumionsrfc-00.md),
 with IETF-specific markdown extensions as described in
 [Dan York's RFC Markdown Examples](https://github.com/danyork/writing-internet-drafts-in-markdown/).
 

@@ -4,20 +4,7 @@
 <!--- SPDX-FileType: Documentation --->
 <!--- SPDX-FileComment: Original by Dan Shearer, 2019 --->
 
-
-Table of Contents
-=================
-
-   * [Codebases Relevant to LumoSQL](#codebases-relevant-to-lumosql)
-   * [What is a Relevant Codebase?](#what-is-a-relevant-codebase)
-   * [Useful Dead SQLite Forks](#useful-dead-sqlite-forks)
-   * [Oracle BDB and Oracle BDB-SQL Codebases](#oracle-bdb-and-oracle-bdb-sql-codebases)
-   * [Distributed or Clustered Codebases](#distributed-or-clustered-codebases)
-   * [Modular Code to Potentially Incorporate in LumoSQL](#modular-code-to-potentially-incorporate-in-lumosql)
-   * [On-disk File Format-related Knowledge](#on-disk-file-format-related-knowledge)
-   * [List of Relevant Benchmarking and Test Knowledge](#list-of-relevant-benchmarking-and-test-knowledge)
-   * [SQLite and Encryption Issues](#sqlite-and-encryption-issues)
-   * [List of from-scratch MySQL SQL and MySQL Server implementations](#list-of-from-scratch-mysql-sql-and-mysql-server-implementations)
+<!-- toc -->
 
 Codebases Relevant to LumoSQL
 =============================

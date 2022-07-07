@@ -6,21 +6,11 @@
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Dan Shearer, September 2020 -->
 
+<!-- toc -->
+
 Notes on the Port of SQLite to BDB 18.1.32
 ==========================================
 
-
-Table of Contents
-=================
-
-   * [Notes on the Port of SQLite to BDB 18.1.32](#notes-on-the-port-of-sqlite-to-bdb-18132)
-   * [Motivation](#motivation)
-   * [Versions and Availability](#versions-and-availability)
-   * [Licensing Gotchas](#licensing-gotchas)
-   * [Running Out of the Box](#running-out-of-the-box)
-   * [Design of the Port](#design-of-the-port)
-      * [Files and Directories](#files-and-directories)
-      * [Code Changes](#code-changes)
 
 # Motivation
 

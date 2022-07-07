@@ -4,18 +4,9 @@
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Dan Shearer, 2020 -->
 
+<!-- toc -->
+
 ![](./images/lumo-legal-aspects-intro.png "XXXXXXXX")
-
-Table of Contents
-=================
-
-   * [LumoSQL Licensing](#lumosql-licensing)
-   * [Why MIT? Why Not MIT?](#why-mit-why-not-mit)
-   * [In Detail: Patents, MIT and Apache 2.0](#in-detail-patents-mit-and-apache-20)
-   * [In Detail: the SQLite Public Domain Licensing Problem](#in-detail-the-sqlite-public-domain-licensing-problem)
-   * [History and Rationale](#history-and-rationale)
-   * [Encryption Legal Issues](#encryption-legal-issues)
-   * [LumoSQL Requirements and Decisions](#lumosql-requirements-and-decisions)
 
 # LumoSQL Licensing
 

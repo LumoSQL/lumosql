@@ -6,6 +6,8 @@
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Dan Shearer, August 2020 -->
 
+<!-- toc -->
+
 LumoSQL Minimal At-Rest Discretionary Access Control System
 ===========================================================
 

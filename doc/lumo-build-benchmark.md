@@ -6,6 +6,8 @@
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Claudio Calvelli, December 2020 -->
 
+<!-- toc -->
+
 # LumoSQL Build and Benchmark System
 
 [LumoSQL](https://lumosql.org) implements a meta-build system for SQLite, using

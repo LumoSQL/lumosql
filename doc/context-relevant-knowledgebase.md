@@ -5,17 +5,7 @@
 <!-- SPDX-FileComment: Original by Dan Shearer, 2019 -->
 
 
-Table of Contents
-=================
-
-   * [Knowledge Relevant to LumoSQL](#knowledge-relevant-to-lumosql)
-   * [List of SQLite Code-related Knowledge](#list-of-sqlite-code-related-knowledge)
-   * [List of MVCC-capable KV store-related Knowledge](#list-of-mvcc-capable-kv-store-related-knowledge)
-   * [List of On-disk SQLite Format-related Knowledge](#list-of-on-disk-sqlite-format-related-knowledge)
-   * [List of Relevant SQL Checksumming-related Knowledge](#list-of-relevant-sql-checksumming-related-knowledge)
-   * [List of Relevant Benchmarking and Test Knowledge](#list-of-relevant-benchmarking-and-test-knowledge)
-   * [List of Just a Few SQLite Encryption Projects](#list-of-just-a-few-sqlite-encryption-projects)
-   * [List of from-scratch MySQL SQL and MySQL Server implementations](#list-of-from-scratch-mysql-sql-and-mysql-server-implementations)
+<!-- toc -->
 
 Knowledge Relevant to LumoSQL
 =============================

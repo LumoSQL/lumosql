@@ -6,6 +6,8 @@
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Dan Shearer, December 2019 -->
 
+<!-- toc -->
+
 # LumoSQL
 
 [LumoSQL](lumosql.org) is a modification (not a fork) of the

@@ -5,12 +5,7 @@
 <!--- SPDX-FileComment: Original by Dan Shearer, 2020 --->
 
 
-Table of Contents
-=================
-
-   * [Overall Objective of LumoSQL](#overall-objective-of-lumosql)
-   * [The Advantages of LumoSQL](#the-advantages-of-lumosql)
-   * [Development Goals](#developmenr-goals)
+<!-- toc -->
 
 
 ![](./images/lumo-project-aims-intro.jpg "Mongolian horseback archery, rights request pending from https://www.toursmongolia.com/")

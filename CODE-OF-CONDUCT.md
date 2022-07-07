@@ -6,6 +6,8 @@
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Dan Shearer, December 2019 -->
 
+<!-- toc -->
+
 # LumoSQL Code of Conduct
 
 Version 1.5 – Updated 18th February, 2022
@@ -16,7 +18,7 @@ about mandating kindness. We are in a global pandemic when kindness is needed mo
 than ever.**
 
 The LumoSQL Project welcomes contributions from anyone who shares
-[the LumoSQL Project Goals](https://lumosql.org/src/lumodoc/doc/trunk/doc/lumo-project-aims.md)
+[the LumoSQL Project Goals](./doc/about-design-philosophy.md)
 This document outlines both expected and prohibited behaviour.
 
 # Short Summary
@@ -137,7 +139,7 @@ accepted or tolerated.
 
 If you believe you’re experiencing unacceptable behaviour 
 as outlined above please contact one of the 
-[current authors](https://lumosql.org/src/lumosql/file?name=AUTHORS).
+[current authors](./AUTHORS).
 
 After receiving a concise description of your situation, they will review and
 determine next steps. 

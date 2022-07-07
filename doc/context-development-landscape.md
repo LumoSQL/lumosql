@@ -5,15 +5,7 @@
 <!--- SPDX-FileComment: Original by Dan Shearer, 2020 --->
 
 
-Table of Contents
-=================
-
-   * [LumoSQL Context](#lumosql-context)
-   * [The SQLite Landscape](#the-sqlite-landscape)
-      * [LumoSQL and The SQLite Project](#lumosql-and-the-sqlite-project)
-   * [SQLite Downstreams](#sqlite-downstreams)
-   * [How Widely-used is SQLite Compared to Others?](#how-widely-used-is-sqlite-compared-to-others)
-   
+<!-- toc --> 
 
 
 ![](./images/lumo-ecosystem-intro.png "LumoSQL logo")

@@ -6,12 +6,7 @@
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Claudio Calvelli, November 2020 -->
 
-
-Table of Contents
-=================
-
-   * [Displaying/processing benchmark results](#displayingprocessing-benchmark-results)
-   * [Full set of options](#full-set-of-options)
+<!-- toc -->
 
 Displaying/processing benchmark results
 =======================================

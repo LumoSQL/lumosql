@@ -1,3 +1,6 @@
+
+<!-- toc -->
+
 # Temporary Note of Debug Proposal
 
 As discussed at https://sqlite.org/forum/forumpost/42e647999d , which also has demo code. 

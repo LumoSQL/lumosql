@@ -4,15 +4,7 @@
 <!--- SPDX-FileType: Documentation --->
 <!--- SPDX-FileComment: Original by Dan Shearer, 2020 --->
 
-
-
-Table of Contents
-=================
-
-   * [LumoSQL 2019 Prototype Conclusions And Lessons](#lumosql-2019-prototype-conclusions-and-lessons)
-    * [Facts Established by 2019 LumoSQL Prototype](#facts-established-by-2019-lumosql-prototype)
-    * [Lessons Learned from sqlightning](#lessons-learned-from-sqlightning)
-
+<!-- toc -->
 
 ![](./images/lumo-ecosystem-intro.png "LumoSQL logo")
 

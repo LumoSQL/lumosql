@@ -19,6 +19,7 @@
 - [Benchmarking](./about-benchmarking.md)
 	- [Displaying Benchmark Results (benchmark-filter.tcl)](./lumo-benchmark-filter.md)
 	- [Statistical Analysis](./statistical_analysis.md)
+
 # New features
 
 - [Design of Role-Based Access Control](./design-rbac.md)
@@ -27,7 +28,7 @@
 	- [Lumion RFC](./rfc.md)
 
 
-# Research
+# Context
 
 - [SQLite Development Landscape](./context-development-landscape.md)
 - [Overview of Relevant Codebases](./context-relevant-codebases.md)
@@ -47,7 +48,7 @@
 - [News - Phase II Announcement](./project-announce-phase2.md)
 - [News - Release 0.4 Announcement](./project-announce-release-0.4.md)
 - [News - Release 0.3 Announcement](./project-announce-release-0.3.md)
-- [Google Summer of Code 2021](./project-gsoc-2032.md)
+- [Google Summer of Code 2023](./project-gsoc-2023.md)
 - [SQLite Debug Proposal](./lumo-proposed-debug.md)
 - [Conributing](./CONTRIBUTING.md)
 - [Code of Conduct](./CODE-OF-CONDUCT.md)
@@ -55,5 +56,5 @@
 
 - [Legal Aspects](./about-legal-aspects.md)
 	- [Licensing](./licensing.md)
-	- [MIT Licence](./MIT.md) 
+	
 

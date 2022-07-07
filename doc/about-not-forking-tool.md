@@ -4,6 +4,7 @@
 <!-- SPDX-FileType: Documentation -->
 <!-- SPDX-FileComment: Original by Dan Shearer, 2022 -->
 
+<!-- toc -->
 
 Not-Forking Upstream Source Code Tracker
 ========================================

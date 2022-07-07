@@ -1,3 +1,6 @@
+
+<!-- toc -->
+
 Announcing LumoSQL Database Phase II
 ====================================
 

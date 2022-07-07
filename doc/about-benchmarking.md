@@ -5,21 +5,7 @@
 <!-- SPDX-FileComment: Original by Dan Shearer, 2020 -->
 
 
-Table of Contents
-=================
-
-   * [About Benchmarking](#about-benchmarking)
-   * [All SQLite Performance Papers are Nonsense](#all-sqlite-performance-papers-are-nonsense)
-   * [Limiting the Problem Space](#limiting-the-problem-space)
-   * [What Questions Will Benchmarking Answer?](#what-questions-will-benchmarking-answer)
-   * [Details of Benchmarking Code](#details-of-benchmarking-code)
-      * [Metrics](#metrics)
-      * [SQL in benchmark.tcl](#sql-in-benchmarktcl)
-      * [SQL Logic Test](#sql-logic-test)
-      * [C speed tests with SQLite C API](#c-speed-tests-with-sqlite-c-api)
-   * [Computer architectures and operating systems](#computer-architectures-and-operating-systems)
-      * [C speed tests with the SQLite/LumoSQL KV API](#c-speed-tests-with-the-sqlitelumosql-kv-api)
-   * [List of Relevant Benchmarking and Test Knowledge](#list-of-relevant-benchmarking-and-test-knowledge)
+<!-- toc -->
 
 About Benchmarkings
 ==================
