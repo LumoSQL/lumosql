@@ -1,0 +1,21 @@
+[book]
+src = "src"
+title = "LumoSQL Documentation"
+authors = ["LumoSQL"]
+language = "en"
+multilingual = false
+
+
+[build]
+build-dir = "book"
+create-missing = false
+
+
+[output.html]
+default-theme = "ayu"
+prefereerd-dark-theme = "ayu"
+
+
+[preprocessor.toc]
+command = "mdbook-toc"
+renderer = ["html"]
