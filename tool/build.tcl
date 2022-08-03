@@ -83,8 +83,8 @@ if {$operation eq "options"} {
     puts $outf ""
     set prn 1
 } elseif {$operation eq "database"} {
-    if {[llength $argv] != 4} {
-	puts stderr "Usage: build.tcl database NOTFORK_CONFIG BUILD_DIR DATABASE_NAME"
+    if {[llength $argv] < 4} {
+	puts stderr "Usage: build.tcl database NOTFORK_CONFIG BUILD_DIR DATABASE_NAME BUILD_OPTIONS..."
 	exit 1
     }
     set build_dir [lindex $argv 2]
@@ -299,8 +299,10 @@ array set other_values [list \
 	LUMO_TEST_DIR    "" \
 	MAKE_COMMAND     "make" \
 	NOTFORK_COMMAND  "not-fork" \
+	NOTFORK_MIRROR   "" \
 	NOTFORK_ONLINE   0 \
 	NOTFORK_UPDATE   0 \
+	SQLITE_FOR_DB    "" \
 	SQLITE_VERSIONS  [join $sqlite3_versions] \
 	USE_SQLITE       "yes" \
 ]
@@ -491,6 +493,9 @@ proc notfork_command {target args} {
     if {$other_values(NOTFORK_ONLINE)} {
 	lappend rargs "--online"
     }
+    if {$other_values(NOTFORK_MIRROR) ne ""} {
+	lappend rargs $other_values(NOTFORK_MIRROR) "--local-mirror"
+    }
     if {$other_values(CACHE_DIR) ne ""} {
 	lappend rargs $other_values(CACHE_DIR) "--cache"
     }
@@ -568,8 +573,12 @@ if {$operation ne "what" && $operation ne "targets"} {
     set build_dir [file normalize $build_dir]
 }
 
-versions_list sqlite3_for_db sqlite3 latest ""
-set sqlite3_for_db [lindex $sqlite3_for_db 0]
+if {$other_values(SQLITE_FOR_DB) eq ""} {
+    versions_list sqlite3_for_db sqlite3 latest ""
+    set sqlite3_for_db [lindex $sqlite3_for_db 0]
+} else {
+    set sqlite3_for_db $other_values(SQLITE_FOR_DB)
+}
 set target_string $other_values(TARGETS)
 set benchmark_list [list]
 set build_list [list $sqlite3_for_db]

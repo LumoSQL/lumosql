@@ -69,9 +69,9 @@ test: Makefile.options $(TEST_DATABASE_NAME)
 
 database: $(DATABASE_NAME)
 $(DATABASE_NAME):
-	$(TCL) tool/build.tcl database not-fork.d $(BUILD_DIR) $(DATABASE_NAME)
+	$(TCL) tool/build.tcl database not-fork.d $(BUILD_DIR) $(DATABASE_NAME) $(BUILD_OPTIONS)
 $(TEST_DATABASE_NAME):
-	$(TCL) tool/build.tcl database not-fork.d $(BUILD_DIR) $(TEST_DATABASE_NAME)
+	$(TCL) tool/build.tcl database not-fork.d $(BUILD_DIR) $(TEST_DATABASE_NAME) $(BUILD_OPTIONS)
 
 # show what targets would be built, useful to test combinations of command-line
 # options

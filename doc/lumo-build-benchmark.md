@@ -318,6 +318,9 @@ targets specified; the targets are specified using the same syntax as
 `TARGETS` described below, with run-time options ignored (build-time
 options will be respected).  This is mainly used by some compatibility
 tests to make sure a version with some special options is also built.
+* `SQLITE_FOR_DB=version` - sqlite3 version to build and use to
+update results databases; if this option is not provided, it defaults
+to `latest`
 * `BENCHMARK_RUNS=number` - how many times to repeat each benchmark, default 1.
 
 Options which take a list of versions expect a space-separated list (this
@@ -376,6 +379,8 @@ to the not-forking tool; this could be necessary if the defaults have been
 set to `--offline` and the operation cannot be completed with cached data.
 * `CACHE_DIR=path` (default: `$HOME/.cache/LumoSQL/not-fork`), the directory
 where not-forking will cache its downloads
+* `NOTFORK_MIRROR=dir` pass `--local-mirror=dir` to `not-fork`, to use
+locally-stored sources where possible
 
 To help debugging, some options provide a mechanism to copy intermediate
 files, as well as the SQL statement used:
