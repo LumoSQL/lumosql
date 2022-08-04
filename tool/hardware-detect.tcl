@@ -144,7 +144,7 @@ proc find_device {dev} {
     }
 
     if {$name eq ""} { return }
-    if {$name eq "0x1af4" } {
+    if {$name eq "0x1af4" || $name eq "0x554d4551"} {
 	# Get the latest Virtio specification with: 
 	#     git clone git://git.kernel.org/pub/scm/virt/kvm/mst/virtio-text.git
 	#     sh makehtml.sh
@@ -158,10 +158,12 @@ proc find_device {dev} {
 	#   ID, as indicated in section 5. Additionally, devices MAY utilize a
 	#   Transitional PCI Device ID range, 0x1000 to 0x103F depending on the
 	#   device type."
+	#
+	# 0x554d4551 is what FreeBSD reports for non-PCI virtio devices
 	puts "Virtio Block Device"
-    } else {
-	puts $name
+	exit 0
     }
+    puts $name
     exit 0
 }
 
@@ -270,6 +272,7 @@ if {[llength $argv] == 0} {
 	FreeBSD {
 	    try_sysctl "hw.model"
 	    try_cpuinfo "/compat/linux/proc/cpuinfo"
+	    try_sysctl "hw.machine"
 	}
 	NetBSD {
 	    try_sysctl "machdep.cpu_brand"
