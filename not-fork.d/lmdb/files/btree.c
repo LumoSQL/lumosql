@@ -283,7 +283,7 @@ static int get_meta_32(Btree *p, unsigned int idx) {
   if (! p->hasData) return 0;
   return get_meta_32_direct(p->svp->txn, p->dataDbi, idx);
 }
-#if 0 /* not currently used
+#if 0 /* not currently used */
 static int get_meta_32_notxn(Btree *p, unsigned int idx, u32 * pValue) {
   MDB_dbi dbi;
   MDB_txn *abort_txn = NULL, *use_txn;
@@ -330,7 +330,7 @@ static int put_meta_32_direct(MDB_txn * txn, MDB_dbi dbi, unsigned int idx, u32 
   key.mv_size = 1;
   data.mv_data = buffer;
   data.mv_size = 4;
-  sqlite3Put4byte(buffer, iValue);
+  sqlite3Put4byte((u8*)buffer, iValue);
   return mdb_put(txn, dbi, &key, &data, 0);
 }
 static int put_meta_32(Btree *p, unsigned int idx, u32 iValue) {
@@ -377,7 +377,7 @@ static int put_meta_64(Btree *p, unsigned int idx, u64 uValue) {
   if (! p->hasData) return EACCES;
   key.mv_data = &bidx;
   key.mv_size = 1;
-  put8(&data, buffer, uValue);
+  put8(&data, (u8*)buffer, uValue);
   return mdb_put(p->svp->txn, p->dataDbi, &key, &data, 0);
 }
 
@@ -555,7 +555,7 @@ static int closeAllSavepoints(Btree *p, int nTo, int commit, int tripCode) {
 
 /* See comment at the top of the file: FIXME we don't have any shared code in
 ** this version */
-int sqlite3_enable_shared_cache(int enable) { }
+int sqlite3_enable_shared_cache(int enable) { return 0; }
 
 /* non-vfs routine to delete all files in a directory, then the
 ** directory itself; to get to the point of calling this we
