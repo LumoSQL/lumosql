@@ -7,8 +7,7 @@ version >= 3.35
 src/pragma.c
 start
 /(?^:^((?:static\s+)?(?:void|int)\s+\S+)\b)/
-@@ -13,6 +13,10 @@
- */
+@@ -14,4 +14,8 @@
  #include "sqliteInt.h"
  
 +#ifdef LUMO_EXTENSIONS
@@ -17,12 +16,10 @@ start
 +
  #if !defined(SQLITE_ENABLE_LOCKING_STYLE)
  #  if defined(__APPLE__)
- #    define SQLITE_ENABLE_LOCKING_STYLE 1
 ---
 /(?^:^((?:static\s+)?(?:void|int)\s+\S+)\b)/ static\x20int\x20integrityCheckResultRow(Vdbe
 /(?^:^\*\*\s+(Process\s+a\s+pragma\b))/
-@@ -7,4 +7,74 @@
-   return addr;
+@@ -8,3 +8,73 @@
  }
  
 +/* parse special Lumo pragmas */
@@ -99,18 +96,16 @@ start
 ---
 /(?^:^((?:static\s+)?(?:void|int)\s+\S+)\b)/ void\x20sqlite3Pragma
 /(?^:^\s*case\s+PragTyp_(.*?[^:])\s*:)/
-@@ -16,6 +16,7 @@
-   Db *pDb;                     /* The specific database being pragmaed */
+@@ -17,4 +17,5 @@
    Vdbe *v = sqlite3GetVdbe(pParse);  /* Prepared statement */
    const PragmaName *pPragma;   /* The pragma */
 +  const char * zLumoResult = 0;
  
    if( v==0 ) return;
-   sqlite3VdbeRunOnlyOnce(v);
-@@ -84,6 +85,23 @@
+@@ -84,4 +85,21 @@
      pParse->nErr++;
      pParse->rc = rc;
-     goto pragma_out;
++    goto pragma_out;
 +  }
 +
 +  /* see if this is a special Lumo pragma */
@@ -127,17 +122,14 @@ start
 +      sqlite3ErrorMsg(pParse, "%s", zLumoResult);
 +    pParse->nErr++;
 +    pParse->rc = rc;
-+    goto pragma_out;
+     goto pragma_out;
    }
- 
-   /* Locate the pragma in the lookup table */
 ---
 -----
 src/vdbe.c
 start
 /(?^:^((?:static\s+)?(?:void|int)\s+\S+)\b)/
-@@ -21,6 +21,21 @@
- #include "sqliteInt.h"
+@@ -22,4 +22,19 @@
  #include "vdbeInt.h"
  
 +#ifdef LUMO_EXTENSIONS
@@ -157,12 +149,10 @@ start
 +
  /*
  ** Invoke this macro on memory cells just prior to changing the
- ** value of the cell.  This macro verifies that shallow copies are
 ---
 /(?^:^\s*case\s+OP_(.*?[^:])\s*:)/ Column
 /(?^:^\s*case\s+OP_(.*?[^:])\s*:)/
-@@ -13,6 +13,9 @@
-   u64 offset64;      /* 64-bit offset */
+@@ -14,4 +14,7 @@
    u32 t;             /* A type code from the record header */
    Mem *pReg;         /* PseudoTable input register */
 +#ifdef LUMO_EXTENSIONS
@@ -170,9 +160,7 @@ start
 +#endif
  
    assert( pOp->p1>=0 && pOp->p1<p->nCursor );
-   pC = p->apCsr[pOp->p1];
-@@ -36,6 +39,10 @@
-   assert( pC->eCurType!=CURTYPE_PSEUDO || pC->nullRow );
+@@ -37,4 +40,8 @@
    assert( pC->eCurType!=CURTYPE_SORTER );
  
 +#ifdef LUMO_EXTENSIONS
@@ -181,9 +169,7 @@ start
 +
    if( pC->cacheStatus!=p->cacheCtr ){                /*OPTIMIZATION-IF-FALSE*/
      if( pC->nullRow ){
-       if( pC->eCurType==CURTYPE_PSEUDO ){
-@@ -68,6 +75,9 @@
-     pC->iHdrOffset = getVarint32(pC->aRow, aOffset[0]);
+@@ -69,4 +76,7 @@
      pC->nHdrParsed = 0;
  
 +#ifdef LUMO_EXTENSIONS
@@ -191,9 +177,7 @@ start
 +#endif
  
      if( pC->szRow<aOffset[0] ){      /*OPTIMIZATION-IF-FALSE*/
-       /* pC->aRow does not have to hold the entire row, but it does at least
-@@ -183,6 +193,27 @@
-       }
+@@ -184,4 +194,25 @@
        goto op_column_out;
      }
 +#ifdef LUMO_EXTENSIONS
@@ -219,12 +203,10 @@ start
 +
    }else{
      t = pC->aType[p2];
-   }
 ---
 /(?^:^\s*case\s+OP_(.*?[^:])\s*:)/ MakeRecord
 /(?^:^\s*case\s+OP_(.*?[^:])\s*:)/
-@@ -64,6 +64,9 @@
-     }while( zAffinity[0] );
+@@ -65,4 +65,7 @@
    }
  
 +#ifndef LUMO_EXTENSIONS
@@ -232,20 +214,16 @@ start
 +  ** columns where it would have found a NULL... */
  #ifdef SQLITE_ENABLE_NULL_TRIM
    /* NULLs can be safely trimmed from the end of the record, as long as
-   ** as the schema format is 2 or more and none of the omitted columns
-@@ -77,6 +80,7 @@
-     }
+@@ -78,4 +81,5 @@
    }
  #endif
 +#endif
  
    /* Loop through the elements that will make up the record to figure
-   ** out how much space is required for the new record.  After this loop,
 ---
 /(?^:^\s*case\s+OP_(.*?[^:])\s*:)/ Insert
 /(?^:^\s*case\s+OP_(.*?[^:])\s*:)/
-@@ -6,6 +6,9 @@
-   const char *zDb;  /* database name - used by the update hook */
+@@ -7,4 +7,7 @@
    Table *pTab;      /* Table structure - used by update and pre-update hooks */
    BtreePayload x;   /* Payload to be inserted */
 +#ifdef LUMO_EXTENSIONS
@@ -253,9 +231,7 @@ start
 +#endif
  
    pData = &aMem[pOp->p2];
-   assert( pOp->p1>=0 && pOp->p1<p->nCursor );
-@@ -62,10 +65,24 @@
-     x.nZero = 0;
+@@ -63,8 +66,22 @@
    }
    x.pKey = 0;
 +#ifdef LUMO_EXTENSIONS
@@ -278,12 +254,10 @@ start
 +#endif
    pC->deferredMoveto = 0;
    pC->cacheStatus = CACHE_STALE;
- 
 ---
 /(?^:^\s*case\s+OP_(.*?[^:])\s*:)/ IdxInsert
 /(?^:^\s*case\s+OP_(.*?[^:])\s*:)/
-@@ -1,6 +1,10 @@
- case OP_IdxInsert: {        /* in2 */
+@@ -2,4 +2,8 @@
    VdbeCursor *pC;
    BtreePayload x;
 +#ifdef LUMO_EXTENSIONS
@@ -292,9 +266,7 @@ start
 +#endif
  
    assert( pOp->p1>=0 && pOp->p1<p->nCursor );
-   pC = p->apCsr[pOp->p1];
-@@ -18,10 +22,21 @@
-   x.pKey = pIn2->z;
+@@ -19,8 +23,19 @@
    x.aMem = aMem + pOp->p3;
    x.nMem = (u16)pOp->p4.i;
 +#ifdef LUMO_EXTENSIONS
@@ -314,6 +286,5 @@ start
 +#endif
    assert( pC->deferredMoveto==0 );
    pC->cacheStatus = CACHE_STALE;
-   if( rc) goto abort_due_to_error;
 ---
 -----
