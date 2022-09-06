@@ -14,9 +14,9 @@
 [SQLite](https://sqlite.org) embedded data storage library, the [most-deployed software](https://sqlite.org/mostdeployed.html).
 LumoSQL adds performance, security and privacy features, partly by adding
 multiple backend storage systems.  If you are an SQLite user familiar with C
-development wanting an easier way to benchmark and measure SQLite, or if you
-are wanting features only available in other key-value storage engines, then
-you may find LumoSQL interesting.
+development wanting an easier way to benchmark and measure SQLite, or you want
+SQLite with encryption, or if you are wanting features not available in the SQLite
+key-value storage engine, then you may find LumoSQL interesting.
 
 In [Phase II of LumoSQL](./doc/LumoSQL-PhaseII-Announce.md) we are building on 
 the existing optional per-row checksums to add per-row [Attribute-Based Encryption (ABE)](https://en.wikipedia.org/wiki/Attribute-based_encryption) and much more.
@@ -38,6 +38,9 @@ reliable.
 LumoSQL is distributed under [very liberal licence terms](LICENCES/README.md).
 
 LumoSQL is supported by the [NLNet Foundation](https://nlnet.nl).
+
+If you are reading this on GitHub, then you are looking at a read-only mirror.
+The non-Git master is always available at [lumosql.org](https://lumosql.org/src/lumosql).
 
 Neither Windows nor Android are supported at present, despite being important
 SQLite targets. We do plan to do so, and in addition contributors are most
