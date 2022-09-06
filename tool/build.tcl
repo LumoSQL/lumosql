@@ -299,6 +299,7 @@ array set other_values [list \
 	LUMO_TEST_DIR    "" \
 	MAKE_COMMAND     "make" \
 	NOTFORK_COMMAND  "not-fork" \
+	NOTFORK_SITE     "https://lumosql.org/src/not-forking" \
 	NOTFORK_MIRROR   "" \
 	NOTFORK_ONLINE   0 \
 	NOTFORK_UPDATE   0 \
@@ -443,6 +444,7 @@ for {set anum $argp} {$anum < [llength $argv]} {incr anum} {
 array set notfork_updated [list]
 set notfork_name $other_values(NOTFORK_COMMAND)
 set make_command $other_values(MAKE_COMMAND)
+set notfork_site $other_values(NOTFORK_SITE)
 
 # not-fork version 0.4.1 is required for --use-version which we need
 set notfork_required "0.4.1"
@@ -457,7 +459,7 @@ if {[catch {
 	}
 	puts stderr "Installed version of not-fork$version_found is too old, $notfork_required required"
     } else {
-	puts stderr "Cannot run $notfork_name, please check that it is installed and in PATH"
+	puts stderr "Cannot run $notfork_name, please check that it is installed from $notfork_site and in PATH"
     }
     exit 1
 }
