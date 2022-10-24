@@ -144,7 +144,7 @@ proc find_device {dev} {
     }
 
     if {$name eq ""} { return }
-    if {$name eq "0x1af4" || $name eq "0x554d4551"} {
+    if {$name eq "0x1af4" || $name eq "0x554d4551" || $name eq "0x554d4551 (rotational)"} {
 	# Get the latest Virtio specification with: 
 	#     git clone git://git.kernel.org/pub/scm/virt/kvm/mst/virtio-text.git
 	#     sh makehtml.sh
@@ -160,6 +160,7 @@ proc find_device {dev} {
 	#   device type."
 	#
 	# 0x554d4551 is what FreeBSD reports for non-PCI virtio devices
+	# 0x554d4551 is also what Linux reports for riscv PCI virtio devices
 	puts "Virtio Block Device"
 	exit 0
     }
@@ -205,6 +206,15 @@ proc parse_df {df} {
 	    }
 	}
 	# do we know other ways?
+    }
+}
+
+proc try_uname_m {} {
+    # if nothing else works, at least have the processor type...
+    catch {
+	set cpu [exec uname -m]
+	puts [string trim $cpu]
+	exit 0
     }
 }
 
@@ -279,6 +289,7 @@ if {[llength $argv] == 0} {
 	    try_cpuinfo "/proc/cpuinfo"
 	}
     }
+    try_uname_m
     # if we find out other ways to do this, we add them here
 } elseif {[llength $argv] == 1} {
     set path [lindex $argv 0]
