@@ -10,41 +10,50 @@
 
 # LumoSQL
 
-[LumoSQL](lumosql.org) is a modification (not a fork) of the
-[SQLite](https://sqlite.org) embedded data storage library, the [most-deployed software](https://sqlite.org/mostdeployed.html).
-LumoSQL adds performance, security and privacy features, partly by adding
-multiple backend storage systems.  If you are an SQLite user familiar with C
-development wanting an easier way to benchmark and measure SQLite, or you want
-SQLite with encryption, or if you are wanting features not available in the SQLite
-key-value storage engine, then you may find LumoSQL interesting.
+[LumoSQL](lumosql.org) is a modification ([not a fork](https://lumosql.org/src/not-forking/)) of the
+[SQLite](https://sqlite.org) embedded data storage library, the [most-deployed software](https://sqlite.org/mostdeployed.html). We are currently in [Phase II of the project](./doc/LumoSQL-PhaseII-Announce.md).
 
-In [Phase II of LumoSQL](./doc/LumoSQL-PhaseII-Announce.md) we are building on 
-the existing optional per-row checksums to add per-row [Attribute-Based Encryption (ABE)](https://en.wikipedia.org/wiki/Attribute-based_encryption) and much more.
+If you are reading this on GitHub you are looking at a read-only mirror.
+The master is always available at [lumosql.org](https://lumosql.org/src/lumosql).
+LumoSQL adds security, privacy, performance and measurement features to SQLite.
 
-In the existing LumoSQL 0.4 there are currently three LumoSQL backends:
+# Benchmarking
+
+SQLite can test and compare results consistently across many kinds of system and configurations using the [Not-forking tool](https://lumosql.org/src/not-forking). Example:
+
+![Example statistical result from LumoSQL benchmarking](./new-doc/images/LumoSQLBenchmarkExample.png)
+
+# Pluggable backends
+
+LumoSQL can swap back end key-value store engines in and out of SQLite. LMDB is
+the most famous (but not the only) example of an alternative key-value store,
+and LumoSQL can combine dozes of versions of LMDB and SQLite source code like
+this:
+
+![Diagram of Not-forking used to create two example binaries](./new-doc/images/LumoSQL-Notforking-diagram.png)
+
+In LumoSQL 0.4 there are three LumoSQL backends:
 
 * the default SQLite Btree storage system
 * [LMDB](https://github.com/LMDB/lmdb)
-* [the Berkley Database](https://en.wikipedia.org/wiki/Berkeley_DB)
+* [the ancient Berkley Database](https://en.wikipedia.org/wiki/Berkeley_DB)
 
-LumoSQL has a build and benchmarking tool for comparing vanilla SQLite versions
-and configurations with each other, as well as comparing the performance of
-different storage backends. LumoSQL is written in C, like SQLite. The
-benchmarking and other tools are written in Tcl, like much of the tooling and
-extensions for SQLite and Fossil. The build tool guarantees that options and
-configurations are always selected in the same way, so that benchmark results are 
-reliable.
+We are looking at some interesting new development in key-value storage to add and benchmark.
 
-LumoSQL is distributed under [very liberal licence terms](LICENCES/README.md).
+# Encryption and corruption detection, optionally per-row
+
+LumoSQL adds modern encryption to SQLite, including [Attribute-Based Encryption
+(ABE)](https://en.wikipedia.org/wiki/Attribute-based_encryption). This can be
+done on a per-row basis, and also includes per-row checksums so that any error
+can be noticed quickly and located down to the individual row. Per-row
+checksums also make some search and comparison operations much faster.
+
+# Organised and Supported
+
+LumoSQL is distributed under [very liberal MIT licence terms](LICENCES/README.md).
 
 LumoSQL is supported by the [NLNet Foundation](https://nlnet.nl).
 
-If you are reading this on GitHub, then you are looking at a read-only mirror.
-The non-Git master is always available at [lumosql.org](https://lumosql.org/src/lumosql).
-
-Neither Windows nor Android are supported at present, despite being important
-SQLite targets. We do plan to do so, and in addition contributors are most
-welcome via the [LumoSQL Fossil site](/).
 
 # Table of Contents
 
