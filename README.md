@@ -54,6 +54,7 @@ LumoSQL is distributed under [very liberal MIT licence terms](LICENCES/README.md
 
 LumoSQL is supported by the [NLNet Foundation](https://nlnet.nl).
 
+LumoSQL runs on x86, ARM-32 and RISC-V architectures, and many Linux and BSD OSs.
 
 # Table of Contents
 
