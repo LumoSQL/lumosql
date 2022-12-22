@@ -46,7 +46,7 @@ and useful is not something LumoSQL uses.)
   surprise :-)
 
 We know these tools do work for many people, including all those
-involved with LumoSQL at present.`
+involved with LumoSQL at present.
 
 # The LumoSQL Timezone is *Brussels local time*
 
