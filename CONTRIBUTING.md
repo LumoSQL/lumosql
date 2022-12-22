@@ -19,13 +19,14 @@ theory and SQL then we definitely want to hear from you :-)
 
 Please do:
 
-* Drop in to #lumosql on [Libera irc chat][libera] , or email [authors@lumosql.org](mailto://authors@lumosql.org).
+* Drop in to #lumosql on [Libera irc chat][libera] (also findable on Matrix), or email [authors@lumosql.org](mailto://authors@lumosql.org).
 * Tell us about any problems you have following the [LumoSQL Build, Test and Benchmarking][testbuild] documentation.
 * Help us improve the [Lumion design and RFC][lumions].
 
-Things to note:
+The LumoSQL GitHub mirror is one-way, meaning pull requests and bugreports are not very efficient via GitHub.
 
-* The LumoSQL GitHub mirror is one-way. Development happens with [Fossil], which has good documentation and a very [helpful forum][ffor].
+Development happens with [Fossil] not GitHub, as described in the [LumoSQL Quickstart][quickstart]. 
+Fossil has good documentation and a very [helpful forum][ffor].
 
 # Accessibility
 
@@ -65,6 +66,7 @@ Brussels is in Belgium. We chose Brussels because:
 
 [home]: https://lumosql.org/src/lumosql
 [testbuild]: doc/lumo-build-benchmark.md
+[quickstart]: doc/README.md
 [Fossil]: https://fossil-scm.org/
 [ffor]:   https://fossil-scm.org/forum/
 [lumions]: doc/rfc/README.md
