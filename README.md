@@ -131,7 +131,7 @@ As of LumoSQL 0.4, there are many obvious limitations, including:
 <a name="build-environment-and-dependencies"></a>
 ## Build Environment and Dependencies
 
-Most developers already have the required minimum of git and core *ix
+Most developers already have the required minimum of git and core unix-style
 development tools. SQLite has very few dependencies (mostly Tcl), and
 LumoSQL adds one Perl-based processing tool.
 
