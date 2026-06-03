@@ -1,26 +1,9 @@
-<img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='180' viewBox='0 0 800 180'><rect width='100%' height='100%' fill='%23D9383A'/><text x='25' y='50' font-family='sans-serif' font-size='26' font-weight='bold' fill='white'>This repo is very much alive, but has been retired on GitHub.</text><text x='25' y='95' font-family='sans-serif' font-size='18' fill='white'>In 2026, LumoSQL was rebooted and can be found at:</text><text x='25' y='140' font-family='sans-serif' font-size='24' font-weight='bold' fill='%23FFD700'>lumosql.org (Fossil)  or  codeberg.org (git)</text></svg>" alt="LumoSQL Status Update" width="100%">
+> [!CAUTION]
+> **This repo is retired on GitHub but the project is very much alive.**
+> In 2026, LumoSQL was rebooted. Find it at
+> **[lumosql.org (Fossil)](https://lumosql.org/src/lumosql)** or
+> **[codeberg.org (git)](https://codeberg.org/LumoSQL/lumosql)**.
 
-### 🔗 Clickable Links:
-👉 **[lumosql.org (Fossil)](https://lumosql.org/src/lumosql)** 👉 **[codeberg.org (git)](https://codeberg.org/LumoSQL/lumosql)**
-
-<table width="100%">
-  <tr>
-    <td bgcolor="#D9383A" align="left">
-      <h1>
-        <sub>
-          <strong>This repo is very much alive, but has been retired on GitHub.</strong>
-        </sub>
-      </h1>
-      <p>
-        <sub>
-          In 2026, LumoSQL was rebooted and can be found at 
-          <a href="https://lumosql.org/src/lumosql"><strong>lumosql.org (Fossil)</strong></a> or 
-          <a href="https://codeberg.org/LumoSQL/lumosql"><strong>codeberg.org (git)</strong></a>.
-        </sub>
-      </p>
-    </td>
-  </tr>
-</table>
 
 # LumoSQL --- outdated, do not use this repo
 
