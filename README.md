@@ -1,17 +1,17 @@
 
 <table width="100%">
   <tr>
-    <td bgcolor="#FF0000" style="padding: 15px;">
-      <font color="white">
-        <strong>This repo is very much alive, but has been retired on GitHub.</strong><br>
+    <td bgcolor="#D9383A" style="padding: 20px;">
+      <font color="white" size="4">
+        <strong>This repo is very much alive, but has been retired on GitHub.</strong>
+        <br><br>
         In 2026, LumoSQL was rebooted and can be found at 
-        <a href="https://lumosql.org/src/lumosql" style="color: #FFD700; font-weight: bold;">lumosql.org (Fossil)</a> or 
-        <a href="https://codeberg.org/LumoSQL/lumosql" style="color: #FFD700; font-weight: bold;">codeberg.org (git)</a>.
+        <a href="https://lumosql.org/src/lumosql" style="color: #FFF; font-weight: bold; text-decoration: underline;">lumosql.org (Fossil)</a> or 
+        <a href="https://codeberg.org/LumoSQL/lumosql" style="color: #FFF; font-weight: bold; text-decoration: underline;">codeberg.org (git)</a>.
       </font>
     </td>
   </tr>
 </table>
-
 
 # LumoSQL --- outdated, do not use this repo
 
