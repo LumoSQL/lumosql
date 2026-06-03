@@ -1,14 +1,19 @@
-<!-- Copyright 2020 The LumoSQL Authors, see LICENSES/MIT -->
 
-<!-- SPDX-License-Identifier: MIT -->
-<!-- SPDX-FileCopyrightText: 2020 The LumoSQL Authors -->
-<!-- SPDX-ArtifactOfProjectName: LumoSQL -->
-<!-- SPDX-FileType: Documentation -->
-<!-- SPDX-FileComment: Original by Dan Shearer, December 2019 -->
+<table width="100%">
+  <tr>
+    <td bgcolor="#FF0000" style="padding: 15px;">
+      <font color="white">
+        <strong>This repo is very much alive, but has been retired on GitHub.</strong><br>
+        In 2026, LumoSQL was rebooted and can be found at 
+        <a href="https://lumosql.org/src/lumosql" style="color: #FFD700; font-weight: bold;">lumosql.org (Fossil)</a> or 
+        <a href="https://codeberg.org/LumoSQL/lumosql" style="color: #FFD700; font-weight: bold;">codeberg.org (git)</a>.
+      </font>
+    </td>
+  </tr>
+</table>
 
-<!-- toc -->
 
-# LumoSQL
+# LumoSQL --- outdated, do not use this repo
 
 [LumoSQL](lumosql.org) is a modification ([not a fork](https://lumosql.org/src/not-forking/)) of the
 [SQLite](https://sqlite.org) embedded data storage library, the [most-deployed software](https://sqlite.org/mostdeployed.html). We are currently in [Phase II of the project](./doc/LumoSQL-PhaseII-Announce.md).
